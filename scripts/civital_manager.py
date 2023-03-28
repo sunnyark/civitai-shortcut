@@ -27,10 +27,10 @@ def civitai_manager_ui():
                     with gr.Row():                        
                         search_term = gr.Textbox(label="Search Term", placeholder="Enter your prompt", max_lines=1)
                     with gr.Row():                        
-                        search_btn = gr.Button(value=civitai.page_action_dict['search'],variant="primary")
+                        search_btn = gr.Button(value=setting.page_action_dict['search'],variant="primary")
                     with gr.Row():       
-                        prev_page_btn = gr.Button(value=civitai.page_action_dict['prevPage'])
-                        next_page_btn = gr.Button(value=civitai.page_action_dict['nextPage']) 
+                        prev_page_btn = gr.Button(value=setting.page_action_dict['prevPage'])
+                        next_page_btn = gr.Button(value=setting.page_action_dict['nextPage']) 
                     with gr.Row():                    
                         models_list = gr.Dropdown(label="Model List", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)   
                     with gr.Row():       
@@ -185,7 +185,7 @@ def civitai_manager_ui():
     versions_list.select(
         fn=civitai_manager_action.on_versions_list_select,
         inputs=[
-            selected_model_id 
+            selected_model_id, 
         ],
         outputs=[
             selected_version_id,            
@@ -214,7 +214,8 @@ def civitai_manager_ui():
     selected_version_id.change(
         fn=civitai_manager_action.on_selected_version_id_change,
         inputs=[
-            selected_version_id
+            selected_version_id,
+            selected_model_id, 
         ],
         outputs=[
             version_description_html,
@@ -236,7 +237,7 @@ def civitai_manager_ui():
         
     version_gallery.select(civitai_manager_action.on_get_gallery_select, version_images_url, [img_index, hidden])
     
-    civitai_model_url_txt.select(civitai_manager_action.on_civitai_model_url_txt_select,None,[civitai_model_url_txt])
+    # civitai_model_url_txt.select(civitai_manager_action.on_civitai_model_url_txt_select,None,[civitai_model_url_txt])
             
 # init
 setting.init_civitai_manager()

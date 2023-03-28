@@ -6,6 +6,16 @@ root_path = os.getcwd()
 PLACEHOLDER = "<no select>"
 NORESULT = "<no result>"
 
+page_dict = {
+    "limit" : 50,
+}
+
+page_action_dict = {
+    "search" : "Search", 
+    "prevPage" : "Prev Page",
+    "nextPage" : "Next Page",    
+}
+
 folders_dict = {
     "Checkpoint": os.path.join("models","Stable-diffusion"),
     "LORA": os.path.join("models","Lora"),

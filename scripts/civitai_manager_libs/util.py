@@ -1,3 +1,4 @@
+import re
 import os
 from . import setting
 
@@ -53,3 +54,37 @@ def load_InternetShortcut(path)->str:
             printD(e)
             return                
     return urls 
+
+# get image with full size
+# width is in number, not string
+# 파일 인포가 있는 원본 이미지 주소이다.
+def get_full_size_image_url(image_url, width):
+    return re.sub('/width=\d+/', '/width=' + str(width) + '/', image_url)
+
+def change_width_from_image_url(image_url, width):
+    return re.sub('/width=\d+/', '/width=' + str(width) + '/', image_url)
+
+# get id from url
+def get_model_id_from_url(url):
+    id = ""
+
+    if not url:
+        return ""
+
+    if url.isnumeric():
+        # is already an id
+        id = str(url)
+        return id
+    
+    s = url.split("/")
+    if len(s) < 2:
+        return ""
+    
+    if s[-2].isnumeric():
+        id  = s[-2]
+    elif s[-1].isnumeric():
+        id  = s[-1]
+    else:
+        return ""
+    
+    return id

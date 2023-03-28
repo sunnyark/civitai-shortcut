@@ -3,12 +3,11 @@ import json
 import shutil
 import requests
 import threading
-
+from PIL import Image
 from . import civitai
 from . import util
 from . import downloader
 from . import setting
-from . import model
     
 def download_file_thread(file_name, version_id, lora_an):               
     if not file_name:
@@ -41,7 +40,7 @@ def download_file_thread(file_name, version_id, lora_an):
             thread.start()                
 
             # 버전 인포 파일 저장. primary 이름으로 저장한다.
-            info_file = model.write_version_info_by_version_info(model_folder,version_info)
+            info_file = civitai.write_version_info_by_version_info(model_folder,version_info)
             if info_file:
                 util.printD(f"Wrote version info : {info_file}")
 
@@ -49,7 +48,7 @@ def download_file_thread(file_name, version_id, lora_an):
             pass
 
     # triger words 가 있으면 저장. primary 이름으로 저장한다.
-    triger_file = model.write_triger_words_by_version_info(model_folder,version_info)
+    triger_file = civitai.write_triger_words_by_version_info(model_folder,version_info)
     if triger_file:
          util.printD(f"Wrote triger words : {triger_file}")
 
@@ -95,7 +94,7 @@ def download_image_files(version_id, lora_an):
                 # use max width
                 if "width" in img_dict:
                     if img_dict["width"]:
-                        img_url =  civitai.get_full_size_image_url(img_url, img_dict["width"])
+                        img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
                 
                 try:
                     # get image
@@ -129,17 +128,13 @@ def get_model_title_name_by_version_id(version_id:str)->str:
         return
     
     info = civitai.get_version_info_by_version_id(version_id)
-    
-    if not info:
-        return
-
-    return get_model_title_name_by_version_id(info)
+    return get_model_title_name_by_version_info(info)
 
 def get_model_title_name_by_version_info(version_info:dict)->str:
-    title_name = ""
     if not version_info:
         return
-
+    
+    title_name = ""
     if 'model' not in version_info:
         return
         
@@ -164,15 +159,15 @@ def get_version_description_gallery_by_version_info(version_info:dict):
             # 파일 인포가 있는 원본 이미지.
             if "width" in pic:
                 if pic["width"]:
-                    img_url = civitai.get_full_size_image_url(img_url, pic["width"])                                            
+                    img_url = util.change_width_from_image_url(img_url, pic["width"])                                            
 
-            # 파일 이상 유무 체크 하지만!!!! 속도는? head로 하니 조금 느려지는정도인가?
+            # 파일 이상 유무 체크 하지만!!!! 속도는?
             # 일단 이걸로 간다.
             # 문제있는 파일은 건너뛴다.                   
             # try:
             #     img_r = requests.get(pic["url"],stream=True)
             #     if not img_r.ok:
-            #     util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")            
+            #         util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")            
             #         continue
             #     img_r.raw.decode_content=True
             #     version_images.append(Image.open(img_r.raw))        
@@ -181,12 +176,12 @@ def get_version_description_gallery_by_version_info(version_info:dict):
             #     pass
 
             #작은 이미지 - 로드는 작은 이미지로 한다
-            version_images_url.append(pic["url"])                                 
             #제네레이션 정보는 원본에만 있다                        
+            version_images_url.append(pic["url"])                                 
             version_full_images_url.append(img_url)     
                 
     return version_images_url,version_full_images_url
-    #return version_images,version_full_images_url
+    # return version_images,version_full_images_url
 
 def get_version_description_gallery_by_version_id(version_id:str):       
     if not version_id:                
@@ -226,13 +221,13 @@ def get_version_description_by_version_info(version_info:dict):
     if not model_id:
         return "",None,None,None
         
-    model_info = civitai.get_model_info_by_id(model_id)
+    model_info = civitai.get_model_info_by_model_id(model_id)
 
     if not model_info:
         return "",None,None,None
                 
     html_typepart = f"<br><b>Type: {model_info['type']}</b>"    
-    model_url = civitai.url_dict["modelPage"]+str(model_id)
+    model_url = civitai.Url_Page()+str(model_id)
 
     html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_info["name"]}</a></b>'
     html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
@@ -258,7 +253,7 @@ def get_version_description_by_version_info(version_info:dict):
 
     # html_imgpart = "<div with=100%>"
     # for pic in version_info['images']:
-    #      image_url = civitai.get_full_size_image_url(pic["url"], pic["width"])
+    #      image_url = util.change_width_from_image_url(pic["url"], pic["width"])
     #      html_imgpart = html_imgpart + f'<img src="{image_url}" width=200px></img>'                            
     # html_imgpart = html_imgpart + '</div><br>'
 
@@ -277,14 +272,3 @@ def get_version_description_by_version_id(version_id=None):
     version_info = civitai.get_version_info_by_version_id(version_id)    
     return get_version_description_by_version_info(version_info)        
 
-# 현재 검색된 리스트에서 모델의 이름을 찾아 url을 알려준다.
-def get_url_of_model_by_name(model_list:dict,name):    
-    model_url = None
-    
-    if model_list is not None and name:
-        for model in model_list['items']:
-            if model['name'] == name:
-                model_url = f"{civitai.url_dict['modelId']}{model['id']}" 
-                break
-       
-    return model_url 

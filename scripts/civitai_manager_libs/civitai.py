@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import requests
@@ -9,7 +10,7 @@ url_dict = {
     "modelPage":"https://civitai.com/models/",
     "modelId": "https://civitai.com/api/v1/models/",
     "modelVersionId": "https://civitai.com/api/v1/model-versions/",
-    "hash": "https://civitai.com/api/v1/model-versions/by-hash/"
+    "modelHash": "https://civitai.com/api/v1/model-versions/by-hash/"
 }
 
 content_types_dict = {
@@ -24,48 +25,19 @@ content_types_dict = {
     "Poses":"Poses"
 }
 
-page_dict = {
-    "limit" : 50,
-}
-
-page_action_dict = {
-    "search" : "Search", 
-    "prevPage" : "Prev Page",
-    "nextPage" : "Next Page",    
-}
-
 models_exts = (".bin", ".pt", ".safetensors", ".ckpt")        
 
-# get image with full size
-# width is in number, not string
-# 파일 인포가 있는 원본 이미지 주소이다.
-def get_full_size_image_url(image_url, width):
-    return re.sub('/width=\d+/', '/width=' + str(width) + '/', image_url)
+def Url_Page():
+    return url_dict["modelPage"]
 
-# get id from url
-def get_model_id_from_url(url):
-    id = ""
+def Url_ModelId():
+    return url_dict["modelId"]
 
-    if not url:
-        return ""
+def Url_VersionId():
+    return url_dict["modelVersionId"]
 
-    if url.isnumeric():
-        # is already an id
-        id = str(url)
-        return id
-    
-    s = url.split("/")
-    if len(s) < 2:
-        return ""
-    
-    if s[-2].isnumeric():
-        id  = s[-2]
-    elif s[-1].isnumeric():
-        id  = s[-1]
-    else:
-        return ""
-    
-    return id
+def Url_Hash():
+    return url_dict["modelHash"]
 
 def request_models(api_url=None):
     # Make a GET request to the API
@@ -73,25 +45,23 @@ def request_models(api_url=None):
 
     # Check the status code of the response
     if response.status_code != 200:
-        print("Request failed with status code: {}".format(response.status_code))
+        util.printD("Request failed with status code: {}".format(response.status_code))
         exit()
 
     data = json.loads(response.text)
     return data
 
-def get_model_info_by_id(id:str) -> dict:
+def get_model_info_by_model_id(id:str) -> dict:
     content = None
     if not id:
         return
     
     try:            
-        r = requests.get(url_dict["modelId"]+str(id))            
+        r = requests.get(Url_ModelId()+str(id))            
         content = r.json()
     except Exception as e:
-        return
-
-    if not content:
-        return    
+        pass
+  
     return content
 
 def get_model_info_by_version_id(version_id:str) -> dict:        
@@ -106,7 +76,7 @@ def get_model_info_by_version_info(version_info) -> dict:
         return 
     
     try:
-        return get_model_info_by_id(version_info['modelId'])
+        return get_model_info_by_model_id(version_info['modelId'])
     except Exception as e:
         return
     
@@ -116,16 +86,16 @@ def get_version_info_by_version_id(version_id:str) -> dict:
         return 
     
     try:
-        r = requests.get(url_dict["modelVersionId"]+str(version_id))
+        r = requests.get(Url_VersionId()+str(version_id))
         content = r.json()
     except Exception as e:
-        return None
+        pass
 
     return content   
 
 def get_latest_version_info_by_model_id(id:str) -> dict:
 
-    model_info = get_model_info_by_id(id)
+    model_info = get_model_info_by_model_id(id)
     if not model_info:
         return
 
@@ -150,7 +120,7 @@ def get_version_id_by_version_name(model_id:str,name:str)->str:
     if not model_id:
         return 
     
-    model_info = get_model_info_by_id(model_id)
+    model_info = get_model_info_by_model_id(model_id)
     if not model_info:
         return
     
@@ -238,3 +208,77 @@ def get_triger_by_version_id(version_id=None)->str:
     version_info = get_version_info_by_version_id(version_id)          
     
     return get_triger_by_version_info(version_info)
+                
+# 버전 모델 인포 데이터를 파일에서 읽어옴
+def load_version_info(path)->dict:
+    version_info = None
+    with open(path, 'r') as f:
+        try:
+            version_info = json.load(f)
+        except Exception as e:
+            util.printD("Selected file is not json: " + path)
+            pass
+        
+    return version_info      
+
+ # 버전 모델 인포 데이터를 파일로 저장
+def write_version_info_by_version_id(folder, version_id:str)->str:
+    if not version_id: 
+        return
+    
+    version_info = get_version_info_by_version_id(version_id)
+    
+    return write_version_info_by_version_info(folder, version_info)
+
+def write_version_info_by_version_info(folder, version_info:dict)->str:   
+    if not version_info:
+        return
+
+    primary_file = get_primary_file_by_version_info(version_info)
+    
+    if not primary_file:
+        return
+
+    base, ext = os.path.splitext(primary_file['name'])
+    path_info_file = os.path.join(folder, f"{base}.civitai.info")
+            
+    try:
+        with open(path_info_file, 'w') as f:
+            f.write(json.dumps(version_info, indent=4))
+    except Exception as e:
+            return                
+    
+    return f"{base}.civitai.info"
+
+def write_triger_words_by_version_id(folder, version_id:str)->str:
+    if not version_id: 
+        return    
+        
+    version_info = get_version_info_by_version_id(version_id)
+    
+    return write_triger_words_by_version_info(folder,version_info)
+    
+def write_triger_words_by_version_info(folder, version_info:dict)->str:   
+    if not version_info:
+        return
+    
+    triger_words = get_triger_by_version_info(version_info)
+
+    if not triger_words:
+        return 
+
+    primary_file = get_primary_file_by_version_info(version_info)
+    
+    if not primary_file:
+        return
+
+    base, ext = os.path.splitext(primary_file['name'])
+    path_triger_file = os.path.join(folder, f"{base}.triger.txt")
+
+    try:
+        with open(path_triger_file, 'w') as f:
+            f.write(triger_words)
+    except Exception as e:
+        return
+        
+    return f"{base}.triger.txt"
