@@ -79,12 +79,6 @@ def on_download_model_click(version_id:str, file_name=None, lora_an=False):
 def on_selected_gallery_change(version_id):
     return civitai_action.get_version_description_gallery_by_version_id(version_id)
 
-# def on_civitai_model_url_txt_select(evt: gr.SelectData):
-#     #util.printD("text select")
-#     return gr.Textbox.update(value="")
-
-
-
 # 현재 검색된 리스트에서 모델의 이름을 찾아 url을 알려준다.
 def get_url_of_model_by_name(model_list:dict,name):    
     model_url = None

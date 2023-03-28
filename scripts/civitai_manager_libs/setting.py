@@ -1,5 +1,8 @@
 import os
 from modules import shared
+import modules.scripts as scripts
+from . import util
+from . import model
 
 root_path = os.getcwd()
 
@@ -30,10 +33,18 @@ folders_dict = {
     "Unknown": os.path.join("models","Unknown"),
 }
 
+# 아니다. json 파일에 저장하자
+# folders_custom_dict = {
+#     "INTERNETSHORTCUT" : "InternetShortCut",
+# }
+
+civitai_shortcut = "CivitaiShortCut.json"
+
 # get cusomter model path
 def init_civitai_manager():
     global root_path
     global folders_dict
+    global civitai_shortcut
 
     root_path = os.getcwd()
     
@@ -49,5 +60,12 @@ def init_civitai_manager():
     if shared.cmd_opts.lora_dir:
         folders_dict["LORA"] = shared.cmd_opts.lora_dir
         folders_dict["LoCon"] = shared.cmd_opts.lora_dir
+    
+    civitai_shortcut = os.path.join(scripts.basedir(),civitai_shortcut)
+
+    # if not os.path.exists(folders_custom_dict["INTERNETSHORTCUT"]):
+    #     os.makedirs(folders_custom_dict["INTERNETSHORTCUT"])
+                    
+    # util.printD(f"Check ok! : Civitai Internet shortcut save folder : {folders_custom_dict['INTERNETSHORTCUT']}")
         
         

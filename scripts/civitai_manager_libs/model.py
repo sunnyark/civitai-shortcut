@@ -3,5 +3,5 @@ import json
 import requests
 from . import util
 from . import civitai
-
+from . import setting
 

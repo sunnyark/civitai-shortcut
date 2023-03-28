@@ -66,7 +66,7 @@ def download_image_files(version_id, lora_an):
     if not version_info:
         return
     
-    if 'images' not in version_info:
+    if 'images' not in version_info.keys():
         return
         
     model_folder = util.make_new_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
