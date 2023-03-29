@@ -51,11 +51,11 @@ def request_models(api_url=None):
     data = json.loads(response.text)
     return data
 
-def get_model_info_by_model_id(id:str) -> dict:
-    content = None
+def get_model_info_by_model_id(id:str) -> dict:    
     if not id:
         return
     
+    content = None
     try:            
         r = requests.get(Url_ModelId()+str(id))            
         content = r.json()

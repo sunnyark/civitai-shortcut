@@ -24,13 +24,13 @@ def civitai_manager_ui():
             with gr.Tab("Civitai Shortcut"):                           
                 with gr.Column():
                     with gr.Row():
-                        civitai_model_url_txt = gr.Textbox(label="Model Url", show_label=False , placeholder="Enter your civitai url or model id", max_lines=1)
+                        civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , show_label=False , placeholder="Enter your civitai url or model id", max_lines=1)
                     with gr.Row():
                         civitai_model_info_btn = gr.Button(value="Get Model Info",variant="primary")    
                     with gr.Row():
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut")
                     with gr.Row():
-                        shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + get_Internet_Shortcut_list(), interactive=True, value=setting.PLACEHOLDER)   
+                        shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)   
                     with gr.Row():
                         shortcut_del_btn = gr.Button(value="Delete Civitai Shortcut") 
             with gr.Tab("Search"):  
@@ -253,9 +253,9 @@ def civitai_manager_ui():
     )
         
     version_gallery.select(civitai_manager_action.on_get_gallery_select, version_images_url, [img_index, hidden])
+    
+    civitai_model_url_txt.change(civitai_model_url_txt_change,None,[civitai_internet_url])
         
-
-
     civitai_internet_url.upload(
         fn=civitai_internet_url_upload,
         inputs=[
@@ -269,13 +269,22 @@ def civitai_manager_ui():
             selected_model_id,            
         ]
     )                  
-         
-    civitai_model_url_txt.change(civitai_model_url_txt_change,None,[civitai_internet_url])
-    
-    shortcut_list.select(shortcut_list_select,shortcut_list,[civitai_model_url_txt])        
+
+    #shortcut_list.select(shortcut_list_select,shortcut_list,[civitai_model_url_txt])        
+    shortcut_list.select(
+        fn=shortcut_list_select,
+        inputs=[
+            shortcut_list
+        ],
+        outputs=[
+            civitai_model_url_txt,
+            versions_list,
+            selected_version_id, 
+            selected_model_id,            
+        ]
+    )                  
     
     shortcut_del_btn.click(shortcut_del_btn_click,shortcut_list,shortcut_list)
-
 
 def shortcut_del_btn_click(shortcut):
     if shortcut and shortcut != setting.PLACEHOLDER:
@@ -286,80 +295,126 @@ def shortcut_del_btn_click(shortcut):
             ISC = ishortcut.delete(ISC, model_id)                        
             ishortcut.save(ISC)
         
-    return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + get_Internet_Shortcut_list(), value=setting.PLACEHOLDER)
+    return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(), value=setting.PLACEHOLDER)
 
 def civitai_model_url_txt_change():
     return None 
         
-def shortcut_list_select(shortcut):
-    url = ""
+# def shortcut_list_select(shortcut):
+#     url = ""
     
-    if shortcut and shortcut != setting.PLACEHOLDER:
-        model_id = shortcut[0:shortcut.find(':')]
-        #util.printD(f"{model_id} {len(model_id)}")    
-        url = civitai.Url_ModelId() + model_id    
+#     if shortcut and shortcut != setting.PLACEHOLDER:
+#         model_id = shortcut[0:shortcut.find(':')]
+#         #util.printD(f"{model_id} {len(model_id)}")    
+#         url = civitai.Url_ModelId() + model_id    
         
-    return url   
-    
-def civitai_internet_url_upload(file_obj):
-    if not file_obj:
-        return ""
-    
-    shortcut = util.load_InternetShortcut(file_obj.name)
-    if shortcut:        
-        model_id = util.get_model_id_from_url(shortcut) 
-        if model_id:
-            model_info = civitai.get_model_info_by_model_id(model_id)
-            if model_info:
-                model_image = ""
-                def_id = ""
-                def_name = ""
-                versions_list = []
-                model_url = civitai.Url_ModelId() + model_id
-                
-                if "modelVersions" in model_info.keys():            
-                    def_version = model_info["modelVersions"][0]
-                    def_id = def_version['id']
-                    def_name = def_version['name']
-                            
-                    if 'images' in def_version.keys():
-                        img_dict = def_version["images"][0]
-                        model_image = img_dict["url"]
-                        
-                    for version_info in model_info['modelVersions']:
-                        versions_list.append(version_info['name'])                        
-        
-                #util.printD(f"{model_info['id']} {model_info['name']} {model_info['type']} {civitai.Url_ModelId()}{model_id}")
-                
-                ISC = ishortcut.load()                           
-                ISC = ishortcut.add(ISC, model_info['id'] ,model_info['name'], model_info['type'], model_url, def_id , model_image)                        
-                ishortcut.save(ISC)
-            
-                #util.printD(ISC)    
-                
-                return shortcut,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + get_Internet_Shortcut_list(), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[v for v in versions_list], value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
-            
-            return shortcut,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + get_Internet_Shortcut_list(), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
-        
-    return "",gr.Dropdown.update(choices=[setting.PLACEHOLDER] + get_Internet_Shortcut_list(), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
-            
-            
-def get_Internet_Shortcut_list()->str:
-    
-    ISC = ishortcut.load()                           
-    if not ISC:
-        return
-    if "IShortCut" not in ISC.keys():
-        return    
-    
-    shotcutlist = []
-    for k, v in ISC["IShortCut"].items():
-        # util.printD(ISC["IShortCut"][k])
-        if v:
-            shotcutlist.append(f"{v['id']}:{v['name']}")
-                    
-    return [v for v in shotcutlist]
+#     return url
 
+def shortcut_list_select(shortcut):
+    model_url = ""    
+    if shortcut and shortcut != setting.PLACEHOLDER:
+        model_id = shortcut[0:shortcut.find(':')]      
+        model_url = civitai.Url_ModelId() + model_id  
+        #util.printD(f"{model_id} {len(model_id)}")    
+        model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(model_url)     
+        if def_id:
+            return model_url, gr.Dropdown.update(choices=vlist, value=def_name), gr.Textbox.update(value=def_id), gr.Textbox.update(value=model_id)
+    return model_url, gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT), gr.Textbox.update(value=""), gr.Textbox.update(value="")
+      
+def civitai_internet_url_upload(file_obj):   
+    shortcut = util.load_InternetShortcut(file_obj.name)
+    model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
+    if not model_url:
+        return "",gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+    if not def_id:
+        return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+    return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
+
+def internet_shortcut_upload(url):
+    if url:  
+        model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(url)
+        if model_id:
+            util.printD(model_id)
+            ISC = ishortcut.load()                           
+            ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
+            ishortcut.save(ISC)
+    return model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist
+
+def get_selected_model_info_by_url(url):
+    model_id = None    
+    model_name = None
+    model_type = None
+    def_id = None
+    def_name = None
+    def_image = None
+    model_url = None
+    
+    versions_list = []
+    if url:  
+        model_id = util.get_model_id_from_url(url) 
+        model_info = civitai.get_model_info_by_model_id(model_id)
+        if model_info:
+            versions_list = []
+            model_id = model_info['id']
+            model_name = model_info['name']
+            model_type = model_info['type']
+            model_url = f"{civitai.Url_ModelId()}{model_id}"
+            
+            if "modelVersions" in model_info.keys():            
+                def_version = model_info["modelVersions"][0]
+                def_id = def_version['id']
+                def_name = def_version['name']
+                
+                if 'images' in def_version.keys():
+                    img_dict = def_version["images"][0]
+                    def_image = img_dict["url"]
+                                                                
+                for version_info in model_info['modelVersions']:
+                    versions_list.append(version_info['name'])                        
+        
+    return model_id, model_name, model_type, model_url, def_id, def_name, def_image ,[v for v in versions_list]
+                
+
+    
+    # model_id = None
+    # model_name = None
+    # def_id = None
+    # def_name = None
+    # def_image = None
+    # model_url = None
+    # model_type = None
+    
+    # versions_list = []
+    # if url:  
+    #     model_id = util.get_model_id_from_url(url) 
+    #     model_info = civitai.get_model_info_by_model_id(model_id)
+    #     if model_info:
+    #         versions_list = []
+    #         model_url = civitai.Url_ModelId() + model_id
+    #         model_name = model_info['name']
+    #         model_type = model_info['type']
+            
+    #         if "modelVersions" in model_info.keys():            
+    #             def_version = model_info["modelVersions"][0]
+    #             def_id = def_version['id']
+    #             def_name = def_version['name']
+                        
+    #             if 'images' in def_version.keys():
+    #                 img_dict = def_version["images"][0]
+    #                 def_image = img_dict["url"]
+                    
+    #             for version_info in model_info['modelVersions']:
+    #                 versions_list.append(version_info['name'])                        
+
+    #         #util.printD(f"{model_info['id']} {model_info['name']} {model_info['type']} {civitai.Url_ModelId()}{model_id}")
+            
+    #         ISC = ishortcut.load()                           
+    #         ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
+    #         ishortcut.save(ISC)
+        
+    # return model_id, model_name, model_url, def_id, def_name, def_image ,[v for v in versions_list]
+    
+            
 # init
 setting.init_civitai_manager()
     

@@ -21,17 +21,17 @@ def on_models_list_select(evt: gr.SelectData,json_state):
         url = get_url_of_model_by_name(json_state, evt.value)
         
         if url: 
-            m_id, vlist, def_vname , def_vid= get_selected_model_info_by_url(url)
-            if m_id and def_vname and def_vid and vlist:                
-                return gr.Textbox.update(value=url),gr.Dropdown.update(choices=vlist, value=def_vname),gr.Textbox.update(value=def_vid),gr.Textbox.update(value=m_id)
+            model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(url)
+            if model_id and def_id:                
+                return gr.Textbox.update(value=model_url),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
 
     return gr.Textbox.update(value=""),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
 
 def on_civitai_model_info_btn_click(url:str):  
-    if url:                 
-        m_id, vlist, def_vname , def_vid= get_selected_model_info_by_url(url)
-        if m_id and def_vname and def_vid and vlist: 
-            return gr.Textbox.update(value=url),gr.Dropdown.update(choices=vlist, value=def_vname),gr.Textbox.update(value=def_vid),gr.Textbox.update(value=m_id)    
+    if url:                         
+        model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(url)
+        if model_id and def_id:
+            return gr.Textbox.update(value=model_url),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)    
                 
     return gr.Textbox.update(value=""),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
 
@@ -91,44 +91,79 @@ def get_url_of_model_by_name(model_list:dict,name):
        
     return model_url 
 
+# # url에서 model info 정보를 반환한다
+# def get_selected_model_info_by_url(url:str):
+#     model = None
+#     versions_list = []
+#     def_version = None
+    
+#     if not url:
+#         return None,None,None,None
+    
+#     model_id = util.get_model_id_from_url(url)    
+    
+#     if not model_id:
+#         return None,None,None,None
+    
+#     model_url = f"{civitai.Url_ModelId()}{model_id}"             
+    
+#     try:
+#         r = requests.get(model_url)
+#         model = r.json()
+#     except Exception as e:
+#         util.printD("Load failed")
+#         return None,None,None,None
+
+#     if not model:
+#         return None,None,None,None   
+        
+#     if "modelVersions" not in model.keys():
+#         return None,None,None,None
+    
+#     def_version = model["modelVersions"][0]
+    
+#     if not def_version:
+#         return None,None,None,None
+                    
+#     for version_info in model['modelVersions']:
+#         versions_list.append(version_info['name'])
+    
+#     return model_id, [v for v in versions_list], def_version['name'], def_version['id']   
+
 # url에서 model info 정보를 반환한다
 def get_selected_model_info_by_url(url:str):
-    model = None
+    model_id = None
+    model_name = None
+    model_type = None
+    def_id = None
+    def_name = None
+    def_image = None
+    model_url = None
+    
     versions_list = []
-    def_version = None
-    
-    if not url:
-        return None,None,None,None
-    
-    model_id = util.get_model_id_from_url(url)    
-    
-    if not model_id:
-        return None,None,None,None
-    
-    model_url = f"{civitai.Url_ModelId()}{model_id}"             
-    
-    try:
-        r = requests.get(model_url)
-        model = r.json()
-    except Exception as e:
-        util.printD("Load failed")
-        return None,None,None,None
-
-    if not model:
-        return None,None,None,None   
+    if url:  
+        model_id = util.get_model_id_from_url(url) 
+        model_info = civitai.get_model_info_by_model_id(model_id)
+        if model_info:
+            versions_list = []
+            model_id = model_info['id']
+            model_name = model_info['name']
+            model_type = model_info['type']
+            model_url = f"{civitai.Url_ModelId()}{model_id}"
+            
+            if "modelVersions" in model_info.keys():            
+                def_version = model_info["modelVersions"][0]
+                def_id = def_version['id']
+                def_name = def_version['name']
+                
+                if 'images' in def_version.keys():
+                    img_dict = def_version["images"][0]
+                    def_image = img_dict["url"]
+                                                                
+                for version_info in model_info['modelVersions']:
+                    versions_list.append(version_info['name'])                        
         
-    if "modelVersions" not in model.keys():
-        return None,None,None,None
-    
-    def_version = model["modelVersions"][0]
-    
-    if not def_version:
-        return None,None,None,None
-                    
-    for version_info in model['modelVersions']:
-        versions_list.append(version_info['name'])
-    
-    return model_id, [v for v in versions_list], def_version['name'], def_version['id']   
+    return model_id, model_name, model_type, model_url, def_id, def_name, def_image ,[v for v in versions_list]
                         
 def get_search_page_action(action:str, json_state:dict, content_type, sort_type, search_term, show_nsfw=True):
     json_data = json_state

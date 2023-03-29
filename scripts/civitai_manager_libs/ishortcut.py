@@ -45,6 +45,22 @@ from . import setting
 # ISC["IShortCut"].pop('2')    
 # save(ISC)    
  
+def get_list()->str:
+    
+    ISC = load()                           
+    if not ISC:
+        return
+    if "IShortCut" not in ISC.keys():
+        return    
+    
+    shotcutlist = []
+    for k, v in ISC["IShortCut"].items():
+        # util.printD(ISC["IShortCut"][k])
+        if v:
+            shotcutlist.append(f"{v['id']}:{v['name']}")
+                    
+    return [v for v in shotcutlist]
+
 
 def add(ISC:dict, model_id ,model_name, model_type, model_url, version_id, image_url)->dict:
     
