@@ -5,28 +5,22 @@ from . import setting
 def printD(msg):    
     print(f"Civitai Manager: {msg}") 
     
-def make_new_folder(content_type, model_name, lora_an=False):
+def make_model_folder(content_type, model_name, lora_an=False):
     
     if not model_name:
         return
     
     model_name = model_name.strip()
-    
-    try:
-        folder = setting.folders_dict[content_type]
-    except: 
-        # 알수 없는 타입일경우 언노운 폴더에 저장한다.
-        if content_type:
-            tmp_type = content_type.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")
-            folder = os.path.join(setting.folders_dict['Unknown'], tmp_type , model_name.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-"))
-        else:                    
-            folder = os.path.join(setting.folders_dict['Unknown'], content_type, model_name.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-"))
-    
+
     if lora_an and content_type == "LORA":
-        folder = setting.folders_dict['ANLORA']        
-            
-    model_folder = folder  
-    #if content_type == "Checkpoint" or content_type == "Hypernetwork" or content_type =="LORA" or content_type == "Poses" or content_type == "TextualInversion" or content_type == "AestheticGradient":
+        model_folder = setting.folders_dict['ANLORA']
+    elif content_type in setting.folders_dict.keys():
+        model_folder = setting.folders_dict[content_type]        
+    elif content_type:
+        model_folder = os.path.join(setting.folders_dict['Unknown'], content_type.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-"))
+    else:
+        model_folder = os.path.join(setting.folders_dict['Unknown'])
+         
     model_folder = os.path.join(model_folder, model_name.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-"))    
                 
     if not os.path.exists(model_folder):
@@ -53,7 +47,7 @@ def load_InternetShortcut(path)->str:
         except Exception as e:
             printD(e)
             return                
-    return urls 
+    return urls.strip()
 
 # get image with full size
 # width is in number, not string

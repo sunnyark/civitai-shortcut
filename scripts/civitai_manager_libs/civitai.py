@@ -13,18 +13,6 @@ url_dict = {
     "modelHash": "https://civitai.com/api/v1/model-versions/by-hash/"
 }
 
-content_types_dict = {
-    "All" : "",    
-    "Checkpoint": "Checkpoint",
-    "LORA": "LORA",
-    "LyCORIS": "LoCon",
-    "Hypernetwork": "Hypernetwork",
-    "TextualInversion": "TextualInversion",            
-    "AestheticGradient":"AestheticGradient",    
-    "Controlnet" : "Controlnet", 
-    "Poses":"Poses"
-}
-
 models_exts = (".bin", ".pt", ".safetensors", ".ckpt")        
 
 def Url_Page():

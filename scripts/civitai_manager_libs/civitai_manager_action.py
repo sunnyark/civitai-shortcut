@@ -7,6 +7,7 @@ from . import setting
 from . import util
 from . import model
 from PIL import Image
+from . import ishortcut
 
 def on_page_btn_click(action, json_state, content_type, sort_type, search_term, show_nsfw):       
     mlist, new_json_data = get_search_page_action(action, json_state, content_type, sort_type, search_term, show_nsfw)
@@ -21,19 +22,19 @@ def on_models_list_select(evt: gr.SelectData,json_state):
         url = get_url_of_model_by_name(json_state, evt.value)
         
         if url: 
-            model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(url)
+            model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = civitai_action.get_selected_model_info_by_url(url)
             if model_id and def_id:                
                 return gr.Textbox.update(value=model_url),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
 
     return gr.Textbox.update(value=""),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
 
-def on_civitai_model_info_btn_click(url:str):  
-    if url:                         
-        model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(url)
-        if model_id and def_id:
-            return gr.Textbox.update(value=model_url),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)    
+# def on_civitai_model_info_btn_click(url:str):  
+#     if url:                         
+#         model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = get_selected_model_info_by_url(url)
+#         if model_id and def_id:
+#             return gr.Textbox.update(value=model_url),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)    
                 
-    return gr.Textbox.update(value=""),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+#     return gr.Textbox.update(value=""),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
 
 def on_versions_list_select(evt: gr.SelectData, model_id:str):       
     
@@ -90,91 +91,18 @@ def get_url_of_model_by_name(model_list:dict,name):
                 break
        
     return model_url 
-
-# # url에서 model info 정보를 반환한다
-# def get_selected_model_info_by_url(url:str):
-#     model = None
-#     versions_list = []
-#     def_version = None
-    
-#     if not url:
-#         return None,None,None,None
-    
-#     model_id = util.get_model_id_from_url(url)    
-    
-#     if not model_id:
-#         return None,None,None,None
-    
-#     model_url = f"{civitai.Url_ModelId()}{model_id}"             
-    
-#     try:
-#         r = requests.get(model_url)
-#         model = r.json()
-#     except Exception as e:
-#         util.printD("Load failed")
-#         return None,None,None,None
-
-#     if not model:
-#         return None,None,None,None   
-        
-#     if "modelVersions" not in model.keys():
-#         return None,None,None,None
-    
-#     def_version = model["modelVersions"][0]
-    
-#     if not def_version:
-#         return None,None,None,None
-                    
-#     for version_info in model['modelVersions']:
-#         versions_list.append(version_info['name'])
-    
-#     return model_id, [v for v in versions_list], def_version['name'], def_version['id']   
-
-# url에서 model info 정보를 반환한다
-def get_selected_model_info_by_url(url:str):
-    model_id = None
-    model_name = None
-    model_type = None
-    def_id = None
-    def_name = None
-    def_image = None
-    model_url = None
-    
-    versions_list = []
-    if url:  
-        model_id = util.get_model_id_from_url(url) 
-        model_info = civitai.get_model_info_by_model_id(model_id)
-        if model_info:
-            versions_list = []
-            model_id = model_info['id']
-            model_name = model_info['name']
-            model_type = model_info['type']
-            model_url = f"{civitai.Url_ModelId()}{model_id}"
-            
-            if "modelVersions" in model_info.keys():            
-                def_version = model_info["modelVersions"][0]
-                def_id = def_version['id']
-                def_name = def_version['name']
-                
-                if 'images' in def_version.keys():
-                    img_dict = def_version["images"][0]
-                    def_image = img_dict["url"]
-                                                                
-                for version_info in model_info['modelVersions']:
-                    versions_list.append(version_info['name'])                        
-        
-    return model_id, model_name, model_type, model_url, def_id, def_name, def_image ,[v for v in versions_list]
                         
 def get_search_page_action(action:str, json_state:dict, content_type, sort_type, search_term, show_nsfw=True):
     json_data = json_state
     if action == setting.page_action_dict['search']:
         if search_term:
             search_term = search_term.strip().replace(" ", "%20")
-        
-        c_types = civitai.content_types_dict[content_type]
-        urls = f"{civitai.Url_ModelId()}?limit={setting.page_dict['limit']}"             
-        if c_types and len(c_types) > 0:        
-            urls = f"{urls}&types={c_types}"
+
+        c_types = ""
+        for ctype in content_type:
+            c_types += f"&types={setting.content_types_dict[ctype]}"
+            
+        urls = f"{civitai.Url_ModelId()}?limit={setting.page_dict['limit']}{c_types}"             
         urls = f"{urls}&sort={sort_type}&query={search_term}"    
         json_data = civitai.request_models(urls)
         
@@ -208,3 +136,51 @@ def get_search_page_action(action:str, json_state:dict, content_type, sort_type,
             if not temp_nsfw:
                 models_name.append(model['name'])
     return [v for v in models_name],json_state
+
+def on_shortcut_del_btn_click(shortcut):
+    if shortcut and shortcut != setting.PLACEHOLDER:
+        model_id = shortcut[0:shortcut.find(':')]
+        util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
+        if model_id:
+            ISC = ishortcut.load()                           
+            ISC = ishortcut.delete(ISC, model_id)                        
+            ishortcut.save(ISC)
+        
+    return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(), value=setting.PLACEHOLDER)
+
+def on_civitai_model_url_txt_change():
+    return None 
+        
+def on_shortcut_type_change(sc_types):       
+    return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER)
+
+def on_shortcut_list_select(shortcut):
+    model_url = ""    
+    if shortcut and shortcut != setting.PLACEHOLDER:
+        model_id = shortcut[0:shortcut.find(':')]      
+        model_url = civitai.Url_ModelId() + model_id  
+        #util.printD(f"{model_id} {len(model_id)}")    
+        model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = civitai_action.get_selected_model_info_by_url(model_url)     
+        if def_id:
+            return model_url, gr.Dropdown.update(choices=vlist, value=def_name), gr.Textbox.update(value=def_id), gr.Textbox.update(value=model_id)
+    return model_url, gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT), gr.Textbox.update(value=""), gr.Textbox.update(value="")
+      
+def on_civitai_internet_url_upload(file_obj, sc_types):   
+    shortcut = util.load_InternetShortcut(file_obj.name)
+    model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
+    if not model_url:
+        return "",gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+    if not def_id:
+        return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+    return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
+
+def internet_shortcut_upload(url):
+    if url:  
+        #util.printD(url)
+        model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = civitai_action.get_selected_model_info_by_url(url)
+        if model_id:
+            # util.printD(model_id)
+            ISC = ishortcut.load()                           
+            ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
+            ishortcut.save(ISC)
+    return model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist
