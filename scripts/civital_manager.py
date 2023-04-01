@@ -11,12 +11,6 @@ from scripts.civitai_manager_libs import civitai_action
 def civitai_manager_ui():                             
     with gr.Row(): 
         with gr.Column(scale=1):            
-            with gr.Tab("Browsing Shortcut"):   
-                    with gr.Row():
-                        shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
-                    with gr.Row():
-                        sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)
-
             with gr.Tab("Shortcut and Search"):                           
                 with gr.Column():
                     with gr.Row():
@@ -41,7 +35,11 @@ def civitai_manager_ui():
                             models_list = gr.Dropdown(label="Model List", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)   
                         with gr.Row():       
                             show_nsfw = gr.Checkbox(label="Show NSFW", value=True)  
-                        
+            with gr.Tab("Browsing Shortcut"):   
+                    with gr.Row():
+                        shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
+                    with gr.Row():
+                        sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)                        
         with gr.Column(scale=4):                                                          
             with gr.Tab("Model Info"):
                 with gr.Row():                                                                                                                                    
@@ -70,7 +68,7 @@ def civitai_manager_ui():
                         with gr.Row():                                                              
                             model_title_name = gr.Markdown("###", visible=True)            
                         with gr.Row():    
-                            version_gallery = gr.Gallery(show_label=False).style(grid=5)
+                            version_gallery = gr.Gallery(show_label=False).style(grid=4)
                             #version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
                         with gr.Row():    
                             version_description_html = gr.HTML()                                                                                                   

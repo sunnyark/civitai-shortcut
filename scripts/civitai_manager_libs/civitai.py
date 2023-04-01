@@ -49,8 +49,11 @@ def get_model_info_by_model_id(id:str) -> dict:
         with requests.get(Url_ModelId()+str(id)) as response:
             content = response.json()
     except Exception as e:
-        pass
-  
+        return None
+    
+    if 'id' not in content.keys():
+        return None
+    
     return content
 
 def get_model_info_by_version_id(version_id:str) -> dict:        
@@ -65,17 +68,21 @@ def get_model_info_by_version_info(version_info) -> dict:
         return 
     return get_model_info_by_model_id(version_info['modelId'])
   
-def get_version_info_by_version_id(version_id:str) -> dict:    
-    content = None
+def get_version_info_by_version_id(version_id:str) -> dict:        
     if not version_id:                
         return 
+    
+    content = None
     
     try:
         with requests.get(Url_VersionId()+str(version_id)) as response:
             content = response.json()
     except Exception as e:
-        pass
+        return None
 
+    if 'id' not in content.keys():
+        return None
+    
     return content   
 
 def get_latest_version_info_by_model_id(id:str) -> dict:
