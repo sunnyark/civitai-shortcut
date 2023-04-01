@@ -175,7 +175,8 @@ def get_version_description_gallery_by_version_info(version_info:dict):
 
             #작은 이미지 - 로드는 작은 이미지로 한다
             #제네레이션 정보는 원본에만 있다                        
-            version_images_url.append(pic["url"])                                 
+            #version_images_url.append((pic["url"],f"[{version_info['id']}]:{version_info['model']['name']}"))
+            version_images_url.append(pic["url"])
             version_full_images_url.append(img_url)     
                 
     return version_images_url,version_full_images_url

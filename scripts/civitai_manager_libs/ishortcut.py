@@ -46,6 +46,35 @@ def get_list(shortcut_types=None)->str:
     return [v for v in shotcutlist]
 
 
+def get_image_list(shortcut_types=None)->str:
+    
+    ISC = load()                           
+    if not ISC:
+        return
+    if "IShortCut" not in ISC.keys():
+        return    
+    
+    tmp_types = []
+    if shortcut_types:
+        for sc_type in shortcut_types:
+            try:
+                tmp_types.append(setting.content_types_dict[sc_type])
+            except:
+                pass
+            
+    shotcutlist = []
+    for k, v in ISC["IShortCut"].items():
+        # util.printD(ISC["IShortCut"][k])
+        if v:
+            if tmp_types:
+                if v['type'] in tmp_types:
+                    shotcutlist.append((v['imageurl'],f"{v['id']}:{v['name']}"))
+            else:                                
+                shotcutlist.append((v['imageurl'],f"{v['id']}:{v['name']}"))
+                    
+    return [v for v in shotcutlist]
+
+
 def add(ISC:dict, model_id ,model_name, model_type, model_url, version_id, image_url)->dict:
     
     if not ISC:
@@ -72,7 +101,7 @@ def delete(ISC:dict, model_id)->dict:
         return 
         
     if "IShortCut" not in ISC.keys():
-        return   
+        return
     ISC["IShortCut"].pop(model_id,None)
     return ISC
 
