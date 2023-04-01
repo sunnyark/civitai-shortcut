@@ -1,9 +1,7 @@
 import os
-import json
 import shutil
 import requests
 import threading
-from PIL import Image
 from . import civitai
 from . import util
 from . import downloader
@@ -98,19 +96,19 @@ def download_image_files(version_id, lora_an):
                 
                 try:
                     # get image
-                    img_r = requests.get(img_url, stream=True)
-                    if not img_r.ok:
-                        util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
-                        continue
+                    with requests.get(img_url, stream=True) as img_r:
+                        if not img_r.ok:
+                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                            continue
 
-                    # write to file
-                    description_img = f'{base}_{image_count}.preview.png'
-                    if image_count == 0:
-                        description_img = f'{base}.preview.png'
-                                                                            
-                    with open(description_img, 'wb') as f:
-                        img_r.raw.decode_content = True
-                        shutil.copyfileobj(img_r.raw, f)
+                        # write to file
+                        description_img = f'{base}_{image_count}.preview.png'
+                        if image_count == 0:
+                            description_img = f'{base}.preview.png'
+                                                                                
+                        with open(description_img, 'wb') as f:
+                            img_r.raw.decode_content = True
+                            shutil.copyfileobj(img_r.raw, f)
                 except Exception as e:
                     pass
                 

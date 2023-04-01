@@ -29,14 +29,13 @@ def Url_Hash():
 
 def request_models(api_url=None):
     # Make a GET request to the API
-    response = requests.get(api_url)
+    with requests.get(api_url) as response:
+        # Check the status code of the response
+        if response.status_code != 200:
+            util.printD("Request failed with status code: {}".format(response.status_code))
+            exit()
 
-    # Check the status code of the response
-    if response.status_code != 200:
-        util.printD("Request failed with status code: {}".format(response.status_code))
-        exit()
-
-    data = json.loads(response.text)
+        data = json.loads(response.text)
     return data
 
 def get_model_info_by_model_id(id:str) -> dict:    
@@ -45,8 +44,8 @@ def get_model_info_by_model_id(id:str) -> dict:
     
     content = None
     try:            
-        r = requests.get(Url_ModelId()+str(id))            
-        content = r.json()
+        with requests.get(Url_ModelId()+str(id)) as response:
+            content = response.json()
     except Exception as e:
         pass
   
@@ -74,8 +73,8 @@ def get_version_info_by_version_id(version_id:str) -> dict:
         return 
     
     try:
-        r = requests.get(Url_VersionId()+str(version_id))
-        content = r.json()
+        with requests.get(Url_VersionId()+str(version_id)) as response:
+            content = response.json()
     except Exception as e:
         pass
 

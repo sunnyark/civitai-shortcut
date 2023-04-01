@@ -1,8 +1,6 @@
 import os
 from modules import shared
 import modules.scripts as scripts
-from . import util
-from . import model
 
 root_path = os.getcwd()
 

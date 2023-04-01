@@ -1,12 +1,8 @@
-import requests
 import gradio as gr
 from . import civitai
 from . import civitai_action
-from . import model
 from . import setting
 from . import util
-from . import model
-from PIL import Image
 from . import ishortcut
 
 def on_page_btn_click(action, json_state, content_type, sort_type, search_term, show_nsfw):       
