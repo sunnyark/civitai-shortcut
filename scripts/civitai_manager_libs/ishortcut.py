@@ -3,20 +3,9 @@ import json
 from . import util
 from . import setting
 
+import shutil
+import requests
 
-# cis_list = {
-#     "IShortCut":[{
-#         model_id : 
-#         {
-#             "id" : model_id,
-#             "type" : model_type,
-#             "name": name,
-#             "url": url,        
-#             "image" : "default version image",
-#         }
-#     }],       
-# }
- 
 def get_list(shortcut_types=None)->str:
     
     ISC = load()                           
@@ -68,12 +57,73 @@ def get_image_list(shortcut_types=None)->str:
         if v:
             if tmp_types:
                 if v['type'] in tmp_types:
-                    shotcutlist.append((v['imageurl'],f"{v['id']}:{v['name']}"))
-            else:                                
-                shotcutlist.append((v['imageurl'],f"{v['id']}:{v['name']}"))
+                    if is_sc_image(v['id']):
+                        shotcutlist.append((os.path.join(setting.civitai_shorcut_image_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                    else:
+                        shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
+            else:           
+                if is_sc_image(v['id']):
+                    shotcutlist.append((os.path.join(setting.civitai_shorcut_image_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                else:
+                    shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
                     
     return [v for v in shotcutlist]
 
+def download_all_images():
+    ISC = load()                           
+    if not ISC:
+        return
+
+    if "IShortCut" not in ISC.keys():
+        return    
+    
+    for k, v in ISC["IShortCut"].items():
+        if v:
+            download_image(v['id'], v['imageurl'])
+
+def is_sc_image(model_id):
+    if not model_id:    
+        return False
+            
+    if os.path.isfile(os.path.join(setting.civitai_shorcut_image_folder,f"{model_id}.png")):
+        return True
+    
+    return False        
+    
+def download_image(model_id, url):
+    if not model_id:    
+        return False
+
+    if not url:    
+        return False
+    
+    if not os.path.exists(setting.civitai_shorcut_image_folder):
+        os.makedirs(setting.civitai_shorcut_image_folder)    
+        
+    if os.path.isfile(os.path.join(setting.civitai_shorcut_image_folder,f"{model_id}.png")):
+        return True
+    
+    try:
+        # get image
+        with requests.get(url, stream=True) as img_r:
+            if not img_r.ok:
+                return False
+            
+            shotcut_img = os.path.join(setting.civitai_shorcut_image_folder,f"{model_id}.png")                                                                   
+            with open(shotcut_img, 'wb') as f:
+                img_r.raw.decode_content = True
+                shutil.copyfileobj(img_r.raw, f)                            
+    except Exception as e:
+        return False
+    
+    return True
+                        
+def delete_image(model_id):
+    if is_sc_image(model_id):
+        try:
+            os.remove(os.path.join(setting.civitai_shorcut_image_folder,f"{model_id}.png"))
+        except:
+            return        
 
 def add(ISC:dict, model_id ,model_name, model_type, model_url, version_id, image_url)->dict:
     
@@ -93,16 +143,25 @@ def add(ISC:dict, model_id ,model_name, model_type, model_url, version_id, image
     }
     
     ISC["IShortCut"][model_id] = cis
+    
+    download_image(model_id, image_url)
+    
     return ISC
 
 def delete(ISC:dict, model_id)->dict:
+    if not model_id:
+        return 
     
     if not ISC:
         return 
         
     if "IShortCut" not in ISC.keys():
         return
+    
     ISC["IShortCut"].pop(model_id,None)
+    
+    delete_image(model_id)
+    
     return ISC
 
 def save(cis_data):

@@ -11,44 +11,36 @@ from scripts.civitai_manager_libs import civitai_action
 def civitai_manager_ui():                             
     with gr.Row(): 
         with gr.Column(scale=1):            
-            with gr.Tab("Shortcut"):                           
-                with gr.Column():
-                    with gr.Row():
-                        civitai_internet_url = gr.File(label="Civitai Internet Shortcut")
-                    with gr.Row():
-                        civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , show_label=False , max_lines=1)
+            with gr.Tab("Browsing Shortcut"):   
                     with gr.Row():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                     with gr.Row():
-                        shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)   
+                        sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)
+
+            with gr.Tab("Shortcut and Search"):                           
+                with gr.Column():
                     with gr.Row():
-                        shortcut_del_btn = gr.Button(value="Delete Civitai Shortcut") 
-            # with gr.Tab("Browsing Shortcut"):   
-            #         with gr.Row():
-            #             shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
-            #         with gr.Row():
-            #             shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)   
-            #         with gr.Row():
-            #             shortcut_del_btn = gr.Button(value="Delete Civitai Shortcut") 
-            #         with gr.Row():
-            #             sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)                                                
-            with gr.Tab("Search"):  
-                with gr.Column():                    
-                    with gr.Row():
-                        content_type = gr.Dropdown(label='Model type', multiselect=True, choices=[k for k in setting.content_types_dict], value=[], type="value") 
-                    with gr.Row():                                                           
-                        sort_type = gr.Dropdown(label='Sort List by', choices=["Newest", "Most Downloaded", "Highest Rated", "Most Liked"], value="Newest", type="value")                        
-                    with gr.Row():                        
-                        search_term = gr.Textbox(label="Search Term", placeholder="Enter your prompt", max_lines=1)
-                    with gr.Row():                        
-                        search_btn = gr.Button(value=setting.page_action_dict['search'],variant="primary")
-                    with gr.Row():       
-                        prev_page_btn = gr.Button(value=setting.page_action_dict['prevPage'])
-                        next_page_btn = gr.Button(value=setting.page_action_dict['nextPage']) 
-                    with gr.Row():                    
-                        models_list = gr.Dropdown(label="Model List", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)   
-                    with gr.Row():       
-                        show_nsfw = gr.Checkbox(label="Show NSFW", value=True)  
+                        civitai_internet_url = gr.File(label="Civitai Internet Shortcut")
+                    # with gr.Row():
+                    #     shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
+                    # with gr.Row():
+                    #     shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)   
+                    with gr.Tab("Search"):                
+                        with gr.Row():
+                            content_type = gr.Dropdown(label='Model type', multiselect=True, choices=[k for k in setting.content_types_dict], value=[], type="value") 
+                        with gr.Row():                                                           
+                            sort_type = gr.Dropdown(label='Sort List by', choices=["Newest", "Most Downloaded", "Highest Rated", "Most Liked"], value="Newest", type="value")                        
+                        with gr.Row():                        
+                            search_term = gr.Textbox(label="Search Term", placeholder="Enter your prompt", max_lines=1)
+                        with gr.Row():                        
+                            search_btn = gr.Button(value=setting.page_action_dict['search'],variant="primary")
+                        with gr.Row():       
+                            prev_page_btn = gr.Button(value=setting.page_action_dict['prevPage'])
+                            next_page_btn = gr.Button(value=setting.page_action_dict['nextPage']) 
+                        with gr.Row():                    
+                            models_list = gr.Dropdown(label="Model List", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)   
+                        with gr.Row():       
+                            show_nsfw = gr.Checkbox(label="Show NSFW", value=True)  
                         
         with gr.Column(scale=4):                                                          
             with gr.Tab("Model Info"):
@@ -59,7 +51,9 @@ def civitai_manager_ui():
                         with gr.Row():
                             model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)                                                     
                         with gr.Row():
-                            trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")                                
+                            trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
+                        with gr.Row():
+                            civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)                                                   
                         with gr.Row():
                             filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
                         with gr.Row():                            
@@ -67,7 +61,9 @@ def civitai_manager_ui():
                         with gr.Row():
                             download_model = gr.Button(value="Download", variant="primary")                                                
                         with gr.Row():
-                            download_images = gr.Button(value="Download Images",variant="primary")                            
+                            download_images = gr.Button(value="Download Images",variant="primary")      
+                        with gr.Row():
+                            shortcut_del_btn = gr.Button(value="Delete Shortcut")                                                   
                         with gr.Row():    
                             message_log = gr.Markdown("###")
                     with gr.Column(scale=4):                                                  
@@ -184,21 +180,7 @@ def civitai_manager_ui():
             selected_model_id,                                     
         ]
     )
-                   
-    # model의 정보 표시
-    # civitai_model_info_btn.click(
-    #     fn=civitai_manager_action.on_civitai_model_info_btn_click,
-    #     inputs=[
-    #         civitai_model_url_txt,
-    #     ],
-    #     outputs=[
-    #         civitai_model_url_txt,
-    #         versions_list,
-    #         selected_version_id, 
-    #         selected_model_id,                        
-    #     ]                
-    # )
-        
+                          
     # 버전을 하나 선택
     versions_list.select(
         fn=civitai_manager_action.on_versions_list_select,
@@ -257,19 +239,66 @@ def civitai_manager_ui():
     
     civitai_model_url_txt.change(civitai_manager_action.on_civitai_model_url_txt_change,None,[civitai_internet_url])
 
-    shortcut_list.select(
-        fn=civitai_manager_action.on_shortcut_list_select,
-        inputs=[
-            shortcut_list
-        ],
+    # shortcut_list.select(
+    #     fn=civitai_manager_action.on_shortcut_list_select,
+    #     inputs=[
+    #         shortcut_list
+    #     ],
+    #     outputs=[
+    #         civitai_model_url_txt,
+    #         versions_list,
+    #         selected_version_id, 
+    #         selected_model_id,            
+    #     ]
+    # )  
+                
+    # civitai_internet_url.upload(
+    #     fn=civitai_manager_action.on_civitai_internet_url_upload,
+    #     inputs=[
+    #         civitai_internet_url,
+    #         shortcut_type            
+    #     ],
+    #     outputs=[
+    #         civitai_model_url_txt,
+    #         shortcut_list,
+    #         versions_list,
+    #         selected_version_id, 
+    #         selected_model_id,            
+    #     ]
+    # )                                  
+    
+    # shortcut_del_btn.click(
+    #     fn=civitai_manager_action.on_shortcut_del_btn_click,
+    #     inputs=[
+    #         shortcut_list,
+    #         shortcut_type,
+    #     ],
+    #     outputs=[
+    #         shortcut_list,            
+    #     ]                
+    # )
+
+    # shortcut_type.change(
+    #     fn=civitai_manager_action.on_shortcut_type_change,
+    #     inputs=[
+    #         shortcut_type,
+    #     ],
+    #     outputs=[
+    #         shortcut_list,
+    #     ]
+    # )
+    
+    #sc_gallery,shortcut_list를 갱신 시켜야 되는 3가지 이벤트 civitai_internet_url,shortcut_del_btn,shortcut_type
+    sc_gallery.select(
+        fn=civitai_manager_action.on_get_sc_galery_select,
+        inputs=None,
         outputs=[
             civitai_model_url_txt,
             versions_list,
             selected_version_id, 
             selected_model_id,            
         ]
-    )  
-                
+    )
     civitai_internet_url.upload(
         fn=civitai_manager_action.on_civitai_internet_url_upload,
         inputs=[
@@ -278,8 +307,7 @@ def civitai_manager_ui():
         ],
         outputs=[
             civitai_model_url_txt,
-            shortcut_list,
-            #sc_gallery,
+            sc_gallery,
             versions_list,
             selected_version_id, 
             selected_model_id,            
@@ -289,13 +317,11 @@ def civitai_manager_ui():
     shortcut_del_btn.click(
         fn=civitai_manager_action.on_shortcut_del_btn_click,
         inputs=[
-            shortcut_list,
-            #selected_model_id,
+            selected_model_id,
             shortcut_type,
         ],
         outputs=[
-            shortcut_list,            
-            #sc_gallery,
+            sc_gallery,
         ]                
     )
 
@@ -305,22 +331,9 @@ def civitai_manager_ui():
             shortcut_type,
         ],
         outputs=[
-            shortcut_list,
-            #sc_gallery,
+            sc_gallery,
         ]
-    )
-    
-    #sc_gallery,shortcut_list를 갱신 시켜야 되는 3가지 이벤트 civitai_internet_url,shortcut_del_btn,shortcut_type
-    # sc_gallery.select(
-    #     fn=civitai_manager_action.on_get_sc_galery_select,
-    #     inputs=None,
-    #     outputs=[
-    #         civitai_model_url_txt,
-    #         versions_list,
-    #         selected_version_id, 
-    #         selected_model_id,            
-    #     ]
-    # )
+    )    
     
             
 # init

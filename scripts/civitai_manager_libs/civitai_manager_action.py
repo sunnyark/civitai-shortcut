@@ -141,73 +141,72 @@ def on_civitai_model_url_txt_change():
 
 
 
-# def on_get_sc_galery_select(evt : gr.SelectData):
-#     model_url = "" 
-#     if evt.value:
-#         shortcut = evt.value 
-#         model_id = shortcut[0:shortcut.find(':')]      
-#         model_url = civitai.Url_ModelId() + model_id  
-#         #util.printD(f"{model_id} {len(model_id)}")    
-#         model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = civitai_action.get_selected_model_info_by_url(model_url)     
-#         if def_id:
-#             return model_url, gr.Dropdown.update(choices=vlist, value=def_name), gr.Textbox.update(value=def_id), gr.Textbox.update(value=model_id)
-#     return model_url, gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT), gr.Textbox.update(value=""), gr.Textbox.update(value="")       
-     
-# def on_shortcut_del_btn_click(model_id,sc_types):
-#     util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
-#     if model_id:
-#         ISC = ishortcut.load()                           
-#         ISC = ishortcut.delete(ISC, model_id)                        
-#         ishortcut.save(ISC)
-        
-#     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
-        
-# def on_shortcut_type_change(sc_types):       
-#     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
-
-# def on_civitai_internet_url_upload(file_obj, sc_types):   
-#     shortcut = util.load_InternetShortcut(file_obj.name)
-#     model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
-#     if not model_url:
-#         return "",gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
-#     if not def_id:
-#         return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
-#     return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
-
-
-def on_shortcut_list_select(shortcut):
-    model_url = ""    
-    if shortcut and shortcut != setting.PLACEHOLDER:
+def on_get_sc_galery_select(evt : gr.SelectData):
+    model_url = "" 
+    if evt.value:
+        shortcut = evt.value 
         model_id = shortcut[0:shortcut.find(':')]      
         model_url = civitai.Url_ModelId() + model_id  
         #util.printD(f"{model_id} {len(model_id)}")    
         model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = civitai_action.get_selected_model_info_by_url(model_url)     
         if def_id:
             return model_url, gr.Dropdown.update(choices=vlist, value=def_name), gr.Textbox.update(value=def_id), gr.Textbox.update(value=model_id)
-    return model_url, gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT), gr.Textbox.update(value=""), gr.Textbox.update(value="")
+    return model_url, gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT), gr.Textbox.update(value=""), gr.Textbox.update(value="")       
      
-def on_shortcut_del_btn_click(shortcut,sc_types):
-    if shortcut and shortcut != setting.PLACEHOLDER:
-        model_id = shortcut[0:shortcut.find(':')]
-        util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
-        if model_id:
-            ISC = ishortcut.load()                           
-            ISC = ishortcut.delete(ISC, model_id)                        
-            ishortcut.save(ISC)
+def on_shortcut_del_btn_click(model_id,sc_types):
+    #util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
+    if model_id:
+        ISC = ishortcut.load()                           
+        ISC = ishortcut.delete(ISC, model_id)                        
+        ishortcut.save(ISC)
         
-    return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER)
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
         
 def on_shortcut_type_change(sc_types):       
-    return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER)
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
 
 def on_civitai_internet_url_upload(file_obj, sc_types):   
     shortcut = util.load_InternetShortcut(file_obj.name)
     model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
     if not model_url:
-        return "",gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+        return "",gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
     if not def_id:
-        return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
-    return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
+        return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+    return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
+
+# def on_shortcut_list_select(shortcut):
+#     model_url = ""    
+#     if shortcut and shortcut != setting.PLACEHOLDER:
+#         model_id = shortcut[0:shortcut.find(':')]      
+#         model_url = civitai.Url_ModelId() + model_id  
+#         #util.printD(f"{model_id} {len(model_id)}")    
+#         model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = civitai_action.get_selected_model_info_by_url(model_url)     
+#         if def_id:
+#             return model_url, gr.Dropdown.update(choices=vlist, value=def_name), gr.Textbox.update(value=def_id), gr.Textbox.update(value=model_id)
+#     return model_url, gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT), gr.Textbox.update(value=""), gr.Textbox.update(value="")
+     
+# def on_shortcut_del_btn_click(shortcut,sc_types):
+#     if shortcut and shortcut != setting.PLACEHOLDER:
+#         model_id = shortcut[0:shortcut.find(':')]
+#         util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
+#         if model_id:
+#             ISC = ishortcut.load()                           
+#             ISC = ishortcut.delete(ISC, model_id)                        
+#             ishortcut.save(ISC)
+        
+#     return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER)
+        
+# def on_shortcut_type_change(sc_types):       
+#     return gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER)
+
+# def on_civitai_internet_url_upload(file_obj, sc_types):   
+#     shortcut = util.load_InternetShortcut(file_obj.name)
+#     model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
+#     if not model_url:
+#         return "",gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+#     if not def_id:
+#         return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+#     return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
 
 def internet_shortcut_upload(url):
     if url:  
