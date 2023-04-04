@@ -299,8 +299,9 @@ def get_selected_model_info_by_url(url:str):
                 def_name = def_version['name']
                 
                 if 'images' in def_version.keys():
-                    img_dict = def_version["images"][0]
-                    def_image = img_dict["url"]
+                    if len(def_version["images"]) > 0:
+                        img_dict = def_version["images"][0]
+                        def_image = img_dict["url"]
                                                                 
                 for version_info in model_info['modelVersions']:
                     versions_list.append(version_info['name'])                        
