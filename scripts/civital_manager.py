@@ -31,26 +31,12 @@ def civitai_manager_ui():
                 with gr.Column():
                     with gr.Row():
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut")
+                    with gr.Row():                        
+                        scan_sc_btn = gr.Button(value="Scan & Update Shortcut",variant="primary")                        
                     # with gr.Row():
                     #     shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                     # with gr.Row():
-                    #     shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)   
-                    with gr.Tab("Search"):                
-                        with gr.Row():
-                            content_type = gr.Dropdown(label='Model type', multiselect=True, choices=[k for k in setting.content_types_dict], value=[], type="value") 
-                        with gr.Row():                                                           
-                            sort_type = gr.Dropdown(label='Sort List by', choices=["Newest", "Most Downloaded", "Highest Rated", "Most Liked"], value="Newest", type="value")                        
-                        with gr.Row():                        
-                            search_term = gr.Textbox(label="Search Term", placeholder="Enter your prompt", max_lines=1)
-                        with gr.Row():                        
-                            search_btn = gr.Button(value=setting.page_action_dict['search'],variant="primary")
-                        with gr.Row():  
-                            prev_page_btn = gr.Button(value=setting.page_action_dict['prevPage'])                              
-                            next_page_btn = gr.Button(value=setting.page_action_dict['nextPage']) 
-                        with gr.Row():                    
-                            models_list = gr.Dropdown(label="Model List", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)   
-                        with gr.Row():       
-                            show_nsfw = gr.Checkbox(label="Show NSFW", value=True)  
+                    #     shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)                       
             with gr.Tab("Browsing Shortcut"):   
                     with gr.Row():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
@@ -58,8 +44,6 @@ def civitai_manager_ui():
                         sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)
                     with gr.Row():                        
                         update_sc_btn = gr.Button(value="Update Thumnails",variant="primary")
-                    with gr.Row():                        
-                        scan_sc_btn = gr.Button(value="Scan & Update Shortcut",variant="primary")
         with gr.Column(scale=4):                                                          
             with gr.Tab("Model Info"):
                 with gr.Row():                                                                                                                                    
@@ -110,13 +94,6 @@ def civitai_manager_ui():
         selected_version_id = gr.Textbox()
         selected_model_id = gr.Textbox()
         selected_gallery = gr.Textbox()
-        
-        up_shortcut = gr.Textbox()
-        
-        # 검색한 모델들의 정보와 선택한 모델정보를 저장하는 변수
-        # 페이지가 새로고침 되기전까지 정보를 저장한다.
-        json_state  = gr.State()  #검색한 모델들의 정보
-        #model_state  = gr.State() #선택한 모델정보
                                                                              
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])      
 
@@ -124,80 +101,6 @@ def civitai_manager_ui():
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
-
-    show_nsfw.change(
-        fn=civitai_manager_action.on_page_btn_click,
-        inputs=[  
-            show_nsfw,              
-            json_state,
-            content_type,
-            sort_type,
-            search_term,
-            show_nsfw,            
-        ],
-        outputs=[
-            json_state,
-            models_list,
-        ]
-    )                      
-    search_btn.click(
-        fn=civitai_manager_action.on_page_btn_click,
-        inputs=[  
-            search_btn,              
-            json_state,
-            content_type,
-            sort_type,
-            search_term,
-            show_nsfw,            
-        ],
-        outputs=[
-            json_state,
-            models_list,
-        ]
-    )
-    next_page_btn.click(
-        fn=civitai_manager_action.on_page_btn_click,
-        inputs=[
-            next_page_btn,
-            json_state,
-            content_type,
-            sort_type,
-            search_term,
-            show_nsfw,      
-        ],
-        outputs=[
-            json_state,            
-            models_list,
-        ]
-    )
-    prev_page_btn.click(
-        fn=civitai_manager_action.on_page_btn_click,
-        inputs=[
-            prev_page_btn,
-            json_state,
-            content_type,
-            sort_type,
-            search_term,
-            show_nsfw,      
-        ],
-        outputs=[
-            json_state,            
-            models_list,
-        ]
-    )     
-
-    models_list.select(
-        fn=civitai_manager_action.on_models_list_select,
-        inputs=[
-            json_state,            
-        ],
-        outputs=[
-            civitai_model_url_txt,
-            versions_list,
-            selected_version_id, 
-            selected_model_id,                                     
-        ]
-    )
                           
     # 버전을 하나 선택
     versions_list.select(
@@ -256,57 +159,7 @@ def civitai_manager_ui():
     version_gallery.select(civitai_manager_action.on_get_gallery_select, version_images_url, [img_index, hidden])
     
     civitai_model_url_txt.change(civitai_manager_action.on_civitai_model_url_txt_change,None,[civitai_internet_url])
-
-    # shortcut_list.select(
-    #     fn=civitai_manager_action.on_shortcut_list_select,
-    #     inputs=[
-    #         shortcut_list
-    #     ],
-    #     outputs=[
-    #         civitai_model_url_txt,
-    #         versions_list,
-    #         selected_version_id, 
-    #         selected_model_id,            
-    #     ]
-    # )  
-                
-    # civitai_internet_url.upload(
-    #     fn=civitai_manager_action.on_civitai_internet_url_upload,
-    #     inputs=[
-    #         civitai_internet_url,
-    #         shortcut_type            
-    #     ],
-    #     outputs=[
-    #         civitai_model_url_txt,
-    #         shortcut_list,
-    #         versions_list,
-    #         selected_version_id, 
-    #         selected_model_id,            
-    #     ]
-    # )                                  
     
-    # shortcut_del_btn.click(
-    #     fn=civitai_manager_action.on_shortcut_del_btn_click,
-    #     inputs=[
-    #         shortcut_list,
-    #         shortcut_type,
-    #     ],
-    #     outputs=[
-    #         shortcut_list,            
-    #     ]                
-    # )
-
-    # shortcut_type.change(
-    #     fn=civitai_manager_action.on_shortcut_type_change,
-    #     inputs=[
-    #         shortcut_type,
-    #     ],
-    #     outputs=[
-    #         shortcut_list,
-    #     ]
-    # )
-    
-    #sc_gallery,shortcut_list를 갱신 시켜야 되는 3가지 이벤트 civitai_internet_url,shortcut_del_btn,shortcut_type
     sc_gallery.select(
         fn=civitai_manager_action.on_get_sc_galery_select,
         inputs=None,
