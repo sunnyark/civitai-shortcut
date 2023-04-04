@@ -50,7 +50,8 @@ content_types_dict = {
 }
 
 civitai_shortcut = "CivitaiShortCut.json"
-civitai_shorcut_image_folder =  "sc_thum_images"
+civitai_shortcut_image_folder =  "sc_thum_images"
+civitai_shortcut_save_folder =  "sc_saves"
 civitai_no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
 
 # get cusomter model path
@@ -58,7 +59,8 @@ def init_civitai_manager():
     global root_path
     global folders_dict
     global civitai_shortcut
-    global civitai_shorcut_image_folder
+    global civitai_shortcut_image_folder
+    global civitai_shortcut_save_folder
     
     root_path = os.getcwd()
     
@@ -76,7 +78,8 @@ def init_civitai_manager():
         folders_dict["LoCon"] = shared.cmd_opts.lora_dir
     
     civitai_shortcut = os.path.join(scripts.basedir(),"CivitaiShortCut.json")
-    civitai_shorcut_image_folder = os.path.join(scripts.basedir(),"sc_thum_images")
+    civitai_shortcut_image_folder = os.path.join(scripts.basedir(),"sc_thum_images")
+    civitai_shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
 
     
     # if not os.path.exists(folders_custom_dict["INTERNETSHORTCUT"]):

@@ -7,6 +7,22 @@ from scripts.civitai_manager_libs import civitai_manager_action
 from scripts.civitai_manager_libs import ishortcut
 from scripts.civitai_manager_libs import civitai
 from scripts.civitai_manager_libs import civitai_action
+from scripts.civitai_manager_libs import util
+
+def on_scan_to_shortcut_click(sc_types):
+    ishortcut.OwnedModel_to_Shortcut()
+    util.printD("Scan & Update Shortcut ended")
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
+
+import threading
+
+def scan_owned_to_shortcut_thread():               
+    
+    thread = threading.Thread(target=ishortcut.OwnedModel_to_Shortcut(),args=None)                        
+    # Start the thread
+    thread.start()                
+    
+    return f"Scan started"
         
 def civitai_manager_ui():                             
     with gr.Row(): 
@@ -28,8 +44,8 @@ def civitai_manager_ui():
                             search_term = gr.Textbox(label="Search Term", placeholder="Enter your prompt", max_lines=1)
                         with gr.Row():                        
                             search_btn = gr.Button(value=setting.page_action_dict['search'],variant="primary")
-                        with gr.Row():       
-                            prev_page_btn = gr.Button(value=setting.page_action_dict['prevPage'])
+                        with gr.Row():  
+                            prev_page_btn = gr.Button(value=setting.page_action_dict['prevPage'])                              
                             next_page_btn = gr.Button(value=setting.page_action_dict['nextPage']) 
                         with gr.Row():                    
                             models_list = gr.Dropdown(label="Model List", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)   
@@ -39,7 +55,11 @@ def civitai_manager_ui():
                     with gr.Row():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                     with gr.Row():
-                        sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)                        
+                        sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)
+                    with gr.Row():                        
+                        update_sc_btn = gr.Button(value="Update Thumnails",variant="primary")
+                    with gr.Row():                        
+                        scan_sc_btn = gr.Button(value="Scan & Update Shortcut",variant="primary")
         with gr.Column(scale=4):                                                          
             with gr.Tab("Model Info"):
                 with gr.Row():                                                                                                                                    
@@ -332,7 +352,28 @@ def civitai_manager_ui():
             sc_gallery,
         ]
     )    
+        
+    update_sc_btn.click(
+        fn=civitai_manager_action.on_shortcut_thumnail_update_click,
+        inputs=[
+            shortcut_type,
+        ],
+        outputs=[
+            sc_gallery,
+        ]
+    )
     
+    scan_sc_btn.click(
+        fn=on_scan_to_shortcut_click,
+        inputs=[
+            shortcut_type,
+        ],
+        outputs=[
+            sc_gallery,
+        ]                
+    )
+    
+
             
 # init
 setting.init_civitai_manager()

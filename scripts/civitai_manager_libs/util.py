@@ -26,8 +26,18 @@ def make_model_folder(content_type, model_name, lora_an=False):
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
                 
-    return model_folder    
+    return model_folder   
+ 
+def replace_filename(file_name):
+    if file_name and len(file_name.strip()) > 0:
+        return file_name.replace("*", "-").replace("?", "-").replace("\"", "-").replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")    
+    return None
 
+def replace_dirname(dir_name):
+    if dir_name and len(dir_name.strip()) > 0:
+        return dir_name.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")
+    return None
+    
 def write_InternetShortcut(path, url):
     with open(path, 'w', newline='\r\n') as f:        
         f.write(f"[InternetShortcut]\nURL={url}")
@@ -82,3 +92,33 @@ def get_model_id_from_url(url):
         return ""
     
     return id
+
+def search_file(root_dirs:list,base,ext)->list:
+    file_list = list()
+    #root_path = "D:\\AI\\stable-diffusion-webui"
+    root_path = os.getcwd()
+        
+    for root_dir in root_dirs:
+        #print(f"{os.path.join(root_path,root_dir)}\n")
+        for (root,dirs,files) in os.walk(os.path.join(root_path,root_dir)):
+            # if len(dirs) > 0:
+            #     for dir_name in dirs:
+            #         print("dir: " + dir_name)        
+            if len(files) > 0:
+                for file_name in files:               
+                    b, e = os.path.splitext(file_name) 
+                    if base and ext:
+                        if e == ext and b == base:
+                            file_list.append(os.path.join(root,file_name))                        
+                    elif base:
+                        if b == base:
+                            file_list.append(os.path.join(root,file_name))
+                    elif ext:
+                        if e == ext:
+                            file_list.append(os.path.join(root,file_name))
+                    else:       
+                        file_list.append(os.path.join(root,file_name))                        
+                    
+    if len(file_list) > 0:
+        return file_list
+    return None

@@ -138,9 +138,11 @@ def on_civitai_model_url_txt_change():
 
 
 
+def on_shortcut_thumnail_update_click(sc_types):
+    ishortcut.download_all_images()
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
 
-
-
+# 갤러리 방식으로 숏컬리스트 표시할때
 def on_get_sc_galery_select(evt : gr.SelectData):
     model_url = "" 
     if evt.value:
@@ -174,6 +176,7 @@ def on_civitai_internet_url_upload(file_obj, sc_types):
         return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
     return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
 
+# 드롭 다운 방식으로 숏컷리스트 표시할때
 # def on_shortcut_list_select(shortcut):
 #     model_url = ""    
 #     if shortcut and shortcut != setting.PLACEHOLDER:
@@ -207,6 +210,11 @@ def on_civitai_internet_url_upload(file_obj, sc_types):
 #     if not def_id:
 #         return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
 #     return model_url,gr.Dropdown.update(choices=[setting.PLACEHOLDER] + ishortcut.get_list(sc_types), value=setting.PLACEHOLDER),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
+
+
+
+
+
 
 def internet_shortcut_upload(url):
     if url:  
