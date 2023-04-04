@@ -76,7 +76,7 @@ def download_image_files(version_id, lora_an):
     primary_file = civitai.get_primary_file_by_version_info(version_info)
     if not primary_file:
         #없으면 임의로 만들어준다
-        base = (version_info['model']['name'] + "." + version_info['name']).replace("*", "-").replace("?", "-").replace("\"", "-").replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")
+        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
     base, ext = os.path.splitext(primary_file['name'])                    
     base = os.path.join(setting.root_path, model_folder, base)
     

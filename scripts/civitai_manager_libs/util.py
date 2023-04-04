@@ -17,11 +17,11 @@ def make_model_folder(content_type, model_name, lora_an=False):
     elif content_type in setting.folders_dict.keys():
         model_folder = setting.folders_dict[content_type]        
     elif content_type:
-        model_folder = os.path.join(setting.folders_dict['Unknown'], content_type.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-"))
+        model_folder = os.path.join(setting.folders_dict['Unknown'], replace_dirname(content_type))
     else:
         model_folder = os.path.join(setting.folders_dict['Unknown'])
          
-    model_folder = os.path.join(model_folder, model_name.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-"))    
+    model_folder = os.path.join(model_folder, replace_dirname(model_name))
                 
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
@@ -39,14 +39,18 @@ def replace_dirname(dir_name):
     return None
     
 def write_InternetShortcut(path, url):
-    with open(path, 'w', newline='\r\n') as f:        
-        f.write(f"[InternetShortcut]\nURL={url}")
-    return
-
+    try:
+        with open(path, 'w', newline='\r\n') as f:        
+            f.write(f"[InternetShortcut]\nURL={url}")        
+    except:
+        return False
+    
+    return True
+    
 def load_InternetShortcut(path)->str:
     urls = ""
-    with open(path, 'r') as f:
-        try:
+    try:    
+        with open(path, 'r') as f:
             InternetShortcut = f.readline()            
             if not InternetShortcut or not "[InternetShortcut]" in InternetShortcut:
                 return
@@ -54,9 +58,10 @@ def load_InternetShortcut(path)->str:
             if not InternetShortcut:
                 return            
             urls = InternetShortcut[4:]
-        except Exception as e:
-            printD(e)
-            return                
+    except Exception as e:
+        printD(e)
+        return                
+
     return urls.strip()
 
 # get image with full size
