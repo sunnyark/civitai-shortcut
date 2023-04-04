@@ -4,6 +4,7 @@ from . import civitai_action
 from . import setting
 from . import util
 from . import ishortcut
+from tqdm import tqdm
 
 def on_versions_list_select(evt: gr.SelectData, model_id:str):       
     
@@ -83,14 +84,21 @@ def on_shortcut_del_btn_click(model_id,sc_types):
 def on_shortcut_type_change(sc_types):       
     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
 
-def on_civitai_internet_url_upload(file_obj, sc_types):   
-    shortcut = util.load_InternetShortcut(file_obj.name)
-    model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
+def on_civitai_internet_url_upload(files, sc_types):   
+    
+    if files:
+        shortcut = None
+        for file in tqdm(files, desc=f"Civitai Shortcut"):                        
+            shortcut = util.load_InternetShortcut(file.name)            
+            model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist = internet_shortcut_upload(shortcut)
+        
     if not model_url:
         return "",gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
+    
     if not def_id:
         return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
     return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
+
 
 def internet_shortcut_upload(url):
     if url:  

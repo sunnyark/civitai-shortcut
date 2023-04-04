@@ -111,12 +111,12 @@ def get_image_list(shortcut_types=None)->str:
             if tmp_types:
                 if v['type'] in tmp_types:
                     if is_sc_image(v['id']):
-                        shotcutlist.append((os.path.join(setting.civitai_shortcut_image_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                        shotcutlist.append((os.path.join(setting.civitai_shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
                     else:
                         shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
             else:           
                 if is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.civitai_shortcut_image_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                    shotcutlist.append((os.path.join(setting.civitai_shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
                 else:
                     shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
                     
@@ -135,7 +135,7 @@ def is_sc_image(model_id):
     if not model_id:    
         return False
             
-    if os.path.isfile(os.path.join(setting.civitai_shortcut_image_folder,f"{model_id}.png")):
+    if os.path.isfile(os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png")):
         return True
     
     return False        
@@ -147,10 +147,10 @@ def download_image(model_id, url):
     if not url:    
         return False
     
-    if not os.path.exists(setting.civitai_shortcut_image_folder):
-        os.makedirs(setting.civitai_shortcut_image_folder)    
+    if not os.path.exists(setting.civitai_shortcut_thumnail_folder):
+        os.makedirs(setting.civitai_shortcut_thumnail_folder)    
         
-    # if os.path.isfile(os.path.join(setting.civitai_shortcut_image_folder,f"{model_id}.png")):
+    # if os.path.isfile(os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png")):
     #     return True
     
     try:
@@ -159,7 +159,7 @@ def download_image(model_id, url):
             if not img_r.ok:
                 return False
             
-            shotcut_img = os.path.join(setting.civitai_shortcut_image_folder,f"{model_id}.png")                                                                   
+            shotcut_img = os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png")                                                                   
             with open(shotcut_img, 'wb') as f:
                 img_r.raw.decode_content = True
                 shutil.copyfileobj(img_r.raw, f)                            
@@ -171,7 +171,7 @@ def download_image(model_id, url):
 def delete_image(model_id):
     if is_sc_image(model_id):
         try:
-            os.remove(os.path.join(setting.civitai_shortcut_image_folder,f"{model_id}.png"))
+            os.remove(os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png"))
         except:
             return        
 

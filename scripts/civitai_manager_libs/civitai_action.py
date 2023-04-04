@@ -6,6 +6,7 @@ from . import civitai
 from . import util
 from . import downloader
 from . import setting
+from tqdm import tqdm
     
 def download_file_thread(file_name, version_id, lora_an):               
     if not file_name:
@@ -81,8 +82,9 @@ def download_image_files(version_id, lora_an):
     base = os.path.join(setting.root_path, model_folder, base)
     
     if base and len(base.strip()) > 0:                                           
-        image_count = 0           
-        for img_dict in version_info["images"]:
+        #image_count = 0 
+        
+        for image_count, img_dict in enumerate(tqdm(version_info["images"], desc=f"Download image"), start=0):
             # if "nsfw" in img_dict:
             #     if img_dict["nsfw"]:
             #         printD("This image is NSFW")
@@ -115,10 +117,7 @@ def download_image_files(version_id, lora_an):
                 # set image_counter
                 image_count = image_count + 1
     
-        if image_count > 2:        
-            message = f"Downloaded {image_count} images"
-        else:
-            message = f"Downloaded image"                    
+        message = f"Downloaded images"
     return message       
 
 def get_model_title_name_by_version_id(version_id:str)->str:

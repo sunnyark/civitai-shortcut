@@ -23,6 +23,7 @@ def scan_owned_to_shortcut_thread():
     thread.start()                
     
     return f"Scan started"
+
         
 def civitai_manager_ui():                             
     with gr.Row(): 
@@ -30,13 +31,9 @@ def civitai_manager_ui():
             with gr.Tab("Shortcut and Search"):                           
                 with gr.Column():
                     with gr.Row():
-                        civitai_internet_url = gr.File(label="Civitai Internet Shortcut")
+                        civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
                     with gr.Row():                        
-                        scan_sc_btn = gr.Button(value="Scan & Update Shortcut",variant="primary")                        
-                    # with gr.Row():
-                    #     shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
-                    # with gr.Row():
-                    #     shortcut_list = gr.Dropdown(label="Civitai Shortcut List", choices=[setting.PLACEHOLDER] + ishortcut.get_list(), interactive=True, value=setting.PLACEHOLDER)                       
+                        scan_sc_btn = gr.Button(value="Scan & Update Shortcut",variant="primary")    
             with gr.Tab("Browsing Shortcut"):   
                     with gr.Row():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
@@ -225,7 +222,7 @@ def civitai_manager_ui():
             sc_gallery,
         ]                
     )
-    
+  
 
             
 # init

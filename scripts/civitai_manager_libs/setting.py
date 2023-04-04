@@ -7,16 +7,6 @@ root_path = os.getcwd()
 PLACEHOLDER = "<no select>"
 NORESULT = "<no result>"
 
-page_dict = {
-    "limit" : 50,
-}
-
-page_action_dict = {
-    "search" : "Search", 
-    "prevPage" : "Prev Page",
-    "nextPage" : "Next Page",    
-}
-
 content_types_list = ["Checkpoint","LORA","LoCon","TextualInversion","Hypernetwork","AestheticGradient","Controlnet","Poses","Wildcards","Other"]
 
 folders_dict = {
@@ -50,7 +40,7 @@ content_types_dict = {
 }
 
 civitai_shortcut = "CivitaiShortCut.json"
-civitai_shortcut_image_folder =  "sc_thum_images"
+civitai_shortcut_thumnail_folder =  "sc_thum_images"
 civitai_shortcut_save_folder =  "sc_saves"
 civitai_no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
 
@@ -59,7 +49,7 @@ def init_civitai_manager():
     global root_path
     global folders_dict
     global civitai_shortcut
-    global civitai_shortcut_image_folder
+    global civitai_shortcut_thumnail_folder
     global civitai_shortcut_save_folder
     
     root_path = os.getcwd()
@@ -78,7 +68,7 @@ def init_civitai_manager():
         folders_dict["LoCon"] = shared.cmd_opts.lora_dir
     
     civitai_shortcut = os.path.join(scripts.basedir(),"CivitaiShortCut.json")
-    civitai_shortcut_image_folder = os.path.join(scripts.basedir(),"sc_thum_images")
+    civitai_shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thum_images")
     civitai_shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
 
     
