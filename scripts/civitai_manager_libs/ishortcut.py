@@ -59,8 +59,6 @@ def OwnedModel_to_Shortcut():
         else:
             ISC = add_ISC            
         save(ISC)    
-
-            
             
         
 def get_list(shortcut_types=None)->str:

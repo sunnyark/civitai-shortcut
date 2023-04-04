@@ -8,7 +8,7 @@ from . import downloader
 from . import setting
 from tqdm import tqdm
     
-def download_file_thread(file_name, version_id, lora_an):               
+def download_file_thread(file_name, version_id, lora_an, vs_folder):               
     if not file_name:
         return
 
@@ -25,7 +25,8 @@ def download_file_thread(file_name, version_id, lora_an):
     if not download_files:
         return
 
-    model_folder = util.make_model_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
+    #model_folder = util.make_model_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
+    model_folder = util.make_folder(version_info, lora_an , vs_folder)
     
     if not model_folder:
         return
@@ -53,7 +54,7 @@ def download_file_thread(file_name, version_id, lora_an):
 
     return f"Download started"
 
-def download_image_files(version_id, lora_an):
+def download_image_files(version_id, lora_an, vs_folder):
     message =""
     base = None
     
@@ -68,7 +69,8 @@ def download_image_files(version_id, lora_an):
     if 'images' not in version_info.keys():
         return
         
-    model_folder = util.make_model_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
+    #model_folder = util.make_model_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
+    model_folder = util.make_folder(version_info, lora_an , vs_folder)
     
     if not model_folder:
         return
@@ -78,7 +80,7 @@ def download_image_files(version_id, lora_an):
     if not primary_file:
         #없으면 임의로 만들어준다
         base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
-    base, ext = os.path.splitext(primary_file['name'])                    
+    base, ext = os.path.splitext(primary_file['name'])
     base = os.path.join(setting.root_path, model_folder, base)
     
     if base and len(base.strip()) > 0:                                           

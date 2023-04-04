@@ -56,7 +56,9 @@ def civitai_manager_ui():
                         with gr.Row():
                             filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
                         with gr.Row():                            
-                            an_lora = gr.Checkbox(label="LoRA to additional-networks", value=False)                                 
+                            an_lora = gr.Checkbox(label="LoRA to additional-networks", value=False)          
+                        with gr.Row():                            
+                            vs_folder = gr.Checkbox(label="Create version specific folder", value=True)                                                                  
                         with gr.Row():
                             download_model = gr.Button(value="Download", variant="primary")                                                
                         with gr.Row():
@@ -116,6 +118,7 @@ def civitai_manager_ui():
         inputs=[
             selected_version_id,
             an_lora,
+            vs_folder,
         ],
         outputs=[message_log]
     )
@@ -124,7 +127,8 @@ def civitai_manager_ui():
         inputs=[
             selected_version_id,
             filename_list,            
-            an_lora,            
+            an_lora,
+            vs_folder,            
         ],
         outputs=[message_log]
     )     

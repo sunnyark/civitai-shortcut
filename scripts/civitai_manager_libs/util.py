@@ -5,7 +5,39 @@ from . import setting
 def printD(msg):    
     print(f"Civitai Manager: {msg}") 
     
-def make_model_folder(content_type, model_name, lora_an=False):
+# def make_model_folder(content_type, model_name, lora_an=False):
+    
+#     if not model_name:
+#         return
+    
+#     model_name = model_name.strip()
+
+#     if lora_an and content_type == "LORA":
+#         model_folder = setting.folders_dict['ANLORA']
+#     elif content_type in setting.folders_dict.keys():
+#         model_folder = setting.folders_dict[content_type]        
+#     elif content_type:
+#         model_folder = os.path.join(setting.folders_dict['Unknown'], replace_dirname(content_type))
+#     else:
+#         model_folder = os.path.join(setting.folders_dict['Unknown'])
+         
+#     model_folder = os.path.join(model_folder, replace_dirname(model_name))
+                
+#     if not os.path.exists(model_folder):
+#         os.makedirs(model_folder)
+                
+#     return model_folder   
+ 
+def make_folder(version_info, lora_an=False, vs_folder=True):
+    
+    if not version_info:
+        return
+                
+    if "model" not in version_info.keys():
+        return
+                       
+    content_type = version_info['model']['type']
+    model_name = version_info['model']['name']
     
     if not model_name:
         return
@@ -21,13 +53,27 @@ def make_model_folder(content_type, model_name, lora_an=False):
     else:
         model_folder = os.path.join(setting.folders_dict['Unknown'])
          
-    model_folder = os.path.join(model_folder, replace_dirname(model_name))
+    if vs_folder:  
+
+        vs_folder_name = None
+        primary_file = None
+        
+        if len(version_info['files']) > 0:
+            primary_file = version_info['files'][0]
+                        
+        if not primary_file:
+            vs_folder_name = replace_filename(version_info['model']['name'] + "." + version_info['name'])
+        vs_folder_name, ext = os.path.splitext(primary_file['name'])                 
+
+        model_folder = os.path.join(model_folder, replace_dirname(model_name), replace_dirname(vs_folder_name))
+    else:        
+        model_folder = os.path.join(model_folder, replace_dirname(model_name))
                 
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
                 
-    return model_folder   
- 
+    return model_folder  
+
 def replace_filename(file_name):
     if file_name and len(file_name.strip()) > 0:
         return file_name.replace("*", "-").replace("?", "-").replace("\"", "-").replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")    

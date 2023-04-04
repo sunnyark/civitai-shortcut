@@ -31,20 +31,20 @@ def on_selected_version_id_change(version_id:str,selected_model_id:str):
 def on_get_gallery_select(evt: gr.SelectData,version_images_url):  
      return evt.index, version_images_url[evt.index]
 
-def on_download_images_click(version_id:str, lora_an=False):
+def on_download_images_click(version_id:str, lora_an=False,vs_folder=True):
     msg = None
     if not version_id:
         return msg
 
-    msg = civitai_action.download_image_files(version_id, lora_an)        
+    msg = civitai_action.download_image_files(version_id, lora_an, vs_folder)
     return msg
 
-def on_download_model_click(version_id:str, file_name=None, lora_an=False):
+def on_download_model_click(version_id:str, file_name=None, lora_an=False,vs_folder=True):
     msg = None
     if not version_id:
         return
     
-    msg = civitai_action.download_file_thread(file_name, version_id, lora_an)
+    msg = civitai_action.download_file_thread(file_name, version_id, lora_an, vs_folder)
     return msg
 
 def on_selected_gallery_change(version_id):
