@@ -128,6 +128,33 @@ def download_all_images():
     for k, v in ISC.items():
         if v:
             download_image(v['id'], v['imageurl'])
+            
+def update_thumnail_images():
+    preISC = load()                           
+    if not preISC:
+        return
+    
+    for k, v in tqdm(preISC.items(),desc="Update Shortcut Thumnails"):
+        if v:
+            version_info = civitai.get_latest_version_info_by_model_id(v['id'])
+            if not version_info:
+                continue
+            
+            if 'images' not in version_info.keys():
+                continue
+            
+            if len(version_info['images']) > 0:                    
+                v['imageurl'] = version_info['images'][0]['url']
+                download_image(v['id'], v['imageurl'])
+                
+    # 중간에 변동이 있을수 있으므로 병합한다.                
+    ISC = load()
+    if ISC:
+        ISC.update(preISC)
+    else:
+        ISC = preISC            
+    save(ISC) 
+                        
 
 def is_sc_image(model_id):
     if not model_id:    

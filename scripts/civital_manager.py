@@ -11,20 +11,12 @@ from scripts.civitai_manager_libs import util
 
 def on_scan_to_shortcut_click(sc_types):
     ishortcut.OwnedModel_to_Shortcut()
-    util.printD("Scan & Update Shortcut ended")
+    util.printD("Scan Models to Shortcut ended")
     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
 
-import threading
-
-def scan_owned_to_shortcut_thread():               
-    
-    thread = threading.Thread(target=ishortcut.OwnedModel_to_Shortcut(),args=None)                        
-    # Start the thread
-    thread.start()                
-    
-    return f"Scan started"
-
-        
+def on_refresh_sc_btn_click(sc_types):
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
+           
 def civitai_manager_ui():                             
     with gr.Row(): 
         with gr.Column(scale=1):            
@@ -33,12 +25,14 @@ def civitai_manager_ui():
                     with gr.Row():
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
                     with gr.Row():                        
-                        scan_sc_btn = gr.Button(value="Scan & Update Shortcut",variant="primary")    
+                        scan_sc_btn = gr.Button(value="Scan Models to Shortcut",variant="primary")    
             with gr.Tab("Browsing Shortcut"):   
                     with gr.Row():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                     with gr.Row():
                         sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)
+                    with gr.Row():                        
+                        refresh_sc_btn = gr.Button(value="Refressh Shortcut",variant="primary")                        
                     with gr.Row():                        
                         update_sc_btn = gr.Button(value="Update Thumnails",variant="primary")
         with gr.Column(scale=4):                                                          
@@ -226,6 +220,8 @@ def civitai_manager_ui():
             sc_gallery,
         ]                
     )
+    
+    refresh_sc_btn.click(on_refresh_sc_btn_click,shortcut_type,sc_gallery)
   
 
             

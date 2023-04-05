@@ -53,10 +53,8 @@ def on_selected_gallery_change(version_id):
 def on_civitai_model_url_txt_change():
     return None 
 
-
-
 def on_shortcut_thumnail_update_click(sc_types):
-    ishortcut.download_all_images()
+    ishortcut.update_thumnail_images()
     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
 
 # 갤러리 방식으로 숏컬리스트 표시할때
