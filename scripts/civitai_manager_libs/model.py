@@ -7,6 +7,18 @@ from . import setting
 
 Owned_Models = dict()
 
+def Test_Models():
+    if Owned_Models:
+        for mid, vlist in Owned_Models.items():
+            util.printD(f"{mid} :\n")
+            # for path in vlist:
+            #     print(f"{path}\n")
+            
+def Load_Owned_ModelInfo():
+    global Owned_Models
+    Owned_Models = get_Owned_Model_Info()
+    
+
 # 단순히 소유한 모델의 modelid만을 리스트로 반환한다
 def get_Owned_ModelId():
     root_dirs = list(set(setting.folders_dict.values()))

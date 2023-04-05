@@ -70,7 +70,7 @@ def download_file(url, file_name):
         progress.close()
         downloaded_size = os.path.getsize(file_name)
         # Check if the download was successful
-        if downloaded_size >= total_size:
+        if downloaded_size >= total_size:            
             print(f"{file_name_display} successfully downloaded.")
             break
         else:

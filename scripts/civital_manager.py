@@ -10,17 +10,9 @@ from scripts.civitai_manager_libs import ishortcut
 from scripts.civitai_manager_libs import civitai
 from scripts.civitai_manager_libs import civitai_action
 from scripts.civitai_manager_libs import util
-
-def on_scan_to_shortcut_click(sc_types):
-    ishortcut.OwnedModel_to_Shortcut()
-    util.printD("Scan Models to Shortcut ended")
-    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
-
-def on_refresh_sc_btn_click(sc_types):
-    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
-           
-def civitai_manager_ui():             
-    setting.test = "hahahahahaha"
+from scripts.civitai_manager_libs import model
+          
+def civitai_manager_ui():                 
     with gr.Row(): 
         with gr.Column(scale=1):            
             with gr.Tab("Shortcut and Search"):                           
@@ -215,7 +207,7 @@ def civitai_manager_ui():
     )
     
     scan_sc_btn.click(
-        fn=on_scan_to_shortcut_click,
+        fn=civitai_manager_action.on_scan_to_shortcut_click,
         inputs=[
             shortcut_type,
         ],
@@ -224,7 +216,7 @@ def civitai_manager_ui():
         ]                
     )
     
-    refresh_sc_btn.click(on_refresh_sc_btn_click,shortcut_type,sc_gallery)
+    refresh_sc_btn.click(civitai_manager_action.on_refresh_sc_btn_click,shortcut_type,sc_gallery)
 
 def init_civitai_manager():
    
@@ -246,6 +238,9 @@ def init_civitai_manager():
     setting.civitai_shortcut = os.path.join(scripts.basedir(),"CivitaiShortCut.json")
     setting.civitai_shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thum_images")
     setting.civitai_shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
+    
+    # 소유한 모델 데이터를 저장한다.
+    model.Load_Owned_ModelInfo()
                
 # init
 init_civitai_manager()

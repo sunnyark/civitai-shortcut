@@ -6,6 +6,7 @@ from . import civitai
 from . import util
 from . import downloader
 from . import setting
+from . import model
 from tqdm import tqdm
     
 def download_file_thread(file_name, version_id, lora_an, vs_folder):               
@@ -43,7 +44,10 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
             info_file = civitai.write_version_info_by_version_info(model_folder,version_info)
             if info_file:
                 util.printD(f"Wrote version info : {info_file}")
-
+            
+            # 모델 인포가 생성되면 모델 정보를 갱신한다.
+            model.Load_Owned_ModelInfo()
+            
         except:
             pass
 

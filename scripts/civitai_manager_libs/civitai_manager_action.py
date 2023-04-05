@@ -4,6 +4,7 @@ from . import civitai_action
 from . import setting
 from . import util
 from . import ishortcut
+from . import model
 from tqdm import tqdm
 
 def on_versions_list_select(evt: gr.SelectData, model_id:str):       
@@ -97,7 +98,6 @@ def on_civitai_internet_url_upload(files, sc_types):
         return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.Textbox.update(value=""),gr.Textbox.update(value="")
     return model_url,gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Dropdown.update(choices=vlist, value=def_name),gr.Textbox.update(value=def_id),gr.Textbox.update(value=model_id)
 
-
 def internet_shortcut_upload(url):
     if url:  
         #util.printD(url)
@@ -108,3 +108,12 @@ def internet_shortcut_upload(url):
             ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
             ishortcut.save(ISC)
     return model_id, model_name, model_type, model_url, def_id, def_name, def_image, vlist
+
+def on_scan_to_shortcut_click(sc_types):
+    ishortcut.OwnedModel_to_Shortcut()
+    util.printD("Scan Models to Shortcut ended")
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
+
+def on_refresh_sc_btn_click(sc_types):
+    #model.Test_Models()
+    return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
