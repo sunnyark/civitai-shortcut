@@ -169,7 +169,6 @@ def search_file(root_dirs:list,base,ext)->list:
                         file_list.append(os.path.join(root,file_name))                        
                     
     if len(file_list) > 0:
-        # 중복을 제거한다다
         file_list = list(set(file_list))
         return file_list
     return None

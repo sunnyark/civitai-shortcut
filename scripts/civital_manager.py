@@ -1,6 +1,8 @@
+import os
 import gradio as gr
 import modules.extras
-from modules.shared import opts
+import modules.scripts as scripts
+from modules import shared
 from modules import script_callbacks
 from scripts.civitai_manager_libs import setting
 from scripts.civitai_manager_libs import civitai_manager_action
@@ -17,7 +19,8 @@ def on_scan_to_shortcut_click(sc_types):
 def on_refresh_sc_btn_click(sc_types):
     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types))
            
-def civitai_manager_ui():                             
+def civitai_manager_ui():             
+    setting.test = "hahahahahaha"
     with gr.Row(): 
         with gr.Column(scale=1):            
             with gr.Tab("Shortcut and Search"):                           
@@ -222,12 +225,31 @@ def civitai_manager_ui():
     )
     
     refresh_sc_btn.click(on_refresh_sc_btn_click,shortcut_type,sc_gallery)
-  
 
-            
-# init
-setting.init_civitai_manager()
+def init_civitai_manager():
+   
+    setting.root_path = os.getcwd()
     
+    if shared.cmd_opts.embeddings_dir:
+        setting.folders_dict["TextualInversion"] = shared.cmd_opts.embeddings_dir
+
+    if shared.cmd_opts.hypernetwork_dir :
+        setting.folders_dict["Hypernetwork"] = shared.cmd_opts.hypernetwork_dir
+
+    if shared.cmd_opts.ckpt_dir:
+        setting.folders_dict["Checkpoint"] = shared.cmd_opts.ckpt_dir
+
+    if shared.cmd_opts.lora_dir:
+        setting.folders_dict["LORA"] = shared.cmd_opts.lora_dir
+        setting.folders_dict["LoCon"] = shared.cmd_opts.lora_dir
+    
+    setting.civitai_shortcut = os.path.join(scripts.basedir(),"CivitaiShortCut.json")
+    setting.civitai_shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thum_images")
+    setting.civitai_shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
+               
+# init
+init_civitai_manager()
+        
 def on_ui_tabs():
     with gr.Blocks() as civitai_manager:
     	civitai_manager_ui()
