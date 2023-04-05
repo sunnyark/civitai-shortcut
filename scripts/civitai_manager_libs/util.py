@@ -89,24 +89,23 @@ def write_InternetShortcut(path, url):
         with open(path, 'w', newline='\r\n') as f:        
             f.write(f"[InternetShortcut]\nURL={url}")        
     except:
-        return False
-    
+        return False    
     return True
     
 def load_InternetShortcut(path)->str:
     urls = ""
     try:    
         with open(path, 'r') as f:
-            InternetShortcut = f.readline()            
+            InternetShortcut = f.readline()
             if not InternetShortcut or not "[InternetShortcut]" in InternetShortcut:
                 return
             InternetShortcut = f.readline()
             if not InternetShortcut:
-                return            
+                return
             urls = InternetShortcut[4:]
     except Exception as e:
         printD(e)
-        return                
+        return
 
     return urls.strip()
 
@@ -146,7 +145,6 @@ def get_model_id_from_url(url):
 
 def search_file(root_dirs:list,base,ext)->list:
     file_list = list()
-    #root_path = "D:\\AI\\stable-diffusion-webui"
     root_path = os.getcwd()
         
     for root_dir in root_dirs:
@@ -171,5 +169,7 @@ def search_file(root_dirs:list,base,ext)->list:
                         file_list.append(os.path.join(root,file_name))                        
                     
     if len(file_list) > 0:
+        # 중복을 제거한다다
+        file_list = list(set(file_list))
         return file_list
     return None

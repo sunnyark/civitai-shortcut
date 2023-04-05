@@ -11,8 +11,7 @@ from tqdm import tqdm
 
 def OwnedModel_to_Shortcut():
     root_dirs = list(set(setting.folders_dict.values()))
-    file_list = util.search_file(root_dirs,None,".info")
-    
+    file_list = list(set(util.search_file(root_dirs,None,".info")))
         
     add_ISC = dict()
             

@@ -26,7 +26,7 @@ def civitai_manager_ui():
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
                     with gr.Row():                        
                         scan_sc_btn = gr.Button(value="Scan Models to Shortcut",variant="primary")    
-            with gr.Tab("Browsing Shortcut"):   
+            with gr.Tab("Browsing Shortcut"):        
                     with gr.Row():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                     with gr.Row():
