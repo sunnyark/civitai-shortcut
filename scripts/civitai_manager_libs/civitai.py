@@ -202,27 +202,19 @@ def get_triger_by_version_id(version_id=None)->str:
     return get_triger_by_version_info(version_info)
                 
 # 버전 모델 인포 데이터를 파일에서 읽어옴
-def load_version_info(path)->dict:
+def read_version_info(path)->dict:
     version_info = None
-    with open(path, 'r') as f:
-        try:
-            version_info = json.load(f)
-        except Exception as e:
-            util.printD("Selected file is not json: " + path)
-            pass
-        
-    return version_info      
+    if not path:
+        return None    
+    try:
+        with open(path, 'r') as f:
+            version_info = json.load(f)            
+    except:
+        return None
+                
+    return version_info
 
- # 버전 모델 인포 데이터를 파일로 저장
-def write_version_info_by_version_id(folder, version_id:str)->str:
-    if not version_id: 
-        return
-    
-    version_info = get_version_info_by_version_id(version_id)
-    
-    return write_version_info_by_version_info(folder, version_info)
-
-def write_version_info_by_version_info(folder, version_info:dict)->str:   
+def write_version_info(folder, version_info:dict)->str:   
     if not version_info:
         return
 

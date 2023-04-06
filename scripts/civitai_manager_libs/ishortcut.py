@@ -3,7 +3,7 @@ import json
 from . import util
 from . import setting
 from . import civitai
-
+from . import model
 import shutil
 import requests
 
@@ -118,6 +118,18 @@ def get_image_list(shortcut_types=None)->str:
                     shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
                     
     return [v for v in shotcutlist]
+
+def get_owned_image_list(shortcut_types=None):
+    owned_list = list()
+    if model.Owned_Models:        
+        shortlist =  get_image_list(shortcut_types)
+        for short in shortlist:
+            sc_name = short[1]
+            mid = str(sc_name[0:sc_name.find(':')])
+            if mid in model.Owned_Models.keys():
+                owned_list.append(short)
+    return owned_list
+    
 
 def download_all_images():
     ISC = load()                           

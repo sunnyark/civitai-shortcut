@@ -36,17 +36,17 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
         try:
             #모델 파일 저장
             path_dl_file = os.path.join(model_folder, file)            
-            thread = threading.Thread(target=downloader.download_file,args=(download_files[file]['downloadUrl'], path_dl_file))                        
+            thread = threading.Thread(target=downloader.download_file,args=(download_files[file]['downloadUrl'], path_dl_file))
             # Start the thread
             thread.start()                
 
             # 버전 인포 파일 저장. primary 이름으로 저장한다.
-            info_file = civitai.write_version_info_by_version_info(model_folder,version_info)
+            info_file = civitai.write_version_info(model_folder,version_info)
             if info_file:
                 util.printD(f"Wrote version info : {info_file}")
             
             # 모델 인포가 생성되면 모델 정보를 갱신한다.
-            model.Load_Owned_ModelInfo()
+            model.Load_Owned_Models()
             
         except:
             pass

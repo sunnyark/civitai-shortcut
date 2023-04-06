@@ -11,11 +11,11 @@ from scripts.civitai_manager_libs import civitai
 from scripts.civitai_manager_libs import civitai_action
 from scripts.civitai_manager_libs import util
 from scripts.civitai_manager_libs import model
-          
+    
 def civitai_manager_ui():                 
     with gr.Row(): 
         with gr.Column(scale=1):            
-            with gr.Tab("Shortcut and Search"):                           
+            with gr.Tab("Shortcut"):                           
                 with gr.Column():
                     with gr.Row():
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
@@ -26,14 +26,23 @@ def civitai_manager_ui():
                         shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                     with gr.Row():
                         sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_image_list()).style(grid=1)
-                    with gr.Row():                        
+                    with gr.Row():
                         refresh_sc_btn = gr.Button(value="Refressh Shortcut",variant="primary")                        
-                    with gr.Row():                        
+                    with gr.Row():
                         update_sc_btn = gr.Button(value="Update Thumnails",variant="primary")
-        with gr.Column(scale=4):                                                          
+            with gr.Tab("Browsing Owned Items"):
+                    with gr.Row():
+                        shortcut_owned_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
+                    with gr.Row():
+                        sc_owned_gallery = gr.Gallery(show_label=False, value=ishortcut.get_owned_image_list()).style(grid=1)
+        with gr.Column(scale=4):
             with gr.Tab("Model Info"):
-                with gr.Row():                                                                                                                                    
-                    with gr.Column(scale=1):   
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        with gr.Row(visible=False) as owned_tab: 
+                            with gr.Tab("Owned Version"):
+                                with gr.Row():                            
+                                    owned_info = gr.Textbox(interactive=False,show_label=False)                        
                         with gr.Row():
                             versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
                         with gr.Row():
@@ -44,9 +53,9 @@ def civitai_manager_ui():
                             civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)                                                   
                         with gr.Row():
                             filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
-                        with gr.Row():                            
+                        with gr.Row():
                             an_lora = gr.Checkbox(label="LoRA to additional-networks", value=False)          
-                        with gr.Row():                            
+                        with gr.Row():
                             vs_folder = gr.Checkbox(label="Create version specific folder", value=True)                                                                  
                         with gr.Row():
                             download_model = gr.Button(value="Download", variant="primary")                                                
@@ -65,7 +74,6 @@ def civitai_manager_ui():
                         with gr.Row():    
                             version_description_html = gr.HTML()                                                                                                   
                     with gr.Column(scale=1):
-
                         with gr.Row():                            
                             img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
                         with gr.Row():
@@ -89,6 +97,8 @@ def civitai_manager_ui():
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
+
+
                           
     # 버전을 하나 선택
     versions_list.select(
@@ -102,15 +112,6 @@ def civitai_manager_ui():
     )
        
     # 다운로드
-    download_images.click(
-        fn=civitai_manager_action.on_download_images_click,
-        inputs=[
-            selected_version_id,
-            an_lora,
-            vs_folder,
-        ],
-        outputs=[message_log]
-    )
     download_model.click(
         fn=civitai_manager_action.on_download_model_click,
         inputs=[
@@ -120,8 +121,24 @@ def civitai_manager_ui():
             vs_folder,            
         ],
         outputs=[message_log]
-    )     
-
+    )  
+        
+    download_images.click(
+        fn=civitai_manager_action.on_download_images_click,
+        inputs=[
+            selected_version_id,
+            an_lora,
+            vs_folder,
+        ],
+        outputs=[message_log]
+    )
+    
+    selected_model_id.change(
+        fn=civitai_manager_action.on_selected_model_id_change,   
+        inputs=selected_model_id,
+        outputs=[owned_tab, owned_info] 
+    )
+    
     selected_version_id.change(
         fn=civitai_manager_action.on_selected_version_id_change,
         inputs=[
@@ -150,6 +167,63 @@ def civitai_manager_ui():
     
     civitai_model_url_txt.change(civitai_manager_action.on_civitai_model_url_txt_change,None,[civitai_internet_url])
     
+    # shortcut delete
+    shortcut_del_btn.click(
+        fn=civitai_manager_action.on_shortcut_del_btn_click,
+        inputs=[
+            selected_model_id,
+            shortcut_type,
+            shortcut_owned_type
+        ],
+        outputs=[
+            sc_gallery,
+            sc_owned_gallery,
+        ]                
+    )
+
+    # shortcut tab
+    civitai_internet_url.upload(
+        fn=civitai_manager_action.on_civitai_internet_url_upload,
+        inputs=[
+            civitai_internet_url,
+            shortcut_type,
+            shortcut_owned_type
+            
+        ],
+        outputs=[
+            civitai_model_url_txt,
+            sc_gallery,
+            sc_owned_gallery,
+            versions_list,
+            selected_version_id, 
+            selected_model_id,            
+        ]
+    )  
+        
+    scan_sc_btn.click(
+        fn=civitai_manager_action.on_scan_to_shortcut_click,
+        inputs=[
+            shortcut_type,
+            shortcut_owned_type
+        ],
+        outputs=[
+            sc_gallery,
+            sc_owned_gallery
+        ]                
+    )
+    # shortcut tab
+    
+    # total gallery tab
+    shortcut_type.change(
+        fn=civitai_manager_action.on_shortcut_type_change,
+        inputs=[
+            shortcut_type,
+        ],
+        outputs=[
+            sc_gallery,
+        ]
+    )  
+
     sc_gallery.select(
         fn=civitai_manager_action.on_get_sc_galery_select,
         inputs=None,
@@ -160,64 +234,48 @@ def civitai_manager_ui():
             selected_model_id,            
         ]
     )
-    civitai_internet_url.upload(
-        fn=civitai_manager_action.on_civitai_internet_url_upload,
-        inputs=[
-            civitai_internet_url,
-            shortcut_type            
-        ],
-        outputs=[
-            civitai_model_url_txt,
-            sc_gallery,
-            versions_list,
-            selected_version_id, 
-            selected_model_id,            
-        ]
-    )                                  
-    
-    shortcut_del_btn.click(
-        fn=civitai_manager_action.on_shortcut_del_btn_click,
-        inputs=[
-            selected_model_id,
-            shortcut_type,
-        ],
-        outputs=[
-            sc_gallery,
-        ]                
-    )
 
-    shortcut_type.change(
-        fn=civitai_manager_action.on_shortcut_type_change,
-        inputs=[
-            shortcut_type,
-        ],
-        outputs=[
-            sc_gallery,
-        ]
-    )    
-        
     update_sc_btn.click(
         fn=civitai_manager_action.on_shortcut_thumnail_update_click,
         inputs=[
             shortcut_type,
+            shortcut_owned_type,
         ],
         outputs=[
             sc_gallery,
+            sc_owned_gallery
         ]
     )
-    
-    scan_sc_btn.click(
-        fn=civitai_manager_action.on_scan_to_shortcut_click,
+            
+    refresh_sc_btn.click(civitai_manager_action.on_refresh_sc_btn_click,[shortcut_type,shortcut_owned_type],[sc_gallery,sc_owned_gallery])
+    # total gallery tab
+
+    # owned gallery tab
+    # 여러군데에 갱신하는 부분을 넣어줘야 한다.
+    # sc_gallery 가 참조되는 부분을 보자
+    shortcut_owned_type.change(
+        fn=civitai_manager_action.on_shortcut_owned_type_change,
         inputs=[
-            shortcut_type,
+            shortcut_owned_type,
         ],
         outputs=[
-            sc_gallery,
-        ]                
-    )
+            sc_owned_gallery,
+        ]
+    )   
     
-    refresh_sc_btn.click(civitai_manager_action.on_refresh_sc_btn_click,shortcut_type,sc_gallery)
-
+    sc_owned_gallery.select(
+        #같이씀
+        fn=civitai_manager_action.on_get_sc_galery_select,
+        inputs=None,
+        outputs=[
+            civitai_model_url_txt,
+            versions_list,
+            selected_version_id, 
+            selected_model_id,            
+        ]
+    )
+    # owned gallery tab
+    
 def init_civitai_manager():
    
     setting.root_path = os.getcwd()
@@ -239,8 +297,8 @@ def init_civitai_manager():
     setting.civitai_shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thum_images")
     setting.civitai_shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
     
-    # 소유한 모델 데이터를 저장한다.
-    model.Load_Owned_ModelInfo()
+    # 소유한 모델을 스캔하여 저장한다.
+    model.Load_Owned_Models()
                
 # init
 init_civitai_manager()
