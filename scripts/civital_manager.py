@@ -77,7 +77,7 @@ def civitai_manager_ui():
                                 version_gallery = gr.Gallery(show_label=False).style(grid=4)
                                 #version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
                             with gr.Row():    
-                                version_description_html = gr.HTML()                                                                                                   
+                                description_html = gr.HTML()                                                                                                   
                         with gr.Column(scale=1):
                             with gr.Row():                            
                                 img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
@@ -106,7 +106,7 @@ def civitai_manager_ui():
                                 owned_version_gallery = gr.Gallery(show_label=False).style(grid=4)
                                 #owned_version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
                             with gr.Row():    
-                                owned_version_description_html = gr.HTML()                                                                                                   
+                                owned_description_html = gr.HTML()                                                                                                   
                         with gr.Column(scale=1):
                             with gr.Row():                            
                                 owned_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
@@ -121,7 +121,6 @@ def civitai_manager_ui():
         #civitai model select model
         selected_version_id = gr.Textbox()
         selected_model_id = gr.Textbox()
-        selected_gallery = gr.Textbox()
         
         #civitai model information                
         img_index = gr.Number(show_label=False)
@@ -133,7 +132,6 @@ def civitai_manager_ui():
         #download model select model
         owned_selected_version_id = gr.Textbox()
         owned_selected_model_id = gr.Textbox()
-        owned_selected_gallery = gr.Textbox()
         
         #download model information                
         owned_img_index = gr.Number(show_label=False)
@@ -186,7 +184,6 @@ def civitai_manager_ui():
         fn=civitai_manager_action.on_selected_model_id_change,   
         inputs=[
             selected_model_id,
-            selected_version_id
         ],
         outputs=[
             civitai_model_url_txt, 
@@ -195,7 +192,6 @@ def civitai_manager_ui():
             an_lora, 
             model_type, 
             versions_list,
-            selected_gallery
         ] 
     )
   
@@ -206,7 +202,7 @@ def civitai_manager_ui():
         ],
         outputs=[
             selected_model_id,
-            version_description_html,
+            description_html,
             trigger_words,
             filename_list,
             model_title_name,                        
@@ -215,10 +211,10 @@ def civitai_manager_ui():
         ]
     )
         
-    selected_gallery.change(
-        fn=civitai_manager_action.on_selected_gallery_change,
+    description_html.change(
+        fn=civitai_manager_action.on_description_html_change,
         inputs=[
-            selected_gallery
+            selected_version_id
         ],
         outputs=[
             version_gallery, 
@@ -254,7 +250,6 @@ def civitai_manager_ui():
             owned_civitai_model_url_txt,
             owned_model_type, 
             owned_versions_list,
-            owned_selected_gallery
         ] 
     )
     
@@ -265,7 +260,7 @@ def civitai_manager_ui():
         ],
         outputs=[
             owned_selected_model_id,
-            owned_version_description_html,
+            owned_description_html,
             owned_trigger_words,
             owned_filename_list,
             owned_model_title_name,                                    
@@ -274,10 +269,10 @@ def civitai_manager_ui():
         ]
     )
     
-    owned_selected_gallery.change(
-        fn=civitai_manager_action.on_owned_selected_gallery_change,
+    owned_description_html.change(
+        fn=civitai_manager_action.on_owned_description_html_change,
         inputs=[
-            owned_selected_gallery
+            owned_selected_version_id
         ],
         outputs=[
             owned_version_gallery, 
@@ -317,9 +312,9 @@ def civitai_manager_ui():
         ],
         outputs=[
             sc_gallery,
-            sc_owned_gallery,
-            owned_selected_version_id,
+            sc_owned_gallery,            
             selected_version_id, 
+            owned_selected_version_id,
         ]
     )  
         
@@ -350,9 +345,9 @@ def civitai_manager_ui():
     sc_gallery.select(
         fn=civitai_manager_action.on_sc_gallery_select,
         inputs=None,
-        outputs=[
-            owned_selected_version_id, 
+        outputs=[            
             selected_version_id, 
+            owned_selected_version_id, 
         ]
     )
 
@@ -388,9 +383,9 @@ def civitai_manager_ui():
         #같이씀
         fn=civitai_manager_action.on_sc_gallery_select,
         inputs=None,
-        outputs=[
-            owned_selected_version_id, 
+        outputs=[            
             selected_version_id, 
+            owned_selected_version_id, 
         ]
     )
     # owned gallery tab

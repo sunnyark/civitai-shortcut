@@ -1,8 +1,8 @@
 import os
 from . import model
 from . import civitai
-
-def get_selected_owned_modelinfo(modelid):
+    
+def get_selected_owned_modelinfo(modelid, def_id:str):
     model_type= None
     owned_info = ""
     def_name = ""
@@ -19,20 +19,21 @@ def get_selected_owned_modelinfo(modelid):
                 for file,path in file_list.items():
                     vinfo = model.read_owned_versioninfo(path)
                     if vinfo:
-                        def_info = vinfo
+                        if def_id == str(vinfo['id']):
+                            def_info = vinfo
                         try:  
                             if owned_info != "":
                                 owned_info = owned_info + "\n"
-                            owned_info = owned_info + f"{def_info['name']}"
-                            versions_list.append(def_info['name'])  
+                            owned_info = owned_info + f"{vinfo['name']}"
+                            versions_list.append(vinfo['name'])  
                         except:
                             pass
 
             if def_info:
                 def_name = def_info['name']
                 if "model" in def_info.keys():
-                    model_type = def_info['model']['type']
-                
+                    model_type = def_info['model']['type']                
+                                    
     return owned_info, model_type, def_name, [v for v in versions_list]
 
 def get_model_title_name(version_info:dict)->str:

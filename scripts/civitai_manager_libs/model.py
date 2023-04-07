@@ -17,8 +17,10 @@ def Test_Models():
             #     print(f"{path}\n")
             
 def Load_Owned_Models():
-    global Owned_Models,Owned_Versions
-    Owned_Models,Owned_Versions = get_owned_modelpath()
+    global Owned_Models
+    global Owned_Versions
+    
+    Owned_Models, Owned_Versions = get_owned_modelpath()
     
 # 단순히 소유한 모델의 modelid만을 리스트로 반환한다
 def get_owned_modelid():
@@ -76,13 +78,14 @@ def get_owned_modelinfo()->dict:
                 with open(file_path, 'r') as f:
                     json_data = json.load(f)
                     if "modelId" in json_data.keys():
-                        mid = str(json_data['modelId'])
-                        vid = str(json_data['id'])
+                        mid = str(json_data['modelId']).strip()
+                        vid = str(json_data['id']).strip()
                         
                         if mid not in models.keys():
                             models[mid] = list()
+                            
                         models[mid].append(json_data)
-                        versions[str(vid)] = file_path
+                        versions[vid] = file_path                        
             except:
                 pass
             
@@ -105,14 +108,13 @@ def get_owned_modelpath()->dict:
                 with open(file_path, 'r') as f:
                     json_data = json.load(f)
                     if "modelId" in json_data.keys():
-                        mid = str(json_data['modelId'])
-                        vid = str(json_data['id'])
+                        mid = str(json_data['modelId']).strip()
+                        vid = str(json_data['id']).strip()
                         
                         if mid not in models.keys():
                             models[mid] = list()
                         models[mid].append(file_path)
-                        versions[str(vid)] = file_path
-                        
+                        versions[vid] = file_path                        
             except:
                 pass
             
@@ -142,6 +144,24 @@ def get_version_id_by_version_name(modelid, versionname):
                 pass        
     return None
 
+def get_default_version_info(modelid):
+    if not modelid:
+        return 
+
+    if not Owned_Models:
+        return
+        
+    if str(modelid) in Owned_Models.keys():
+        file_list = dict()
+        for version_paths in Owned_Models[str(modelid)]:
+            file_list[os.path.basename(version_paths)] = version_paths
+                
+        for file,path in file_list.items():
+            return read_owned_versioninfo(path)
+        
+    return None        
+    
+
 def get_version_info(versionid:str)->dict:
     if not versionid:
         return None
@@ -149,8 +169,15 @@ def get_version_info(versionid:str)->dict:
     if not Owned_Versions:
         return None
     
+    if versionid in Owned_Versions.keys():
+        util.printD(Owned_Versions[versionid])
+
+    for vid,path in Owned_Versions.items():
+        util.printD(f"{str(vid)} : {path}")
+
+    util.printD(f"end {versionid}")                
     try:
-        return read_owned_versioninfo(Owned_Versions[str(versionid)])
+        return read_owned_versioninfo(Owned_Versions[versionid])
     except:
         pass
     
