@@ -121,7 +121,7 @@ def get_owned_modelpath()->dict:
     
     return None,None
 
-def get_version_id_by_version_name(modelid, name):
+def get_version_id_by_version_name(modelid, versionname):
     if not modelid:
         return 
 
@@ -136,7 +136,7 @@ def get_version_id_by_version_name(modelid, name):
         for file,path in file_list.items():
             vinfo = read_owned_versioninfo(path)
             try:  
-                if vinfo['name'] == name:
+                if vinfo['name'] == versionname:
                     return vinfo['id']
             except:
                 pass        
