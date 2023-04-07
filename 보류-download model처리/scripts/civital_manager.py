@@ -201,6 +201,7 @@ def civitai_manager_ui():
             selected_version_id,
         ],
         outputs=[
+            selected_model_id,
             version_description_html,
             trigger_words,
             filename_list,
@@ -254,9 +255,9 @@ def civitai_manager_ui():
         fn=civitai_manager_action.on_selected_owned_version_id_change,
         inputs=[
             owned_selected_version_id,
-            owned_selected_model_id
         ],
         outputs=[
+            owned_selected_model_id,
             owned_version_description_html,
             owned_trigger_words,
             owned_filename_list,
@@ -313,9 +314,7 @@ def civitai_manager_ui():
             sc_gallery,
             sc_owned_gallery,
             owned_selected_version_id,
-            owned_selected_model_id,            
             selected_version_id, 
-            selected_model_id,            
         ]
     )  
         
@@ -348,9 +347,7 @@ def civitai_manager_ui():
         inputs=None,
         outputs=[
             owned_selected_version_id, 
-            owned_selected_model_id,               
             selected_version_id, 
-            selected_model_id,                                            
         ]
     )
 
@@ -388,9 +385,7 @@ def civitai_manager_ui():
         inputs=None,
         outputs=[
             owned_selected_version_id, 
-            owned_selected_model_id,            
             selected_version_id, 
-            selected_model_id,                          
         ]
     )
     # owned gallery tab

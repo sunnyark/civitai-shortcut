@@ -153,6 +153,7 @@ def civitai_manager_ui():
             selected_version_id,
         ],
         outputs=[
+            selected_model_id,
             version_description_html,
             trigger_words,
             filename_list,
@@ -201,7 +202,6 @@ def civitai_manager_ui():
             sc_gallery,
             sc_owned_gallery,
             selected_version_id, 
-            selected_model_id,            
         ]
     )  
         
@@ -234,7 +234,6 @@ def civitai_manager_ui():
         inputs=None,
         outputs=[
             selected_version_id, 
-            selected_model_id,                                           
         ]
     )
 
@@ -272,7 +271,6 @@ def civitai_manager_ui():
         inputs=None,
         outputs=[
             selected_version_id, 
-            selected_model_id,   
         ]
     )
     # owned gallery tab
