@@ -9,7 +9,7 @@ from . import model
 from tqdm import tqdm
 
 # civitai model information start
-# sc_gallery_select -> select_versionid -> select_modelid-> select_gallery 순으로 순차적으로 실행된다.
+# sc_gallery_select -> select_versionid -> descript_html -> gallery 순으로 순차적으로 실행된다.
 # 동시헤 하면 교착상태에 자주빠져서 이리했다. 아마 동시에 civitai에 request 를 해서 네트워크가 안좋을때는 문제가 되는듯하다.
 # 모델의 정보 불러오게 하는 루틴
 def on_selected_model_id_change(modelid):
