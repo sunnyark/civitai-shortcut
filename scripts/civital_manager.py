@@ -52,23 +52,7 @@ def civitai_manager_ui():
                             with gr.Tabs(visible=True) as owtabs:
                                 with gr.TabItem("Owned Version"):
                                     with gr.Row():                            
-                                        owned_info = gr.Textbox(interactive=False,show_label=False)
-                            
-                            
-                            
-                        # with gr.Row():
-                        #     with gr.Tabs():                                
-                        #         with gr.TabItem("Tese"):
-                        #             pass
-                        #         with gr.TabItem("Tese"):
-                        #             pass
-                        #         with gr.TabItem("Tese"):
-                        #             pass
-                            
-                            
-                        # with gr.Row():
-                        #     with gr.Tab("Download"):                                 
-
+                                        owned_info = gr.Textbox(interactive=False,show_label=False)                              
                         with gr.Row():
                             filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
                         with gr.Row():
@@ -101,8 +85,8 @@ def civitai_manager_ui():
                                 send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                             except:
                                 pass   
-            with gr.Tab("Downloaded Model Information"):
-                pass
+            # with gr.Tab("Downloaded Model Information"):
+            #     pass
     with gr.Row(visible=False):                                         
                 
         
@@ -117,32 +101,6 @@ def civitai_manager_ui():
         hidden = gr.Image(type="pil")
         info1 = gr.Textbox()
         info2 = gr.Textbox()        
-
-
-
-        #download model informaton ui
-        owned_versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
-        owned_model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)                                                     
-        owned_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
-        owned_civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)
-        owned_filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
-                                            
-        owned_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)
-        owned_version_description_html = gr.HTML()
-        owned_model_title_name = gr.Markdown("###", visible=True)            
-        owned_version_gallery = gr.Gallery(show_label=False).style(grid=4)
-
-        #download model select model
-        owned_selected_version_id = gr.Textbox()
-        owned_selected_model_id = gr.Textbox()
-        owned_selected_gallery = gr.Textbox()
-        
-        #download model information                
-        owned_img_index = gr.Number(show_label=False)
-        owned_version_images_url = gr.State()
-        owned_hidden = gr.Image(type="pil")
-        owned_info1 = gr.Textbox()
-        owned_info2 = gr.Textbox()  
                         
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
@@ -215,66 +173,6 @@ def civitai_manager_ui():
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])      
     # civitai model information
     
-    
-    # # download model information
-    # # 버전을 하나 선택
-    # # 동일 이벤트에 여러개 연결하면 많이 늦어지는듯함..  따로 만듧시다.
-    # owned_versions_list.select(
-    #     fn=civitai_manager_action.on_owned_versions_list_select,
-    #     inputs=[
-    #         owned_selected_model_id, 
-    #     ],
-    #     outputs=[
-    #         owned_selected_version_id,            
-    #     ]
-    # )    
-
-    # owned_selected_model_id.change(
-    #     fn=civitai_manager_action.on_selected_owned_model_id_change,   
-    #     inputs=owned_selected_model_id,
-    #     outputs=None,
-    #     # outputs=[
-    #     #     owned_civitai_model_url_txt
-    #     #     owned_model_type, 
-    #     #     owned_versions_list
-    #     # ] 
-    # )
-    
-    # owned_selected_version_id.change(
-    #     fn=civitai_manager_action.on_selected_owned_version_id_change,
-    #     inputs=[
-    #         owned_selected_version_id,
-    #     ],
-    #     outputs=None,
-    #     # outputs=[
-    #     #     owned_version_description_html,
-    #     #     owned_trigger_words,
-    #     #     owned_filename_list,
-    #     #     owned_model_title_name,                        
-    #     #     owned_selected_gallery,
-    #     #     owned_version_gallery,
-    #     #     owned_img_file_info      
-    #     # ]
-    # )
-    
-    # owned_selected_gallery.change(
-    #     fn=civitai_manager_action.on_selected_owned_gallery_change,
-    #     inputs=[
-    #         owned_selected_gallery
-    #     ],
-    #     outputs=None,
-    #     # outputs=[
-    #     #     owned_version_gallery, 
-    #     #     owned_version_images_url
-    #     # ]
-    # )
-    
-    # owned_version_gallery.select(civitai_manager_action.on_owned_gallery_select, owned_version_images_url, [owned_img_index, owned_hidden])
-    # owned_hidden.change(fn=modules.extras.run_pnginfo, inputs=[owned_hidden], outputs=[owned_info1, owned_img_file_info, owned_info2])
-    # # download model information
-                
-    
-    
     civitai_model_url_txt.change(civitai_manager_action.on_civitai_model_url_txt_change,None,[civitai_internet_url])
     
     # shortcut delete
@@ -304,8 +202,6 @@ def civitai_manager_ui():
             sc_owned_gallery,
             selected_version_id, 
             selected_model_id,            
-            owned_selected_version_id,
-            owned_selected_model_id,
         ]
     )  
         
@@ -338,9 +234,7 @@ def civitai_manager_ui():
         inputs=None,
         outputs=[
             selected_version_id, 
-            selected_model_id,            
-            owned_selected_version_id, 
-            owned_selected_model_id,                                   
+            selected_model_id,                                           
         ]
     )
 
@@ -379,8 +273,6 @@ def civitai_manager_ui():
         outputs=[
             selected_version_id, 
             selected_model_id,   
-            owned_selected_version_id, 
-            owned_selected_model_id,                       
         ]
     )
     # owned gallery tab
