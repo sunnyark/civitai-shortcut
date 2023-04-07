@@ -123,13 +123,15 @@ def get_owned_image_list(shortcut_types=None):
     owned_list = list()
     if model.Owned_Models:        
         shortlist =  get_image_list(shortcut_types)
+        if not shortlist:
+            return None
+        
         for short in shortlist:
             sc_name = short[1]
             mid = str(sc_name[0:sc_name.find(':')])
             if mid in model.Owned_Models.keys():
                 owned_list.append(short)
-    return owned_list
-    
+    return owned_list    
 
 def download_all_images():
     ISC = load()                           

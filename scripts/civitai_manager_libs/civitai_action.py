@@ -26,7 +26,6 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
     if not download_files:
         return
 
-    #model_folder = util.make_model_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
     model_folder = util.make_folder(version_info, lora_an , vs_folder)
     
     if not model_folder:
@@ -73,7 +72,6 @@ def download_image_files(version_id, lora_an, vs_folder):
     if 'images' not in version_info.keys():
         return
         
-    #model_folder = util.make_model_folder(version_info['model']['type'], version_info['model']['name'], lora_an)
     model_folder = util.make_folder(version_info, lora_an , vs_folder)
     
     if not model_folder:
@@ -138,7 +136,7 @@ def get_model_title_name_by_version_info(version_info:dict)->str:
         return
     
     title_name = ""
-    if 'model' not in version_info:
+    if 'model' not in version_info.keys():
         return
         
     title_name = f"### {version_info['model']['name']} : {version_info['name']}"
@@ -225,7 +223,7 @@ def get_version_description_by_version_info(version_info:dict):
     if not model_id:
         return "",None,None,None
         
-    model_info = civitai.get_model_info_by_model_id(model_id)
+    model_info = civitai.get_model_info(model_id)
 
     if not model_info:
         return "",None,None,None
@@ -270,16 +268,7 @@ def get_version_description_by_version_info(version_info:dict):
     
     return output_html, output_training, [v for v in files_name], model_info['type']     
 
-def get_version_description_by_version_id(version_id=None):
-    if not version_id:
-        return "",None,None    
-    version_info = civitai.get_version_info_by_version_id(version_id)    
-    return get_version_description_by_version_info(version_info)        
-
-
-# url에서 model info 정보를 반환한다
-def get_selected_model_info_by_url(url:str):
-    model_id = None
+def get_shortcut_model_info(model_id:str):
     model_name = None
     model_type = None
     def_id = None
@@ -287,29 +276,57 @@ def get_selected_model_info_by_url(url:str):
     def_image = None
     model_url = None
     
-    versions_list = []
-    if url:  
-        model_id = util.get_model_id_from_url(url) 
-        model_info = civitai.get_model_info_by_model_id(model_id)
-        if model_info:
-            versions_list = []
-            model_id = model_info['id']
-            model_name = model_info['name']
-            model_type = model_info['type']
-            model_url = f"{civitai.Url_ModelId()}{model_id}"
+    model_info = civitai.get_model_info(model_id)
+    if model_info:
+        model_name = model_info['name']
+        model_type = model_info['type']
+        model_url = f"{civitai.Url_ModelId()}{model_id}"
+        
+        if "modelVersions" in model_info.keys():            
+            def_version = model_info["modelVersions"][0]
+            def_id = def_version['id']
+            def_name = def_version['name']
             
+            if 'images' in def_version.keys():
+                if len(def_version["images"]) > 0:
+                    img_dict = def_version["images"][0]
+                    def_image = img_dict["url"]                  
+        
+    return model_name, model_type, model_url, def_id, def_name, def_image
+
+def get_selected_model_info(modelid):
+    model_type= None
+    owned_info = ""
+    def_name = ""
+
+    versions_list = []    
+    if modelid:
+        model_info = civitai.get_model_info(modelid)
+        if model_info:
+            model_type = model_info['type']            
+
             if "modelVersions" in model_info.keys():            
                 def_version = model_info["modelVersions"][0]
-                def_id = def_version['id']
-                def_name = def_version['name']
-                
-                if 'images' in def_version.keys():
-                    if len(def_version["images"]) > 0:
-                        img_dict = def_version["images"][0]
-                        def_image = img_dict["url"]
-                                                                
+                def_name = def_version["name"]
                 for version_info in model_info['modelVersions']:
                     versions_list.append(version_info['name'])                        
-        
-    return model_id, model_name, model_type, model_url, def_id, def_name, def_image ,[v for v in versions_list]
-
+                
+        if model.Owned_Models:                        
+            if str(modelid) in model.Owned_Models.keys():
+                file_list = dict()
+                
+                for version_paths in model.Owned_Models[str(modelid)]:
+                    file_list[os.path.basename(version_paths)] = version_paths
+                
+                for file,path in file_list.items():
+                    vinfo = civitai.read_version_info(path)
+                    if vinfo:                      
+                        try:  
+                            if owned_info != "":
+                                owned_info = owned_info + "\n"
+                            owned_info = owned_info + f"{vinfo['name']}"
+                        except:
+                            pass
+                
+    return owned_info, model_type, def_name, [v for v in versions_list]
+                            

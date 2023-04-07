@@ -40,7 +40,7 @@ def request_models(api_url=None):
         return
     return data
 
-def get_model_info_by_model_id(id:str) -> dict:    
+def get_model_info(id:str) -> dict:    
     if not id:
         return
     
@@ -66,7 +66,7 @@ def get_model_info_by_version_id(version_id:str) -> dict:
 def get_model_info_by_version_info(version_info) -> dict:    
     if not version_info:
         return 
-    return get_model_info_by_model_id(version_info['modelId'])
+    return get_model_info(version_info['modelId'])
   
 def get_version_info_by_version_id(version_id:str) -> dict:        
     if not version_id:                
@@ -87,7 +87,7 @@ def get_version_info_by_version_id(version_id:str) -> dict:
 
 def get_latest_version_info_by_model_id(id:str) -> dict:
 
-    model_info = get_model_info_by_model_id(id)
+    model_info = get_model_info(id)
     if not model_info:
         return
 
@@ -112,7 +112,7 @@ def get_version_id_by_version_name(model_id:str,name:str)->str:
     if not model_id:
         return 
     
-    model_info = get_model_info_by_model_id(model_id)
+    model_info = get_model_info(model_id)
     if not model_info:
         return
     
@@ -200,7 +200,10 @@ def get_triger_by_version_id(version_id=None)->str:
     version_info = get_version_info_by_version_id(version_id)          
     
     return get_triger_by_version_info(version_info)
-                
+
+
+
+
 # 버전 모델 인포 데이터를 파일에서 읽어옴
 def read_version_info(path)->dict:
     version_info = None
