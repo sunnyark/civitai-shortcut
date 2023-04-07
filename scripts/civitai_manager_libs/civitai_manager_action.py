@@ -12,7 +12,7 @@ from tqdm import tqdm
 # sc_gallery_select -> select_versionid -> select_modelid-> select_gallery 순으로 순차적으로 실행된다.
 # 동시헤 하면 교착상태에 자주빠져서 이리했다. 아마 동시에 civitai에 request 를 해서 네트워크가 안좋을때는 문제가 되는듯하다.
 # 모델의 정보 불러오게 하는 루틴
-def on_selected_model_id_change(modelid, versionid):
+def on_selected_model_id_change(modelid):
     is_lora = False
     is_owned = False
     model_type = ""
@@ -31,8 +31,8 @@ def on_selected_model_id_change(modelid, versionid):
 
         model_url = civitai.Url_ModelId() + str(modelid)
         
-        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name),gr.update(value=versionid)
-    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=versionid)
+        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
     
 # 모델의 버전 정보 불러오게 하는 루틴
 def on_selected_version_id_change(version_id:str):
@@ -54,7 +54,7 @@ def on_selected_version_id_change(version_id:str):
     
     return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
     
-def on_selected_gallery_change(version_id):
+def on_description_html_change(version_id):
     return civitai_action.get_version_description_gallery_by_version_id(version_id)
 
 def on_gallery_select(evt: gr.SelectData,version_images_url):  
@@ -114,7 +114,6 @@ def on_sc_gallery_select(evt : gr.SelectData):
     if evt.value:
         shortcut = evt.value 
         sc_model_id = shortcut[0:shortcut.find(':')]      
-        sc_model_url = civitai.Url_ModelId() + sc_model_id  
         version_info = civitai.get_latest_version_info_by_model_id(sc_model_id)
         if version_info:
             def_id = version_info['id']            

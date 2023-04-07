@@ -76,7 +76,7 @@ def civitai_manager_ui():
                             version_gallery = gr.Gallery(show_label=False).style(grid=4)
                             #version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
                         with gr.Row():    
-                            version_description_html = gr.HTML()                                                                                                   
+                            description_html = gr.HTML()                                                                                                   
                     with gr.Column(scale=1):
                         with gr.Row():                            
                             img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
@@ -93,7 +93,6 @@ def civitai_manager_ui():
         #civitai model select model
         selected_version_id = gr.Textbox()
         selected_model_id = gr.Textbox()
-        selected_gallery = gr.Textbox()
         
         #civitai model information                
         img_index = gr.Number(show_label=False)
@@ -145,7 +144,6 @@ def civitai_manager_ui():
         fn=civitai_manager_action.on_selected_model_id_change,   
         inputs=[
             selected_model_id,
-            selected_version_id
         ],    
         outputs=[
             civitai_model_url_txt, 
@@ -154,7 +152,6 @@ def civitai_manager_ui():
             an_lora, 
             model_type, 
             versions_list,
-            selected_gallery,
         ] 
     )
   
@@ -165,7 +162,7 @@ def civitai_manager_ui():
         ],
         outputs=[
             selected_model_id,
-            version_description_html,
+            description_html,
             trigger_words,
             filename_list,
             model_title_name,                                    
@@ -173,13 +170,13 @@ def civitai_manager_ui():
             img_file_info      
         ]
     )
-        
-    selected_gallery.change(
-        fn=civitai_manager_action.on_selected_gallery_change,
-        inputs=[selected_gallery],
+
+    description_html.change(
+        fn=civitai_manager_action.on_description_html_change,
+        inputs=[selected_version_id],
         outputs=[version_gallery, version_images_url]
     )
-
+        
     version_gallery.select(civitai_manager_action.on_gallery_select, version_images_url, [img_index, hidden])    
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])      
     # civitai model information
