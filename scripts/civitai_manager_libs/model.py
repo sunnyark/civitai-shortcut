@@ -156,7 +156,30 @@ def get_version_info(versionid:str)->dict:
     
     return None
     
+def get_version_images(versionid:str):
+    if not Owned_Versions:
+        return
 
+    file_list = list()    
+    if versionid in Owned_Versions.keys():        
+        path = Owned_Versions[versionid]  
+        try:
+            vfolder , vfile = os.path.split(path)
+            # versionname . civitai.info 형식이다.
+            # 그래서 두번
+            base , ext = os.path.splitext(vfile)
+            base , ext = os.path.splitext(base)
+            
+            for file in os.listdir(vfolder):
+                if os.path.isdir(file):
+                    continue
+                if file.endswith(".png") and file.startswith(base):
+                    file_list.append(os.path.join(vfolder,file))            
+        except:
+            return
+        
+    return file_list if len(file_list) > 0 else None
+            
 # 버전 모델 인포 데이터를 파일에서 읽어옴
 def read_owned_versioninfo(path)->dict:
     version_info = None

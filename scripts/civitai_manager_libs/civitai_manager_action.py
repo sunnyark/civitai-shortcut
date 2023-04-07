@@ -71,7 +71,7 @@ def on_versions_list_select(evt: gr.SelectData, model_id:str):
 
 
 # download model information start
-def on_selected_owned_model_id_change(modelid, versionid):
+def on_owned_selected_model_id_change(modelid, versionid):
     model_type = ""
     def_name = ""
     model_url = ""
@@ -83,7 +83,7 @@ def on_selected_owned_model_id_change(modelid, versionid):
         return gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name),gr.update(value=versionid)
     return gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=versionid)
 
-def on_selected_owned_version_id_change(versionid:str):
+def on_owned_selected_version_id_change(versionid:str):
     
     if not versionid:
         return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
@@ -101,11 +101,18 @@ def on_selected_owned_version_id_change(versionid:str):
     dhtml, triger, flist, mtype = model_action.get_version_description(version_info)
     title_name = model_action.get_model_title_name(version_info)    
     
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=flist),title_name,None,None    
+    file_text = ""
+    for file in flist:
+        if file_text != "":
+            file_text = file_text + "\n"
+        file_text = file_text + file
+        
+    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=file_text),title_name,None,None    
     
 
-def on_selected_owned_gallery_change(version_id):
-    pass
+def on_owned_selected_gallery_change(versionid):
+    #util.printD(versionid)
+    return model_action.get_version_description_gallery(versionid)
 
 def on_owned_gallery_select(evt: gr.SelectData,owned_version_images_url):  
      return evt.index, owned_version_images_url[evt.index]
@@ -116,7 +123,8 @@ def on_owned_versions_list_select(evt: gr.SelectData, model_id:str):
         return gr.Textbox.update(value="")
        
     version_id = model.get_version_id_by_version_name(model_id, evt.value)
-        
+    
+    util.printD(version_id)        
     return gr.Textbox.update(value=version_id)
 # download model information end
 

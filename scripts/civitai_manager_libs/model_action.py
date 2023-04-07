@@ -99,8 +99,16 @@ def get_version_description(version_info:dict):
                         
     output_html = html_typepart + html_modelpart + html_versionpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
     
-    return output_html, output_training, [v for v in files_name], model_type
+    return output_html, output_training, files_name, model_type
 
+from . import util
+def get_version_description_gallery(versionid):
+    if not versionid:
+        return None,None
+    imagelist = model.get_version_images(versionid)
+    return imagelist,imagelist
+
+    
 # def get_selected_owned_versioninfo(model_id:str):
 #     model_name = None
 #     model_type = None

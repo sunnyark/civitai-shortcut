@@ -194,7 +194,8 @@ def civitai_manager_ui():
             owned_info, 
             an_lora, 
             model_type, 
-            versions_list
+            versions_list,
+            selected_gallery
         ] 
     )
   
@@ -244,20 +245,21 @@ def civitai_manager_ui():
     )    
 
     owned_selected_model_id.change(
-        fn=civitai_manager_action.on_selected_owned_model_id_change,   
+        fn=civitai_manager_action.on_owned_selected_model_id_change,   
         inputs=[
             owned_selected_model_id,
-            owned_selected_gallery
+            owned_selected_version_id
         ],
         outputs=[
             owned_civitai_model_url_txt,
             owned_model_type, 
-            owned_versions_list
+            owned_versions_list,
+            owned_selected_gallery
         ] 
     )
     
     owned_selected_version_id.change(
-        fn=civitai_manager_action.on_selected_owned_version_id_change,
+        fn=civitai_manager_action.on_owned_selected_version_id_change,
         inputs=[
             owned_selected_version_id,
         ],
@@ -273,15 +275,14 @@ def civitai_manager_ui():
     )
     
     owned_selected_gallery.change(
-        fn=civitai_manager_action.on_selected_owned_gallery_change,
+        fn=civitai_manager_action.on_owned_selected_gallery_change,
         inputs=[
             owned_selected_gallery
         ],
-        outputs=None,
-        # outputs=[
-        #     owned_version_gallery, 
-        #     owned_version_images_url
-        # ]
+        outputs=[
+            owned_version_gallery, 
+            owned_version_images_url
+        ]
     )
     
     owned_version_gallery.select(civitai_manager_action.on_owned_gallery_select, owned_version_images_url, [owned_img_index, owned_hidden])
