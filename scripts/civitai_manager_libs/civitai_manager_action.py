@@ -9,7 +9,8 @@ from . import model
 from tqdm import tqdm
 
 # civitai model information start
-# sc_gallery_select -> select_versionid -> descript_html -> gallery 순으로 순차적으로 실행된다.
+# 
+# sc_gallery_select -> select_modelid -> versionid-> description_html -> gallery 순으로 순차적으로 실행된다.
 # 동시헤 하면 교착상태에 자주빠져서 이리했다. 아마 동시에 civitai에 request 를 해서 네트워크가 안좋을때는 문제가 되는듯하다.
 # 모델의 정보 불러오게 하는 루틴
 def on_selected_model_id_change(modelid):
@@ -18,10 +19,11 @@ def on_selected_model_id_change(modelid):
     model_type = ""
     owned_info = ""
     def_name = ""
+    def_id = ""
     model_url = ""
     
     if modelid:
-        owned_info, model_type, def_name, vlist= civitai_action.get_selected_model_info(modelid)
+        owned_info, model_type, def_name, def_id, vlist= civitai_action.get_selected_model_info(modelid)
 
         if model_type == "LORA":
             is_lora = True   
@@ -30,29 +32,24 @@ def on_selected_model_id_change(modelid):
             is_owned = True 
 
         model_url = civitai.Url_ModelId() + str(modelid)
-        
-        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
-    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+                
+        return gr.update(value=def_id), gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+    return gr.update(value=def_id), gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
     
 # 모델의 버전 정보 불러오게 하는 루틴
 def on_selected_version_id_change(version_id:str):
     if not version_id:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
+        return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
     
     version_info = civitai.get_version_info_by_version_id(version_id) 
         
     if not version_info:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
-
-    modelid = None
-    
-    if "modelId" in version_info.keys():
-        modelid = version_info["modelId"]
-                
+        return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
+               
     dhtml, triger, flist, mtype = civitai_action.get_version_description_by_version_info(version_info)
     title_name = civitai_action.get_model_title_name_by_version_info(version_info)    
     
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
+    return gr.HTML.update(value=dhtml), gr.Textbox.update(value=triger), gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
     
 def on_description_html_change(version_id):
     return civitai_action.get_version_description_gallery_by_version_id(version_id)
@@ -94,7 +91,6 @@ def on_shortcut_thumnail_update_click(sc_types,sc_owned_types):
     return gr.Gallery.update(value=ishortcut.get_image_list(sc_types)),gr.Gallery.update(value=ishortcut.get_owned_image_list(sc_owned_types))
      
 def on_shortcut_del_btn_click(model_id, sc_types, sc_owned_types):
-    #util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
     if model_id:
         ISC = ishortcut.load()                           
         ISC = ishortcut.delete(ISC, model_id)                        
@@ -113,11 +109,8 @@ def on_sc_gallery_select(evt : gr.SelectData):
     def_id = ""
     if evt.value:
         shortcut = evt.value 
-        sc_model_id = shortcut[0:shortcut.find(':')]      
-        version_info = civitai.get_latest_version_info_by_model_id(sc_model_id)
-        if version_info:
-            def_id = version_info['id']            
-    return gr.update(value=def_id)
+        sc_model_id = shortcut[0:shortcut.find(':')]               
+    return gr.update(value=sc_model_id)
 
 # civitai_internet_url 필드를 클리어 하기 위한것
 def on_civitai_model_url_txt_change():
@@ -131,18 +124,16 @@ def on_civitai_internet_url_upload(files, sc_types, sc_owned_types):
             shortcut = util.load_InternetShortcut(file.name)            
             model_id, model_url, def_id = internet_shortcut_upload(shortcut)
             
-    if not def_id:
+    if not model_id:
         return gr.update(value=ishortcut.get_image_list(sc_types)),gr.update(value=ishortcut.get_owned_image_list(sc_owned_types)),gr.update(value="")
-    return gr.update(value=ishortcut.get_image_list(sc_types)),gr.update(value=ishortcut.get_owned_image_list(sc_owned_types)),gr.update(value=def_id)
+    return gr.update(value=ishortcut.get_image_list(sc_types)),gr.update(value=ishortcut.get_owned_image_list(sc_owned_types)),gr.update(value=model_id)
 
 def internet_shortcut_upload(url):
     if url:  
-        #util.printD(url)        
         model_id = util.get_model_id_from_url(url) 
         model_name, model_type, model_url, def_id, def_name, def_image = civitai_action.get_shortcut_model_info(model_id)
         
         if model_id:
-            # util.printD(model_id)
             ISC = ishortcut.load()                           
             ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
             ishortcut.save(ISC)
