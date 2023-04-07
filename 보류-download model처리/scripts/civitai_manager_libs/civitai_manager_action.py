@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 # civitai model information start
 # 모델의 정보 불러오게 하는 루틴
-def on_selected_model_id_change(modelid):
+def on_selected_model_id_change(modelid, versionid):
     is_lora = False
     is_owned = False
     model_type = ""
@@ -30,18 +30,18 @@ def on_selected_model_id_change(modelid):
 
         model_url = civitai.Url_ModelId() + str(modelid)
         
-        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
-    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name),gr.update(value=versionid)
+    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=versionid)
     
 # 모델의 버전 정보 불러오게 하는 루틴
 def on_selected_version_id_change(version_id:str):
     if not version_id:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None,None
+        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
     
     version_info = civitai.get_version_info_by_version_id(version_id) 
     
     if not version_info:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None,None
+        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
 
     modelid = None
     
@@ -51,7 +51,7 @@ def on_selected_version_id_change(version_id:str):
     dhtml, triger, flist, mtype = civitai_action.get_version_description_by_version_info(version_info)
     title_name = civitai_action.get_model_title_name_by_version_info(version_info)    
     
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,version_id,None,None
+    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
     
 def on_selected_gallery_change(version_id):
     return civitai_action.get_version_description_gallery_by_version_id(version_id)
@@ -71,7 +71,7 @@ def on_versions_list_select(evt: gr.SelectData, model_id:str):
 
 
 # download model information start
-def on_selected_owned_model_id_change(modelid):
+def on_selected_owned_model_id_change(modelid, versionid):
     model_type = ""
     def_name = ""
     model_url = ""
@@ -80,18 +80,18 @@ def on_selected_owned_model_id_change(modelid):
         owned_info, model_type, def_name, vlist= model_action.get_selected_owned_modelinfo(modelid)
         model_url = civitai.Url_ModelId() + str(modelid)
         
-        return gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
-    return gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+        return gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name),gr.update(value=versionid)
+    return gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=versionid)
 
 def on_selected_owned_version_id_change(versionid:str):
     
     if not versionid:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None,None
+        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
     
     version_info = model.get_version_info(versionid) 
     
     if not version_info:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None,None
+        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
 
     modelid = None
     
@@ -101,7 +101,7 @@ def on_selected_owned_version_id_change(versionid:str):
     dhtml, triger, flist, mtype = model_action.get_version_description(version_info)
     title_name = model_action.get_model_title_name(version_info)    
     
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=flist),title_name,versionid,None,None    
+    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=flist),title_name,None,None    
     
 
 def on_selected_owned_gallery_change(version_id):

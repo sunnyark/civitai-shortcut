@@ -7,6 +7,7 @@ from . import setting
 # civitai 와의 연결은 최소화하고 local의 관리를 목표로 한다.
 
 Owned_Models = dict()
+Owned_Versions = dict()
 
 def Test_Models():
     if Owned_Models:
@@ -16,8 +17,8 @@ def Test_Models():
             #     print(f"{path}\n")
             
 def Load_Owned_Models():
-    global Owned_Models
-    Owned_Models = get_owned_modelpath()
+    global Owned_Models,Owned_Versions
+    Owned_Models,Owned_Versions = get_owned_modelpath()
     
 # 단순히 소유한 모델의 modelid만을 리스트로 반환한다
 def get_owned_modelid():
@@ -67,6 +68,7 @@ def get_owned_modelinfo()->dict:
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = util.search_file(root_dirs,None,".info")
     models = dict()
+    versions = dict()
     
     if file_list:             
         for file_path in file_list:        
@@ -75,16 +77,19 @@ def get_owned_modelinfo()->dict:
                     json_data = json.load(f)
                     if "modelId" in json_data.keys():
                         mid = str(json_data['modelId'])
+                        vid = str(json_data['id'])
+                        
                         if mid not in models.keys():
                             models[mid] = list()
                         models[mid].append(json_data)
+                        versions[str(vid)] = file_path
             except:
                 pass
             
     if len(models) > 0:
-        return models
+        return models,versions
     
-    return None
+    return None,None
 
 # modelid를 키로 modelid가 같은 version_info의 File Path를 list로 묶어 반환한다.
 def get_owned_modelpath()->dict:
@@ -92,6 +97,7 @@ def get_owned_modelpath()->dict:
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = util.search_file(root_dirs,None,".info")
     models = dict()
+    versions = dict()
     
     if file_list:             
         for file_path in file_list:        
@@ -100,18 +106,22 @@ def get_owned_modelpath()->dict:
                     json_data = json.load(f)
                     if "modelId" in json_data.keys():
                         mid = str(json_data['modelId'])
+                        vid = str(json_data['id'])
+                        
                         if mid not in models.keys():
                             models[mid] = list()
                         models[mid].append(file_path)
+                        versions[str(vid)] = file_path
+                        
             except:
                 pass
             
     if len(models) > 0:
-        return models
+        return models,versions
     
-    return None
+    return None,None
 
-def get_version_id_by_version_name(modelid, versionname):
+def get_version_id_by_version_name(modelid, name):
     if not modelid:
         return 
 
@@ -126,11 +136,26 @@ def get_version_id_by_version_name(modelid, versionname):
         for file,path in file_list.items():
             vinfo = read_owned_versioninfo(path)
             try:  
-                if vinfo['name'] == versionname:
+                if vinfo['name'] == name:
                     return vinfo['id']
             except:
                 pass        
     return None
+
+def get_version_info(versionid:str)->dict:
+    if not versionid:
+        return None
+
+    if not Owned_Versions:
+        return None
+    
+    try:
+        return read_owned_versioninfo(Owned_Versions[str(versionid)])
+    except:
+        pass
+    
+    return None
+    
 
 # 버전 모델 인포 데이터를 파일에서 읽어옴
 def read_owned_versioninfo(path)->dict:

@@ -143,8 +143,19 @@ def civitai_manager_ui():
     
     selected_model_id.change(
         fn=civitai_manager_action.on_selected_model_id_change,   
-        inputs=selected_model_id,
-        outputs=[civitai_model_url_txt, owned_tab, owned_info, an_lora, model_type, versions_list] 
+        inputs=[
+            selected_model_id,
+            selected_version_id
+        ],    
+        outputs=[
+            civitai_model_url_txt, 
+            owned_tab, 
+            owned_info, 
+            an_lora, 
+            model_type, 
+            versions_list,
+            selected_gallery,
+        ] 
     )
   
     selected_version_id.change(
@@ -157,8 +168,7 @@ def civitai_manager_ui():
             version_description_html,
             trigger_words,
             filename_list,
-            model_title_name,                        
-            selected_gallery,
+            model_title_name,                                    
             version_gallery,
             img_file_info      
         ]

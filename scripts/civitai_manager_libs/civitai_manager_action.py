@@ -9,8 +9,10 @@ from . import model
 from tqdm import tqdm
 
 # civitai model information start
+# sc_gallery_select -> select_versionid -> select_modelid-> select_gallery 순으로 순차적으로 실행된다.
+# 동시헤 하면 교착상태에 자주빠져서 이리했다. 아마 동시에 civitai에 request 를 해서 네트워크가 안좋을때는 문제가 되는듯하다.
 # 모델의 정보 불러오게 하는 루틴
-def on_selected_model_id_change(modelid):
+def on_selected_model_id_change(modelid, versionid):
     is_lora = False
     is_owned = False
     model_type = ""
@@ -29,18 +31,18 @@ def on_selected_model_id_change(modelid):
 
         model_url = civitai.Url_ModelId() + str(modelid)
         
-        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
-    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name),gr.update(value=versionid)
+    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=versionid)
     
 # 모델의 버전 정보 불러오게 하는 루틴
 def on_selected_version_id_change(version_id:str):
     if not version_id:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None,None
+        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
     
     version_info = civitai.get_version_info_by_version_id(version_id) 
         
     if not version_info:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None,None
+        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
 
     modelid = None
     
@@ -50,7 +52,7 @@ def on_selected_version_id_change(version_id:str):
     dhtml, triger, flist, mtype = civitai_action.get_version_description_by_version_info(version_info)
     title_name = civitai_action.get_model_title_name_by_version_info(version_info)    
     
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,version_id,None,None
+    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
     
 def on_selected_gallery_change(version_id):
     return civitai_action.get_version_description_gallery_by_version_id(version_id)
