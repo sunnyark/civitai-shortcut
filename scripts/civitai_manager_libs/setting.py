@@ -40,7 +40,7 @@ content_types_dict = {
 }
    
 civitai_shortcut = "CivitaiShortCut.json"
-civitai_shortcut_thumnail_folder =  "sc_thum_images"
+civitai_shortcut_thumnail_folder =  "sc_thumb_images"
 civitai_shortcut_save_folder =  "sc_saves"
 civitai_no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
 

@@ -137,7 +137,7 @@ def on_download_model_click(version_id:str, file_name=None, lora_an=False,vs_fol
 
 # left menu action start   
 def on_shortcut_gallery_refresh(sc_types,show_only_downloaded_sc=True):
-    return gr.update(value=ishortcut.get_thumnail_list(sc_types,show_only_downloaded_sc))
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc))
   
 def on_shortcut_del_btn_click(model_id, sc_types, show_only_downloaded_sc, sc_downloaded_types):
     #util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
@@ -146,7 +146,7 @@ def on_shortcut_del_btn_click(model_id, sc_types, show_only_downloaded_sc, sc_do
         ISC = ishortcut.delete(ISC, model_id)                        
         ishortcut.save(ISC)
         
-    return gr.update(value=ishortcut.get_thumnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumnail_list(sc_downloaded_types,True))
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
 
 # 갤러리에서 하나 선택할때
 def on_gallery_select(evt: gr.SelectData,version_images_url):  
@@ -172,17 +172,17 @@ def on_civitai_internet_url_upload(files, sc_types,show_only_downloaded_sc, sc_d
             model_id, model_url, def_id = internet_shortcut_upload(shortcut)
             
     if not model_id:
-        return gr.update(value=ishortcut.get_thumnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumnail_list(sc_downloaded_types,True)),gr.update(value="")
-    return gr.update(value=ishortcut.get_thumnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumnail_list(sc_downloaded_types,True)),gr.update(value=model_id)
+        return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value="")
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value=model_id)
    
 def on_scan_to_shortcut_click(sc_types, show_only_downloaded_sc, sc_downloaded_types):
     ishortcut.DownloadedModel_to_Shortcut()
     util.printD("Scan Models to Shortcut ended")
-    return gr.update(value=ishortcut.get_thumnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumnail_list(sc_downloaded_types,True))
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
 
-def on_shortcut_thumnail_update_click(sc_types,show_only_downloaded_sc,sc_downloaded_types):
-    ishortcut.update_thumnail_images()
-    return gr.Gallery.update(value=ishortcut.get_thumnail_list(sc_types,show_only_downloaded_sc)),gr.Gallery.update(value=ishortcut.get_thumnail_list(sc_downloaded_types,True))
+def on_shortcut_thumbnail_update_click(sc_types,show_only_downloaded_sc,sc_downloaded_types):
+    ishortcut.update_thumbnail_images()
+    return gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
 
 def internet_shortcut_upload(url):
     if url:  

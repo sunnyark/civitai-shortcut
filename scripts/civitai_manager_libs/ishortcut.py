@@ -59,7 +59,7 @@ def DownloadedModel_to_Shortcut():
             ISC = add_ISC            
         save(ISC)    
 
-def get_thumnail_list(shortcut_types=None,only_downloaded=False):
+def get_thumbnail_list(shortcut_types=None,only_downloaded=False):
     
     shortlist =  get_image_list(shortcut_types)
     if not shortlist:
@@ -145,7 +145,7 @@ def download_all_images():
         if v:
             download_image(v['id'], v['imageurl'])
             
-def update_thumnail_images():
+def update_thumbnail_images():
     preISC = load()                           
     if not preISC:
         return

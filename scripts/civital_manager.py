@@ -13,118 +13,121 @@ from scripts.civitai_manager_libs import util
 from scripts.civitai_manager_libs import model   
 
 def civitai_manager_ui():      
-    with gr.Tab("Civitai Shortcut"):
-        with gr.Row(): 
-            with gr.Column(scale=1):
-                with gr.Tab("Upload"):
-                    with gr.Row():
-                        civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"]) 
-                    with gr.Row():
-                        update_sc_btn = gr.Button(value="Update Shortcut's Thumnails",variant="primary")
-                    with gr.Row():                        
-                        scan_sc_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")                             
-                with gr.Tab("Browsing"):    
-                    with gr.Row():
-                        shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
-                    with gr.Row():
-                        sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_thumnail_list()).style(grid=1)
-                    with gr.Row():
-                        show_only_downloaded_sc = gr.Checkbox(label="Show downloaded shortcut only", value=False)                        
-                    with gr.Row():
-                        refresh_sc_btn = gr.Button(value="Refressh Shortcut List",variant="primary")                        
+    with gr.Tabs():
+        with gr.TabItem("Civitai Shortcut"):
+            with gr.Row(): 
+                with gr.Column(scale=1):
+                    with gr.Tabs():
+                        with gr.TabItem("Upload"):
+                            with gr.Row():
+                                civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"]) 
+                            with gr.Row():
+                                update_sc_btn = gr.Button(value="Update Shortcut's Thumbnails",variant="primary")
+                            with gr.Row():                        
+                                scan_sc_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")                             
+                        with gr.TabItem("Browsing"):    
+                            with gr.Row():
+                                shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
+                            with gr.Row():
+                                sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=1)
+                            with gr.Row():
+                                show_only_downloaded_sc = gr.Checkbox(label="Show downloaded shortcut only", value=False)                        
+                            with gr.Row():
+                                refresh_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")                        
 
-            with gr.Column(scale=4):
-                with gr.Tab("Model Infomation"):
-                    with gr.Row():
-                        with gr.Column(scale=1):
-                            with gr.Row():
-                                versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
-                            with gr.Row():
-                                model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
-                            with gr.Row():
-                                trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
-                            with gr.Row():
-                                civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)
+                with gr.Column(scale=4):
+                    with gr.Tab("Model Information"):
+                        with gr.Row():
+                            with gr.Column(scale=1):
+                                with gr.Row():
+                                    versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+                                with gr.Row():
+                                    model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+                                with gr.Row():
+                                    trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
+                                with gr.Row():
+                                    civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)
 
-                            with gr.Row(visible=False) as downloaded_tab:
-                                    with gr.TabItem("Downloaded Version"):
-                                        with gr.Row():                            
-                                            downloaded_info = gr.Textbox(interactive=False,show_label=False)
-                                            
-                            with gr.Row():
-                                filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
-                            with gr.Row():
-                                an_lora = gr.Checkbox(label="LoRA to additional-networks", value=False)          
-                            with gr.Row():
-                                vs_folder = gr.Checkbox(label="Create version specific folder", value=True)                                                                  
-                            with gr.Row():
-                                download_model = gr.Button(value="Download", variant="primary")                                                
-                            with gr.Row():
-                                download_images = gr.Button(value="Download Images",variant="primary")                                                              
-                            with gr.Row():
-                                shortcut_del_btn = gr.Button(value="Delete Shortcut")                                                   
-                            with gr.Row():    
-                                message_log = gr.Markdown("###")
-                        with gr.Column(scale=4):                                                  
-                            with gr.Row():                                                              
-                                model_title_name = gr.Markdown("###", visible=True)            
-                            with gr.Row():    
-                                version_gallery = gr.Gallery(show_label=False).style(grid=4)
-                                #version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
-                            with gr.Row():    
-                                description_html = gr.HTML()                                                                                                   
-                        with gr.Column(scale=1):
-                            with gr.Row():                            
-                                img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
-                            with gr.Row():
-                                try:
-                                    send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-                                except:
-                                    pass   
+                                with gr.Row(visible=False) as downloaded_tab:
+                                        with gr.TabItem("Downloaded Version"):
+                                            with gr.Row():                            
+                                                downloaded_info = gr.Textbox(interactive=False,show_label=False)
+                                                
+                                with gr.Row():
+                                    filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
+                                with gr.Row():
+                                    an_lora = gr.Checkbox(label="LoRA to additional-networks", value=False)          
+                                with gr.Row():
+                                    vs_folder = gr.Checkbox(label="Create version specific folder", value=True)                                                                  
+                                with gr.Row():
+                                    download_model = gr.Button(value="Download", variant="primary")                                                
+                                with gr.Row():
+                                    download_images = gr.Button(value="Download Images",variant="primary")                                                              
+                                with gr.Row():
+                                    shortcut_del_btn = gr.Button(value="Delete Shortcut")                                                   
+                                with gr.Row():    
+                                    message_log = gr.Markdown("###")
+                            with gr.Column(scale=4):                                                  
+                                with gr.Row():                                                              
+                                    model_title_name = gr.Markdown("###", visible=True)            
+                                with gr.Row():    
+                                    version_gallery = gr.Gallery(show_label=False).style(grid=4)
+                                    #version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
+                                with gr.Row():    
+                                    description_html = gr.HTML()                                                                                                   
+                            with gr.Column(scale=1):
+                                with gr.Row():                            
+                                    img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
+                                with gr.Row():
+                                    try:
+                                        send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                                    except:
+                                        pass   
                 
                     
 
             
-    with gr.Tab("Downloaded Shortcut"):
-        with gr.Row(): 
-            with gr.Column(scale=1):
-                with gr.Tab("Browsing"):
-                    with gr.Row():
-                        shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
-                    with gr.Row():
-                        sc_downloaded_gallery = gr.Gallery(show_label=False, value=ishortcut.get_thumnail_list(None,True)).style(grid=1)
-                    with gr.Row():
-                        refresh_downloaded_sc_btn = gr.Button(value="Refressh Shortcut List",variant="primary")                                                    
-            with gr.Column(scale=4):
-                with gr.Tab("Model Information"):
-                    with gr.Row():
-                        with gr.Column(scale=1):
+        with gr.TabItem("Downloaded Shortcut"):
+            with gr.Row(): 
+                with gr.Column(scale=1):
+                    with gr.Tabs():
+                        with gr.TabItem("Browsing"):                    
                             with gr.Row():
-                                downloaded_versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+                                shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                             with gr.Row():
-                                downloaded_model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)                                                     
+                                sc_downloaded_gallery = gr.Gallery(show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=1)
                             with gr.Row():
-                                downloaded_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
-                            with gr.Row():
-                                downloaded_civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)
-                            with gr.Row():
-                                downloaded_filename_list = gr.Textbox(label="Model Version File", interactive=False)
-                        with gr.Column(scale=4):                                                  
-                            with gr.Row():                                                              
-                                downloaded_model_title_name = gr.Markdown("###", visible=True)            
-                            with gr.Row():    
-                                downloaded_version_gallery = gr.Gallery(show_label=False).style(grid=4)
-                                #owned_version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
-                            with gr.Row():    
-                                downloaded_description_html = gr.HTML()                                                                                                   
-                        with gr.Column(scale=1):
-                            with gr.Row():                            
-                                downloaded_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
-                            with gr.Row():
-                                try:
-                                    downloaded_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-                                except:
-                                    pass      
+                                refresh_downloaded_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")                                                    
+                with gr.Column(scale=4):
+                    with gr.Tab("Model Information"):
+                        with gr.Row():
+                            with gr.Column(scale=1):
+                                with gr.Row():
+                                    downloaded_versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+                                with gr.Row():
+                                    downloaded_model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)                                                     
+                                with gr.Row():
+                                    downloaded_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
+                                with gr.Row():
+                                    downloaded_civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)
+                                with gr.Row():
+                                    downloaded_filename_list = gr.Textbox(label="Model Version File", interactive=False)
+                            with gr.Column(scale=4):                                                  
+                                with gr.Row():                                                              
+                                    downloaded_model_title_name = gr.Markdown("###", visible=True)            
+                                with gr.Row():    
+                                    downloaded_version_gallery = gr.Gallery(show_label=False).style(grid=4)
+                                    #owned_version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
+                                with gr.Row():    
+                                    downloaded_description_html = gr.HTML()                                                                                                   
+                            with gr.Column(scale=1):
+                                with gr.Row():                            
+                                    downloaded_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)                            
+                                with gr.Row():
+                                    try:
+                                        downloaded_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                                    except:
+                                        pass      
                                     
     with gr.Row(visible=False):                                         
                         
@@ -340,7 +343,7 @@ def civitai_manager_ui():
     )
     
     update_sc_btn.click(
-        fn=civitai_manager_action.on_shortcut_thumnail_update_click,
+        fn=civitai_manager_action.on_shortcut_thumbnail_update_click,
         inputs=[
             shortcut_type,
             show_only_downloaded_sc,
@@ -364,14 +367,6 @@ def civitai_manager_ui():
             sc_gallery,
         ]
     )  
-        
-    sc_gallery.select(
-        fn=civitai_manager_action.on_sc_gallery_select,
-        inputs=None,
-        outputs=[            
-            selected_model_id, 
-        ]
-    )
 
     show_only_downloaded_sc.change(
         fn=civitai_manager_action.on_shortcut_gallery_refresh,
@@ -395,12 +390,10 @@ def civitai_manager_ui():
         ]
     )    
         
-    refresh_downloaded_sc_btn.click(civitai_manager_action.on_shortcut_gallery_refresh,[shortcut_downloaded_type],[sc_downloaded_gallery])
+    sc_gallery.select(civitai_manager_action.on_sc_gallery_select,None,selected_model_id)
     # total gallery tab
 
-    # owned gallery tab
-    # 여러군데에 갱신하는 부분을 넣어줘야 한다.
-    # sc_gallery 가 참조되는 부분을 보자
+    # downloaded gallery tab start
     shortcut_downloaded_type.change(
         fn=civitai_manager_action.on_shortcut_gallery_refresh,
         inputs=[
@@ -411,15 +404,9 @@ def civitai_manager_ui():
         ]
     )   
     
-    sc_downloaded_gallery.select(
-        #같이씀
-        fn=civitai_manager_action.on_sc_gallery_select,
-        inputs=None,
-        outputs=[            
-            selected_downloaded_model_id, 
-        ]
-    )
-    # owned gallery tab
+    refresh_downloaded_sc_btn.click(civitai_manager_action.on_shortcut_gallery_refresh,[shortcut_downloaded_type],[sc_downloaded_gallery])
+    sc_downloaded_gallery.select(civitai_manager_action.on_sc_gallery_select,None,selected_downloaded_model_id)
+    # downloaded gallery tab end
     
 def init_civitai_manager():
    
@@ -439,7 +426,7 @@ def init_civitai_manager():
         setting.folders_dict["LoCon"] = shared.cmd_opts.lora_dir
     
     setting.civitai_shortcut = os.path.join(scripts.basedir(),"CivitaiShortCut.json")
-    setting.civitai_shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thum_images")
+    setting.civitai_shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thumb_images")
     setting.civitai_shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
     
     # 소유한 모델을 스캔하여 저장한다.
