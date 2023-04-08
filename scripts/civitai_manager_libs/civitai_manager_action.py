@@ -106,7 +106,6 @@ def on_shortcut_owned_type_change(sc_types):
 
 # 갤러리 방식으로 숏컬리스트 표시할때
 def on_sc_gallery_select(evt : gr.SelectData):
-    def_id = ""
     if evt.value:
         shortcut = evt.value 
         sc_model_id = shortcut[0:shortcut.find(':')]               
