@@ -298,8 +298,9 @@ def get_selected_model_info(modelid):
     model_type= None
     owned_info = ""
     def_name = ""
-
-    versions_list = []    
+    def_id = ""    
+    versions_list = list()
+    
     if modelid:
         model_info = civitai.get_model_info(modelid)
         if model_info:
@@ -308,6 +309,7 @@ def get_selected_model_info(modelid):
             if "modelVersions" in model_info.keys():            
                 def_version = model_info["modelVersions"][0]
                 def_name = def_version["name"]
+                def_id = def_version["id"]
                 for version_info in model_info['modelVersions']:
                     versions_list.append(version_info['name'])                        
                 
@@ -328,5 +330,5 @@ def get_selected_model_info(modelid):
                         except:
                             pass
                 
-    return owned_info, model_type, def_name, [v for v in versions_list]
+    return owned_info, model_type, def_name, def_id, [v for v in versions_list]
                             

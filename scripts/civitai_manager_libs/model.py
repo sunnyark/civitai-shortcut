@@ -169,13 +169,13 @@ def get_version_info(versionid:str)->dict:
     if not Owned_Versions:
         return None
     
-    if versionid in Owned_Versions.keys():
-        util.printD(Owned_Versions[versionid])
+    # if versionid in Owned_Versions.keys():
+    #     util.printD(Owned_Versions[versionid])
 
-    for vid,path in Owned_Versions.items():
-        util.printD(f"{str(vid)} : {path}")
+    # for vid,path in Owned_Versions.items():
+    #     util.printD(f"{str(vid)} : {path}")
 
-    util.printD(f"end {versionid}")                
+    # util.printD(f"end {versionid}")                
     try:
         return read_owned_versioninfo(Owned_Versions[versionid])
     except:

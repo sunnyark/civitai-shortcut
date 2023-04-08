@@ -186,6 +186,7 @@ def civitai_manager_ui():
             selected_model_id,
         ],
         outputs=[
+            selected_version_id,
             civitai_model_url_txt, 
             owned_tab, 
             owned_info, 
@@ -201,7 +202,6 @@ def civitai_manager_ui():
             selected_version_id,
         ],
         outputs=[
-            selected_model_id,
             description_html,
             trigger_words,
             filename_list,
@@ -244,9 +244,9 @@ def civitai_manager_ui():
         fn=civitai_manager_action.on_owned_selected_model_id_change,   
         inputs=[
             owned_selected_model_id,
-            owned_selected_version_id
         ],
         outputs=[
+            owned_selected_version_id,
             owned_civitai_model_url_txt,
             owned_model_type, 
             owned_versions_list,
@@ -259,7 +259,6 @@ def civitai_manager_ui():
             owned_selected_version_id,
         ],
         outputs=[
-            owned_selected_model_id,
             owned_description_html,
             owned_trigger_words,
             owned_filename_list,
@@ -313,8 +312,8 @@ def civitai_manager_ui():
         outputs=[
             sc_gallery,
             sc_owned_gallery,            
-            selected_version_id, 
-            owned_selected_version_id,
+            selected_model_id, 
+            owned_selected_model_id,
         ]
     )  
         
@@ -346,8 +345,8 @@ def civitai_manager_ui():
         fn=civitai_manager_action.on_sc_gallery_select,
         inputs=None,
         outputs=[            
-            selected_version_id, 
-            owned_selected_version_id, 
+            selected_model_id, 
+            owned_selected_model_id, 
         ]
     )
 
@@ -384,8 +383,8 @@ def civitai_manager_ui():
         fn=civitai_manager_action.on_sc_gallery_select,
         inputs=None,
         outputs=[            
-            selected_version_id, 
-            owned_selected_version_id, 
+            selected_model_id, 
+            owned_selected_model_id, 
         ]
     )
     # owned gallery tab

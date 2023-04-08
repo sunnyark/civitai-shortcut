@@ -18,9 +18,10 @@ def on_selected_model_id_change(modelid):
     owned_info = ""
     def_name = ""
     model_url = ""
+    def_id = ""
     
     if modelid:
-        owned_info, model_type, def_name, vlist= civitai_action.get_selected_model_info(modelid)
+        owned_info, model_type, def_name, def_id, vlist= civitai_action.get_selected_model_info(modelid)
 
         if model_type == "LORA":
             is_lora = True   
@@ -30,28 +31,23 @@ def on_selected_model_id_change(modelid):
 
         model_url = civitai.Url_ModelId() + str(modelid)
         
-        return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
-    return gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+        return gr.update(value=def_id),gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+    return gr.update(value=def_id),gr.update(value=model_url),gr.update(visible = is_owned),gr.update(value=owned_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
     
 # 모델의 버전 정보 불러오게 하는 루틴
 def on_selected_version_id_change(version_id:str):
     if not version_id:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
+        return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
     
     version_info = civitai.get_version_info_by_version_id(version_id) 
     
     if not version_info:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
-
-    modelid = None
-    
-    if "modelId" in version_info.keys():
-        modelid = version_info["modelId"]
+        return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
                 
     dhtml, triger, flist, mtype = civitai_action.get_version_description_by_version_info(version_info)
     title_name = civitai_action.get_model_title_name_by_version_info(version_info)    
     
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
+    return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
     
 def on_description_html_change(version_id):
     return civitai_action.get_version_description_gallery_by_version_id(version_id)
@@ -71,32 +67,28 @@ def on_versions_list_select(evt: gr.SelectData, model_id:str):
 
 
 # download model information start
-def on_owned_selected_model_id_change(modelid, def_id:str):
+def on_owned_selected_model_id_change(modelid):
     model_type = ""
     def_name = ""
     model_url = ""
+    def_id = ""
     
     if modelid:
-        owned_info, model_type, def_name, vlist= model_action.get_selected_owned_modelinfo(modelid,def_id)
+        owned_info, model_type, def_name, def_id, vlist= model_action.get_selected_owned_modelinfo(modelid)
         model_url = civitai.Url_ModelId() + str(modelid)
         
-        return gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
-    return gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+        return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+    return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
 
 def on_owned_selected_version_id_change(versionid:str):
     
     if not versionid:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
+        return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
     
     version_info = model.get_version_info(versionid) 
     
     if not version_info:
-        return gr.update(value=""),gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
-
-    modelid = None
-    
-    if "modelId" in version_info.keys():
-        modelid = version_info["modelId"]
+        return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
                     
     dhtml, triger, flist, mtype = model_action.get_version_description(version_info)
     title_name = model_action.get_model_title_name(version_info)    
@@ -107,7 +99,7 @@ def on_owned_selected_version_id_change(versionid:str):
             file_text = file_text + "\n"
         file_text = file_text + file
         
-    return gr.update(value=modelid),gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=file_text),title_name,None,None    
+    return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=file_text),title_name,None,None    
     
 
 def on_owned_description_html_change(versionid):
@@ -171,20 +163,11 @@ def on_shortcut_owned_type_change(sc_types):
 
 # 갤러리 방식으로 숏컬리스트 표시할때
 def on_sc_gallery_select(evt : gr.SelectData):
-    def_id = ""
     if evt.value:
         shortcut = evt.value 
         sc_model_id = shortcut[0:shortcut.find(':')]      
-        
-        def_info = civitai.get_latest_version_info_by_model_id(sc_model_id)
-        if def_info:
-            def_id = def_info['id']
-            
-        def_owned_info = model.get_default_version_info(sc_model_id)
-        if def_owned_info:
-            def_owned_id = def_owned_info['id']
                         
-    return gr.update(value=def_id), gr.update(value=def_owned_id)
+    return gr.update(value=sc_model_id), gr.update(value=sc_model_id)
 
 # civitai_internet_url 필드를 클리어 하기 위한것
 def on_civitai_model_url_txt_change():
@@ -198,9 +181,9 @@ def on_civitai_internet_url_upload(files, sc_types, sc_owned_types):
             shortcut = util.load_InternetShortcut(file.name)            
             model_id, model_url, def_id = internet_shortcut_upload(shortcut)
             
-    if not def_id:
+    if not model_id:
         return gr.update(value=ishortcut.get_image_list(sc_types)),gr.update(value=ishortcut.get_owned_image_list(sc_owned_types)),gr.update(value=""),gr.update(value="")
-    return gr.update(value=ishortcut.get_image_list(sc_types)),gr.update(value=ishortcut.get_owned_image_list(sc_owned_types)),gr.update(value=def_id),gr.update(value=def_id)
+    return gr.update(value=ishortcut.get_image_list(sc_types)),gr.update(value=ishortcut.get_owned_image_list(sc_owned_types)),gr.update(value=model_id),gr.update(value=model_id)
 
 def internet_shortcut_upload(url):
     if url:  
