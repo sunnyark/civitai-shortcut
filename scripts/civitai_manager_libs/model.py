@@ -6,24 +6,24 @@ from . import setting
 # 이 모듈은 다운로드 받은 정보를 관리한다.
 # civitai 와의 연결은 최소화하고 local의 관리를 목표로 한다.
 
-Owned_Models = dict()
-Owned_Versions = dict()
+Downloaded_Models = dict()
+Downloaded_Versions = dict()
 
 def Test_Models():
-    if Owned_Models:
-        for mid, vlist in Owned_Models.items():
+    if Downloaded_Models:
+        for mid, vlist in Downloaded_Models.items():
             util.printD(f"{mid} :\n")
             # for path in vlist:
             #     print(f"{path}\n")
             
-def Load_Owned_Models():
-    global Owned_Models
-    global Owned_Versions
+def Load_Downloaded_Models():
+    global Downloaded_Models
+    global Downloaded_Versions
     
-    Owned_Models, Owned_Versions = get_owned_modelpath()
+    Downloaded_Models, Downloaded_Versions = get_model_path()
     
 # 단순히 소유한 모델의 modelid만을 리스트로 반환한다
-def get_owned_modelid():
+def get_modelid():
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = util.search_file(root_dirs,None,".info")
     modelid_list = list()   
@@ -44,7 +44,7 @@ def get_owned_modelid():
     return None
 
 # 단순히 소유한 모델의 타입별 modelid만을 리스트로 반환한다
-def get_owned_modelid_byType(ctype):
+def get_modelid_byType(ctype):
     root_dir = [setting.folders_dict[setting.content_types_dict[ctype]]]
     file_list = util.search_file(root_dir,None,".info")
     modelid_list = list()   
@@ -65,7 +65,7 @@ def get_owned_modelid_byType(ctype):
     return None
 
 # modelid를 키로 modelid가 같은 version_info를 list로 묶어 반환한다.
-def get_owned_modelinfo()->dict:
+def get_model_info()->dict:
     #root_dirs = [setting.folders_dict[setting.content_types_dict[ctype]]]
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = util.search_file(root_dirs,None,".info")
@@ -95,7 +95,7 @@ def get_owned_modelinfo()->dict:
     return None,None
 
 # modelid를 키로 modelid가 같은 version_info의 File Path를 list로 묶어 반환한다.
-def get_owned_modelpath()->dict:
+def get_model_path()->dict:
     #root_dirs = [setting.folders_dict[setting.content_types_dict[ctype]]]
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = util.search_file(root_dirs,None,".info")
@@ -127,16 +127,16 @@ def get_version_id_by_version_name(modelid, versionname):
     if not modelid:
         return 
 
-    if not Owned_Models:
+    if not Downloaded_Models:
         return
         
-    if str(modelid) in Owned_Models.keys():
+    if str(modelid) in Downloaded_Models.keys():
         file_list = dict()
-        for version_paths in Owned_Models[str(modelid)]:
+        for version_paths in Downloaded_Models[str(modelid)]:
             file_list[os.path.basename(version_paths)] = version_paths
         
         for file,path in file_list.items():
-            vinfo = read_owned_versioninfo(path)
+            vinfo = read_versioninfo(path)
             try:  
                 if vinfo['name'] == versionname:
                     return vinfo['id']
@@ -148,16 +148,16 @@ def get_default_version_info(modelid):
     if not modelid:
         return 
 
-    if not Owned_Models:
+    if not Downloaded_Models:
         return
         
-    if str(modelid) in Owned_Models.keys():
+    if str(modelid) in Downloaded_Models.keys():
         file_list = dict()
-        for version_paths in Owned_Models[str(modelid)]:
+        for version_paths in Downloaded_Models[str(modelid)]:
             file_list[os.path.basename(version_paths)] = version_paths
                 
         for file,path in file_list.items():
-            return read_owned_versioninfo(path)
+            return read_versioninfo(path)
         
     return None        
     
@@ -166,30 +166,30 @@ def get_version_info(versionid:str)->dict:
     if not versionid:
         return None
 
-    if not Owned_Versions:
+    if not Downloaded_Versions:
         return None
     
-    # if versionid in Owned_Versions.keys():
-    #     util.printD(Owned_Versions[versionid])
+    # if versionid in Downloaded_Versions.keys():
+    #     util.printD(Downloaded_Versions[versionid])
 
-    # for vid,path in Owned_Versions.items():
+    # for vid,path in Downloaded_Versions.items():
     #     util.printD(f"{str(vid)} : {path}")
 
     # util.printD(f"end {versionid}")                
     try:
-        return read_owned_versioninfo(Owned_Versions[versionid])
+        return read_versioninfo(Downloaded_Versions[versionid])
     except:
         pass
     
     return None
     
 def get_version_images(versionid:str):
-    if not Owned_Versions:
+    if not Downloaded_Versions:
         return
 
     file_list = list()    
-    if versionid in Owned_Versions.keys():        
-        path = Owned_Versions[versionid]  
+    if versionid in Downloaded_Versions.keys():        
+        path = Downloaded_Versions[versionid]  
         try:
             vfolder , vfile = os.path.split(path)
             # versionname . civitai.info 형식이다.
@@ -208,7 +208,7 @@ def get_version_images(versionid:str):
     return file_list if len(file_list) > 0 else None
             
 # 버전 모델 인포 데이터를 파일에서 읽어옴
-def read_owned_versioninfo(path)->dict:
+def read_versioninfo(path)->dict:
     version_info = None
     if not path:
         return None    

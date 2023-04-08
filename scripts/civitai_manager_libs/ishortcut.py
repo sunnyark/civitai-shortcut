@@ -9,7 +9,7 @@ import requests
 
 from tqdm import tqdm
 
-def OwnedModel_to_Shortcut():
+def DownloadedModel_to_Shortcut():
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = list(set(util.search_file(root_dirs,None,".info")))
         
@@ -58,7 +58,25 @@ def OwnedModel_to_Shortcut():
         else:
             ISC = add_ISC            
         save(ISC)    
-            
+
+def get_thumnail_list(shortcut_types=None,only_downloaded=False):
+    
+    shortlist =  get_image_list(shortcut_types)
+    if not shortlist:
+        return None
+    
+    if only_downloaded:
+        if model.Downloaded_Models:                
+            downloaded_list = list()            
+            for short in shortlist:
+                sc_name = short[1]
+                mid = str(sc_name[0:sc_name.find(':')])
+                if mid in model.Downloaded_Models.keys():
+                    downloaded_list.append(short)
+            return downloaded_list
+    else:
+        return shortlist
+    return None            
         
 def get_list(shortcut_types=None)->str:
     
@@ -85,8 +103,7 @@ def get_list(shortcut_types=None)->str:
                 shotcutlist.append(f"{v['id']}:{v['name']}")                
                     
     return [v for v in shotcutlist]
-
-
+    
 def get_image_list(shortcut_types=None)->str:
     
     ISC = load()                           
@@ -118,20 +135,6 @@ def get_image_list(shortcut_types=None)->str:
                     shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
                     
     return [v for v in shotcutlist]
-
-def get_owned_image_list(shortcut_types=None):
-    owned_list = list()
-    if model.Owned_Models:        
-        shortlist =  get_image_list(shortcut_types)
-        if not shortlist:
-            return None
-        
-        for short in shortlist:
-            sc_name = short[1]
-            mid = str(sc_name[0:sc_name.find(':')])
-            if mid in model.Owned_Models.keys():
-                owned_list.append(short)
-    return owned_list    
 
 def download_all_images():
     ISC = load()                           

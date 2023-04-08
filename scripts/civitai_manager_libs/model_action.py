@@ -2,30 +2,30 @@ import os
 from . import model
 from . import civitai
     
-def get_selected_owned_modelinfo(modelid):
+def get_selected_downloaded_modelinfo(modelid):
     model_type= None
-    owned_info = ""
+    downloaded_info = ""
     def_name = ""
     def_info = None
     def_id = None
     versions_list = []    
     if modelid:
-        if model.Owned_Models:
-            if str(modelid) in model.Owned_Models.keys():
+        if model.Downloaded_Models:
+            if str(modelid) in model.Downloaded_Models.keys():
                 file_list = dict()
                 
-                for version_paths in model.Owned_Models[str(modelid)]:
+                for version_paths in model.Downloaded_Models[str(modelid)]:
                     file_list[os.path.basename(version_paths)] = version_paths
                 
                 for file,path in file_list.items():
-                    vinfo = model.read_owned_versioninfo(path)
+                    vinfo = model.read_versioninfo(path)
                     if vinfo:
                         if not def_info:
                             def_info = vinfo
                         try:  
-                            if owned_info != "":
-                                owned_info = owned_info + "\n"
-                            owned_info = owned_info + f"{vinfo['name']}"
+                            if downloaded_info != "":
+                                downloaded_info = downloaded_info + "\n"
+                            downloaded_info = downloaded_info + f"{vinfo['name']}"
                             versions_list.append(vinfo['name'])  
                         except:
                             pass
@@ -36,7 +36,7 @@ def get_selected_owned_modelinfo(modelid):
                 if "model" in def_info.keys():
                     model_type = def_info['model']['type']                
                                     
-    return owned_info, model_type, def_name, def_id, [v for v in versions_list]
+    return downloaded_info, model_type, def_name, def_id, [v for v in versions_list]
 
 def get_model_title_name(version_info:dict)->str:
     if not version_info:

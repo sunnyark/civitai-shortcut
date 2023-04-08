@@ -45,7 +45,7 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
                 util.printD(f"Wrote version info : {info_file}")
             
             # 모델 인포가 생성되면 모델 정보를 갱신한다.
-            model.Load_Owned_Models()
+            model.Load_Downloaded_Models()
             
         except:
             pass
@@ -313,11 +313,11 @@ def get_selected_model_info(modelid):
                 for version_info in model_info['modelVersions']:
                     versions_list.append(version_info['name'])                        
                 
-        if model.Owned_Models:                        
-            if str(modelid) in model.Owned_Models.keys():
+        if model.Downloaded_Models:                        
+            if str(modelid) in model.Downloaded_Models.keys():
                 file_list = dict()
                 
-                for version_paths in model.Owned_Models[str(modelid)]:
+                for version_paths in model.Downloaded_Models[str(modelid)]:
                     file_list[os.path.basename(version_paths)] = version_paths
                 
                 for file,path in file_list.items():
