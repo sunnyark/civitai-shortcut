@@ -102,7 +102,7 @@ def get_list(shortcut_types=None)->str:
             else:                                
                 shotcutlist.append(f"{v['id']}:{v['name']}")                
                     
-    return [v for v in shotcutlist]
+    return shotcutlist
     
 def get_image_list(shortcut_types=None)->str:
     
@@ -133,8 +133,8 @@ def get_image_list(shortcut_types=None)->str:
                     shotcutlist.append((os.path.join(setting.civitai_shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
                 else:
                     shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
-                    
-    return [v for v in shotcutlist]
+    
+    return shotcutlist                
 
 def download_all_images():
     ISC = load()                           

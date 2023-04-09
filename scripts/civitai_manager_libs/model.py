@@ -188,6 +188,7 @@ def get_version_images(versionid:str):
         return
 
     file_list = list()    
+    vfolder = None
     if versionid in Downloaded_Versions.keys():        
         path = Downloaded_Versions[versionid]  
         try:
@@ -201,12 +202,55 @@ def get_version_images(versionid:str):
                 if os.path.isdir(file):
                     continue
                 if file.endswith(".png") and file.startswith(base):
-                    file_list.append(os.path.join(vfolder,file))            
+                    file_list.append(os.path.join(vfolder, file))            
         except:
             return
         
     return file_list if len(file_list) > 0 else None
+
+# 다운로드 받은 파일만 리턴한다
+def get_version_files(versioninfo):
+    if not Downloaded_Versions:
+        return
+
+    if not versioninfo:
+        return
+    
+    versionid = str(versioninfo['id'])
+
+    infofiles = list()
+        
+    if 'files' in versioninfo.keys():
+        for file in versioninfo['files']:
+            infofiles.append(file['name'])
+    else:
+        return
+               
+    file_list = list()    
+    vfolder = None
+    if versionid in Downloaded_Versions.keys():        
+        path = Downloaded_Versions[versionid]  
+        try:
+            vfolder , vfile = os.path.split(path)
+            # versionname . civitai.info 형식이다.
+            # 그래서 두번
+            base , ext = os.path.splitext(vfile)
+            base , ext = os.path.splitext(base)
             
+            # 폴더를 구함
+                                
+            for file in os.listdir(vfolder):
+                if os.path.isdir(file):
+                    continue
+
+                if file in infofiles:
+                    file_list.append(os.path.join(vfolder, file))
+        except:
+            return
+        
+    return file_list if len(file_list) > 0 else None
+    
+    
 # 버전 모델 인포 데이터를 파일에서 읽어옴
 def read_versioninfo(path)->dict:
     version_info = None

@@ -6,7 +6,6 @@ from . import civitai
 from . import util
 from . import downloader
 from . import setting
-from . import model
 from tqdm import tqdm
     
 def download_file_thread(file_name, version_id, lora_an, vs_folder):               
@@ -38,18 +37,14 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
             thread = threading.Thread(target=downloader.download_file,args=(download_files[file]['downloadUrl'], path_dl_file))
             # Start the thread
             thread.start()                
-
-            # 버전 인포 파일 저장. primary 이름으로 저장한다.
-            info_file = civitai.write_version_info(model_folder,version_info)
-            if info_file:
-                util.printD(f"Wrote version info : {info_file}")
-            
-            # 모델 인포가 생성되면 모델 정보를 갱신한다.
-            model.Load_Downloaded_Models()
-            
         except:
             pass
 
+    # 버전 인포 파일 저장. primary 이름으로 저장한다.
+    info_file = civitai.write_version_info(model_folder,version_info)
+    if info_file:
+        util.printD(f"Wrote version info : {info_file}")
+            
     # triger words 가 있으면 저장. primary 이름으로 저장한다.
     triger_file = civitai.write_triger_words_by_version_info(model_folder,version_info)
     if triger_file:
@@ -120,7 +115,7 @@ def download_image_files(version_id, lora_an, vs_folder):
                 
                 # set image_counter
                 image_count = image_count + 1
-    
+            
         message = f"Downloaded images"
     return message       
 
@@ -253,12 +248,6 @@ def get_version_description_by_version_info(version_info:dict):
                 
     html_versionpart = f"<br><b>Version:</b> {model_version_name}"
 
-    # html_imgpart = "<div with=100%>"
-    # for pic in version_info['images']:
-    #      image_url = util.change_width_from_image_url(pic["url"], pic["width"])
-    #      html_imgpart = html_imgpart + f'<img src="{image_url}" width=200px></img>'                            
-    # html_imgpart = html_imgpart + '</div><br>'
-
     if 'files' in version_info:                                
         for file in version_info['files']:
             files_name.append(file['name'])
@@ -266,7 +255,7 @@ def get_version_description_by_version_info(version_info:dict):
                         
     output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
     
-    return output_html, output_training, [v for v in files_name], model_info['type']     
+    return output_html, output_training, files_name, model_info['type']     
 
 def get_shortcut_model_info(model_id:str):
     model_name = None
@@ -313,22 +302,5 @@ def get_selected_model_info(modelid):
                 for version_info in model_info['modelVersions']:
                     versions_list.append(version_info['name'])                        
                 
-        if model.Downloaded_Models:                        
-            if str(modelid) in model.Downloaded_Models.keys():
-                file_list = dict()
-                
-                for version_paths in model.Downloaded_Models[str(modelid)]:
-                    file_list[os.path.basename(version_paths)] = version_paths
-                
-                for file,path in file_list.items():
-                    vinfo = civitai.read_version_info(path)
-                    if vinfo:                      
-                        try:  
-                            if owned_info != "":
-                                owned_info = owned_info + "\n"
-                            owned_info = owned_info + f"{vinfo['name']}"
-                        except:
-                            pass
-                
-    return owned_info, model_type, def_name, def_id, [v for v in versions_list]
+    return model_type, def_name, def_id, versions_list
                             

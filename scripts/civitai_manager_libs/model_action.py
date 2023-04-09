@@ -1,6 +1,7 @@
 import os
 from . import model
 from . import civitai
+from . import util
     
 def get_selected_downloaded_modelinfo(modelid):
     model_type= None
@@ -23,8 +24,7 @@ def get_selected_downloaded_modelinfo(modelid):
                         if not def_info:
                             def_info = vinfo
                         try:  
-                            if downloaded_info != "":
-                                downloaded_info = downloaded_info + "\n"
+                            downloaded_info = downloaded_info + "\n" if len(downloaded_info.strip()) > 0 else ""
                             downloaded_info = downloaded_info + f"{vinfo['name']}"
                             versions_list.append(vinfo['name'])  
                         except:
@@ -36,7 +36,24 @@ def get_selected_downloaded_modelinfo(modelid):
                 if "model" in def_info.keys():
                     model_type = def_info['model']['type']                
                                     
-    return downloaded_info, model_type, def_name, def_id, [v for v in versions_list]
+    return downloaded_info, model_type, def_name, def_id, versions_list
+
+def get_model_versions(modelid:str):
+    downloaded_version_list = list()
+    if modelid:
+        if model.Downloaded_Models:                        
+            if str(modelid) in model.Downloaded_Models.keys():
+                file_list = dict()
+                
+                for version_paths in model.Downloaded_Models[str(modelid)]:
+                    file_list[os.path.basename(version_paths)] = version_paths
+                
+                for file,path in file_list.items():
+                    vinfo = civitai.read_version_info(path)
+                    if vinfo:                      
+                        downloaded_version_list.append(vinfo['name'])
+                        
+    return downloaded_version_list if len(downloaded_version_list) > 0 else None
 
 def get_model_title_name(version_info:dict)->str:
     if not version_info:
@@ -53,7 +70,7 @@ def get_version_description(version_info:dict):
     output_html = ""
     output_training = ""
 
-    files_name = []
+    files_name = list()
     
     html_typepart = ""
     html_trainingpart = ""
@@ -95,20 +112,27 @@ def get_version_description(version_info:dict):
                             
     html_versionpart = f"<br><b>Version:</b> {model_version_name}"
 
+    # 다운 받은 파일만 표시
+    vfolder = None
+    files = model.get_version_files(version_info)
+    if files:
+        vfolder , vfile = os.path.split(files[0])
+                            
     if 'files' in version_info:                                
         for file in version_info['files']:
-            files_name.append(file['name'])
             html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
-                        
+            if files:
+                if os.path.join(vfolder, file['name']) in files:
+                    files_name.append(file['name'])
+                                                
     output_html = html_typepart + html_modelpart + html_versionpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
     
     return output_html, output_training, files_name, model_type
-
-from . import util
+                        
 def get_version_description_gallery(versionid):
     if not versionid:
         return None,None
     imagelist = model.get_version_images(versionid)
-    return imagelist,imagelist
+    return imagelist, imagelist
 
 

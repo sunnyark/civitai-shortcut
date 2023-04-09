@@ -21,8 +21,12 @@ def on_selected_model_id_change(modelid):
     def_id = ""
     
     if modelid:
-        downloaded_info, model_type, def_name, def_id, vlist= civitai_action.get_selected_model_info(modelid)
+        model_type, def_name, def_id, vlist= civitai_action.get_selected_model_info(modelid)
+        downloaded_versions_list = model_action.get_model_versions(modelid)
 
+        if downloaded_versions_list:
+            downloaded_info = "\n".join(downloaded_versions_list)
+            
         if model_type == "LORA":
             is_lora = True   
         
@@ -73,7 +77,6 @@ def on_selected_downloaded_model_id_change(modelid):
     if modelid:
         downloaded_info, model_type, def_name, def_id, vlist= model_action.get_selected_downloaded_modelinfo(modelid)
         model_url = civitai.Url_ModelId() + str(modelid)
-        
         return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
     return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
 
@@ -90,11 +93,8 @@ def on_selected_downloaded_version_id_change(versionid:str):
     dhtml, triger, flist, mtype = model_action.get_version_description(version_info)
     title_name = model_action.get_model_title_name(version_info)    
     
-    file_text = ""
-    for file in flist:
-        if file_text != "":
-            file_text = file_text + "\n"
-        file_text = file_text + file
+    if flist:
+        file_text = "\n".join(flist)
         
     return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=file_text),title_name,None,None    
     
@@ -116,7 +116,7 @@ def on_downloaded_versions_list_select(evt: gr.SelectData, model_id:str):
     
     
 # page download action start    
-def on_download_images_click(version_id:str, lora_an=False,vs_folder=True):
+def on_download_images_click(version_id:str, lora_an=False, vs_folder=True):
     msg = None
     if not version_id:
         return msg
@@ -124,19 +124,25 @@ def on_download_images_click(version_id:str, lora_an=False,vs_folder=True):
     msg = civitai_action.download_image_files(version_id, lora_an, vs_folder)
     return msg
 
-def on_download_model_click(version_id:str, file_name=None, lora_an=False,vs_folder=True):
+
+# 다운 로드후 shortcut 리스트를 갱신한다.
+def on_download_model_click(version_id:str, file_name, lora_an, vs_folder , sc_types, show_only_downloaded_sc, sc_downloaded_types):
     msg = None
     if not version_id:
-        return
-    
+        return msg, gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+    # 이미지와 파일 모두를 다운 받는다.
     msg = civitai_action.download_file_thread(file_name, version_id, lora_an, vs_folder)
-    return msg
+    civitai_action.download_image_files(version_id, lora_an, vs_folder)
+    # 다운 받은 모델 정보를 갱신한다.    
+    model.Load_Downloaded_Models()
+    return msg, gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
 # page download action end
 
 
 
 # left menu action start   
 def on_shortcut_gallery_refresh(sc_types,show_only_downloaded_sc=True):
+    model.Load_Downloaded_Models()
     return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc))
   
 def on_shortcut_del_btn_click(model_id, sc_types, show_only_downloaded_sc, sc_downloaded_types):
