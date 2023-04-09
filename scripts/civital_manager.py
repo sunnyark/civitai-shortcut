@@ -89,8 +89,6 @@ def civitai_manager_ui():
                                         send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                                     except:
                                         pass   
-                
-                    
 
             
         with gr.TabItem("Downloaded Shortcut" , id="civitai02"):
@@ -142,9 +140,25 @@ def civitai_manager_ui():
                                         downloaded_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                                     except:
                                         pass      
+                                    
+                                    
+                                    
         # with gr.TabItem("Browsing Downloaded Images" , id="civitai03"):
-        #     pass
-    with gr.Row(visible=False):                                         
+        #     with gr.Row(): 
+        #         with gr.Column(scale=5):
+        #             with gr.Row():    
+        #                 downloaded_gallery = gr.Gallery(show_label=False,value=model.get_images()).style(grid=8)
+        #         with gr.Column(scale=1):
+        #             with gr.Row():                            
+        #                 downloaded_img_file_info2 = gr.Textbox(label="Generate Info", interactive=False, lines=6)
+        #             with gr.Row():
+        #                 try:
+        #                     downloaded_send_to_buttons2 = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+        #                 except:
+        #                     pass  
+        
+        
+    with gr.Row(visible=False):
                         
         #civitai model select model
         selected_version_id = gr.Textbox()

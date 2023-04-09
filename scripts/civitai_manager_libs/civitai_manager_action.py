@@ -130,11 +130,13 @@ def on_download_model_click(version_id:str, file_name, lora_an, vs_folder , sc_t
     msg = None
     if not version_id:
         return msg, gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+    
     # 이미지와 파일 모두를 다운 받는다.
     msg = civitai_action.download_file_thread(file_name, version_id, lora_an, vs_folder)
     civitai_action.download_image_files(version_id, lora_an, vs_folder)
     # 다운 받은 모델 정보를 갱신한다.    
     model.Load_Downloaded_Models()
+    
     return msg, gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
 # page download action end
 

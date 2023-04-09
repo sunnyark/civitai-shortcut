@@ -114,10 +114,10 @@ def get_model_path()->dict:
                         if mid not in models.keys():
                             models[mid] = list()
                         models[mid].append(file_path)
-                        versions[vid] = file_path                        
+                        versions[vid] = file_path                                                
             except:
                 pass
-            
+    
     if len(models) > 0:
         return models,versions
     
@@ -182,7 +182,21 @@ def get_version_info(versionid:str)->dict:
         pass
     
     return None
+
+def get_images():
+    if not Downloaded_Versions:
+        return
+
+    file_list = list()    
+    for versionid in Downloaded_Versions.keys():
+        tmp_list = get_version_images(versionid)
+        if tmp_list:
+            file_list.extend(tmp_list)
     
+    file_list = list(set(file_list))
+        
+    return file_list if len(file_list) > 0 else None    
+
 def get_version_images(versionid:str):
     if not Downloaded_Versions:
         return
