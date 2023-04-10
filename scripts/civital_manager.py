@@ -12,14 +12,12 @@ from scripts.civitai_manager_libs import civitai_action
 from scripts.civitai_manager_libs import util
 from scripts.civitai_manager_libs import model   
 
+
 def tab_test():
     return gr.update(selected="civitai01")
 
-def on_goto_civitai_model_tab_click(selected_downloaded_model_id):    
-    return gr.update(selected="civitai01"),gr.update(value=selected_downloaded_model_id)
-
-def civitai_manager_ui():      
-    with gr.Tabs() as civitai_tab:
+def civitai_shortcut_ui():    
+    with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tab:
         with gr.TabItem("Civitai Shortcut" , id="civitai01"):
             with gr.Row(): 
                 with gr.Column(scale=1):
@@ -35,7 +33,7 @@ def civitai_manager_ui():
                             with gr.Row():
                                 shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
                             with gr.Row():
-                                sc_gallery = gr.Gallery(show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=1)
+                                sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=[1],height="auto")
                             with gr.Row():
                                 show_only_downloaded_sc = gr.Checkbox(label="Show downloaded shortcut only", value=False)                        
                             with gr.Row():
@@ -77,8 +75,7 @@ def civitai_manager_ui():
                                 with gr.Row():                                                              
                                     model_title_name = gr.Markdown("###", visible=True)            
                                 with gr.Row():    
-                                    version_gallery = gr.Gallery(show_label=False).style(grid=4)
-                                    #version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
+                                    version_gallery = gr.Gallery(label="Version Gallery", show_label=False, elem_id="version_gallery").style(grid=[4],height="auto")
                                 with gr.Row():    
                                     description_html = gr.HTML()                                                                                                   
                             with gr.Column(scale=1):
@@ -99,12 +96,9 @@ def civitai_manager_ui():
                             with gr.Row():
                                 shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                             with gr.Row():
-                                sc_downloaded_gallery = gr.Gallery(show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=1)
+                                sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=[1],height="auto")
                             with gr.Row():
                                 refresh_downloaded_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")
-                                
-                            # with gr.Row():
-                            #     select_tab_test = gr.Button(value="goto tabs",variant="primary")  
                                                                 
                 with gr.Column(scale=4):
                     with gr.Tab("Model Information"):
@@ -128,8 +122,7 @@ def civitai_manager_ui():
                                 with gr.Row():                                                              
                                     downloaded_model_title_name = gr.Markdown("###", visible=True)            
                                 with gr.Row():    
-                                    downloaded_version_gallery = gr.Gallery(show_label=False).style(grid=4)
-                                    #owned_version_gallery = gr.Gallery(show_label=False).style(grid=opts.images_history_page_columns)
+                                    downloaded_version_gallery = gr.Gallery(label="Downloaded Version Gallery", show_label=False, elem_id="downloaded_version_gallery").style(grid=[4],height="auto")
                                 with gr.Row():    
                                     downloaded_description_html = gr.HTML()                                                                                                   
                             with gr.Column(scale=1):
@@ -143,19 +136,20 @@ def civitai_manager_ui():
                                     
                                     
                                     
-        # with gr.TabItem("Browsing Downloaded Images" , id="civitai03"):
-        #     with gr.Row(): 
-        #         with gr.Column(scale=5):
-        #             with gr.Row():    
-        #                 downloaded_gallery = gr.Gallery(show_label=False,value=model.get_images()).style(grid=8)
-        #         with gr.Column(scale=1):
-        #             with gr.Row():                            
-        #                 downloaded_img_file_info2 = gr.Textbox(label="Generate Info", interactive=False, lines=6)
-        #             with gr.Row():
-        #                 try:
-        #                     downloaded_send_to_buttons2 = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-        #                 except:
-        #                     pass  
+        with gr.TabItem("Browsing Downloaded Images" , id="civitai03"):
+            with gr.Row(): 
+                with gr.Column(scale=5):
+                    with gr.Row():    
+                        pass
+                        downloaded_gallery = gr.Gallery(label="Downloaded Images Gallery", elem_id="downloaded_images_gallery",show_label=False,value=model.get_images()).style(grid=[8],height="auto")
+                with gr.Column(scale=1):
+                    with gr.Row():                            
+                        downloaded_img_file_info2 = gr.Textbox(label="Generate Info", interactive=False, lines=6)
+                    with gr.Row():
+                        try:
+                            downloaded_send_to_buttons2 = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                        except:
+                            pass  
         
         
     with gr.Row(visible=False):
@@ -330,7 +324,7 @@ def civitai_manager_ui():
     
 
     goto_civitai_model_tab.click(
-        fn=on_goto_civitai_model_tab_click,
+        fn=civitai_manager_action.on_goto_civitai_model_tab_click,
         inputs=[
             selected_downloaded_model_id
         ],        
@@ -456,7 +450,7 @@ def civitai_manager_ui():
     sc_downloaded_gallery.select(civitai_manager_action.on_sc_gallery_select,None,selected_downloaded_model_id)
     # downloaded gallery tab end
     
-def init_civitai_manager():
+def init_civitai_shortcut():
    
     setting.root_path = os.getcwd()
     
@@ -481,13 +475,13 @@ def init_civitai_manager():
     model.Load_Downloaded_Models()
                
 # init
-init_civitai_manager()
+init_civitai_shortcut()
         
 def on_ui_tabs():
-    with gr.Blocks() as civitai_manager:
-    	civitai_manager_ui()
+    with gr.Blocks() as civitai_shortcut:
+        civitai_shortcut_ui()
     
-    return (civitai_manager, "Civitai", "civitai_manager"),
+    return (civitai_shortcut, "Civitai Shortcut", "civitai_shortcut"),
 
 
 script_callbacks.on_ui_tabs(on_ui_tabs)

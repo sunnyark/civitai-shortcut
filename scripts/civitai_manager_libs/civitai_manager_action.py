@@ -111,6 +111,9 @@ def on_downloaded_versions_list_select(evt: gr.SelectData, model_id:str):
     version_id = model.get_version_id_by_version_name(model_id, evt.value)
           
     return gr.Textbox.update(value=version_id)
+
+def on_goto_civitai_model_tab_click(selected_downloaded_model_id):    
+    return gr.update(selected="civitai01"), gr.update(value=selected_downloaded_model_id)
 # download model information end
 
     
