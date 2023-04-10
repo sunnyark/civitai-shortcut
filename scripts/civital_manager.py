@@ -12,10 +12,6 @@ from scripts.civitai_manager_libs import civitai_action
 from scripts.civitai_manager_libs import util
 from scripts.civitai_manager_libs import model   
 
-
-def tab_test():
-    return gr.update(selected="civitai01")
-
 def civitai_shortcut_ui():    
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tab:
         with gr.TabItem("Civitai Shortcut" , id="civitai01"):
@@ -136,20 +132,20 @@ def civitai_shortcut_ui():
                                     
                                     
                                     
-        with gr.TabItem("Browsing Downloaded Images" , id="civitai03"):
-            with gr.Row(): 
-                with gr.Column(scale=5):
-                    with gr.Row():    
-                        pass
-                        downloaded_gallery = gr.Gallery(label="Downloaded Images Gallery", elem_id="downloaded_images_gallery",show_label=False,value=model.get_images()).style(grid=[8],height="auto")
-                with gr.Column(scale=1):
-                    with gr.Row():                            
-                        downloaded_img_file_info2 = gr.Textbox(label="Generate Info", interactive=False, lines=6)
-                    with gr.Row():
-                        try:
-                            downloaded_send_to_buttons2 = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-                        except:
-                            pass  
+        # with gr.TabItem("Browsing Downloaded Images" , id="civitai03"):
+        #     with gr.Row(): 
+        #         with gr.Column(scale=5):
+        #             with gr.Row():    
+        #                 dnimages_gallery = gr.Gallery(label="Downloaded Images Gallery", elem_id="downloaded_images_gallery",show_label=False,value=model.get_images()).style(grid=[8],height="auto")
+                        
+        #         with gr.Column(scale=1):
+        #             with gr.Row():                            
+        #                 dnimages_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6)
+        #             with gr.Row():
+        #                 try:
+        #                     dnimages_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+        #                 except:
+        #                     pass  
         
         
     with gr.Row(visible=False):
@@ -175,13 +171,22 @@ def civitai_shortcut_ui():
         downloaded_hidden = gr.Image(type="pil")
         downloaded_info1 = gr.Textbox()
         downloaded_info2 = gr.Textbox()  
+        
+        # downloaded images browser
+        # dnimages_img_index = gr.Number(show_label=False)
+        # dnimages_images_url = gr.State(model.get_images())
+        # dnimages_hidden = gr.Image(type="pil")
+        # dnimages_info1 = gr.Textbox()
+        # dnimages_info2 = gr.Textbox()  
                                                 
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
         modules.generation_parameters_copypaste.bind_buttons(downloaded_send_to_buttons, downloaded_hidden,downloaded_img_file_info)
+        # modules.generation_parameters_copypaste.bind_buttons(dnimages_send_to_buttons, dnimages_hidden,dnimages_img_file_info)
     except:
         pass
-              
+
+                 
     # 다운로드
     download_model.click(
         fn=civitai_manager_action.on_download_model_click,
@@ -211,7 +216,12 @@ def civitai_shortcut_ui():
         outputs=[message_log]
     )
     
-    # civitai model information
+    # downloaded images browser start 
+    # dnimages_gallery.select(civitai_manager_action.on_gallery_select, dnimages_images_url, [dnimages_img_index, dnimages_hidden])    
+    # dnimages_hidden.change(fn=modules.extras.run_pnginfo, inputs=[dnimages_hidden], outputs=[dnimages_info1, dnimages_img_file_info, dnimages_info2]) 
+    # downloaded images browser end
+    
+    # civitai model information start
     # 버전을 하나 선택
     versions_list.select(
         fn=civitai_manager_action.on_versions_list_select,
@@ -267,7 +277,7 @@ def civitai_shortcut_ui():
 
     version_gallery.select(civitai_manager_action.on_gallery_select, version_images_url, [img_index, hidden])    
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])      
-    # civitai model information
+    # civitai model information end
     
     
     # download model information start
