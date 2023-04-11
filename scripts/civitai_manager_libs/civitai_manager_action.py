@@ -86,7 +86,7 @@ def on_selected_downloaded_version_id_change(versionid:str):
         return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
     
     version_info = model.get_version_info(versionid) 
-    
+
     if not version_info:
         return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
                     
@@ -145,7 +145,7 @@ def on_download_model_click(version_id:str, file_name, lora_an, vs_folder , sc_t
 
 
 
-# left menu action start   
+# left menu action start 
 def on_shortcut_gallery_refresh(sc_types,show_only_downloaded_sc=True):
     model.Load_Downloaded_Models()
     return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc))
@@ -185,15 +185,6 @@ def on_civitai_internet_url_upload(files, sc_types,show_only_downloaded_sc, sc_d
     if not model_id:
         return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value="")
     return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value=model_id)
-   
-def on_scan_to_shortcut_click(sc_types, show_only_downloaded_sc, sc_downloaded_types):
-    ishortcut.DownloadedModel_to_Shortcut()
-    util.printD("Scan Models to Shortcut ended")
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
-
-def on_shortcut_thumbnail_update_click(sc_types,show_only_downloaded_sc,sc_downloaded_types):
-    ishortcut.update_thumbnail_images()
-    return gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
 
 def internet_shortcut_upload(url):
     if url:  
@@ -207,3 +198,28 @@ def internet_shortcut_upload(url):
             ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
             ishortcut.save(ISC)
     return model_id, model_url, def_id
+   
+def on_scan_to_shortcut_click(sc_types, show_only_downloaded_sc, sc_downloaded_types):
+    ishortcut.DownloadedModel_to_Shortcut()
+    util.printD("Scan Models to Shortcut ended")
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+
+def on_shortcut_thumbnail_update_click(sc_types,show_only_downloaded_sc,sc_downloaded_types):
+    ishortcut.update_thumbnail_images()
+    return gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+
+# 새 버전이 있는지 스캔한다
+def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
+    model.Load_Downloaded_Models()
+
+    scan_list = list()
+    shortlist =  ishortcut.get_thumbnail_list(sc_types,True)
+    if shortlist:
+        for short in progress.tqdm(shortlist, desc="Scanning new version model"):
+            sc_name = short[1]
+            mid = str(sc_name[0:sc_name.find(':')])
+            if not model_action.is_latest(mid):
+                scan_list.append(short)
+
+    return gr.update(value=scan_list)
+# left menu action end

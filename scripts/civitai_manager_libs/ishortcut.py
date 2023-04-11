@@ -4,6 +4,7 @@ from . import util
 from . import setting
 from . import civitai
 from . import model
+from . import model_action
 import shutil
 import requests
 
@@ -59,7 +60,30 @@ def DownloadedModel_to_Shortcut():
             ISC = add_ISC            
         save(ISC)    
 
-def get_thumbnail_list(shortcut_types=None,only_downloaded=False):
+# def get_thumbnail_list(shortcut_types=None, only_downloaded=False, check_new=False):
+    
+#     shortlist =  get_image_list(shortcut_types)
+#     if not shortlist:
+#         return None
+    
+#     if only_downloaded:
+#         if model.Downloaded_Models:                
+#             downloaded_list = list()            
+#             for short in shortlist:
+#                 sc_name = short[1]
+#                 mid = str(sc_name[0:sc_name.find(':')])
+#                 if mid in model.Downloaded_Models.keys():
+#                     if check_new:
+#                         if not model_action.is_latest(mid):
+#                             downloaded_list.append(short)
+#                     else:
+#                         downloaded_list.append(short)                                                    
+#             return downloaded_list
+#     else:
+#         return shortlist
+#     return None            
+
+def get_thumbnail_list(shortcut_types=None, only_downloaded=False):
     
     shortlist =  get_image_list(shortcut_types)
     if not shortlist:
@@ -76,7 +100,7 @@ def get_thumbnail_list(shortcut_types=None,only_downloaded=False):
             return downloaded_list
     else:
         return shortlist
-    return None            
+    return None  
         
 def get_list(shortcut_types=None)->str:
     

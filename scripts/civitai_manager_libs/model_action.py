@@ -15,11 +15,11 @@ def get_selected_downloaded_modelinfo(modelid):
             if str(modelid) in model.Downloaded_Models.keys():
                 file_list = dict()
                 
-                for version_paths in model.Downloaded_Models[str(modelid)]:
+                for vid, version_paths in model.Downloaded_Models[str(modelid)]:
                     file_list[os.path.basename(version_paths)] = version_paths
                 
                 for file,path in file_list.items():
-                    vinfo = model.read_versioninfo(path)
+                    vinfo = util.read_json(path)
                     if vinfo:
                         if not def_info:
                             def_info = vinfo
@@ -45,11 +45,11 @@ def get_model_versions(modelid:str):
             if str(modelid) in model.Downloaded_Models.keys():
                 file_list = dict()
                 
-                for version_paths in model.Downloaded_Models[str(modelid)]:
+                for vid, version_paths in model.Downloaded_Models[str(modelid)]:
                     file_list[os.path.basename(version_paths)] = version_paths
                 
                 for file,path in file_list.items():
-                    vinfo = civitai.read_version_info(path)
+                    vinfo = util.read_json(path)
                     if vinfo:                      
                         downloaded_version_list.append(vinfo['name'])
                         
@@ -135,4 +135,59 @@ def get_version_description_gallery(versionid):
     imagelist = model.get_version_images(versionid)
     return imagelist, imagelist
 
+def get_is_not_latest_modelversions(model_list:list)->list:
+    if not model_list:
+        return
 
+    new_model_list = list()
+    
+    for modelid in model_list:
+        if modelid in model.Downloaded_Models.keys():
+            # civitai 에서 최신 모델 정보를 가져온다.
+            version_info = civitai.get_latest_version_info_by_model_id(modelid)
+            if version_info:
+                latest_versionid = str(version_info['id']).strip()                
+                
+                # 현재 가지고 있는 버전들을 가져온다.                
+                dnver_list = list()                
+                for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+                    dnver_list.append(str(vid).strip())
+                    
+                if latest_versionid not in dnver_list:                        
+                    new_model_list.append([modelid, latest_versionid])
+    
+    return new_model_list if len(new_model_list) > 0 else None
+
+def get_is_not_latest_models(model_list:list)->list:
+    if not model_list:
+        return
+
+    new_model_list = list()
+    
+    for modelid in model_list:
+        if not is_latest(modelid):
+            new_model_list.append(modelid)
+    
+    return new_model_list if len(new_model_list) > 0 else None
+                        
+def is_latest(modelid:str)->bool:
+    if not modelid:
+        return False
+   
+    if modelid in model.Downloaded_Models.keys():
+        # civitai 에서 최신 모델 정보를 가져온다.
+        version_info = civitai.get_latest_version_info_by_model_id(modelid)
+        if version_info:
+            latest_versionid = str(version_info['id']).strip()                
+            
+            # 현재 가지고 있는 버전들을 가져온다.                
+            dnver_list = list()                
+            for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+                dnver_list.append(str(vid).strip())
+                
+            if latest_versionid in dnver_list:                        
+                return True
+    return False
+                        
+                        
+            

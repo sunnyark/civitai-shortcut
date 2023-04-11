@@ -1,33 +1,37 @@
 import re
 import os
+import json
 from . import setting
 
 def printD(msg):    
     print(f"Civitai Manager: {msg}") 
     
-# def make_model_folder(content_type, model_name, lora_an=False):
-    
-#     if not model_name:
-#         return
-    
-#     model_name = model_name.strip()
+def read_json(path)->dict:
+    contents = None
+    if not path:
+        return None    
+    try:
+        with open(path, 'r') as f:
+            contents = json.load(f)            
+    except:
+        return None
+                
+    return contents
 
-#     if lora_an and content_type == "LORA":
-#         model_folder = setting.folders_dict['ANLORA']
-#     elif content_type in setting.folders_dict.keys():
-#         model_folder = setting.folders_dict[content_type]        
-#     elif content_type:
-#         model_folder = os.path.join(setting.folders_dict['Unknown'], replace_dirname(content_type))
-#     else:
-#         model_folder = os.path.join(setting.folders_dict['Unknown'])
-         
-#     model_folder = os.path.join(model_folder, replace_dirname(model_name))
-                
-#     if not os.path.exists(model_folder):
-#         os.makedirs(model_folder)
-                
-#     return model_folder   
- 
+def write_json(contents, path):
+    if not path:
+        return
+    
+    if not contents:
+        return
+        
+    try:
+        with open(path, 'w') as f:
+            f.write(json.dumps(contents, indent=4))
+    except Exception as e:
+        return
+        
+  
 def make_folder(version_info, lora_an=False, vs_folder=True):
     
     if not version_info:

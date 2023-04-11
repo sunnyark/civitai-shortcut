@@ -33,7 +33,14 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 show_only_downloaded_sc = gr.Checkbox(label="Show downloaded shortcut only", value=False)                        
                             with gr.Row():
-                                refresh_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")                        
+                                refresh_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")
+                        with gr.TabItem("Scan New Version"):
+                            with gr.Row():
+                                shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)                                     
+                            with gr.Row():
+                                scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
+                            with gr.Row():
+                                sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[1],height="auto")                                
 
                 with gr.Column(scale=4):
                     with gr.Tab("Model Information"):
@@ -95,6 +102,13 @@ def civitai_shortcut_ui():
                                 sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=[1],height="auto")
                             with gr.Row():
                                 refresh_downloaded_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")
+                        # with gr.TabItem("Check New Version"):
+                        #     with gr.Row():
+                        #         shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)                                     
+                        #     with gr.Row():
+                        #         check_new_version_btn = gr.Button(value="Check new version model", variant="primary")
+                        #     with gr.Row():
+                        #         sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[1],height="auto")
                                                                 
                 with gr.Column(scale=4):
                     with gr.Tab("Model Information"):
@@ -443,7 +457,22 @@ def civitai_shortcut_ui():
     )    
         
     sc_gallery.select(civitai_manager_action.on_sc_gallery_select,None,selected_model_id)
+    
+    scan_new_version_btn.click(
+        fn=civitai_manager_action.on_scan_new_version_btn,
+        inputs=[
+            shortcut_new_version_type,
+        ],
+        outputs=[
+            sc_new_version_gallery,
+        ]                
+    )
+    
+    sc_new_version_gallery.select(civitai_manager_action.on_sc_gallery_select,None,selected_model_id)
+    #sc_new_version_gallery.select(civitai_manager_action.on_sc_gallery_select,None,selected_downloaded_model_id)
+    #sc_new_version_gallery.select(civitai_manager_action.on_sc_new_version_gallery_select,None,[civitai_tab,selected_model_id])    
     # total gallery tab
+
 
     # downloaded gallery tab start
     shortcut_downloaded_type.change(

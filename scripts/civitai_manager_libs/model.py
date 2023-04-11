@@ -6,15 +6,15 @@ from . import setting
 # 이 모듈은 다운로드 받은 정보를 관리한다.
 # civitai 와의 연결은 최소화하고 local의 관리를 목표로 한다.
 
-Downloaded_Models = dict()
-Downloaded_Versions = dict()
+Downloaded_Models = dict()      # modelid : [vid:path]
+Downloaded_Versions = dict()    # versionid : path
 
 def Test_Models():
     if Downloaded_Models:
-        for mid, vlist in Downloaded_Models.items():
+        for mid, vidpath in Downloaded_Models.items():
             util.printD(f"{mid} :\n")
-            # for path in vlist:
-            #     print(f"{path}\n")
+            # for vid, path in vidpath:
+            #     print(f"{vid} : {path}\n")
             
 def Load_Downloaded_Models():
     global Downloaded_Models
@@ -82,8 +82,7 @@ def get_model_info()->dict:
                         vid = str(json_data['id']).strip()
                         
                         if mid not in models.keys():
-                            models[mid] = list()
-                            
+                            models[mid] = list()                            
                         models[mid].append(json_data)
                         versions[vid] = file_path                        
             except:
@@ -112,14 +111,16 @@ def get_model_path()->dict:
                         vid = str(json_data['id']).strip()
                         
                         if mid not in models.keys():
-                            models[mid] = list()
-                        models[mid].append(file_path)
-                        versions[vid] = file_path                                                
+                            models[mid] = list()                        
+                        models[mid].append([vid, file_path])
+                        #models[mid].append(file_path)
+                        versions[vid] = file_path
+                        
             except:
                 pass
     
     if len(models) > 0:
-        return models,versions
+        return models, versions
     
     return None,None
 
@@ -132,11 +133,11 @@ def get_version_id_by_version_name(modelid, versionname):
         
     if str(modelid) in Downloaded_Models.keys():
         file_list = dict()
-        for version_paths in Downloaded_Models[str(modelid)]:
+        for vid, version_paths in Downloaded_Models[str(modelid)]:
             file_list[os.path.basename(version_paths)] = version_paths
         
-        for file,path in file_list.items():
-            vinfo = read_versioninfo(path)
+        for file, path in file_list.items():
+            vinfo = util.read_json(path)
             try:  
                 if vinfo['name'] == versionname:
                     return vinfo['id']
@@ -153,11 +154,11 @@ def get_default_version_info(modelid):
         
     if str(modelid) in Downloaded_Models.keys():
         file_list = dict()
-        for version_paths in Downloaded_Models[str(modelid)]:
+        for vid, version_paths in Downloaded_Models[str(modelid)]:
             file_list[os.path.basename(version_paths)] = version_paths
                 
         for file,path in file_list.items():
-            return read_versioninfo(path)
+            return util.read_json(path)
         
     return None        
     
@@ -168,16 +169,9 @@ def get_version_info(versionid:str)->dict:
 
     if not Downloaded_Versions:
         return None
-    
-    # if versionid in Downloaded_Versions.keys():
-    #     util.printD(Downloaded_Versions[versionid])
-
-    # for vid,path in Downloaded_Versions.items():
-    #     util.printD(f"{str(vid)} : {path}")
-
-    # util.printD(f"end {versionid}")                
+                 
     try:
-        return read_versioninfo(Downloaded_Versions[versionid])
+        return util.read_json(Downloaded_Versions[versionid])
     except:
         pass
     
@@ -263,18 +257,4 @@ def get_version_files(versioninfo):
             return
         
     return file_list if len(file_list) > 0 else None
-    
-    
-# 버전 모델 인포 데이터를 파일에서 읽어옴
-def read_versioninfo(path)->dict:
-    version_info = None
-    if not path:
-        return None    
-    try:
-        with open(path, 'r') as f:
-            version_info = json.load(f)            
-    except:
-        return None
-                
-    return version_info
 
