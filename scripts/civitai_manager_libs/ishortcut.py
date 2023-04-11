@@ -7,10 +7,11 @@ from . import model
 from . import model_action
 import shutil
 import requests
+import gradio as gr
 
 from tqdm import tqdm
 
-def DownloadedModel_to_Shortcut():
+def DownloadedModel_to_Shortcut(progress):
     root_dirs = list(set(setting.folders_dict.values()))
     file_list = list(set(util.search_file(root_dirs,None,".info")))
         
@@ -18,7 +19,7 @@ def DownloadedModel_to_Shortcut():
             
     if file_list:             
         # ISC = load()
-        for file_path in tqdm(file_list, desc=f"Scan to shortcut"):        
+        for file_path in progress.tqdm(file_list, desc=f"Scan Downloaded Models to shortcut"):        
             #util.printD(f"{file_path}\n")    
             try:
                 json_data = None
@@ -60,6 +61,33 @@ def DownloadedModel_to_Shortcut():
             ISC = add_ISC            
         save(ISC)    
 
+def update_thumbnail_images(progress):
+    preISC = load()                           
+    if not preISC:
+        return
+    
+    for k, v in progress.tqdm(preISC.items(),desc="Update Shortcut's Thumbnails"):
+        if v:
+            version_info = civitai.get_latest_version_info_by_model_id(v['id'])
+            if not version_info:
+                continue
+            
+            if 'images' not in version_info.keys():
+                continue
+            
+            if len(version_info['images']) > 0:                    
+                v['imageurl'] = version_info['images'][0]['url']
+                download_image(v['id'], v['imageurl'])
+                
+    # 중간에 변동이 있을수 있으므로 병합한다.                
+    ISC = load()
+    if ISC:
+        ISC.update(preISC)
+    else:
+        ISC = preISC            
+    save(ISC) 
+    
+    
 # def get_thumbnail_list(shortcut_types=None, only_downloaded=False, check_new=False):
     
 #     shortlist =  get_image_list(shortcut_types)
@@ -167,34 +195,7 @@ def download_all_images():
     
     for k, v in ISC.items():
         if v:
-            download_image(v['id'], v['imageurl'])
-            
-def update_thumbnail_images():
-    preISC = load()                           
-    if not preISC:
-        return
-    
-    for k, v in tqdm(preISC.items(),desc="Update Shortcut Thumnails"):
-        if v:
-            version_info = civitai.get_latest_version_info_by_model_id(v['id'])
-            if not version_info:
-                continue
-            
-            if 'images' not in version_info.keys():
-                continue
-            
-            if len(version_info['images']) > 0:                    
-                v['imageurl'] = version_info['images'][0]['url']
-                download_image(v['id'], v['imageurl'])
-                
-    # 중간에 변동이 있을수 있으므로 병합한다.                
-    ISC = load()
-    if ISC:
-        ISC.update(preISC)
-    else:
-        ISC = preISC            
-    save(ISC) 
-                        
+            download_image(v['id'], v['imageurl'])                       
 
 def is_sc_image(model_id):
     if not model_id:    

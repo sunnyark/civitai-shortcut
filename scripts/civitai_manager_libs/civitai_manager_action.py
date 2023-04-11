@@ -98,9 +98,7 @@ def on_selected_downloaded_version_id_change(versionid:str):
         
     return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=file_text),title_name,None,None    
     
-
 def on_downloaded_description_html_change(versionid):
-    #util.printD(versionid)
     return model_action.get_version_description_gallery(versionid)
 
 def on_downloaded_versions_list_select(evt: gr.SelectData, model_id:str):       
@@ -118,46 +116,43 @@ def on_goto_civitai_model_tab_click(selected_downloaded_model_id):
 
     
     
-# page download action start    
+# page download action start
 def on_download_images_click(version_id:str, lora_an=False, vs_folder=True):
     msg = None
     if not version_id:
         return msg
 
     msg = civitai_action.download_image_files(version_id, lora_an, vs_folder)
-    return msg
-
+    return gr.update(value=msg, visible=False)
 
 # 다운 로드후 shortcut 리스트를 갱신한다.
-def on_download_model_click(version_id:str, file_name, lora_an, vs_folder , sc_types, show_only_downloaded_sc, sc_downloaded_types):
+def on_download_model_click(version_id:str, file_name, lora_an, vs_folder):
     msg = None
-    if not version_id:
-        return msg, gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+    if version_id:    
+        # 이미지와 파일 모두를 다운 받는다.
+        msg = civitai_action.download_file_thread(file_name, version_id, lora_an, vs_folder)
+        civitai_action.download_image_files(version_id, lora_an, vs_folder)
+        # 다운 받은 모델 정보를 갱신한다.    
+        model.Load_Downloaded_Models()
     
-    # 이미지와 파일 모두를 다운 받는다.
-    msg = civitai_action.download_file_thread(file_name, version_id, lora_an, vs_folder)
-    civitai_action.download_image_files(version_id, lora_an, vs_folder)
-    # 다운 받은 모델 정보를 갱신한다.    
-    model.Load_Downloaded_Models()
-    
-    return msg, gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
-# page download action end
+    return gr.update(value=msg, visible=False)
 
-
-
-# left menu action start 
-def on_shortcut_gallery_refresh(sc_types,show_only_downloaded_sc=True):
-    model.Load_Downloaded_Models()
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc))
-  
-def on_shortcut_del_btn_click(model_id, sc_types, show_only_downloaded_sc, sc_downloaded_types):
+def on_shortcut_del_btn_click(model_id):
     #util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
     if model_id:
         ISC = ishortcut.load()                           
         ISC = ishortcut.delete(ISC, model_id)                        
         ishortcut.save(ISC)
-        
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+            
+    return gr.update(value="Delete shortcut is Done", visible=False)
+# page download action end
+
+def on_refresh_progress_change(sc_types,show_only_downloaded_sc,sc_downloaded_types):
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value="###",visible=True)
+
+# left menu action start 
+def on_shortcut_gallery_refresh(sc_types,show_only_downloaded_sc=True):
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc))
 
 # 갤러리에서 하나 선택할때
 def on_gallery_select(evt: gr.SelectData,version_images_url):  
@@ -171,42 +166,37 @@ def on_sc_gallery_select(evt : gr.SelectData):
                         
     return gr.update(value=sc_model_id)
 
-# civitai_internet_url 필드를 클리어 하기 위한것
-def on_civitai_model_url_txt_change():
-    return None 
-
-def on_civitai_internet_url_upload(files, sc_types,show_only_downloaded_sc, sc_downloaded_types):       
+def on_civitai_internet_url_upload(files, progress=gr.Progress()):       
     if files:
         shortcut = None
-        for file in tqdm(files, desc=f"Civitai Shortcut"):                        
+        add_ISC = dict()
+        for file in progress.tqdm(files, desc=f"Civitai Shortcut"):                        
             shortcut = util.load_InternetShortcut(file.name)            
-            model_id, model_url, def_id = internet_shortcut_upload(shortcut)
-            
+            if shortcut:  
+                model_id = util.get_model_id_from_url(shortcut) 
+                model_name, model_type, model_url, def_id, def_name, def_image = civitai_action.get_shortcut_model_info(model_id)
+                
+                if model_id:                    
+                    add_ISC = ishortcut.add(add_ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
+                    
+        ISC = ishortcut.load()
+        if ISC:
+            ISC.update(add_ISC)
+        else:
+            ISC = add_ISC            
+        ishortcut.save(ISC)                     
+
     if not model_id:
-        return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value="")
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value=model_id)
+        return gr.update(value=""),gr.update(value="Upload shortcut is Done"), None
+    return gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
+  
+def on_scan_to_shortcut_click(progress=gr.Progress()):
+    ishortcut.DownloadedModel_to_Shortcut(progress)
+    return gr.update(value="Scan Downloaded Models to Shortcut is Done",visible=False)
 
-def internet_shortcut_upload(url):
-    if url:  
-        #util.printD(url)        
-        model_id = util.get_model_id_from_url(url) 
-        model_name, model_type, model_url, def_id, def_name, def_image = civitai_action.get_shortcut_model_info(model_id)
-        
-        if model_id:
-            # util.printD(model_id)
-            ISC = ishortcut.load()                           
-            ISC = ishortcut.add(ISC, model_id, model_name, model_type, model_url, def_id, def_image)                        
-            ishortcut.save(ISC)
-    return model_id, model_url, def_id
-   
-def on_scan_to_shortcut_click(sc_types, show_only_downloaded_sc, sc_downloaded_types):
-    ishortcut.DownloadedModel_to_Shortcut()
-    util.printD("Scan Models to Shortcut ended")
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
-
-def on_shortcut_thumbnail_update_click(sc_types,show_only_downloaded_sc,sc_downloaded_types):
-    ishortcut.update_thumbnail_images()
-    return gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.Gallery.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True))
+def on_shortcut_thumbnail_update_click(progress=gr.Progress()):
+    ishortcut.update_thumbnail_images(progress)
+    return gr.update(value="Update Shortcut's Thumbnails is Done",visible=False)
 
 # 새 버전이 있는지 스캔한다
 def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
