@@ -80,12 +80,12 @@ def make_folder(version_info, lora_an=False, vs_folder=True):
 
 def replace_filename(file_name):
     if file_name and len(file_name.strip()) > 0:
-        return file_name.replace("*", "-").replace("?", "-").replace("\"", "-").replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")    
+        return file_name.replace("*", "-").replace("?", "-").replace("\"", "-").replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-").replace("<", "-").replace(">", "-")    
     return None
 
 def replace_dirname(dir_name):
     if dir_name and len(dir_name.strip()) > 0:
-        return dir_name.replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-")
+        return dir_name.replace("*", "-").replace("?", "-").replace("\"", "-").replace("|", "-").replace(":", "-").replace("/", "-").replace("\\", "-").replace("<", "-").replace(">", "-")
     return None
     
 def write_InternetShortcut(path, url):
