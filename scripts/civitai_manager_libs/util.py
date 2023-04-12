@@ -3,8 +3,35 @@ import os
 import json
 from . import setting
 
+import hashlib
+import io
+
 def printD(msg):    
     print(f"Civitai Manager: {msg}") 
+
+# # Now, hashing use the same way as pip's source code.
+# def gen_file_sha256(filname):
+#     printD("Use Memory Optimized SHA256")
+#     blocksize=1 << 20
+#     h = hashlib.sha256()
+#     length = 0
+#     with open(os.path.realpath(filname), 'rb') as f:
+#         for block in read_chunks(f, size=blocksize):
+#             length += len(block)
+#             h.update(block)
+
+#     hash_value =  h.hexdigest()
+#     printD("sha256: " + hash_value)
+#     printD("length: " + str(length))
+#     return hash_value
+
+# def read_chunks(file, size=io.DEFAULT_BUFFER_SIZE):
+#     """Yield pieces of data from a file-like object until EOF."""
+#     while True:
+#         chunk = file.read(size)
+#         if not chunk:
+#             break
+#         yield chunk
     
 def read_json(path)->dict:
     contents = None

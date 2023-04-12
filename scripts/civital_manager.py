@@ -38,7 +38,7 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
                             with gr.Row():
-                                sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=[1],height="auto")
+                                sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=[2],height="auto")
                             with gr.Row():
                                 show_only_downloaded_sc = gr.Checkbox(label="Show downloaded shortcut only", value=False)                        
                             with gr.Row():
@@ -50,7 +50,7 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
                             with gr.Row():
-                                sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[1],height="auto")                                
+                                sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[2],height="auto")                                
 
                 with gr.Column(scale=4):
                     with gr.Tab("Model Information"):
@@ -113,7 +113,7 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
                             with gr.Row():
-                                sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=[1],height="auto")
+                                sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=[2],height="auto")
                             with gr.Row():
                                 refresh_downloaded_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")
                                 
