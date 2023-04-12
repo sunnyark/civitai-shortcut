@@ -37,3 +37,5 @@ When using Civitai Shortcut, three items will be created:
 * CivitaiShortCut.json : 등록된 model url 을 기록 관리 하는  json 파일
 
 # Screenshot
+![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231368703-b13858c2-3158-4683-a0f3-d41be6f39010.png)
+
