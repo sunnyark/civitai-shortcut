@@ -39,3 +39,6 @@ When using Civitai Shortcut, three items will be created:
 # Screenshot
 ![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231368703-b13858c2-3158-4683-a0f3-d41be6f39010.png)
 
+![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231370852-cc2ef408-ad9f-4e3f-87c7-4a57c3678468.png)
+
+![screenshot 2023-04-12 152736](https://user-images.githubusercontent.com/40237431/231371028-192f5e95-a953-4840-820b-2255b94c5c0a.png)
