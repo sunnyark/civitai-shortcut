@@ -25,14 +25,14 @@ def civitai_shortcut_ui():
                                 shortcut_thumbnail_update_btn = gr.Button(value="Update Shortcut's Thumbnails",variant="primary")
                             with gr.Row():
                                 scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
-                                
                             with gr.Row():
-                                with gr.Column():
-                                    thumb_progress = gr.Markdown(value="#####", visible=True)
-                                    scan_progress = gr.Markdown(value="#####", visible=True)
-                                    
+                                gr.Markdown(value="Update & Scanning may take some time.\nYou can continue with other tasks.")
+                            with gr.Row():
+                                thumb_progress = gr.Markdown(value="###", visible=True)                                                                                                        
+                            with gr.Row():                                    
+                                scan_progress = gr.Markdown(value="###", visible=True)
                             with gr.Row(visible=False):
-                                upload_progress = gr.Markdown(value="#####", visible=False)
+                                upload_progress = gr.Markdown(value="###", visible=False)
                                 
                         with gr.TabItem("Browsing"):    
                             with gr.Row():
@@ -79,9 +79,11 @@ def civitai_shortcut_ui():
                                 with gr.Row():
                                     download_model = gr.Button(value="Download", variant="primary")                                                
                                 with gr.Row():
-                                    download_images = gr.Button(value="Download Images Only",variant="primary")                                                              
+                                    download_images = gr.Button(value="Download Images Only",variant="primary")                                                                                            
                                 with gr.Row():
                                     shortcut_del_btn = gr.Button(value="Delete Shortcut")
+                                with gr.Row():
+                                    gr.Markdown("Downloading may take some time.\nCheck console log for detail")                                      
                                     
                                 with gr.Row(visible=False):
                                     message_log = gr.Markdown("###", visible=True)

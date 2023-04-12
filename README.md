@@ -12,7 +12,7 @@ Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으�
 
     git clone https://github.com/sunnyark/civitai-shortcut
 
-# Function
+# Features
 
 You can save the model URL of the Civitai site for future reference and storage.
 This allows you to download the model when needed and check if the model has been updated to the latest version.
@@ -37,6 +37,7 @@ When using Civitai Shortcut, three items will be created:
 * CivitaiShortCut.json : 등록된 model url 을 기록 관리 하는  json 파일
 
 # Screenshot
+
 ![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231368703-b13858c2-3158-4683-a0f3-d41be6f39010.png)
 
 ![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231370852-cc2ef408-ad9f-4e3f-87c7-4a57c3678468.png)
