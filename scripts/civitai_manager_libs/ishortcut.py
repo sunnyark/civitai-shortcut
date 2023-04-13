@@ -105,7 +105,7 @@ def update_thumbnail_images(progress):
         ISC = preISC            
     save(ISC)
     
-def get_thumbnail_list(shortcut_types=None, only_downloaded=False):
+def get_thumbnail_list2(shortcut_types=None, only_downloaded=False):
     
     shortlist =  get_image_list(shortcut_types)
     if not shortlist:
@@ -123,6 +123,25 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False):
     else:
         return shortlist
     return None  
+
+def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
+    
+    shortlist =  get_image_list(shortcut_types, search)
+    if not shortlist:
+        return None
+    
+    if only_downloaded:
+        if model.Downloaded_Models:                
+            downloaded_list = list()            
+            for short in shortlist:
+                sc_name = short[1]
+                mid = str(sc_name[0:sc_name.find(':')])
+                if mid in model.Downloaded_Models.keys():
+                    downloaded_list.append(short)
+            return downloaded_list
+    else:
+        return shortlist
+    return None
         
 def get_list(shortcut_types=None)->str:
     
@@ -149,8 +168,8 @@ def get_list(shortcut_types=None)->str:
                 shotcutlist.append(f"{v['id']}:{v['name']}")                
                     
     return shotcutlist
-    
-def get_image_list(shortcut_types=None)->str:
+
+def get_image_list2(shortcut_types=None)->str:
     
     ISC = load()                           
     if not ISC:
@@ -180,6 +199,53 @@ def get_image_list(shortcut_types=None)->str:
                 else:
                     shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
     
+    return shotcutlist 
+    
+def get_image_list(shortcut_types=None, search=None)->str:
+    
+    ISC = load()                           
+    if not ISC:
+        return
+    
+    tmp_types = list()
+    if shortcut_types:
+        for sc_type in shortcut_types:
+            try:
+                tmp_types.append(setting.content_types_dict[sc_type])
+            except:
+                pass
+            
+    
+    search_list= list()
+    # type 을 걸러내자
+    for k, v in ISC.items():
+        # util.printD(ISC[k])
+        if v:
+            if tmp_types:
+                if v['type'] in tmp_types:
+                    search_list.append(v)                    
+            else:
+                search_list.append(v)
+    
+    # search를 걸러내자
+    result_list=list()
+    for v in search_list:
+        if v:
+            if search:
+                if search.lower() in v['name'].lower():
+                    result_list.append(v)
+            else:
+                result_list.append(v)
+                
+    # 썸네일이 있는지 판단해서 대체 이미지 작업
+    shotcutlist = list()
+    for v in result_list:
+        if v:
+            if is_sc_image(v['id']):
+                shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
+            else:
+                shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
+
     return shotcutlist                
 
 def delete_thumbnail_image(model_id):

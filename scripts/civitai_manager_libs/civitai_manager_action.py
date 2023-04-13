@@ -185,12 +185,12 @@ def on_shortcut_del_btn_click(model_id):
     return gr.update(value="Delete shortcut is Done", visible=False)
 # page download action end
 
-def on_refresh_progress_change(sc_types,show_only_downloaded_sc,sc_downloaded_types):
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True)),gr.update(value="###",visible=True)
+def on_refresh_progress_change(sc_types,sc_search,show_only_downloaded_sc,sc_downloaded_types,sc_downloaded_search):
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(value=ishortcut.get_thumbnail_list(sc_downloaded_types,True,sc_downloaded_search)),gr.update(value="###",visible=True)
 
 # left menu action start 
-def on_shortcut_gallery_refresh(sc_types, show_only_downloaded_sc=True):
-    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc))
+def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc=True):
+    return gr.update(value=ishortcut.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search))
 
 # 갤러리에서 하나 선택할때
 def on_gallery_select(evt: gr.SelectData,version_images_url):  

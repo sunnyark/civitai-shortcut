@@ -12,6 +12,7 @@ from scripts.civitai_manager_libs import civitai_action
 from scripts.civitai_manager_libs import util
 from scripts.civitai_manager_libs import model   
 
+
 def civitai_shortcut_ui():    
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tab:
         with gr.TabItem("Civitai Shortcut" , id="civitai01"):
@@ -36,6 +37,8 @@ def civitai_shortcut_ui():
                         with gr.TabItem("Browsing"):    
                             with gr.Row():
                                 shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
+                            with gr.Row():
+                                sc_search = gr.Textbox(label="Search", value="", placeholder="Search by name [Enter]",interactive=True, lines=1)
                             with gr.Row():
                                 sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=[setting.shortcut_colunm],height="auto")
                             with gr.Row():
@@ -135,7 +138,9 @@ def civitai_shortcut_ui():
                     with gr.Tabs() as downloaded_model_tabs:                               
                         with gr.TabItem("Browsing"):
                             with gr.Row():
-                                shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)         
+                                shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
+                            with gr.Row():
+                                sc_downloaded_search = gr.Textbox(label="Search", value="", placeholder="Search by name [Enter]" , interactive=True, lines=1)                                
                             with gr.Row():
                                 sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=[setting.shortcut_colunm],height="auto")                         
                             with gr.Row():
@@ -343,8 +348,10 @@ def civitai_shortcut_ui():
         fn=civitai_manager_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
+            sc_search,
             show_only_downloaded_sc,
-            shortcut_downloaded_type
+            shortcut_downloaded_type,
+            sc_downloaded_search
         ],
         outputs=[
             sc_gallery,
@@ -357,8 +364,10 @@ def civitai_shortcut_ui():
         fn=civitai_manager_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
+            sc_search,
             show_only_downloaded_sc,
-            shortcut_downloaded_type
+            shortcut_downloaded_type,
+            sc_downloaded_search
         ],
         outputs=[
             sc_gallery,
@@ -371,8 +380,10 @@ def civitai_shortcut_ui():
         fn=civitai_manager_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
+            sc_search,
             show_only_downloaded_sc,
-            shortcut_downloaded_type
+            shortcut_downloaded_type,
+            sc_downloaded_search
         ],
         outputs=[
             sc_gallery,
@@ -386,18 +397,32 @@ def civitai_shortcut_ui():
     shortcut_type.change(
         fn=civitai_manager_action.on_shortcut_gallery_refresh,
         inputs=[
-            shortcut_type,
-            show_only_downloaded_sc,
+            shortcut_type,            
+            sc_search,
+            show_only_downloaded_sc,            
         ],
         outputs=[
             sc_gallery,
         ]
     )  
     
+    sc_search.submit(
+        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        inputs=[            
+            shortcut_type,
+            sc_search,
+            show_only_downloaded_sc,                        
+        ],
+        outputs=[
+            sc_gallery            
+        ]        
+    )
+    
     refresh_sc_btn.click(
         fn=civitai_manager_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_type,
+            sc_search,
             show_only_downloaded_sc,
         ],
         outputs=[
@@ -411,6 +436,7 @@ def civitai_shortcut_ui():
         fn=civitai_manager_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_type,
+            sc_search,
             show_only_downloaded_sc,
         ],
         outputs=[
@@ -450,8 +476,10 @@ def civitai_shortcut_ui():
         fn=civitai_manager_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
+            sc_search,
             show_only_downloaded_sc,
-            shortcut_downloaded_type
+            shortcut_downloaded_type,
+            sc_downloaded_search
         ],
         outputs=[
             sc_gallery,
@@ -527,13 +555,25 @@ def civitai_shortcut_ui():
         fn=civitai_manager_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_downloaded_type,
+            sc_downloaded_search
         ],
         outputs=[
             sc_downloaded_gallery,
         ]
     )   
-    
-    refresh_downloaded_sc_btn.click(civitai_manager_action.on_shortcut_gallery_refresh,[shortcut_downloaded_type],[sc_downloaded_gallery])
+
+    sc_downloaded_search.submit(
+        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        inputs=[            
+            shortcut_downloaded_type,          
+            sc_downloaded_search
+        ],
+        outputs=[
+            sc_downloaded_gallery            
+        ]        
+    )
+        
+    refresh_downloaded_sc_btn.click(civitai_manager_action.on_shortcut_gallery_refresh,[shortcut_downloaded_type,sc_downloaded_search],[sc_downloaded_gallery])
     sc_downloaded_gallery.select(civitai_manager_action.on_sc_downloaded_gallery_select,None,selected_downloaded_model_id)
     # downloaded browsing tab end
 
