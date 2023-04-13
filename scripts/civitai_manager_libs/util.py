@@ -7,7 +7,7 @@ import hashlib
 import io
 
 def printD(msg):    
-    print(f"Civitai Manager: {msg}") 
+    print(f"Civitai Shortcut: {msg}") 
 
 # # Now, hashing use the same way as pip's source code.
 # def gen_file_sha256(filname):

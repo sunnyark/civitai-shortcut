@@ -3,6 +3,7 @@ import re
 import json
 import requests
 from . import util
+from . import setting
 
 # Set the URL for the API endpoint
 
@@ -201,6 +202,26 @@ def get_triger_by_version_id(version_id=None)->str:
     
     return get_triger_by_version_info(version_info)
 
+
+def write_model_info(folder, model_info:dict)->str:   
+    if not model_info:
+        return
+
+    model_id = model_info['id']
+    model_name = model_info['name']
+    
+    base = f"{str(model_id).strip()}-{util.replace_filename(model_name)}"
+    path_info_file = os.path.join(folder, f"{base}{setting.info_suffix}{setting.info_ext}")
+            
+    try:
+        with open(path_info_file, 'w') as f:
+            f.write(json.dumps(model_info, indent=4))
+    except Exception as e:
+            return
+    
+    return f"{base}{setting.info_suffix}{setting.info_ext}"
+
+
 def write_version_info(folder, version_info:dict)->str:   
     if not version_info:
         return
@@ -211,7 +232,7 @@ def write_version_info(folder, version_info:dict)->str:
         return
 
     base, ext = os.path.splitext(primary_file['name'])
-    path_info_file = os.path.join(folder, f"{base}.civitai.info")
+    path_info_file = os.path.join(folder, f"{base}{setting.info_suffix}{setting.info_ext}")
             
     try:
         with open(path_info_file, 'w') as f:
@@ -219,7 +240,7 @@ def write_version_info(folder, version_info:dict)->str:
     except Exception as e:
             return                
     
-    return f"{base}.civitai.info"
+    return f"{base}{setting.info_suffix}{setting.info_ext}"
 
 def write_triger_words_by_version_id(folder, version_id:str)->str:
     if not version_id: 
@@ -244,7 +265,7 @@ def write_triger_words_by_version_info(folder, version_info:dict)->str:
         return
 
     base, ext = os.path.splitext(primary_file['name'])
-    path_triger_file = os.path.join(folder, f"{base}.triger.txt")
+    path_triger_file = os.path.join(folder, f"{base}{setting.triger_suffix}{setting.triger_ext}")
 
     try:
         with open(path_triger_file, 'w') as f:
@@ -252,4 +273,4 @@ def write_triger_words_by_version_info(folder, version_info:dict)->str:
     except Exception as e:
         return
         
-    return f"{base}.triger.txt"
+    return f"{base}{setting.triger_suffix}{setting.triger_ext}"

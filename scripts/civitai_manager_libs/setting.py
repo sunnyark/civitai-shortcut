@@ -38,9 +38,33 @@ content_types_dict = {
     "Wildcards" : content_types_list[8],
     "Other" : content_types_list[9],
 }
-   
-civitai_shortcut = "CivitaiShortCut.json"
-civitai_shortcut_thumnail_folder =  "sc_thumb_images"
-civitai_shortcut_save_folder =  "sc_saves"
-civitai_no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
+ 
+# civitai helper 호환성
+info_ext = ".info"
+info_suffix = ".civitai"
+
+triger_ext = ".txt"
+triger_suffix = ".triger"
+
+preview_image_ext = ".png"
+preview_image_suffix = ".preview"
+
+gallery_column = 4
+shortcut_colunm = 2  
+shortcut = "CivitaiShortCut.json"
+shortcut_thumnail_folder =  "sc_thumb_images"
+shortcut_save_folder =  "sc_saves"
+
+
+# have model_name subfolder ... 
+# add shortcut -> create model_name folder ..
+# model_name/ modelid.info , versionid_images... 
+# del shortcut --> rm model_name folder ..
+# thumbnails update -->  shortcuts update : model_info update
+shortcut_info_folder =  "sc_infos"
+
+no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
+
+
+
 

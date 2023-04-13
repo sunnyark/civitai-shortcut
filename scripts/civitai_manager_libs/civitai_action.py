@@ -52,6 +52,59 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
 
     return f"Download started"
 
+def download_preview_image(version_id, lora_an, vs_folder):
+    message =""
+    base = None
+    
+    if not version_id:                
+        return         
+    
+    version_info = civitai.get_version_info_by_version_id(version_id)          
+    
+    if not version_info:
+        return
+    
+    if 'images' not in version_info.keys():
+        return
+        
+    model_folder = util.make_folder(version_info, lora_an , vs_folder)
+    
+    if not model_folder:
+        return
+    
+    # 이미지 파일명도 primary 이름으로 저장한다.
+    #없으면 임의로 만들어준다    
+    primary_file = civitai.get_primary_file_by_version_info(version_info)
+    if not primary_file:
+        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])        
+    base, ext = os.path.splitext(primary_file['name'])
+    base = os.path.join(setting.root_path, model_folder, base)
+    
+    if base and len(base.strip()) > 0:  
+        if "images" in version_info.keys():
+            try:            
+                img_dict = version_info["images"][0] 
+                if "url" in img_dict:
+                    img_url = img_dict["url"]
+                    # use max width
+                    if "width" in img_dict:
+                        if img_dict["width"]:
+                            img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
+                        # get image
+                        with requests.get(img_url, stream=True) as img_r:
+                            if not img_r.ok:
+                                util.printD("Get error code: " + str(img_r.status_code))
+                                return
+                            # write to file
+                            description_img = f"{base}{setting.preview_image_suffix}{setting.preview_image_ext}"
+
+                            with open(description_img, 'wb') as f:
+                                img_r.raw.decode_content = True
+                                shutil.copyfileobj(img_r.raw, f)
+            except Exception as e:
+                return
+    return
+
 def download_image_files(version_id, lora_an, vs_folder):
     message =""
     base = None
@@ -103,9 +156,9 @@ def download_image_files(version_id, lora_an, vs_folder):
                             continue
 
                         # write to file
-                        description_img = f'{base}_{image_count}.preview.png'
+                        description_img = f'{base}_{image_count}{setting.preview_image_suffix}{setting.preview_image_ext}'
                         if image_count == 0:
-                            description_img = f'{base}.preview.png'
+                            description_img = f'{base}{setting.preview_image_suffix}{setting.preview_image_ext}'
                                                                                 
                         with open(description_img, 'wb') as f:
                             img_r.raw.decode_content = True
@@ -257,31 +310,31 @@ def get_version_description_by_version_info(version_info:dict):
     
     return output_html, output_training, files_name, model_info['type']     
 
-def get_shortcut_model_info(model_id:str):
-    model_name = None
-    model_type = None
-    def_id = None
-    def_name = None
-    def_image = None
-    model_url = None
+# def get_shortcut_model_info(model_id:str):
+#     model_name = None
+#     model_type = None
+#     def_id = None
+#     def_name = None
+#     def_image = None
+#     model_url = None
     
-    model_info = civitai.get_model_info(model_id)
-    if model_info:
-        model_name = model_info['name']
-        model_type = model_info['type']
-        model_url = f"{civitai.Url_ModelId()}{model_id}"
+#     model_info = civitai.get_model_info(model_id)
+#     if model_info:
+#         model_name = model_info['name']
+#         model_type = model_info['type']
+#         model_url = f"{civitai.Url_ModelId()}{model_id}"
         
-        if "modelVersions" in model_info.keys():            
-            def_version = model_info["modelVersions"][0]
-            def_id = def_version['id']
-            def_name = def_version['name']
+#         if "modelVersions" in model_info.keys():            
+#             def_version = model_info["modelVersions"][0]
+#             def_id = def_version['id']
+#             def_name = def_version['name']
             
-            if 'images' in def_version.keys():
-                if len(def_version["images"]) > 0:
-                    img_dict = def_version["images"][0]
-                    def_image = img_dict["url"]                  
+#             if 'images' in def_version.keys():
+#                 if len(def_version["images"]) > 0:
+#                     img_dict = def_version["images"][0]
+#                     def_image = img_dict["url"]                  
         
-    return model_name, model_type, model_url, def_id, def_name, def_image
+#     return model_name, model_type, model_url, def_id, def_name, def_image
 
 def get_selected_model_info(modelid):
     model_type= None

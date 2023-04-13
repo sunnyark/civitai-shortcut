@@ -1,65 +1,83 @@
 import os
 import json
-from . import util
-from . import setting
-from . import civitai
-from . import model
-from . import model_action
 import shutil
 import requests
 import gradio as gr
 
-from tqdm import tqdm
+from . import util
+from . import setting
+from . import civitai
+from . import model
 
-def DownloadedModel_to_Shortcut(progress):
-    root_dirs = list(set(setting.folders_dict.values()))
-    file_list = list(set(util.search_file(root_dirs,None,".info")))
-        
-    add_ISC = dict()
-            
-    if file_list:             
-        # ISC = load()
-        for file_path in progress.tqdm(file_list, desc=f"Scan Downloaded Models to shortcut"):        
-            #util.printD(f"{file_path}\n")    
-            try:
-                json_data = None
-                with open(file_path, 'r') as f:
-                    json_data = json.load(f)
-                    
-                if "id" not in json_data.keys():
-                    continue
+def write_model_information(modelid:str):    
+    if not modelid:
+        return     
+    model_info = civitai.get_model_info(modelid)
+    if model_info:
+        version_list = list()
+        if "modelVersions" in model_info.keys():
+            for version_info in model_info["modelVersions"]:
+                version_id = version_info['id']
+                if "images" in version_info.keys():
+                    image_list = list()
+                    for img in version_info["images"]:                                                
+                        if "url" in img:
+                            img_url = img["url"]
+                            # use max width
+                            if "width" in img.keys():
+                                if img["width"]:
+                                    img_url =  util.change_width_from_image_url(img_url, img["width"])
+                            image_list.append([version_id,img_url])        
+                    if len(image_list) > 0:
+                        version_list.append(image_list)
+        try:
+            # model 폴더 생성
+            model_path = os.path.join(setting.shortcut_info_folder, modelid)        
+            if not os.path.exists(model_path):
+                os.makedirs(model_path)
+
+            # model info 저장            
+            model_info_file = os.path.join(model_path, f"{modelid}{setting.info_suffix}{setting.info_ext}")            
+            with open(model_info_file, 'w') as f:
+                f.write(json.dumps(model_info, indent=4))
                 
-                version_id = json_data['id']
+        except Exception as e:
+            return
                         
-                if "modelId" not in json_data.keys():
-                    continue
-                
-                model_id = json_data['modelId']
-                
-                model_url = f"{civitai.Url_ModelId()}{model_id}" 
-                
-                if "model" not in json_data.keys():
-                    continue
-                
-                model_type = json_data['model']['type']
-                model_name = json_data['model']['name']
-                
-                if "images" not in json_data.keys():
-                    continue         
-                                                
-                image_url  = json_data['images'][0]['url']
-                
-                # util.printD(f"{model_id},{model_name},{model_type},{model_url},{version_id},{image_url}")           
-                add_ISC = add(add_ISC,model_id ,model_name, model_type, model_url, version_id, image_url)  
-            except:
-                pass 
-            
-        ISC = load()
-        if ISC:
-            ISC.update(add_ISC)
-        else:
-            ISC = add_ISC            
-        save(ISC)    
+        # 이미지 다운로드    
+        if len(version_list) > 0:
+            for image_list in version_list:
+                for image_count, (vid, url) in enumerate(image_list,start=0):
+                    try:
+                        # get image
+                        with requests.get(url, stream=True) as img_r:
+                            if not img_r.ok:
+                                util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                                continue
+
+                            # write to file
+                            description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
+                            with open(description_img, 'wb') as f:
+                                img_r.raw.decode_content = True
+                                shutil.copyfileobj(img_r.raw, f)
+                    except Exception as e:
+                        pass              
+    return model_info
+
+def delete_model_information(modelid:str):
+    if not modelid:
+        return 
+    
+    model_path = os.path.join(setting.shortcut_info_folder, modelid)
+    if setting.shortcut_info_folder != model_path:
+        if os.path.exists(model_path):
+            shutil.rmtree(model_path)
+    
+def delete_shortcut_model(modelid):
+    if modelid:
+        ISC = load()                           
+        ISC = delete(ISC, modelid)
+        save(ISC) 
 
 def update_thumbnail_images(progress):
     preISC = load()                           
@@ -77,7 +95,7 @@ def update_thumbnail_images(progress):
             
             if len(version_info['images']) > 0:                    
                 v['imageurl'] = version_info['images'][0]['url']
-                download_image(v['id'], v['imageurl'])
+                download_thumbnail_image(v['id'], v['imageurl'])
                 
     # 중간에 변동이 있을수 있으므로 병합한다.                
     ISC = load()
@@ -85,32 +103,8 @@ def update_thumbnail_images(progress):
         ISC.update(preISC)
     else:
         ISC = preISC            
-    save(ISC) 
+    save(ISC)
     
-    
-# def get_thumbnail_list(shortcut_types=None, only_downloaded=False, check_new=False):
-    
-#     shortlist =  get_image_list(shortcut_types)
-#     if not shortlist:
-#         return None
-    
-#     if only_downloaded:
-#         if model.Downloaded_Models:                
-#             downloaded_list = list()            
-#             for short in shortlist:
-#                 sc_name = short[1]
-#                 mid = str(sc_name[0:sc_name.find(':')])
-#                 if mid in model.Downloaded_Models.keys():
-#                     if check_new:
-#                         if not model_action.is_latest(mid):
-#                             downloaded_list.append(short)
-#                     else:
-#                         downloaded_list.append(short)                                                    
-#             return downloaded_list
-#     else:
-#         return shortlist
-#     return None            
-
 def get_thumbnail_list(shortcut_types=None, only_downloaded=False):
     
     shortlist =  get_image_list(shortcut_types)
@@ -177,46 +171,35 @@ def get_image_list(shortcut_types=None)->str:
             if tmp_types:
                 if v['type'] in tmp_types:
                     if is_sc_image(v['id']):
-                        shotcutlist.append((os.path.join(setting.civitai_shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                        shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
                     else:
-                        shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
+                        shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
             else:           
                 if is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.civitai_shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                    shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
                 else:
-                    shotcutlist.append((setting.civitai_no_card_preview_image,f"{v['id']}:{v['name']}"))
+                    shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
     
     return shotcutlist                
 
-def download_all_images():
-    ISC = load()                           
-    if not ISC:
-        return
-    
-    for k, v in ISC.items():
-        if v:
-            download_image(v['id'], v['imageurl'])                       
-
-def is_sc_image(model_id):
-    if not model_id:    
-        return False
-            
-    if os.path.isfile(os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png")):
-        return True
-    
-    return False        
-    
-def download_image(model_id, url):
+def delete_thumbnail_image(model_id):
+    if is_sc_image(model_id):
+        try:
+            os.remove(os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}"))
+        except:
+            return 
+        
+def download_thumbnail_image(model_id, url):
     if not model_id:    
         return False
 
     if not url:    
         return False
     
-    if not os.path.exists(setting.civitai_shortcut_thumnail_folder):
-        os.makedirs(setting.civitai_shortcut_thumnail_folder)    
+    if not os.path.exists(setting.shortcut_thumnail_folder):
+        os.makedirs(setting.shortcut_thumnail_folder)    
         
-    # if os.path.isfile(os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png")):
+    # if os.path.isfile(os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}")):
     #     return True
     
     try:
@@ -225,42 +208,59 @@ def download_image(model_id, url):
             if not img_r.ok:
                 return False
             
-            shotcut_img = os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png")                                                                   
+            shotcut_img = os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}")                                                                   
             with open(shotcut_img, 'wb') as f:
                 img_r.raw.decode_content = True
                 shutil.copyfileobj(img_r.raw, f)                            
     except Exception as e:
         return False
     
-    return True
-                        
-def delete_image(model_id):
-    if is_sc_image(model_id):
-        try:
-            os.remove(os.path.join(setting.civitai_shortcut_thumnail_folder,f"{model_id}.png"))
-        except:
-            return        
+    return True                    
 
-def add(ISC:dict, model_id ,model_name, model_type, model_url, version_id, image_url)->dict:
+def is_sc_image(model_id):
+    if not model_id:    
+        return False
+            
+    if os.path.isfile(os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}")):
+        return True
     
+    return False        
+
+def add(ISC:dict, model_id)->dict:
+
+    if not model_id:
+        return ISC   
+        
     if not ISC:
         ISC = dict()
+    
+    model_info = write_model_information(model_id)
+    
+    if model_info:        
+        if "modelVersions" in model_info.keys():            
+            def_version = model_info["modelVersions"][0]
+            def_id = def_version['id']
+                
+            if 'images' in def_version.keys():
+                if len(def_version["images"]) > 0:
+                    img_dict = def_version["images"][0]
+                    def_image = img_dict["url"]                
+                        
+        cis = {
+                "id" : model_info['id'],
+                "type" : model_info['type'],
+                "name": model_info['name'],
+                "url": f"{civitai.Url_ModelId()}{model_id}",
+                "versionid" : def_id,
+                "imageurl" : def_image
+        }
+
+        ISC[str(model_id)] = cis
         
-    cis = {
-            "id" : model_id,
-            "type" : model_type,
-            "name": model_name,
-            "url": model_url,
-            "versionid" : version_id,
-            "imageurl" : image_url
-    }
-    
-    ISC[str(model_id)] = cis
-    
-    cis_to_file(cis)
-    
-    download_image(model_id, image_url)
-    
+        cis_to_file(cis)
+        
+        download_thumbnail_image(model_id, def_image)
+
     return ISC
 
 def delete(ISC:dict, model_id)->dict:
@@ -274,44 +274,47 @@ def delete(ISC:dict, model_id)->dict:
     
     cis_to_file(cis)
     
-    delete_image(model_id)
+    delete_thumbnail_image(model_id)
+    
+    delete_model_information(model_id)
+    
     return ISC
 
 def cis_to_file(cis):
     if cis: 
         if "name" in cis.keys() and 'id' in cis.keys():
-                if not os.path.exists(setting.civitai_shortcut_save_folder):
-                    os.makedirs(setting.civitai_shortcut_save_folder)              
-                util.write_InternetShortcut(os.path.join(setting.civitai_shortcut_save_folder,f"{util.replace_filename(cis['name'])}.url"),f"{civitai.Url_ModelId()}{cis['id']}")
+                if not os.path.exists(setting.shortcut_save_folder):
+                    os.makedirs(setting.shortcut_save_folder)              
+                util.write_InternetShortcut(os.path.join(setting.shortcut_save_folder,f"{util.replace_filename(cis['name'])}.url"),f"{civitai.Url_ModelId()}{cis['id']}")
     
 def save(ISC:dict):
-    #print("Saving Civitai Internet Shortcut to: " + setting.civitai_shortcut)
+    #print("Saving Civitai Internet Shortcut to: " + setting.shortcut)
 
     output = ""
     
     #write to file
     try:
-        with open(setting.civitai_shortcut, 'w') as f:
+        with open(setting.shortcut, 'w') as f:
             json.dump(ISC, f, indent=4)
     except Exception as e:
-        util.printD("Error when writing file:"+setting.civitai_shortcut)
+        util.printD("Error when writing file:"+setting.shortcut)
         return output
 
-    output = "Civitai Internet Shortcut saved to: " + setting.civitai_shortcut
+    output = "Civitai Internet Shortcut saved to: " + setting.shortcut
     #util.printD(output)
 
     return output
 
 def load()->dict:
-    #util.printD("Load Civitai Internet Shortcut from: " + setting.civitai_shortcut)
+    #util.printD("Load Civitai Internet Shortcut from: " + setting.shortcut)
 
-    if not os.path.isfile(setting.civitai_shortcut):
+    if not os.path.isfile(setting.shortcut):
         util.printD("No Civitai Internet Shortcut file, use blank")
         return
     
     json_data = None
     try:
-        with open(setting.civitai_shortcut, 'r') as f:
+        with open(setting.shortcut, 'r') as f:
             json_data = json.load(f)
     except:
         return None            

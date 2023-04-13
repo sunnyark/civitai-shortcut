@@ -24,22 +24,44 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 
 # Notice
 
-When using Civitai Shortcut, three items will be created:
+When using Civitai Shortcut, four items will be created:
 
 * sc_saves: a folder where registered model URLs are backed up and stored.
 * sc_thumb_images: a folder where thumbnails of registered URLs are stored.
+* sc_infos: a folder where model info and images are saved when registering a shortcut.
 * CivitaiShortCut.json: a JSON file that records and manages registered model URLs.
 
 두개의 폴더와 하나의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
 
 * sc_saves : 등록된 model url이 백업되는 폴더, 등록된 모든 url이 저장되는 폴더
 * sc_thumb_images : 등록된 url의 thumbnail이 저장되는 폴더
+* sc_infos : 등록시 모델정보와 이미지가 저장되는 폴더
 * CivitaiShortCut.json : 등록된 model url 을 기록 관리 하는  json 파일
 
+# Change Log
+
+v 1.1
+
+* When registering a shortcut, model information and images are saved in a separate folder.
+* This allows users to access model information from "Saved Model Information" Tab even if there is no connection to the Civitai site.
+* "Thumbnail Update" button is removed and replaced with an "Update Shortcut's Model Information" button to keep the model information and images up to date.
+* "Download images Only" button is removed from "Civitai Model Information" Tab that can be accessed live, and "Delete shortcut" button is moved to "Saved Model Information" Tab.
+* "Delete shortcut" button removes the model information and images stored in sc_infos in one go.
+* "Update Model Information" button is added to "Saved Model Information" Tab for individual updating of model information, in addition to "Update Shortcut's Model Information" that updates all model information.
+* Shortcut 등록 시 모델정보와 이미지가 별도의 폴더에 저장됩니다.
+* 이를 통해 사용자는 Civitai 사이트에 연결되지 않은 경우에도Saved Model Information 탭에서 모델 정보에 액세스할 수 있습니다.
+* 모델 정보와 이미지를 최신 상태로 유지하기 위해 "Thumbnail Update" 버튼이 제거되고 "Update Shortcut's Model Information" 버튼으로 대체됩니다.
+* 섬네일 업데이트 버튼을 삭제하고 shortcut 의 모델 정보와 이미지를 최신 정보로 유지하기위한 Update Shortcut's Model Information 버튼을 추가
+* 라이브로 접속 가능한 "Civitai Model Information" 탭에서 Download images Only 버튼이 제거되고, Delete shortcut 버튼이 Saved Model Information 탭으로 이동됩니다.
+* Delete shortcut는 sc_infos에 저장된 모델 정보와 이미지를 한 번에 제거합니다.
+  *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
+
 # Screenshot
+![screenshot 2023-04-13 200422](https://user-images.githubusercontent.com/40237431/231810541-c91471e5-e7ae-4d3c-a825-2bfed6746b73.png)
 
-![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231368703-b13858c2-3158-4683-a0f3-d41be6f39010.png)
+![screenshot 2023-04-13 200432](https://user-images.githubusercontent.com/40237431/231810585-63f6bffd-defa-4582-a7da-750dae29f589.png)
 
-![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231370852-cc2ef408-ad9f-4e3f-87c7-4a57c3678468.png)
+![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231810628-c962429a-5b0b-46a9-9cb4-fe52a9e4d998.png)
 
-![screenshot 2023-04-12 152736](https://user-images.githubusercontent.com/40237431/231371028-192f5e95-a953-4840-820b-2255b94c5c0a.png)
+![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231810678-19876694-d023-4f62-960d-9ce774cccf67.png)
+

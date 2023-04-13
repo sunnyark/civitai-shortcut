@@ -25,7 +25,7 @@ def Load_Downloaded_Models():
 # 단순히 소유한 모델의 modelid만을 리스트로 반환한다
 def get_modelid():
     root_dirs = list(set(setting.folders_dict.values()))
-    file_list = util.search_file(root_dirs,None,".info")
+    file_list = util.search_file(root_dirs,None,setting.info_ext)
     modelid_list = list()   
 
     if file_list:             
@@ -46,7 +46,7 @@ def get_modelid():
 # 단순히 소유한 모델의 타입별 modelid만을 리스트로 반환한다
 def get_modelid_byType(ctype):
     root_dir = [setting.folders_dict[setting.content_types_dict[ctype]]]
-    file_list = util.search_file(root_dir,None,".info")
+    file_list = util.search_file(root_dir,None,setting.info_ext)
     modelid_list = list()   
 
     if file_list:             
@@ -68,7 +68,7 @@ def get_modelid_byType(ctype):
 def get_model_info()->dict:
     #root_dirs = [setting.folders_dict[setting.content_types_dict[ctype]]]
     root_dirs = list(set(setting.folders_dict.values()))
-    file_list = util.search_file(root_dirs,None,".info")
+    file_list = util.search_file(root_dirs,None,setting.info_ext)
     models = dict()
     versions = dict()
     
@@ -97,7 +97,7 @@ def get_model_info()->dict:
 def get_model_path()->dict:
     #root_dirs = [setting.folders_dict[setting.content_types_dict[ctype]]]
     root_dirs = list(set(setting.folders_dict.values()))
-    file_list = util.search_file(root_dirs,None,".info")
+    file_list = util.search_file(root_dirs,None,setting.info_ext)
     models = dict()
     versions = dict()
     
@@ -236,17 +236,11 @@ def get_version_files(versioninfo):
                
     file_list = list()    
     vfolder = None
+
     if versionid in Downloaded_Versions.keys():        
         path = Downloaded_Versions[versionid]  
         try:
             vfolder , vfile = os.path.split(path)
-            # versionname . civitai.info 형식이다.
-            # 그래서 두번
-            base , ext = os.path.splitext(vfile)
-            base , ext = os.path.splitext(base)
-            
-            # 폴더를 구함
-                                
             for file in os.listdir(vfolder):
                 if os.path.isdir(file):
                     continue
