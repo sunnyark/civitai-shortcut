@@ -1,0 +1,693 @@
+#================================================================    
+    # selected_model_id.change(
+    #     fn=civitai_manager_action.on_selected_model_id_change,   
+    #     inputs=[
+    #         selected_model_id,
+    #     ],
+    #     outputs=[
+    #         selected_version_id,
+    #         civitai_model_url_txt, 
+    #         downloaded_tab, 
+    #         downloaded_info, 
+    #         an_lora, 
+    #         model_type, 
+    #         versions_list,
+    #     ] 
+    # )
+  
+    # selected_version_id.change(
+    #     fn=civitai_manager_action.on_selected_version_id_change,
+    #     inputs=[
+    #         selected_version_id,
+    #     ],
+    #     outputs=[
+    #         description_html,
+    #         trigger_words,
+    #         filename_list,
+    #         model_title_name,                        
+    #         version_gallery,
+    #         img_file_info      
+    #     ]
+    # )
+        
+    # description_html.change(
+    #     fn=civitai_manager_action.on_description_html_change,
+    #     inputs=[
+    #         selected_version_id
+    #     ],
+    #     outputs=[
+    #         version_gallery, 
+    #         version_images_url
+    #     ]
+    # )
+
+    # # 버전을 하나 선택
+    # versions_list.select(
+    #     fn=civitai_manager_action.on_versions_list_select,
+    #     inputs=[
+    #         selected_model_id, 
+    #     ],
+    #     outputs=[
+    #         selected_version_id,            
+    #     ]
+    # )
+    #================================================================
+
+    #===============================================================================
+    # selected_saved_model_id.change(
+    #     fn=civitai_manager_action.on_selected_saved_model_id_change,   
+    #     inputs=[
+    #         selected_saved_model_id,
+    #     ],
+    #     outputs=[
+    #         selected_saved_version_id,
+    #         saved_civitai_model_url_txt,
+    #         saved_model_type, 
+    #         saved_versions_list,
+    #     ] 
+    # )    
+
+    # selected_saved_version_id.change(
+    #     fn=civitai_manager_action.on_selected_saved_version_id_change,
+    #     inputs=[
+    #         selected_saved_model_id,
+    #         selected_saved_version_id,
+    #     ],
+    #     outputs=[
+    #         saved_description_html,
+    #         saved_trigger_words,
+    #         saved_filename_list,
+    #         saved_model_title_name,                        
+    #         saved_version_gallery,
+    #         saved_img_file_info      
+    #     ]
+    # )
+     
+    # saved_description_html.change(
+    #     fn=civitai_manager_action.on_saved_description_html_change,
+    #     inputs=[
+    #         selected_saved_model_id,
+    #         selected_saved_version_id            
+    #     ],
+    #     outputs=[
+    #         saved_version_gallery, 
+    #         saved_version_images_url
+    #     ]
+    # )
+
+    # # 버전을 하나 선택
+    # saved_versions_list.select(
+    #     fn=civitai_manager_action.on_saved_versions_list_select,
+    #     inputs=[
+    #         selected_saved_model_id, 
+    #     ],
+    #     outputs=[
+    #         selected_saved_version_id,
+    #     ]
+    # )
+    #===============================================================================
+
+    #=====================================================================================
+    # selected_downloaded_model_id.change(
+    #     fn=civitai_manager_action.on_selected_downloaded_model_id_change,   
+    #     inputs=[
+    #         selected_downloaded_model_id,
+    #     ],
+    #     outputs=[
+    #         selected_downloaded_version_id,
+    #         downloaded_civitai_model_url_txt,
+    #         downloaded_model_type, 
+    #         downloaded_versions_list,
+    #     ] 
+    # )
+    
+    # selected_downloaded_version_id.change(
+    #     fn=civitai_manager_action.on_selected_downloaded_version_id_change,
+    #     inputs=[
+    #         selected_downloaded_version_id,
+    #     ],
+    #     outputs=[
+    #         downloaded_description_html,
+    #         downloaded_trigger_words,
+    #         downloaded_filename_list,
+    #         downloaded_model_title_name,                                    
+    #         downloaded_version_gallery,
+    #         downloaded_img_file_info      
+    #     ]
+    # )
+    
+    # downloaded_description_html.change(
+    #     fn=civitai_manager_action.on_downloaded_description_html_change,
+    #     inputs=[
+    #         selected_downloaded_version_id
+    #     ],
+    #     outputs=[
+    #         downloaded_version_gallery, 
+    #         downloaded_version_images_url
+    #     ]
+    # )
+    
+    # downloaded_versions_list.select(
+    #     fn=civitai_manager_action.on_downloaded_versions_list_select,
+    #     inputs=[
+    #         selected_downloaded_model_id, 
+    #     ],
+    #     outputs=[
+    #         selected_downloaded_version_id,            
+    #     ]
+    # )
+    #===================================================================================== 
+
+# ishortcut_action
+
+
+def get_versionid_by_index(modelid:str, index):
+    if not modelid:
+        return    
+    
+    model_info = ishortcut.get_model_info(modelid)
+    
+    if not model_info:
+        return
+    
+    if "modelVersions" not in model_info.keys():
+        return 
+    
+    try:
+        version_info = model_info["modelVersions"][index]
+        return version_info['id']
+    except:
+        return None
+
+
+# def get_selected_model_info(modelid):
+#     model_type= None
+#     def_name = ""
+#     def_id = ""    
+#     versions_list = list()
+    
+#     if modelid:
+#         model_info = ishortcut.get_model_info(modelid)
+#         if model_info:
+#             model_type = model_info['type']            
+
+#             if "modelVersions" in model_info.keys():            
+#                 def_version = model_info["modelVersions"][0]
+#                 def_name = def_version["name"]
+#                 def_id = def_version["id"]
+#                 for version_info in model_info['modelVersions']:
+#                     versions_list.append(version_info['name'])                        
+                
+#     return model_type, def_name, def_id, versions_list
+
+def get_version_description_id(modelid:str ,versionid:str):
+    output_html = ""
+    output_training = ""
+
+    files_name = []
+    
+    html_typepart = ""
+    html_creatorpart = ""
+    html_trainingpart = ""
+    html_modelpart = ""
+    html_versionpart = ""
+    html_descpart = ""
+    html_dnurlpart = ""
+    html_imgpart = ""
+    html_modelurlpart = ""
+    
+    if not modelid or not versionid:
+        return "",None,None,None,None
+    
+    model_info = ishortcut.get_model_info(modelid)
+    version_info = get_version_info(modelid, versionid) 
+    
+    if not version_info or not model_info:
+        return "",None,None,None,None
+                
+    html_typepart = f"<br><b>Type: {model_info['type']}</b>"    
+    model_url = civitai.Url_Page()+str(modelid)
+
+    html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_info["name"]}</a></b>'
+    html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
+
+    model_version_name = version_info['name']
+
+    if 'trainedWords' in version_info:  
+        output_training = ", ".join(version_info['trainedWords'])
+        html_trainingpart = f'<br><b>Training Tags:</b> {output_training}'
+
+    model_uploader = model_info['creator']['username']
+    html_creatorpart = f"<br><b>Uploaded by:</b> {model_uploader}"
+
+    if 'description' in version_info:  
+        if version_info['description']:
+            html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
+            
+    if 'description' in model_info:  
+        if model_info['description']:
+            html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
+                
+    html_versionpart = f"<br><b>Version:</b> {model_version_name}"
+
+    if 'files' in version_info:                                
+        for file in version_info['files']:
+            files_name.append(file['name'])
+            html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
+                        
+    output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
+
+    title_name = f"### {model_info['name']} : {version_info['name']}"
+        
+    return output_html, output_training, files_name, model_info['type'], title_name
+
+        
+# # civitai saved model informaton start
+# def on_selected_saved_model_id_change(modelid):
+#     is_downloaded = False
+#     model_type = ""
+#     downloaded_info = ""
+#     def_name = ""
+#     model_url = ""
+#     def_id = ""
+    
+#     if modelid:
+#         model_type, def_name, def_id, vlist= ishortcut_action.get_selected_model_info(modelid)
+#         model_url = civitai.Url_ModelId() + str(modelid)
+#         return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+#     return gr.update(value=None),gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+
+# def on_selected_saved_version_id_change(modelid:str , versionid:str):
+#     if not modelid or not versionid:        
+#         gr.HTML.update(value=""),gr.Textbox.update(value=None),gr.update(value=None),None,None,None
+
+#     dhtml, triger, flist, mtype, title_name = ishortcut_action.get_version_description_id(modelid, versionid)
+    
+#     file_text = ""
+    
+#     if flist:
+#         file_text = "\n".join(flist)
+            
+#     return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.update(value=file_text),title_name,None,None
+
+# def on_saved_description_html_change(modelid:str, versionid:str):
+#     return ishortcut_action.get_version_description_gallery(modelid, versionid)
+
+# def on_saved_versions_list_select(evt: gr.SelectData, modelid:str):       
+    
+#     if not modelid or not evt.value:
+#         return gr.Textbox.update(value="")
+
+#     versionid = ishortcut_action.get_versionid_by_index(modelid, evt.index)        
+        
+#     return gr.Textbox.update(value=versionid)
+# # civitai saved model informaton end
+
+# # civitai model information start
+# def on_selected_model_id_change(modelid):
+#     is_lora = False
+#     is_downloaded = False
+#     model_type = ""
+#     downloaded_info = ""
+#     def_name = ""
+#     model_url = ""
+#     def_id = ""
+    
+#     if modelid:
+#         model_type, def_name, def_id, vlist= civitai_action.get_selected_model_info(modelid)
+#         downloaded_versions_list = model_action.get_model_versions(modelid)
+
+#         if downloaded_versions_list:
+#             downloaded_info = "\n".join(downloaded_versions_list)
+            
+#         if model_type == "LORA":
+#             is_lora = True   
+        
+#         if downloaded_info:
+#             is_downloaded = True 
+
+#         model_url = civitai.Url_ModelId() + str(modelid)
+        
+#         return gr.update(value=def_id),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+#     return gr.update(value=def_id),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_lora),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+    
+# def on_selected_version_id_change(versionid:str):
+#     if not versionid:
+#         return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
+    
+#     version_info = civitai.get_version_info_by_version_id(versionid) 
+    
+#     if not version_info:
+#         return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.CheckboxGroup.update(choices=[], value=None),None,None,None
+                
+#     dhtml, triger, flist, mtype = civitai_action.get_version_description_by_version_info(version_info)
+#     title_name = civitai_action.get_model_title_name_by_version_info(version_info)    
+    
+#     return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.CheckboxGroup.update(choices=flist if flist else [], value=flist if flist else []),title_name,None,None
+    
+# def on_description_html_change(versionid):
+#     return civitai_action.get_version_description_gallery_by_version_id(versionid)
+  
+# def on_versions_list_select(evt: gr.SelectData, modelid:str):       
+    
+#     if not modelid or not evt.value:
+#         return gr.Textbox.update(value="")
+       
+#     versionid = civitai.get_version_id_by_version_name(modelid, evt.value)        
+        
+#     return gr.Textbox.update(value=versionid)
+# # civitai model information end 
+
+
+# # download model information start
+# def on_selected_downloaded_model_id_change(modelid):
+#     model_type = ""
+#     def_name = ""
+#     model_url = ""
+#     def_id = ""
+    
+#     if modelid:
+#         downloaded_info, model_type, def_name, def_id, vlist= model_action.get_selected_downloaded_modelinfo(modelid)
+#         model_url = civitai.Url_ModelId() + str(modelid)
+#         return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.update(choices=vlist,value=def_name)
+#     return gr.update(value=def_id),gr.update(value=model_url),gr.update(value=model_type),gr.Dropdown.update(choices=[setting.NORESULT], value=setting.NORESULT)
+
+# def on_selected_downloaded_version_id_change(versionid:str):
+    
+#     if not versionid:
+#         return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
+    
+#     version_info = model.get_version_info(versionid) 
+
+#     if not version_info:
+#         return gr.HTML.update(value=""), gr.Textbox.update(value=None), gr.Textbox.update(value=None),None,None,None
+                    
+#     dhtml, triger, flist, mtype = model_action.get_version_description(version_info)
+#     title_name = model_action.get_model_title_name(version_info)    
+    
+#     if flist:
+#         file_text = "\n".join(flist)
+        
+#     return gr.HTML.update(value=dhtml),gr.Textbox.update(value=triger),gr.Textbox.update(value=file_text),title_name,None,None    
+    
+# def on_downloaded_description_html_change(versionid):
+#     return model_action.get_version_description_gallery(versionid)
+
+# def on_downloaded_versions_list_select(evt: gr.SelectData, model_id:str):       
+    
+#     if not model_id or not evt.value:
+#         return gr.Textbox.update(value="")
+       
+#     version_id = model.get_version_id_by_version_name(model_id, evt.value)
+          
+#     return gr.Textbox.update(value=version_id)
+
+# civitai_action
+
+# def get_model_title_name_by_version_id(version_id:str)->str:
+#     if not version_id:
+#         return
+    
+#     info = civitai.get_version_info_by_version_id(version_id)
+#     return get_model_title_name_by_version_info(info)
+
+# def get_model_title_name_by_version_info(version_info:dict)->str:
+#     if not version_info:
+#         return
+    
+#     title_name = ""
+#     if 'model' not in version_info.keys():
+#         return
+        
+#     title_name = f"### {version_info['model']['name']} : {version_info['name']}"
+#     return title_name
+
+# def get_version_description_gallery_by_version_info(version_info:dict):       
+#     if not version_info:
+#         return None,None
+
+#     version_images = []
+#     version_images_url = []
+#     version_full_images_url = []
+
+#     if 'images' not in version_info:
+#         return None,None
+                    
+#     for pic in version_info["images"]:   
+#         if "url" in pic:
+#             img_url = pic["url"]
+#             # use max width
+#             # 파일 인포가 있는 원본 이미지.
+#             if "width" in pic:
+#                 if pic["width"]:
+#                     img_url = util.change_width_from_image_url(img_url, pic["width"])                                            
+
+#             # 파일 이상 유무 체크 하지만!!!! 속도는?
+#             # 일단 이걸로 간다.
+#             # 문제있는 파일은 건너뛴다.                   
+#             # try:
+#             #     img_r = requests.get(pic["url"],stream=True)
+#             #     if not img_r.ok:
+#             #         util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")            
+#             #         continue
+#             #     img_r.raw.decode_content=True
+#             #     version_images.append(Image.open(img_r.raw))        
+#             #     version_full_images_url.append(img_url)                                  
+#             # except:
+#             #     pass
+
+#             #작은 이미지 - 로드는 작은 이미지로 한다
+#             #제네레이션 정보는 원본에만 있다                        
+#             #version_images_url.append((pic["url"],f"[{version_info['id']}]:{version_info['model']['name']}"))
+#             version_images_url.append(pic["url"])
+#             version_full_images_url.append(img_url)     
+                
+#     return version_images_url,version_full_images_url
+#     # return version_images,version_full_images_url
+
+# def get_version_description_gallery_by_version_id(version_id:str):       
+#     if not version_id:                
+#         return None,None
+    
+#     # util.printD(f"{version_id}")
+    
+#     version_info = civitai.get_version_info_by_version_id(version_id)
+#     return get_version_description_gallery_by_version_info(version_info)
+
+# def get_version_description_by_version_info(version_info:dict):
+#     output_html = ""
+#     output_training = ""
+
+#     files_name = []
+    
+#     html_typepart = ""
+#     html_creatorpart = ""
+#     html_trainingpart = ""
+#     html_modelpart = ""
+#     html_versionpart = ""
+#     html_descpart = ""
+#     html_dnurlpart = ""
+#     html_imgpart = ""
+#     html_modelurlpart = ""
+    
+#     model_id = None
+    
+#     if not version_info:
+#         return "",None,None,None
+    
+#     if 'modelId' not in version_info:
+#         return "",None,None,None
+        
+#     model_id = version_info['modelId']
+    
+#     if not model_id:
+#         return "",None,None,None
+        
+#     model_info = civitai.get_model_info(model_id)
+
+#     if not model_info:
+#         return "",None,None,None
+                
+#     html_typepart = f"<br><b>Type: {model_info['type']}</b>"    
+#     model_url = civitai.Url_Page()+str(model_id)
+
+#     html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_info["name"]}</a></b>'
+#     html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
+
+#     model_version_name = version_info['name']
+
+#     if 'trainedWords' in version_info:  
+#         output_training = ", ".join(version_info['trainedWords'])
+#         html_trainingpart = f'<br><b>Training Tags:</b> {output_training}'
+
+#     model_uploader = model_info['creator']['username']
+#     html_creatorpart = f"<br><b>Uploaded by:</b> {model_uploader}"
+
+#     if 'description' in version_info:  
+#         if version_info['description']:
+#             html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
+            
+#     if 'description' in model_info:  
+#         if model_info['description']:
+#             html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
+                
+#     html_versionpart = f"<br><b>Version:</b> {model_version_name}"
+
+#     if 'files' in version_info:                                
+#         for file in version_info['files']:
+#             files_name.append(file['name'])
+#             html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
+                        
+#     output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
+    
+#     return output_html, output_training, files_name, model_info['type']     
+
+# def get_shortcut_model_info(model_id:str):
+#     model_name = None
+#     model_type = None
+#     def_id = None
+#     def_name = None
+#     def_image = None
+#     model_url = None
+    
+#     model_info = civitai.get_model_info(model_id)
+#     if model_info:
+#         model_name = model_info['name']
+#         model_type = model_info['type']
+#         model_url = f"{civitai.Url_ModelId()}{model_id}"
+        
+#         if "modelVersions" in model_info.keys():            
+#             def_version = model_info["modelVersions"][0]
+#             def_id = def_version['id']
+#             def_name = def_version['name']
+            
+#             if 'images' in def_version.keys():
+#                 if len(def_version["images"]) > 0:
+#                     img_dict = def_version["images"][0]
+#                     def_image = img_dict["url"]                  
+        
+#     return model_name, model_type, model_url, def_id, def_name, def_image
+
+# def get_selected_model_info(modelid):
+#     model_type= None
+#     owned_info = ""
+#     def_name = ""
+#     def_id = ""    
+#     versions_list = list()
+    
+#     if modelid:
+#         model_info = civitai.get_model_info(modelid)
+#         if model_info:
+#             model_type = model_info['type']            
+
+#             if "modelVersions" in model_info.keys():            
+#                 def_version = model_info["modelVersions"][0]
+#                 def_name = def_version["name"]
+#                 def_id = def_version["id"]
+#                 for version_info in model_info['modelVersions']:
+#                     versions_list.append(version_info['name'])                        
+                
+#     return model_type, def_name, def_id, versions_list
+
+
+#model_action
+
+# def get_selected_downloaded_modelinfo(modelid):
+#     model_type= None
+#     downloaded_info = ""
+#     def_name = ""
+#     def_info = None
+#     def_id = None
+#     versions_list = []    
+#     if modelid:
+#         if model.Downloaded_Models:
+#             if str(modelid) in model.Downloaded_Models.keys():
+#                 file_list = dict()
+                
+#                 for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+#                     file_list[os.path.basename(version_paths)] = version_paths
+                
+#                 for file,path in file_list.items():
+#                     vinfo = util.read_json(path)
+#                     if vinfo:
+#                         if not def_info:
+#                             def_info = vinfo
+#                         try:  
+#                             downloaded_info = downloaded_info + "\n" if len(downloaded_info.strip()) > 0 else ""
+#                             downloaded_info = downloaded_info + f"{vinfo['name']}"
+#                             versions_list.append(vinfo['name'])  
+#                         except:
+#                             pass
+
+#             if def_info:
+#                 def_name = def_info['name']
+#                 def_id = def_info['id']
+#                 if "model" in def_info.keys():
+#                     model_type = def_info['model']['type']                
+                                    
+#     return downloaded_info, model_type, def_name, def_id, versions_list
+
+# def get_model_title_name(version_info:dict)->str:
+#     if not version_info:
+#         return
+    
+#     title_name = ""
+#     if 'model' not in version_info.keys():
+#         return
+        
+#     title_name = f"### {version_info['model']['name']} : {version_info['name']}"
+#     return title_name
+
+# def get_is_not_latest_modelversions(model_list:list)->list:
+#     if not model_list:
+#         return
+
+#     new_model_list = list()
+    
+#     for modelid in model_list:
+#         if modelid in model.Downloaded_Models.keys():
+#             # civitai 에서 최신 모델 정보를 가져온다.
+#             version_info = civitai.get_latest_version_info_by_model_id(modelid)
+#             if version_info:
+#                 latest_versionid = str(version_info['id']).strip()                
+                
+#                 # 현재 가지고 있는 버전들을 가져온다.                
+#                 dnver_list = list()                
+#                 for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+#                     dnver_list.append(str(vid).strip())
+                    
+#                 if latest_versionid not in dnver_list:                        
+#                     new_model_list.append([modelid, latest_versionid])
+    
+#     return new_model_list if len(new_model_list) > 0 else None
+
+# def get_is_not_latest_models(model_list:list)->list:
+#     if not model_list:
+#         return
+
+#     new_model_list = list()
+    
+#     for modelid in model_list:
+#         if not is_latest(modelid):
+#             new_model_list.append(modelid)
+    
+#     return new_model_list if len(new_model_list) > 0 else None
+                        
+# def is_latest(modelid:str)->bool:
+#     if not modelid:
+#         return False
+   
+#     if modelid in model.Downloaded_Models.keys():
+#         # civitai 에서 최신 모델 정보를 가져온다.
+#         version_info = civitai.get_latest_version_info_by_model_id(modelid)
+#         if version_info:
+#             latest_versionid = str(version_info['id']).strip()                
+            
+#             # 현재 가지고 있는 버전들을 가져온다.                
+#             dnver_list = list()                
+#             for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+#                 dnver_list.append(str(vid).strip())
+                
+#             if latest_versionid in dnver_list:                        
+#                 return True
+#     return False

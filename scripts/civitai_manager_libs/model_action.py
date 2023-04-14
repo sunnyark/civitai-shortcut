@@ -1,72 +1,79 @@
 import os
+from . import util
 from . import model
 from . import civitai
-from . import util
+
+def Load_Downloaded_Models():
+    model.update_downloaded_model()
+
+def is_latest(modelid:str)->bool:
+    if not modelid:
+        return False
+   
+    if modelid in model.Downloaded_Models.keys():
+        # civitai 에서 최신 모델 정보를 가져온다.
+        version_info = civitai.get_latest_version_info_by_model_id(modelid)
+        if version_info:
+            latest_versionid = str(version_info['id']).strip()                
+            
+            # 현재 가지고 있는 버전들을 가져온다.                
+            dnver_list = list()                
+            for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+                dnver_list.append(str(vid).strip())
+                
+            if latest_versionid in dnver_list:                        
+                return True
+    return False
+           
+def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
+    # 현재 모델의 정보를 가져온다.
+    model_info = None
+    version_info = None
     
-def get_selected_downloaded_modelinfo(modelid):
-    model_type= None
-    downloaded_info = ""
-    def_name = ""
-    def_info = None
-    def_id = None
-    versions_list = []    
     if modelid:
-        if model.Downloaded_Models:
-            if str(modelid) in model.Downloaded_Models.keys():
-                file_list = dict()
-                
-                for vid, version_paths in model.Downloaded_Models[str(modelid)]:
-                    file_list[os.path.basename(version_paths)] = version_paths
-                
-                for file,path in file_list.items():
-                    vinfo = util.read_json(path)
-                    if vinfo:
-                        if not def_info:
-                            def_info = vinfo
-                        try:  
-                            downloaded_info = downloaded_info + "\n" if len(downloaded_info.strip()) > 0 else ""
-                            downloaded_info = downloaded_info + f"{vinfo['name']}"
-                            versions_list.append(vinfo['name'])  
-                        except:
-                            pass
-
-            if def_info:
-                def_name = def_info['name']
-                def_id = def_info['id']
-                if "model" in def_info.keys():
-                    model_type = def_info['model']['type']                
-                                    
-    return downloaded_info, model_type, def_name, def_id, versions_list
-
-def get_model_versions(modelid:str):
-    downloaded_version_list = list()
-    if modelid:
-        if model.Downloaded_Models:                        
-            if str(modelid) in model.Downloaded_Models.keys():
-                file_list = dict()
-                
-                for vid, version_paths in model.Downloaded_Models[str(modelid)]:
-                    file_list[os.path.basename(version_paths)] = version_paths
-                
-                for file,path in file_list.items():
-                    vinfo = util.read_json(path)
-                    if vinfo:                      
-                        downloaded_version_list.append(vinfo['name'])
-                        
-    return downloaded_version_list if len(downloaded_version_list) > 0 else None
-
-def get_model_title_name(version_info:dict)->str:
-    if not version_info:
-        return
-    
-    title_name = ""
-    if 'model' not in version_info.keys():
-        return
+        model_info = model.get_model_info(modelid)      
+        version_info = dict()
+        if model_info:
+            if not versionid and not ver_index:
+                if "modelVersions" in model_info.keys():
+                    version_info = model_info["modelVersions"][0]
+                    if version_info["id"]:
+                        versionid = version_info["id"]
+            elif versionid:
+                if "modelVersions" in model_info.keys():
+                    for ver in model_info["modelVersions"]:                        
+                        if versionid == ver["id"]:
+                            version_info = ver                
+            else:
+                if "modelVersions" in model_info.keys():
+                    if len(model_info["modelVersions"]) > 0:
+                        version_info = model_info["modelVersions"][ver_index]
+                        if version_info["id"]:
+                            versionid = version_info["id"]
+                            
+    # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
+    if model_info and version_info:        
+        version_name = version_info["name"]
+        model_type = model_info['type']                    
+        versions_list = list()            
+        for ver in model_info['modelVersions']:
+            versions_list.append(ver['name'])
         
-    title_name = f"### {version_info['model']['name']} : {version_info['name']}"
-    return title_name
+        model_url = civitai.Url_ModelId() + str(modelid)        
+        dhtml, triger, flist = get_version_description(version_info, model_info)
+        title_name = f"### {model_info['name']} : {version_info['name']}"           
+        gallery_url, images_url = get_version_description_gallery(versionid)
+        
+        return model_info, versionid,version_name,model_url,model_type,versions_list,dhtml,triger,flist,title_name,gallery_url,images_url
+    return None, None,None,None,None,None,None,None,None,None,None,None
+        
+def get_version_description_gallery(versionid:str):
+    if not versionid:
+        return None,None
+    imagelist = model.get_version_images(str(versionid))
+    return imagelist, imagelist
 
-def get_version_description(version_info:dict):
+def get_version_description(version_info:dict, model_info:dict=None):
     output_html = ""
     output_training = ""
 
@@ -80,16 +87,15 @@ def get_version_description(version_info:dict):
     html_dnurlpart = ""
     html_imgpart = ""
     html_modelurlpart = ""
-    
-    
+        
     if not version_info:
-        return "",None,None,None
+        return "",None,None
     
     if 'modelId' not in version_info:
-        return "",None,None,None
+        return "",None,None
         
     if "model" not in version_info.keys():    
-        return "",None,None,None
+        return "",None,None
     
     model_id = version_info['modelId']
     model_type = version_info['model']['type']
@@ -127,67 +133,8 @@ def get_version_description(version_info:dict):
                                                 
     output_html = html_typepart + html_modelpart + html_versionpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
     
-    return output_html, output_training, files_name, model_type
-                        
-def get_version_description_gallery(versionid):
-    if not versionid:
-        return None,None
-    imagelist = model.get_version_images(versionid)
-    return imagelist, imagelist
+    return output_html, output_training, files_name
 
-def get_is_not_latest_modelversions(model_list:list)->list:
-    if not model_list:
-        return
-
-    new_model_list = list()
-    
-    for modelid in model_list:
-        if modelid in model.Downloaded_Models.keys():
-            # civitai 에서 최신 모델 정보를 가져온다.
-            version_info = civitai.get_latest_version_info_by_model_id(modelid)
-            if version_info:
-                latest_versionid = str(version_info['id']).strip()                
-                
-                # 현재 가지고 있는 버전들을 가져온다.                
-                dnver_list = list()                
-                for vid, version_paths in model.Downloaded_Models[str(modelid)]:
-                    dnver_list.append(str(vid).strip())
-                    
-                if latest_versionid not in dnver_list:                        
-                    new_model_list.append([modelid, latest_versionid])
-    
-    return new_model_list if len(new_model_list) > 0 else None
-
-def get_is_not_latest_models(model_list:list)->list:
-    if not model_list:
-        return
-
-    new_model_list = list()
-    
-    for modelid in model_list:
-        if not is_latest(modelid):
-            new_model_list.append(modelid)
-    
-    return new_model_list if len(new_model_list) > 0 else None
-                        
-def is_latest(modelid:str)->bool:
-    if not modelid:
-        return False
-   
-    if modelid in model.Downloaded_Models.keys():
-        # civitai 에서 최신 모델 정보를 가져온다.
-        version_info = civitai.get_latest_version_info_by_model_id(modelid)
-        if version_info:
-            latest_versionid = str(version_info['id']).strip()                
-            
-            # 현재 가지고 있는 버전들을 가져온다.                
-            dnver_list = list()                
-            for vid, version_paths in model.Downloaded_Models[str(modelid)]:
-                dnver_list.append(str(vid).strip())
-                
-            if latest_versionid in dnver_list:                        
-                return True
-    return False
                         
                         
             

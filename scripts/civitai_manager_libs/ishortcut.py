@@ -7,7 +7,41 @@ import gradio as gr
 from . import util
 from . import setting
 from . import civitai
-from . import model
+
+def get_model_info(modelid:str):
+    if not modelid:
+        return    
+    contents = None    
+    model_path = os.path.join(setting.shortcut_info_folder, modelid, f"{modelid}{setting.info_suffix}{setting.info_ext}")       
+    try:
+        with open(model_path, 'r') as f:
+            contents = json.load(f)            
+    except:
+        return None
+    
+    if 'id' not in contents.keys():
+        return None
+    
+    return contents
+
+# def get_version_info(modelid:str, versionid:str):
+#     if not modelid or not versionid:
+#         return    
+#     contents = None    
+
+#     model_info = get_model_info(modelid)
+    
+#     if not model_info:
+#         return
+#     if "modelVersions" not in model_info.keys():
+#         return 
+    
+#     for version_info in model_info["modelVersions"]:
+#         if "id" in version_info.keys():
+#             if str(version_info["id"]) == str(versionid):
+#                 return version_info
+    
+#     return contents
 
 def write_model_information(modelid:str):    
     if not modelid:
@@ -72,12 +106,6 @@ def delete_model_information(modelid:str):
     if setting.shortcut_info_folder != model_path:
         if os.path.exists(model_path):
             shutil.rmtree(model_path)
-    
-def delete_shortcut_model(modelid):
-    if modelid:
-        ISC = load()                           
-        ISC = delete(ISC, modelid)
-        save(ISC) 
 
 def update_thumbnail_images(progress):
     preISC = load()                           
@@ -105,43 +133,24 @@ def update_thumbnail_images(progress):
         ISC = preISC            
     save(ISC)
     
-def get_thumbnail_list2(shortcut_types=None, only_downloaded=False):
+# def get_thumbnail_list2(shortcut_types=None, only_downloaded=False):
     
-    shortlist =  get_image_list(shortcut_types)
-    if not shortlist:
-        return None
+#     shortlist =  get_image_list(shortcut_types)
+#     if not shortlist:
+#         return None
     
-    if only_downloaded:
-        if model.Downloaded_Models:                
-            downloaded_list = list()            
-            for short in shortlist:
-                sc_name = short[1]
-                mid = str(sc_name[0:sc_name.find(':')])
-                if mid in model.Downloaded_Models.keys():
-                    downloaded_list.append(short)
-            return downloaded_list
-    else:
-        return shortlist
-    return None  
-
-def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
-    
-    shortlist =  get_image_list(shortcut_types, search)
-    if not shortlist:
-        return None
-    
-    if only_downloaded:
-        if model.Downloaded_Models:                
-            downloaded_list = list()            
-            for short in shortlist:
-                sc_name = short[1]
-                mid = str(sc_name[0:sc_name.find(':')])
-                if mid in model.Downloaded_Models.keys():
-                    downloaded_list.append(short)
-            return downloaded_list
-    else:
-        return shortlist
-    return None
+#     if only_downloaded:
+#         if model.Downloaded_Models:                
+#             downloaded_list = list()            
+#             for short in shortlist:
+#                 sc_name = short[1]
+#                 mid = str(sc_name[0:sc_name.find(':')])
+#                 if mid in model.Downloaded_Models.keys():
+#                     downloaded_list.append(short)
+#             return downloaded_list
+#     else:
+#         return shortlist
+#     return None  
         
 def get_list(shortcut_types=None)->str:
     

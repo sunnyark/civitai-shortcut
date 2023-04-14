@@ -6,58 +6,148 @@ from . import civitai
 from . import ishortcut
 from . import setting
 
-def get_model_info(modelid:str):
-    if not modelid:
-        return    
-    contents = None    
-    model_path = os.path.join(setting.shortcut_info_folder, modelid, f"{modelid}{setting.info_suffix}{setting.info_ext}")       
-    try:
-        with open(model_path, 'r') as f:
-            contents = json.load(f)            
-    except:
-        return None
-    
-    if 'id' not in contents.keys():
-        return None
-    
-    return contents
 
-def get_version_info(modelid:str, versionid:str):
+def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
+    # 현재 모델의 정보를 가져온다.
+    model_info = None
+    version_info = None
+    
+    if modelid:
+        model_info = ishortcut.get_model_info(modelid)        
+        version_info = dict()
+        if model_info:
+            if not versionid and not ver_index:
+                if "modelVersions" in model_info.keys():
+                    version_info = model_info["modelVersions"][0]
+                    if version_info["id"]:
+                        versionid = version_info["id"]
+            elif versionid:
+                if "modelVersions" in model_info.keys():
+                    for ver in model_info["modelVersions"]:                        
+                        if versionid == ver["id"]:
+                            version_info = ver                
+            else:
+                if "modelVersions" in model_info.keys():
+                    if len(model_info["modelVersions"]) > 0:
+                        version_info = model_info["modelVersions"][ver_index]
+                        if version_info["id"]:
+                            versionid = version_info["id"]
+                            
+    # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
+    if model_info and version_info:        
+        version_name = version_info["name"]
+        model_type = model_info['type']                    
+        downloaded_versions_list = model.get_model_version_list(modelid)
+        versions_list = list()            
+        for ver in model_info['modelVersions']:
+            versions_list.append(ver['name'])
+        
+        model_url = civitai.Url_ModelId() + str(modelid)        
+        dhtml, triger, flist = get_version_description(version_info,model_info)
+        title_name = f"### {model_info['name']} : {version_info['name']}"           
+        gallery_url, images_url = get_version_description_gallery(modelid, versionid)
+        
+        return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,gallery_url,images_url
+    return None, None,None,None,None,None,None,None,None,None,None,None,None
+
+def get_version_description_gallery(modelid:str, versionid:str):
     if not modelid or not versionid:
-        return    
-    contents = None    
+        return None, None
 
-    model_info = get_model_info(modelid)
-    
-    if not model_info:
-        return
-    if "modelVersions" not in model_info.keys():
-        return 
-    
-    for version_info in model_info["modelVersions"]:
-        if "id" in version_info.keys():
-            if str(version_info["id"]) == str(versionid):
-                return version_info
-    
-    return contents
-
-def get_versionid_by_index(modelid:str, index):
-    if not modelid:
-        return    
-    
-    model_info = get_model_info(modelid)
-    
-    if not model_info:
-        return
-    
-    if "modelVersions" not in model_info.keys():
-        return 
-    
-    try:
-        version_info = model_info["modelVersions"][index]
-        return version_info['id']
+    model_path = os.path.join(setting.shortcut_info_folder, modelid)         
+    version_image_prefix = f"{versionid}-"
+    version_images_url = list()
+    try:        
+        for file in os.listdir(model_path):
+            if os.path.isdir(file):
+                continue
+            if file.endswith(setting.preview_image_ext) and file.startswith(version_image_prefix):
+                version_images_url.append(os.path.join(model_path, file))            
     except:
+        return None,None
+                
+    return version_images_url,version_images_url
+      
+def get_version_description(version_info:dict,model_info:dict=None):
+    output_html = ""
+    output_training = ""
+
+    files_name = []
+    
+    html_typepart = ""
+    html_creatorpart = ""
+    html_trainingpart = ""
+    html_modelpart = ""
+    html_versionpart = ""
+    html_descpart = ""
+    html_dnurlpart = ""
+    html_imgpart = ""
+    html_modelurlpart = ""
+    
+    model_id = None
+    
+    if version_info:        
+        if 'modelId' in version_info:            
+            model_id = version_info['modelId']  
+            if not model_info:            
+                model_info = ishortcut.get_model_info(model_id)
+
+    if version_info and model_info:
+        
+        html_typepart = f"<br><b>Type: {model_info['type']}</b>"    
+        model_url = civitai.Url_Page()+str(model_id)
+
+        html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_info["name"]}</a></b>'
+        html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
+
+        model_version_name = version_info['name']
+
+        if 'trainedWords' in version_info:  
+            output_training = ", ".join(version_info['trainedWords'])
+            html_trainingpart = f'<br><b>Training Tags:</b> {output_training}'
+
+        model_uploader = model_info['creator']['username']
+        html_creatorpart = f"<br><b>Uploaded by:</b> {model_uploader}"
+
+        if 'description' in version_info:  
+            if version_info['description']:
+                html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
+                
+        if 'description' in model_info:  
+            if model_info['description']:
+                html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
+                    
+        html_versionpart = f"<br><b>Version:</b> {model_version_name}"
+
+        if 'files' in version_info:                                
+            for file in version_info['files']:
+                files_name.append(file['name'])
+                html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
+                            
+        output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
+        
+        return output_html, output_training, files_name             
+    
+    return "",None,None    
+
+def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
+    
+    shortlist =  ishortcut.get_image_list(shortcut_types, search)
+    if not shortlist:
         return None
+    
+    if only_downloaded:
+        if model.Downloaded_Models:                
+            downloaded_list = list()            
+            for short in shortlist:
+                sc_name = short[1]
+                mid = str(sc_name[0:sc_name.find(':')])
+                if mid in model.Downloaded_Models.keys():
+                    downloaded_list.append(short)
+            return downloaded_list
+    else:
+        return shortlist
+    return None
     
 def upload_shortcut_by_files(files, progress):
     modelids = list()
@@ -109,12 +199,16 @@ def update_all_shortcut_model(progress):
     else:
         ISC = preISC            
     ishortcut.save(ISC)
-    
-def DownloadedModel_to_Shortcut(progress):        
+
+def delete_shortcut_model(modelid):
+    if modelid:
+        ISC = ishortcut.load()                           
+        ISC = ishortcut.delete(ISC, modelid)
+        ishortcut.save(ISC) 
+            
+def scan_downloadedmodel_to_shortcut(progress):        
     add_ISC = dict()
 
-    # 다운로드 받은 모델 정보를 갱신한다.
-    model.Load_Downloaded_Models()   
     # util.printD(len(model.Downloaded_Models))
     if model.Downloaded_Models:
         for modelid in progress.tqdm(model.Downloaded_Models, desc=f"Scan Downloaded Models to shortcut"):        
@@ -127,103 +221,4 @@ def DownloadedModel_to_Shortcut(progress):
     else:
         ISC = add_ISC            
     ishortcut.save(ISC) 
-    
-def get_selected_model_info(modelid):
-    model_type= None
-    def_name = ""
-    def_id = ""    
-    versions_list = list()
-    
-    if modelid:
-        model_info = get_model_info(modelid)
-        if model_info:
-            model_type = model_info['type']            
-
-            if "modelVersions" in model_info.keys():            
-                def_version = model_info["modelVersions"][0]
-                def_name = def_version["name"]
-                def_id = def_version["id"]
-                for version_info in model_info['modelVersions']:
-                    versions_list.append(version_info['name'])                        
-                
-    return model_type, def_name, def_id, versions_list
-
-def get_version_description(modelid:str ,versionid:str):
-    output_html = ""
-    output_training = ""
-
-    files_name = []
-    
-    html_typepart = ""
-    html_creatorpart = ""
-    html_trainingpart = ""
-    html_modelpart = ""
-    html_versionpart = ""
-    html_descpart = ""
-    html_dnurlpart = ""
-    html_imgpart = ""
-    html_modelurlpart = ""
-    
-    if not modelid or not versionid:
-        return "",None,None,None,None
-    
-    model_info = get_model_info(modelid)
-    version_info = get_version_info(modelid, versionid) 
-    
-    if not version_info or not model_info:
-        return "",None,None,None,None
-                
-    html_typepart = f"<br><b>Type: {model_info['type']}</b>"    
-    model_url = civitai.Url_Page()+str(modelid)
-
-    html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_info["name"]}</a></b>'
-    html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
-
-    model_version_name = version_info['name']
-
-    if 'trainedWords' in version_info:  
-        output_training = ", ".join(version_info['trainedWords'])
-        html_trainingpart = f'<br><b>Training Tags:</b> {output_training}'
-
-    model_uploader = model_info['creator']['username']
-    html_creatorpart = f"<br><b>Uploaded by:</b> {model_uploader}"
-
-    if 'description' in version_info:  
-        if version_info['description']:
-            html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
-            
-    if 'description' in model_info:  
-        if model_info['description']:
-            html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
-                
-    html_versionpart = f"<br><b>Version:</b> {model_version_name}"
-
-    if 'files' in version_info:                                
-        for file in version_info['files']:
-            files_name.append(file['name'])
-            html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
-                        
-    output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
-
-    title_name = f"### {model_info['name']} : {version_info['name']}"
         
-    return output_html, output_training, files_name, model_info['type'], title_name
-
-def get_version_description_gallery(modelid:str, versionid:str):
-    if not modelid or not versionid:
-        return None,None
-
-    model_path = os.path.join(setting.shortcut_info_folder, modelid)         
-    version_image_prefix = f"{versionid}-"
-    version_images_url = list()
-    try:        
-        for file in os.listdir(model_path):
-            if os.path.isdir(file):
-                continue
-            if file.endswith(setting.preview_image_ext) and file.startswith(version_image_prefix):
-                version_images_url.append(os.path.join(model_path, file))            
-    except:
-        return None,None
-                
-    return version_images_url,version_images_url
-    

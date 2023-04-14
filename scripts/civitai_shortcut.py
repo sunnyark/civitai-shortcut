@@ -5,13 +5,9 @@ import modules.scripts as scripts
 from modules import shared
 from modules import script_callbacks
 from scripts.civitai_manager_libs import setting
-from scripts.civitai_manager_libs import civitai_manager_action
-from scripts.civitai_manager_libs import ishortcut
-from scripts.civitai_manager_libs import civitai
-from scripts.civitai_manager_libs import civitai_action
-from scripts.civitai_manager_libs import util
-from scripts.civitai_manager_libs import model   
-
+from scripts.civitai_manager_libs import model_action
+from scripts.civitai_manager_libs import ishortcut_action
+from scripts.civitai_manager_libs import civitai_shortcut_action
 
 def civitai_shortcut_ui():    
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tab:
@@ -40,7 +36,7 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 sc_search = gr.Textbox(label="Search", value="", placeholder="Search by name [Enter]",interactive=True, lines=1)
                             with gr.Row():
-                                sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut.get_thumbnail_list()).style(grid=[setting.shortcut_colunm],height="auto")
+                                sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut_action.get_thumbnail_list()).style(grid=[setting.shortcut_colunm],height="auto")
                             with gr.Row():
                                 show_only_downloaded_sc = gr.Checkbox(label="Show downloaded shortcut only", value=False)
                             with gr.Row():
@@ -108,8 +104,12 @@ def civitai_shortcut_ui():
                                     saved_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container="True")         
                                 with gr.Row():
                                     saved_civitai_model_url_txt = gr.Textbox(label="Model Url", interactive=False , max_lines=1)
+                                    
+                                with gr.Row(visible=False) as saved_downloaded_tab:
+                                    with gr.Tab("Downloaded Version"):
+                                        saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)
+
                                 with gr.Row():
-                                    # saved_filename_list = gr.CheckboxGroup (label="Model Version File", choices=[], value=[],  interactive=False)
                                     saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
                                 with gr.Row():
                                     saved_update_information_btn = gr.Button(value="Update Model Information")
@@ -142,7 +142,7 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 sc_downloaded_search = gr.Textbox(label="Search", value="", placeholder="Search by name [Enter]" , interactive=True, lines=1)                                
                             with gr.Row():
-                                sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut.get_thumbnail_list(None,True)).style(grid=[setting.shortcut_colunm],height="auto")                         
+                                sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut_action.get_thumbnail_list(None,True)).style(grid=[setting.shortcut_colunm],height="auto")                         
                             with gr.Row():
                                 refresh_downloaded_sc_btn = gr.Button(value="Refresh Shortcut List",variant="primary")
                                                                 
@@ -222,101 +222,11 @@ def civitai_shortcut_ui():
     except:
         pass
    
-   
-   
-    # 다하고 저기 아래로 보내자
-    # civitai saved model information start
-    selected_saved_model_id.change(
-        fn=civitai_manager_action.on_selected_saved_model_id_change,   
-        inputs=[
-            selected_saved_model_id,
-        ],
-        outputs=[
-            selected_saved_version_id,
-            saved_civitai_model_url_txt,
-            saved_model_type, 
-            saved_versions_list,
-        ] 
-    )    
-
-    selected_saved_version_id.change(
-        fn=civitai_manager_action.on_selected_saved_version_id_change,
-        inputs=[
-            selected_saved_model_id,
-            selected_saved_version_id,
-        ],
-        outputs=[
-            saved_description_html,
-            saved_trigger_words,
-            saved_filename_list,
-            saved_model_title_name,                        
-            saved_version_gallery,
-            saved_img_file_info      
-        ]
-    )
-     
-    saved_description_html.change(
-        fn=civitai_manager_action.on_saved_description_html_change,
-        inputs=[
-            selected_saved_model_id,
-            selected_saved_version_id            
-        ],
-        outputs=[
-            saved_version_gallery, 
-            saved_version_images_url
-        ]
-    )
-
-    # 버전을 하나 선택
-    saved_versions_list.select(
-        fn=civitai_manager_action.on_saved_versions_list_select,
-        inputs=[
-            selected_saved_model_id, 
-        ],
-        outputs=[
-            selected_saved_version_id,
-        ]
-    )
-
-    # shortcut delete
-    shortcut_del_btn.click(
-        fn=civitai_manager_action.on_shortcut_del_btn_click,
-        inputs=[
-            selected_model_id,
-        ],
-        outputs=[refresh_sc_list]               
-    )
-    
-    saved_update_information_btn.click(
-        fn=civitai_manager_action.on_saved_update_information_btn_click,
-        inputs=[
-            selected_saved_model_id,
-        ],
-        outputs=[ 
-            selected_saved_model_id,
-            refresh_sc_list,
-            # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
-            saved_version_gallery
-        ]                    
-    )                 
-
-    # selected_saved_model_id 값을 초기화 시키기 위한 이벤트 헨들러이다.
-    # saved_update_information_btn.click 에 두개가 묶여 있지만 이것이 먼저 실행될것이다.
-    # 하는게 없으므로
-    saved_update_information_btn.click(
-        fn=civitai_manager_action.on_blank_model_info,
-        inputs=None,
-        outputs=[selected_saved_model_id]                    
-    ) 
-    
-    saved_version_gallery.select(civitai_manager_action.on_gallery_select, saved_version_images_url, [saved_img_index, saved_hidden])
-    saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])    
-    # civitai saved model information end
     
     ###### Civitai Tab ######
     # civitai upload tab start
     civitai_internet_url.upload(
-        fn=civitai_manager_action.on_civitai_internet_url_upload,
+        fn=civitai_shortcut_action.on_civitai_internet_url_upload,
         inputs=[
             civitai_internet_url         
         ],
@@ -329,7 +239,7 @@ def civitai_shortcut_ui():
     )
     
     scan_to_shortcut_btn.click(
-        fn=civitai_manager_action.on_scan_to_shortcut_click,
+        fn=civitai_shortcut_action.on_scan_to_shortcut_click,
         inputs=None,
         outputs=[
             scan_progress,
@@ -337,7 +247,7 @@ def civitai_shortcut_ui():
     )
     
     shortcut_saved_update_btn.click(
-        fn=civitai_manager_action.on_shortcut_saved_update_btn,
+        fn=civitai_shortcut_action.on_shortcut_saved_update_btn,
         inputs=None,
         outputs=[
             thumb_progress,
@@ -345,7 +255,7 @@ def civitai_shortcut_ui():
     ) 
     
     thumb_progress.change(
-        fn=civitai_manager_action.on_refresh_progress_change,
+        fn=civitai_shortcut_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
             sc_search,
@@ -361,7 +271,7 @@ def civitai_shortcut_ui():
     )
     
     scan_progress.change(
-        fn=civitai_manager_action.on_refresh_progress_change,
+        fn=civitai_shortcut_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
             sc_search,
@@ -377,7 +287,7 @@ def civitai_shortcut_ui():
     )
     
     upload_progress.change(
-        fn=civitai_manager_action.on_refresh_progress_change,
+        fn=civitai_shortcut_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
             sc_search,
@@ -395,7 +305,7 @@ def civitai_shortcut_ui():
     
     # civitai browsing tab start
     shortcut_type.change(
-        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        fn=civitai_shortcut_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_type,            
             sc_search,
@@ -407,7 +317,7 @@ def civitai_shortcut_ui():
     )  
     
     sc_search.submit(
-        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        fn=civitai_shortcut_action.on_shortcut_gallery_refresh,
         inputs=[            
             shortcut_type,
             sc_search,
@@ -419,7 +329,7 @@ def civitai_shortcut_ui():
     )
     
     refresh_sc_btn.click(
-        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        fn=civitai_shortcut_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_type,
             sc_search,
@@ -430,10 +340,10 @@ def civitai_shortcut_ui():
         ]
     )    
         
-    sc_gallery.select(civitai_manager_action.on_sc_gallery_select,None,[selected_model_id,selected_saved_model_id])    
+    sc_gallery.select(civitai_shortcut_action.on_sc_gallery_select,None,[selected_model_id,selected_saved_model_id])    
     
     show_only_downloaded_sc.change(
-        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        fn=civitai_shortcut_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_type,
             sc_search,
@@ -447,7 +357,7 @@ def civitai_shortcut_ui():
     
     # civitai scan new version tab start
     scan_new_version_btn.click(
-        fn=civitai_manager_action.on_scan_new_version_btn,
+        fn=civitai_shortcut_action.on_scan_new_version_btn,
         inputs=[
             shortcut_new_version_type,
         ],
@@ -456,13 +366,12 @@ def civitai_shortcut_ui():
         ]                
     )
     
-    sc_new_version_gallery.select(civitai_manager_action.on_sc_gallery_select,None,[selected_model_id,selected_saved_model_id])
+    sc_new_version_gallery.select(civitai_shortcut_action.on_sc_gallery_select,None,[selected_model_id,selected_saved_model_id])
     # civitai scan new version tab end
 
     # civitai model information start
-    # 다운로드
     download_model.click(
-        fn=civitai_manager_action.on_download_model_click,
+        fn=civitai_shortcut_action.on_download_model_click,
         inputs=[
             selected_version_id,
             filename_list,            
@@ -473,7 +382,7 @@ def civitai_shortcut_ui():
     )  
     
     refresh_sc_list.change(
-        fn=civitai_manager_action.on_refresh_progress_change,
+        fn=civitai_shortcut_action.on_refresh_progress_change,
         inputs= [
             shortcut_type,
             sc_search,
@@ -486,10 +395,11 @@ def civitai_shortcut_ui():
             sc_downloaded_gallery,
             refresh_sc_list
         ]
-    )    
-    
+    )
+
+    # civitai model
     selected_model_id.change(
-        fn=civitai_manager_action.on_selected_model_id_change,   
+        fn=civitai_shortcut_action.on_load_model,
         inputs=[
             selected_model_id,
         ],
@@ -501,58 +411,128 @@ def civitai_shortcut_ui():
             an_lora, 
             model_type, 
             versions_list,
-        ] 
-    )
-  
-    selected_version_id.change(
-        fn=civitai_manager_action.on_selected_version_id_change,
-        inputs=[
-            selected_version_id,
-        ],
-        outputs=[
             description_html,
             trigger_words,
             filename_list,
             model_title_name,                        
-            version_gallery,
-            img_file_info      
-        ]
-    )
-        
-    description_html.change(
-        fn=civitai_manager_action.on_description_html_change,
-        inputs=[
-            selected_version_id
-        ],
-        outputs=[
             version_gallery, 
-            version_images_url
-        ]
-    )
-
-    # 버전을 하나 선택
-    versions_list.select(
-        fn=civitai_manager_action.on_versions_list_select,
-        inputs=[
-            selected_model_id, 
-        ],
-        outputs=[
-            selected_version_id,            
-        ]
+            version_images_url,
+            img_file_info            
+        ] 
     )
     
-    version_gallery.select(civitai_manager_action.on_gallery_select, version_images_url, [img_index, hidden])
+    versions_list.select(
+        fn=civitai_shortcut_action.on_versions_list_select,
+        inputs=[
+            selected_model_id,
+        ],
+        outputs=[
+            selected_version_id,
+            civitai_model_url_txt, 
+            downloaded_tab, 
+            downloaded_info, 
+            an_lora, 
+            model_type, 
+            versions_list,
+            description_html,
+            trigger_words,
+            filename_list,
+            model_title_name,                        
+            version_gallery, 
+            version_images_url,            
+            img_file_info          
+        ]
+    )    
+    
+    version_gallery.select(civitai_shortcut_action.on_gallery_select, version_images_url, [img_index, hidden])
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])
     # civitai model information end
+
+    # civitai saved model information start
+    selected_saved_model_id.change(
+        fn=civitai_shortcut_action.on_load_saved_model,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_version_id,
+            saved_civitai_model_url_txt,
+            saved_downloaded_tab, 
+            saved_downloaded_info, 
+            saved_model_type, 
+            saved_versions_list,                    
+            saved_description_html,
+            saved_trigger_words,
+            saved_filename_list,
+            saved_model_title_name,                        
+            saved_version_gallery,
+            saved_version_images_url,
+            saved_img_file_info   
+        ] 
+    )
     
+    saved_versions_list.select(
+        fn=civitai_shortcut_action.on_saved_versions_list_select,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_version_id,
+            saved_civitai_model_url_txt,
+            saved_downloaded_tab, 
+            saved_downloaded_info, 
+            saved_model_type, 
+            saved_versions_list,                    
+            saved_description_html,
+            saved_trigger_words,
+            saved_filename_list,
+            saved_model_title_name,                        
+            saved_version_gallery,
+            saved_version_images_url,
+            saved_img_file_info         
+        ]
+    )    
     
-    # 여기로 옯기자
+    # shortcut delete
+    shortcut_del_btn.click(
+        fn=civitai_shortcut_action.on_shortcut_del_btn_click,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[refresh_sc_list]               
+    )
+    
+    saved_update_information_btn.click(
+        fn=civitai_shortcut_action.on_saved_update_information_btn_click,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[ 
+            selected_saved_model_id,
+            refresh_sc_list,
+            # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
+            saved_version_gallery
+        ]                    
+    )                 
+
+    # selected_saved_model_id 값을 초기화 시키기 위한 이벤트 헨들러이다.
+    # saved_update_information_btn.click 에 두개가 묶여 있지만 이것이 먼저 실행될것이다.
+    # 하는게 없으므로
+    saved_update_information_btn.click(
+        fn=civitai_shortcut_action.on_blank_model_info,
+        inputs=None,
+        outputs=[selected_saved_model_id]                    
+    ) 
+    
+    saved_version_gallery.select(civitai_shortcut_action.on_gallery_select, saved_version_images_url, [saved_img_index, saved_hidden])
+    saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])    
+    # civitai saved model information end
     ###### Civitai Tab ###### 
 
     ###### Downloaded Tab ######                                                  
     # downloaded browsing tab start        
     shortcut_downloaded_type.change(
-        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        fn=civitai_shortcut_action.on_shortcut_gallery_refresh,
         inputs=[
             shortcut_downloaded_type,
             sc_downloaded_search
@@ -563,7 +543,7 @@ def civitai_shortcut_ui():
     )   
 
     sc_downloaded_search.submit(
-        fn=civitai_manager_action.on_shortcut_gallery_refresh,
+        fn=civitai_shortcut_action.on_shortcut_gallery_refresh,
         inputs=[            
             shortcut_downloaded_type,          
             sc_downloaded_search
@@ -573,23 +553,13 @@ def civitai_shortcut_ui():
         ]        
     )
         
-    refresh_downloaded_sc_btn.click(civitai_manager_action.on_shortcut_gallery_refresh,[shortcut_downloaded_type,sc_downloaded_search],[sc_downloaded_gallery])
-    sc_downloaded_gallery.select(civitai_manager_action.on_sc_downloaded_gallery_select,None,selected_downloaded_model_id)
+    refresh_downloaded_sc_btn.click(civitai_shortcut_action.on_shortcut_gallery_refresh,[shortcut_downloaded_type,sc_downloaded_search],[sc_downloaded_gallery])
+    sc_downloaded_gallery.select(civitai_shortcut_action.on_sc_downloaded_gallery_select,None,selected_downloaded_model_id)
     # downloaded browsing tab end
 
     # downloaded model information start
-    downloaded_versions_list.select(
-        fn=civitai_manager_action.on_downloaded_versions_list_select,
-        inputs=[
-            selected_downloaded_model_id, 
-        ],
-        outputs=[
-            selected_downloaded_version_id,            
-        ]
-    )    
-
     selected_downloaded_model_id.change(
-        fn=civitai_manager_action.on_selected_downloaded_model_id_change,   
+        fn=civitai_shortcut_action.on_load_downloaded_model,
         inputs=[
             selected_downloaded_model_id,
         ],
@@ -597,38 +567,39 @@ def civitai_shortcut_ui():
             selected_downloaded_version_id,
             downloaded_civitai_model_url_txt,
             downloaded_model_type, 
-            downloaded_versions_list,
-        ] 
-    )
-    
-    selected_downloaded_version_id.change(
-        fn=civitai_manager_action.on_selected_downloaded_version_id_change,
-        inputs=[
-            selected_downloaded_version_id,
-        ],
-        outputs=[
+            downloaded_versions_list,                    
             downloaded_description_html,
             downloaded_trigger_words,
             downloaded_filename_list,
-            downloaded_model_title_name,                                    
+            downloaded_model_title_name,                        
             downloaded_version_gallery,
-            downloaded_img_file_info      
-        ]
+            downloaded_version_images_url,
+            downloaded_img_file_info   
+        ] 
     )
     
-    downloaded_description_html.change(
-        fn=civitai_manager_action.on_downloaded_description_html_change,
+    downloaded_versions_list.select(
+        fn=civitai_shortcut_action.on_downloaded_versions_list_select,
         inputs=[
-            selected_downloaded_version_id
+            selected_downloaded_model_id,
         ],
         outputs=[
-            downloaded_version_gallery, 
-            downloaded_version_images_url
+            selected_downloaded_version_id,
+            downloaded_civitai_model_url_txt,
+            downloaded_model_type, 
+            downloaded_versions_list,                    
+            downloaded_description_html,
+            downloaded_trigger_words,
+            downloaded_filename_list,
+            downloaded_model_title_name,                        
+            downloaded_version_gallery,
+            downloaded_version_images_url,
+            downloaded_img_file_info          
         ]
-    )
-    
+    ) 
+       
     goto_civitai_model_tab.click(
-        fn=civitai_manager_action.on_goto_civitai_model_tab_click,
+        fn=civitai_shortcut_action.on_goto_civitai_model_tab_click,
         inputs=[
             selected_downloaded_model_id
         ],        
@@ -639,7 +610,7 @@ def civitai_shortcut_ui():
         ],        
     )
         
-    downloaded_version_gallery.select(civitai_manager_action.on_gallery_select, downloaded_version_images_url, [downloaded_img_index, downloaded_hidden])
+    downloaded_version_gallery.select(civitai_shortcut_action.on_gallery_select, downloaded_version_images_url, [downloaded_img_index, downloaded_hidden])
     downloaded_hidden.change(fn=modules.extras.run_pnginfo, inputs=[downloaded_hidden], outputs=[downloaded_info1, downloaded_img_file_info, downloaded_info2])
     # downloaded model information end
     ###### Downloaded Tab ######                                                  
@@ -667,7 +638,7 @@ def init_civitai_shortcut():
     setting.shortcut_info_folder = os.path.join(scripts.basedir(),"sc_infos")
     
     # 소유한 모델을 스캔하여 저장한다.
-    model.Load_Downloaded_Models()
+    model_action.Load_Downloaded_Models()
                
 # init
 init_civitai_shortcut()

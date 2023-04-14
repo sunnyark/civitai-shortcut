@@ -15,8 +15,8 @@ def Test_Models():
             util.printD(f"{mid} :\n")
             # for vid, path in vidpath:
             #     print(f"{vid} : {path}\n")
-            
-def Load_Downloaded_Models():
+
+def update_downloaded_model():
     global Downloaded_Models
     global Downloaded_Versions
     
@@ -92,6 +92,23 @@ def get_model_info()->dict:
         return models,versions
     
     return None,None
+
+def get_model_version_list(modelid:str):
+    downloaded_version_list = list()
+    if modelid:
+        if Downloaded_Models:                        
+            if str(modelid) in Downloaded_Models.keys():
+                file_list = dict()
+                
+                for vid, version_paths in Downloaded_Models[str(modelid)]:
+                    file_list[os.path.basename(version_paths)] = version_paths
+                
+                for file,path in file_list.items():
+                    vinfo = util.read_json(path)
+                    if vinfo:                      
+                        downloaded_version_list.append(vinfo['name'])
+                        
+    return downloaded_version_list if len(downloaded_version_list) > 0 else None
 
 # modelid를 키로 modelid가 같은 version_info의 File Path를 list로 묶어 반환한다.
 def get_model_path()->dict:
@@ -252,3 +269,31 @@ def get_version_files(versioninfo):
         
     return file_list if len(file_list) > 0 else None
 
+def get_model_info(modelid):
+    def_info = None
+    versions_list = None
+    model_info = None
+    
+    if modelid:
+        if Downloaded_Models:
+            if str(modelid) in Downloaded_Models.keys():
+                file_list = dict()                
+                for vid, version_paths in Downloaded_Models[str(modelid)]:
+                    file_list[os.path.basename(version_paths)] = version_paths
+                
+                versions_list = list()
+                for file,path in file_list.items():
+                    vinfo = util.read_json(path)
+                    if vinfo:
+                        versions_list.append(vinfo)
+                        if not def_info:
+                            def_info = vinfo
+                if def_info:
+                    if "model" in def_info.keys():
+                        model_info = dict()
+                        model_info['type'] = def_info['model']['type'] 
+                        model_info['id'] = def_info['modelId'] 
+                        model_info['name'] = def_info['model']['name'] 
+                        model_info['modelVersions'] = versions_list        
+    # 모델 인포 를 만들어준다.
+    return model_info
