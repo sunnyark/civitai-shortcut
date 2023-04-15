@@ -40,7 +40,7 @@ When using Civitai Shortcut, four items will be created:
 
 # Change Log
 
-v 1.1a
+v 1.1c
 
 * Measures have been taken to alleviate bottleneck issues during information loading.
 * The search function now includes a #tag search feature.
