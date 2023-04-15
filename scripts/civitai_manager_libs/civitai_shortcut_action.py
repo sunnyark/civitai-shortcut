@@ -9,6 +9,18 @@ from . import model_action
 from tqdm import tqdm
 
 
+def on_civitai_information_tabs_select(evt: gr.SelectData, selected_modelid, selected_saved_modelid):
+    # util.printD(f"{evt.value},{evt.index}")
+    # civitai_information
+    if evt.index == setting.civitai_information_tab:
+        return selected_saved_modelid, selected_saved_modelid, evt.index    
+    # saved_information
+    if evt.index == setting.saved_information_tab:
+        return selected_modelid, selected_modelid, evt.index
+    
+    return selected_modelid, selected_modelid, evt.index
+
+
 # selected_saved_model_id 값을 초기화 시키기 위한 이벤트 헨들러이다.
 # saved_update_information_btn.click 에 두개가 묶여 있지만 이것이 먼저 리턴값을 낼것이다.
 # 하는게 없으므로
@@ -21,7 +33,7 @@ def on_saved_update_information_btn_click(modelid):
     return gr.update(value=modelid),gr.update(value="Done"),gr.update(value=None)
 
 def on_goto_civitai_model_tab_click(selected_downloaded_model_id):    
-    return gr.update(selected="civitai01"), gr.update(value=selected_downloaded_model_id), gr.update(value=selected_downloaded_model_id)
+    return gr.update(selected="civitai01"), gr.update(selected="civitai_info"),gr.update(value=selected_downloaded_model_id)
 # download model information end
 
 # 다운 로드후 shortcut 리스트를 갱신한다.
@@ -55,11 +67,17 @@ def on_gallery_select(evt: gr.SelectData,version_images_url):
      return evt.index, version_images_url[evt.index]
  
 # 갤러리 방식으로 숏컬리스트 표시할때
-def on_sc_gallery_select(evt : gr.SelectData):
+def on_sc_gallery_select(evt : gr.SelectData, selectecd_civitai_information_tabs=None):
     if evt.value:
         shortcut = evt.value 
         sc_model_id = shortcut[0:shortcut.find(':')]      
-                        
+    
+    if selectecd_civitai_information_tabs is not None:
+        if selectecd_civitai_information_tabs == setting.civitai_information_tab:
+            return gr.update(value=sc_model_id),gr.update(value=None)
+        if selectecd_civitai_information_tabs == setting.saved_information_tab:
+            return gr.update(value=None),gr.update(value=sc_model_id)
+                
     return gr.update(value=sc_model_id),gr.update(value=sc_model_id)
 
 # 갤러리 방식으로 숏컬리스트 표시할때
@@ -70,7 +88,7 @@ def on_sc_downloaded_gallery_select(evt : gr.SelectData):
                         
     return gr.update(value=sc_model_id)
 
-def on_civitai_internet_url_upload(files, progress=gr.Progress()):       
+def on_civitai_internet_url_upload(files, progress=gr.Progress(), selectecd_civitai_information_tabs=None):       
     model_id = ""
     if files:
         modelids = ishortcut_action.upload_shortcut_by_files(files,progress)
@@ -79,6 +97,13 @@ def on_civitai_internet_url_upload(files, progress=gr.Progress()):
 
     if not model_id:
         return gr.update(value=""),gr.update(value=""),gr.update(value="Upload shortcut is Done"), None
+
+    if selectecd_civitai_information_tabs is not None:
+        if selectecd_civitai_information_tabs == setting.civitai_information_tab:
+            return gr.update(value=model_id),gr.update(value=None),gr.update(value="Upload shortcut is Done"), None
+        if selectecd_civitai_information_tabs == setting.saved_information_tab:
+            return gr.update(value=None),gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
+
     return gr.update(value=model_id),gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
   
 def on_scan_to_shortcut_click(progress=gr.Progress()):

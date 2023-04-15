@@ -32,6 +32,27 @@ def printD(msg):
 #         if not chunk:
 #             break
 #         yield chunk
+
+def get_search_keyword(search:str):
+    tags = []
+    keys = []
+    
+    if not search:
+        return None , None
+    
+    for word in search.split(","):
+        word = word.strip().lower()
+        if word.startswith("#"):
+            if len(word) > 1:
+                tag = word[1:]
+                if tag not in tags:
+                    tags.append(tag)
+        else:
+            if word not in keys:
+                keys.append(word)
+                    
+    return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None
+    
     
 def read_json(path)->dict:
     contents = None

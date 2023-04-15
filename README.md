@@ -40,6 +40,19 @@ When using Civitai Shortcut, four items will be created:
 
 # Change Log
 
+v 1.1a
+
+* Measures have been taken to alleviate bottleneck issues during information loading.
+* The search function now includes a #tag search feature.
+  Search terms are separated by commas (,) and are connected with an "or" operation within the search terms and within the tags. There is an "and" operation between the search terms and tags.
+* The shortcut storage table has been changed to add the #tag search function.
+  Existing shortcuts require an "update shortcut model information" for tag searches.
+* information 로딩에 병목현상을 일부 완화
+* Search 에 #tags 검색 기능 추가
+  "," 구분되며 search keywords 끼리는 or, tags 끼리도 or , search keyword와 tags는 and 이 적용됩니다.
+* Tags검색 기능 추가를 위해 shortcut 저장 테이블이 변경되었습니다.
+  기존의 shortcut은 tag 검색을 위해 Update Shortcut's Model Information 이 필요합니다.
+
 v 1.1
 
 * When registering a shortcut, model information and images are saved in a separate folder.
@@ -57,6 +70,7 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
+
 ![screenshot 2023-04-13 200422](https://user-images.githubusercontent.com/40237431/231810541-c91471e5-e7ae-4d3c-a825-2bfed6746b73.png)
 
 ![screenshot 2023-04-13 200432](https://user-images.githubusercontent.com/40237431/231810585-63f6bffd-defa-4582-a7da-750dae29f589.png)
@@ -64,4 +78,3 @@ v 1.1
 ![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231810628-c962429a-5b0b-46a9-9cb4-fe52a9e4d998.png)
 
 ![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231810678-19876694-d023-4f62-960d-9ce774cccf67.png)
-

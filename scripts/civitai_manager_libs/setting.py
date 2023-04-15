@@ -55,7 +55,8 @@ shortcut = "CivitaiShortCut.json"
 shortcut_thumnail_folder =  "sc_thumb_images"
 shortcut_save_folder =  "sc_saves"
 
-
+civitai_information_tab = 0
+saved_information_tab = 1
 # have model_name subfolder ... 
 # add shortcut -> create model_name folder ..
 # model_name/ modelid.info , versionid_images... 

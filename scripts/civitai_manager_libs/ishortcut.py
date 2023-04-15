@@ -199,12 +199,12 @@ def get_image_list2(shortcut_types=None)->str:
             if tmp_types:
                 if v['type'] in tmp_types:
                     if is_sc_image(v['id']):
-                        shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                        shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
                     else:
                         shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
             else:           
                 if is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}.png"),f"{v['id']}:{v['name']}"))
+                    shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
                 else:
                     shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
     
@@ -223,29 +223,44 @@ def get_image_list(shortcut_types=None, search=None)->str:
                 tmp_types.append(setting.content_types_dict[sc_type])
             except:
                 pass
-            
-    
-    search_list= list()
+                
     # type 을 걸러내자
+    result_list = list()    
     for k, v in ISC.items():
         # util.printD(ISC[k])
         if v:
             if tmp_types:
                 if v['type'] in tmp_types:
-                    search_list.append(v)                    
-            else:
-                search_list.append(v)
-    
-    # search를 걸러내자
-    result_list=list()
-    for v in search_list:
-        if v:
-            if search:
-                if search.lower() in v['name'].lower():
-                    result_list.append(v)
+                    result_list.append(v)                    
             else:
                 result_list.append(v)
-                
+    
+    keys, tags = util.get_search_keyword(search)
+    
+    # key를 걸러내자
+    if keys:
+        key_list = list()
+        for v in result_list:
+            if v:
+                for key in keys:
+                    if key in v['name'].lower():
+                        key_list.append(v)
+                        break                    
+        result_list = key_list
+
+    # key를 걸러내자
+    if tags:
+        tags_list = list()
+        for v in result_list:
+            if v:
+                if "tags" not in v.keys():
+                    continue                                 
+                v_tags = [tag["name"].lower() for tag in v["tags"]]
+                common_tags = set(v_tags) & set(tags)
+                if common_tags:
+                    tags_list.append(v)
+        result_list = tags_list
+        
     # 썸네일이 있는지 판단해서 대체 이미지 작업
     shotcutlist = list()
     for v in result_list:
@@ -325,6 +340,8 @@ def add(ISC:dict, model_id)->dict:
                 "id" : model_info['id'],
                 "type" : model_info['type'],
                 "name": model_info['name'],
+                "tags" : model_info['tags'],
+                "nsfw" : model_info['nsfw'],
                 "url": f"{civitai.Url_ModelId()}{model_id}",
                 "versionid" : def_id,
                 "imageurl" : def_image
