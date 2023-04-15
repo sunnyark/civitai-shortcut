@@ -326,6 +326,10 @@ def add(ISC:dict, model_id)->dict:
     
     model_info = write_model_information(model_id)
     
+    
+    def_id = None
+    def_image = None
+    
     if model_info:        
         if "modelVersions" in model_info.keys():            
             def_version = model_info["modelVersions"][0]
