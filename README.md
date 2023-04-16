@@ -1,3 +1,4 @@
+
 # Civitai Shortcut
 
 Stable Diffusion Webui Extension for Civitai, to download civitai shortcut and models.
@@ -11,6 +12,40 @@ Stable Diffusion Webui's Extension tab, go to Install from url sub-tab. Copy thi
 Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으로 이동하세요. 해당 프로젝트의 URL을 복사하여 붙여넣고 '설치'를 클릭하세요.
 
     git clone https://github.com/sunnyark/civitai-shortcut
+
+
+# Usage instructions
+
+![screenshot 2023-04-16 182259](https://user-images.githubusercontent.com/40237431/232289602-0b0cab3d-e90c-49c1-95cc-decf3cbe40bf.png)
+1. The information in the Civitai model information tab is obtained in real-time from the Civitai website.
+   Download : downloads the model for the selected version. You can choose to create specific folders for each version. The downloaded model will be automatically saved in the appropriate location, and a preview image and info will be generated together with it.
+
+
+![screenshot 2023-04-16 182316](https://user-images.githubusercontent.com/40237431/232289625-48abfaab-8eb4-4af0-a58e-1a9716751302.png)
+2. The information in the Saved model information tab are composed of the information saved on the Civitai website when creating the shortcut.
+Update Model Information : updates the information of an individual shortcut to the latest information. This function only works when the site is functioning normally.
+Delete Shortcut : deletes the information of a registered shortcut.
+
+
+![screenshot 2023-04-16 182333](https://user-images.githubusercontent.com/40237431/232289652-89ec3225-1849-44f8-8387-6216b576574e.png)
+3. The information in the Downloaded tab of the Civitai model information is obtained from the downloaded folder when the model is downloaded.
+Goto civitai shortcut tab : switches to #1 screen to view new information.
+Open Download Folder : opens the file explorer to the folder where the model was downloaded.
+
+For #1, since the information is obtained in real-time from the website, it can only be accessed when the site is operational. 
+For #2 and #3, the information is displayed based on the saved information, so it can be accessed even when the site is not operational.
+
+
+![screenshot 2023-04-16 182342](https://user-images.githubusercontent.com/40237431/232289694-e9f75198-75b4-492a-8f60-6fc453137f5c.png)
+* Upload : This function creates a shortcut that can be used by the extension when you enter the Civitai site's model URL. It only works when the site is functioning properly. You can either click and drag the URL from the address bar or drag and drop saved internet shortcuts. You can also select multiple internet shortcuts and drop them at once.
+* Update Shortcut's Model Information : This function updates the information of the shortcut you have received by referencing the site.
+* Scan Downloaded Models to Shortcut : This function searches for downloaded models and registers shortcuts for them, in case you have accidentally deleted the shortcut or downloaded the models to a different location. Only models with version info files are registered. You can use Civitai Helper's Scan function to generate version info for models that don't have it. Note that only models available on the Civitai site can be registered with this function. This function only works when the site is functioning properly.
+
+![screenshot 2023-04-16 182349](https://user-images.githubusercontent.com/40237431/232289696-54479aec-4013-42f3-9ae8-9c1f203095f2.png)
+* Browsing : This function displays the registered shortcuts in thumbnail format, and when selected, displays their details on the right-hand side of the window. This function works independently of the Civitai site.
+
+![screenshot 2023-04-16 182354](https://user-images.githubusercontent.com/40237431/232289699-c8b87b7a-85f7-436a-91e0-0c10620599c3.png)
+* Scan New Version : This is a function that searches for the latest version of downloaded models on the Civitai site. It retrieves information from the site and only functions properly when the site is operational.
 
 # Features
 
