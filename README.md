@@ -66,7 +66,7 @@ When using Civitai Shortcut, four items will be created:
 * sc_infos: a folder where model info and images are saved when registering a shortcut.
 * CivitaiShortCut.json: a JSON file that records and manages registered model URLs.
 
-두개의 폴더와 하나의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
+세개의 폴더와 하나의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
 
 * sc_saves : 등록된 model url이 백업되는 폴더, 등록된 모든 url이 저장되는 폴더
 * sc_thumb_images : 등록된 url의 thumbnail이 저장되는 폴더
