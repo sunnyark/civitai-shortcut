@@ -8,6 +8,18 @@ from . import util
 from . import setting
 from . import civitai
 
+
+def get_tags():
+    tags = list()
+    ISC = load()
+    for k, model in ISC.items():
+        for tag in model["tags"]:
+            if "name" in tag.keys():                
+                tag_name = tag["name"]
+                if tag_name not in tags:
+                    tags.append(tag_name)            
+    return tags
+
 def get_model_info(modelid:str):
     if not modelid:
         return    
@@ -23,25 +35,6 @@ def get_model_info(modelid:str):
         return None
     
     return contents
-
-# def get_version_info(modelid:str, versionid:str):
-#     if not modelid or not versionid:
-#         return    
-#     contents = None    
-
-#     model_info = get_model_info(modelid)
-    
-#     if not model_info:
-#         return
-#     if "modelVersions" not in model_info.keys():
-#         return 
-    
-#     for version_info in model_info["modelVersions"]:
-#         if "id" in version_info.keys():
-#             if str(version_info["id"]) == str(versionid):
-#                 return version_info
-    
-#     return contents
 
 def write_model_information(modelid:str):    
     if not modelid:
@@ -132,25 +125,6 @@ def update_thumbnail_images(progress):
     else:
         ISC = preISC            
     save(ISC)
-    
-# def get_thumbnail_list2(shortcut_types=None, only_downloaded=False):
-    
-#     shortlist =  get_image_list(shortcut_types)
-#     if not shortlist:
-#         return None
-    
-#     if only_downloaded:
-#         if model.Downloaded_Models:                
-#             downloaded_list = list()            
-#             for short in shortlist:
-#                 sc_name = short[1]
-#                 mid = str(sc_name[0:sc_name.find(':')])
-#                 if mid in model.Downloaded_Models.keys():
-#                     downloaded_list.append(short)
-#             return downloaded_list
-#     else:
-#         return shortlist
-#     return None  
         
 def get_list(shortcut_types=None)->str:
     
@@ -162,7 +136,7 @@ def get_list(shortcut_types=None)->str:
     if shortcut_types:
         for sc_type in shortcut_types:
             try:
-                tmp_types.append(setting.content_types_dict[sc_type])
+                tmp_types.append(setting.ui_model_types[sc_type])
             except:
                 pass
             
@@ -177,38 +151,6 @@ def get_list(shortcut_types=None)->str:
                 shotcutlist.append(f"{v['id']}:{v['name']}")                
                     
     return shotcutlist
-
-def get_image_list2(shortcut_types=None)->str:
-    
-    ISC = load()                           
-    if not ISC:
-        return
-    
-    tmp_types = list()
-    if shortcut_types:
-        for sc_type in shortcut_types:
-            try:
-                tmp_types.append(setting.content_types_dict[sc_type])
-            except:
-                pass
-            
-    shotcutlist = list()
-    for k, v in ISC.items():
-        # util.printD(ISC[k])
-        if v:
-            if tmp_types:
-                if v['type'] in tmp_types:
-                    if is_sc_image(v['id']):
-                        shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
-                    else:
-                        shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
-            else:           
-                if is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
-                else:
-                    shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
-    
-    return shotcutlist 
     
 def get_image_list(shortcut_types=None, search=None)->str:
     
@@ -220,7 +162,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
     if shortcut_types:
         for sc_type in shortcut_types:
             try:
-                tmp_types.append(setting.content_types_dict[sc_type])
+                tmp_types.append(setting.ui_model_types[sc_type])
             except:
                 pass
                 
@@ -248,7 +190,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
                         break                    
         result_list = key_list
 
-    # key를 걸러내자
+    # tags를 걸러내자
     if tags:
         tags_list = list()
         for v in result_list:
@@ -266,7 +208,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
     for v in result_list:
         if v:
             if is_sc_image(v['id']):
-                shotcutlist.append((os.path.join(setting.shortcut_thumnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
+                shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
             else:
                 shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
 
@@ -275,7 +217,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
 def delete_thumbnail_image(model_id):
     if is_sc_image(model_id):
         try:
-            os.remove(os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}"))
+            os.remove(os.path.join(setting.shortcut_thumbnail_folder,f"{model_id}{setting.preview_image_ext}"))
         except:
             return 
         
@@ -286,10 +228,10 @@ def download_thumbnail_image(model_id, url):
     if not url:    
         return False
     
-    if not os.path.exists(setting.shortcut_thumnail_folder):
-        os.makedirs(setting.shortcut_thumnail_folder)    
+    if not os.path.exists(setting.shortcut_thumbnail_folder):
+        os.makedirs(setting.shortcut_thumbnail_folder)    
         
-    # if os.path.isfile(os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}")):
+    # if os.path.isfile(os.path.join(setting.shortcut_thumbnail_folder,f"{model_id}{setting.preview_image_ext}")):
     #     return True
     
     try:
@@ -298,7 +240,7 @@ def download_thumbnail_image(model_id, url):
             if not img_r.ok:
                 return False
             
-            shotcut_img = os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}")                                                                   
+            shotcut_img = os.path.join(setting.shortcut_thumbnail_folder,f"{model_id}{setting.preview_image_ext}")                                                                   
             with open(shotcut_img, 'wb') as f:
                 img_r.raw.decode_content = True
                 shutil.copyfileobj(img_r.raw, f)                            
@@ -311,7 +253,7 @@ def is_sc_image(model_id):
     if not model_id:    
         return False
             
-    if os.path.isfile(os.path.join(setting.shortcut_thumnail_folder,f"{model_id}{setting.preview_image_ext}")):
+    if os.path.isfile(os.path.join(setting.shortcut_thumbnail_folder,f"{model_id}{setting.preview_image_ext}")):
         return True
     
     return False        

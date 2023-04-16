@@ -83,7 +83,8 @@ def get_version_description(version_info:dict,model_info:dict=None):
     html_dnurlpart = ""
     html_imgpart = ""
     html_modelurlpart = ""
-    
+    html_model_tags = ""
+        
     model_id = None
     
     if version_info:        
@@ -112,7 +113,15 @@ def get_version_description(version_info:dict,model_info:dict=None):
         if 'description' in version_info:  
             if version_info['description']:
                 html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
-                
+
+        if 'tags' in model_info:  
+            if model_info['tags']:
+                model_tags = [tag["name"] for tag in model_info["tags"]]
+                if len(model_tags) > 0:
+                    html_model_tags = "<br><b>Model Tags:</b>"
+                    for tag in model_tags:
+                        html_model_tags = html_model_tags + f"<b> [{tag}] </b>"
+                                        
         if 'description' in model_info:  
             if model_info['description']:
                 html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
@@ -124,7 +133,7 @@ def get_version_description(version_info:dict,model_info:dict=None):
                 files_name.append(file['name'])
                 html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
                             
-        output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
+        output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_model_tags + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
         
         return output_html, output_training, files_name             
     

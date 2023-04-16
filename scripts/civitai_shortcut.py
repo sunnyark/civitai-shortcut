@@ -33,9 +33,9 @@ def civitai_shortcut_ui():
                                 
                         with gr.TabItem("Browsing"):    
                             with gr.Row():
-                                shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
+                                shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_model_types], interactive=True)
                             with gr.Row():
-                                sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags [Enter]",interactive=True, lines=1)
+                                sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags ....",interactive=True, lines=1)
                             with gr.Row():
                                 sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut_action.get_thumbnail_list()).style(grid=[setting.shortcut_colunm],height="auto")
                             with gr.Row():
@@ -45,7 +45,7 @@ def civitai_shortcut_ui():
                                 
                         with gr.TabItem("Scan New Version"):
                             with gr.Row():
-                                shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)                                     
+                                shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_model_types], interactive=True)                                     
                             with gr.Row():
                                 scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
                             with gr.Row():
@@ -68,6 +68,7 @@ def civitai_shortcut_ui():
                                     with gr.Row(visible=False) as downloaded_tab:
                                         with gr.Tab("Downloaded Version"):
                                             downloaded_info = gr.Textbox(interactive=False,show_label=False)
+                                            civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary")   
                                                     
                                     with gr.Row():
                                         filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
@@ -110,6 +111,7 @@ def civitai_shortcut_ui():
                                     with gr.Row(visible=False) as saved_downloaded_tab:
                                         with gr.Tab("Downloaded Version"):
                                             saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)
+                                            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary")                                            
 
                                     with gr.Row():
                                         saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
@@ -140,9 +142,9 @@ def civitai_shortcut_ui():
                     with gr.Tabs() as downloaded_model_tabs:                               
                         with gr.TabItem("Browsing"):
                             with gr.Row():
-                                shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.content_types_dict], interactive=True)
+                                shortcut_downloaded_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_model_types], interactive=True)
                             with gr.Row():
-                                sc_downloaded_search = gr.Textbox(label="Search", value="", placeholder="Search by name [Enter]" , interactive=True, lines=1)                                
+                                sc_downloaded_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags ...." , interactive=True, lines=1)                                
                             with gr.Row():
                                 sc_downloaded_gallery = gr.Gallery(label="SC Downloaded Gallery", elem_id="sc_downloaded_gallery", show_label=False, value=ishortcut_action.get_thumbnail_list(None,True)).style(grid=[setting.shortcut_colunm],height="auto")                         
                             with gr.Row():
@@ -164,7 +166,9 @@ def civitai_shortcut_ui():
                                     downloaded_filename_list = gr.Textbox(label="Model Version File", interactive=False)                                    
                                 with gr.Row():
                                     goto_civitai_model_tab = gr.Button(value="Goto civitai shortcut tab",variant="primary")
-                                                                    
+                                with gr.Row():
+                                    downloaded_openfolder = gr.Button(value="Open Download Folder",variant="primary")
+                                                                                                        
                             with gr.Column(scale=4):                                                  
                                 with gr.Row():                                                              
                                     downloaded_model_title_name = gr.Markdown("###", visible=True)            
@@ -626,40 +630,46 @@ def civitai_shortcut_ui():
             selected_model_id,      
         ],        
     )
-        
+            
     downloaded_version_gallery.select(civitai_shortcut_action.on_gallery_select, downloaded_version_images_url, [downloaded_img_index, downloaded_hidden])
     downloaded_hidden.change(fn=modules.extras.run_pnginfo, inputs=[downloaded_hidden], outputs=[downloaded_info1, downloaded_img_file_info, downloaded_info2])
     # downloaded model information end
     ###### Downloaded Tab ######                                                  
-        
+
+    ### open folder start
+    civitai_openfolder.click(civitai_shortcut_action.on_open_folder_click,selected_version_id,None)
+    saved_openfolder.click(civitai_shortcut_action.on_open_folder_click,selected_saved_version_id,None)
+    downloaded_openfolder.click(civitai_shortcut_action.on_open_folder_click,selected_downloaded_version_id,None)
+    ### open folder end
+            
 def init_civitai_shortcut():
    
     setting.root_path = os.getcwd()
     
     if shared.cmd_opts.embeddings_dir:
-        setting.folders_dict["TextualInversion"] = shared.cmd_opts.embeddings_dir
+        setting.model_folders[setting.model_types['textualinversion']] = shared.cmd_opts.embeddings_dir
 
     if shared.cmd_opts.hypernetwork_dir :
-        setting.folders_dict["Hypernetwork"] = shared.cmd_opts.hypernetwork_dir
+        setting.model_folders[setting.model_types['hypernetwork']] = shared.cmd_opts.hypernetwork_dir
 
     if shared.cmd_opts.ckpt_dir:
-        setting.folders_dict["Checkpoint"] = shared.cmd_opts.ckpt_dir
+        setting.model_folders[setting.model_types['checkpoint']] = shared.cmd_opts.ckpt_dir
 
     if shared.cmd_opts.lora_dir:
-        setting.folders_dict["LORA"] = shared.cmd_opts.lora_dir
-        setting.folders_dict["LoCon"] = shared.cmd_opts.lora_dir
+        setting.model_folders[setting.model_types['lora']] = shared.cmd_opts.lora_dir
+        setting.model_folders[setting.model_types['locon']] = shared.cmd_opts.lora_dir
     
-    setting.shortcut = os.path.join(scripts.basedir(),"CivitaiShortCut.json")
-    setting.shortcut_thumnail_folder = os.path.join(scripts.basedir(),"sc_thumb_images")
-    setting.shortcut_save_folder = os.path.join(scripts.basedir(),"sc_saves")
-    setting.shortcut_info_folder = os.path.join(scripts.basedir(),"sc_infos")
+    setting.shortcut = os.path.join(scripts.basedir(),setting.shortcut)
+    setting.shortcut_thumbnail_folder = os.path.join(scripts.basedir(),setting.shortcut_thumbnail_folder)
+    setting.shortcut_save_folder = os.path.join(scripts.basedir(),setting.shortcut_save_folder)
+    setting.shortcut_info_folder = os.path.join(scripts.basedir(),setting.shortcut_info_folder)
     
     # 소유한 모델을 스캔하여 저장한다.
     model_action.Load_Downloaded_Models()
                
 # init
 init_civitai_shortcut()
-        
+
 def on_ui_tabs():
     with gr.Blocks() as civitai_shortcut:
         civitai_shortcut_ui()

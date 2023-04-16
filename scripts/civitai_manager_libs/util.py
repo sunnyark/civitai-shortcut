@@ -5,9 +5,14 @@ from . import setting
 
 import hashlib
 import io
+import platform
+import subprocess
+
+from modules import shared
+import modules.scripts as scripts
 
 def printD(msg):    
-    print(f"Civitai Shortcut: {msg}") 
+    print(f"{setting.Extensions_Name}: {msg}") 
 
 # # Now, hashing use the same way as pip's source code.
 # def gen_file_sha256(filname):
@@ -33,6 +38,19 @@ def printD(msg):
 #             break
 #         yield chunk
 
+def open_folder(path):
+    if os.path.exists(path):
+        # Code from ui_common.py
+        if not shared.cmd_opts.hide_ui_dir_config:
+            if platform.system() == "Windows":
+                os.startfile(path)
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", path])
+            elif "microsoft-standard-WSL2" in platform.uname().release:
+                subprocess.Popen(["wsl-open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+                
 def get_search_keyword(search:str):
     tags = []
     keys = []
@@ -96,14 +114,14 @@ def make_folder(version_info, lora_an=False, vs_folder=True):
     
     model_name = model_name.strip()
 
-    if lora_an and content_type == "LORA":
-        model_folder = setting.folders_dict['ANLORA']
-    elif content_type in setting.folders_dict.keys():
-        model_folder = setting.folders_dict[content_type]        
+    if lora_an and content_type == setting.model_types['lora']:
+        model_folder = setting.model_folders[setting.model_types['anlora']]
+    elif content_type in setting.model_folders.keys():
+        model_folder = setting.model_folders[content_type]        
     elif content_type:
-        model_folder = os.path.join(setting.folders_dict['Unknown'], replace_dirname(content_type))
+        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']], replace_dirname(content_type))
     else:
-        model_folder = os.path.join(setting.folders_dict['Unknown'])
+        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']])
          
     if vs_folder:  
 

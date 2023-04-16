@@ -8,6 +8,14 @@ from . import ishortcut
 def Load_Downloaded_Models():
     model.update_downloaded_model()
 
+def get_model_folder(vid):
+    if vid:
+        if vid in model.Downloaded_Versions:
+            path = model.Downloaded_Versions[str(vid)]        
+            vfolder , vfile = os.path.split(path)
+            return vfolder
+    return None
+
 def is_latest(modelid:str)->bool:
     if not modelid:
         return False
@@ -98,6 +106,7 @@ def get_version_description(version_info:dict,model_info:dict=None):
     html_dnurlpart = ""
     html_imgpart = ""
     html_modelurlpart = ""
+    html_model_tags = ""
     
     model_id = None
     
@@ -127,6 +136,14 @@ def get_version_description(version_info:dict,model_info:dict=None):
         if 'description' in version_info:  
             if version_info['description']:
                 html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
+
+        if 'tags' in model_info:  
+            if model_info['tags']:
+                model_tags = [tag["name"] for tag in model_info["tags"]]
+                if len(model_tags) > 0:
+                    html_model_tags = "<br><b>Model Tags:</b>"
+                    for tag in model_tags:
+                        html_model_tags = html_model_tags + f"<b> [{tag}] </b>"
                 
         if 'description' in model_info:  
             if model_info['description']:
@@ -139,74 +156,12 @@ def get_version_description(version_info:dict,model_info:dict=None):
                 files_name.append(file['name'])
                 html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
                             
-        output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
+        output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_model_tags + "<br>" + html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
         
         return output_html, output_training, files_name             
     
     return "",None,None    
 
-
-# def get_version_description(version_info:dict, model_info:dict=None):
-#     output_html = ""
-#     output_training = ""
-
-#     files_name = list()
-    
-#     html_typepart = ""
-#     html_trainingpart = ""
-#     html_modelpart = ""
-#     html_versionpart = ""
-#     html_descpart = ""
-#     html_dnurlpart = ""
-#     html_imgpart = ""
-#     html_modelurlpart = ""
-        
-#     if not version_info:
-#         return "",None,None
-    
-#     if 'modelId' not in version_info:
-#         return "",None,None
-        
-#     if "model" not in version_info.keys():    
-#         return "",None,None
-    
-#     model_id = version_info['modelId']
-#     model_type = version_info['model']['type']
-#     model_name = version_info['model']['name']
-#     model_url = civitai.Url_Page()+str(model_id)
-                    
-#     html_typepart = f"<br><b>Type: {model_type}</b>"    
-#     html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_name}</a></b>'
-#     html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
-
-#     model_version_name = version_info['name']
-
-#     if 'trainedWords' in version_info:  
-#         output_training = ", ".join(version_info['trainedWords'])
-#         html_trainingpart = f'<br><b>Training Tags:</b> {output_training}'
-
-#     if 'description' in version_info:  
-#         if version_info['description']:
-#             html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
-                            
-#     html_versionpart = f"<br><b>Version:</b> {model_version_name}"
-
-#     # 다운 받은 파일만 표시
-#     vfolder = None
-#     files = model.get_version_files(version_info)
-#     if files:
-#         vfolder , vfile = os.path.split(files[0])
-                            
-#     if 'files' in version_info:                                
-#         for file in version_info['files']:
-#             html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
-#             if files:
-#                 if os.path.join(vfolder, file['name']) in files:
-#                     files_name.append(file['name'])
-                                                
-#     output_html = html_typepart + html_modelpart + html_versionpart + html_trainingpart + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
-    
-#     return output_html, output_training, files_name
 
                         
                         

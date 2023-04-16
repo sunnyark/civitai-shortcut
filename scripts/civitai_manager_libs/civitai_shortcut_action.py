@@ -6,9 +6,12 @@ from . import civitai_action
 from . import ishortcut_action
 from . import model_action
 
-from tqdm import tqdm
 
-
+def on_open_folder_click(vid):
+    path = model_action.get_model_folder(vid)
+    if path:
+        util.open_folder(path)
+        
 def on_civitai_information_tabs_select(evt: gr.SelectData, selected_modelid, selected_saved_modelid):
     # util.printD(f"{evt.value},{evt.index}")
     # civitai_information
