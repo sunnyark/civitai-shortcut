@@ -11,7 +11,8 @@ url_dict = {
     "modelPage":"https://civitai.com/models/",
     "modelId": "https://civitai.com/api/v1/models/",
     "modelVersionId": "https://civitai.com/api/v1/model-versions/",
-    "modelHash": "https://civitai.com/api/v1/model-versions/by-hash/"
+    "modelHash": "https://civitai.com/api/v1/model-versions/by-hash/",
+    "imagePage" :  "https://civitai.com/api/v1/images/"
 }
 
 models_exts = (".bin", ".pt", ".safetensors", ".ckpt")        
@@ -27,6 +28,9 @@ def Url_VersionId():
 
 def Url_Hash():
     return url_dict["modelHash"]
+
+def Url_ImagePage():
+    return url_dict["imagePage"]
 
 def request_models(api_url=None):
     try:

@@ -38,6 +38,27 @@ def printD(msg):
 #             break
 #         yield chunk
 
+def update_url(url, param_name, new_value):
+    if param_name not in url:
+        # If the parameter is not found in the URL, add it to the end with the new value
+        if "?" in url:
+            # If there are already other parameters in the URL, add the new parameter with "&" separator
+            updated_url = url + "&" + param_name + "=" + str(new_value)
+        else:
+            # If there are no parameters in the URL, add the new parameter with "?" separator
+            updated_url = url + "?" + param_name + "=" + str(new_value)
+    else:
+        # If the parameter is found in the URL, update its value with the new value
+        prefix, suffix = url.split(param_name + "=")
+        if "&" in suffix:
+            current_value, remainder = suffix.split("&", 1)
+            updated_suffix = param_name + "=" + str(new_value) + "&" + remainder
+        else:
+            updated_suffix = param_name + "=" + str(new_value)
+        updated_url = prefix + updated_suffix
+
+    return updated_url
+
 def add_number_to_duplicate_files(filenames):    
     counts = {}
     for i, filename in enumerate(filenames):        

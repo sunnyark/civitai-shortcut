@@ -99,6 +99,7 @@ ModelUITypeFolder = { "model_types" : model_types,  "model_folders" : model_fold
 #information tab 
 civitai_information_tab = 0
 saved_information_tab = 1
+usergal_information_tab = 2
 
 # civitai helper 호환성
 info_ext = ".info"
@@ -113,6 +114,9 @@ preview_image_suffix = ".preview"
 # 갤럴리 ui설정
 gallery_column = 4
 shortcut_colunm = 2  
+
+# 
+gallery_images_page_limit = 10
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"

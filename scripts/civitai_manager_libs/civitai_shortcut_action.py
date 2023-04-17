@@ -1,28 +1,90 @@
 import os
 import gradio as gr
+import requests
+
+from PIL import Image
 from . import util
 from . import setting
 from . import civitai_action
 from . import ishortcut_action
 from . import model_action
-
+from . import civitai_gallery_action
 
 def on_open_folder_click(vid):
     path = model_action.get_model_folder(vid)
     if path:
         util.open_folder(path)
-        
-def on_civitai_information_tabs_select(evt: gr.SelectData, selected_modelid, selected_saved_modelid):
+
+def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_information_tabs , selected_modelid, selected_saved_modelid, selected_usergal_modelid):
     # util.printD(f"{evt.value},{evt.index}")
+    active_modleid = selected_modelid
+    if selected_civitai_information_tabs == setting.civitai_information_tab:
+        active_modleid = selected_modelid
+    if selected_civitai_information_tabs == setting.saved_information_tab:
+        active_modleid = selected_saved_modelid
+    if selected_civitai_information_tabs == setting.usergal_information_tab:
+        active_modleid = selected_usergal_modelid
+        
     # civitai_information
     if evt.index == setting.civitai_information_tab:
-        return selected_saved_modelid, selected_saved_modelid, evt.index    
+        return evt.index, active_modleid, selected_saved_modelid, selected_usergal_modelid
+    
     # saved_information
     if evt.index == setting.saved_information_tab:
-        return selected_modelid, selected_modelid, evt.index
-    
-    return selected_modelid, selected_modelid, evt.index
+        return evt.index, selected_modelid, active_modleid, selected_usergal_modelid
 
+    # usergallery_information
+    if evt.index == setting.usergal_information_tab:
+        return evt.index, selected_modelid, selected_saved_modelid, active_modleid
+        
+    return evt.index, selected_modelid, selected_modelid
+
+def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=None):
+    if evt.value:
+        shortcut = evt.value 
+        sc_model_id = shortcut[0:shortcut.find(':')]      
+    
+    if selected_civitai_information_tabs is not None:
+        if selected_civitai_information_tabs == setting.civitai_information_tab:
+            return gr.update(value=sc_model_id),gr.update(value=None),gr.update(value=None)
+        if selected_civitai_information_tabs == setting.saved_information_tab:
+            return gr.update(value=None),gr.update(value=sc_model_id),gr.update(value=None)
+        if selected_civitai_information_tabs == setting.usergal_information_tab:
+            return gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id)
+                        
+    return gr.update(value=sc_model_id),gr.update(value=sc_model_id)
+
+def on_sc_downloaded_gallery_select(evt : gr.SelectData):
+    if evt.value:
+        shortcut = evt.value 
+        sc_model_id = shortcut[0:shortcut.find(':')]      
+                        
+    return gr.update(value=sc_model_id)
+
+def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
+    if image_url:
+        dn_image_list = []
+        for img_url in progress.tqdm(image_url, desc=f"Civitai Images Loading"):  
+            try:
+                img_r = requests.get(img_url,stream=True)
+                if not img_r.ok:
+                    util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")            
+                    continue
+                img_r.raw.decode_content=True
+                dn_image_list.append(Image.open(img_r.raw))                     
+            except:
+                dn_image_list.append(gr.Image(type="pil"))    
+        return dn_image_list       
+    return None
+
+def on_file_gallery_loading(image_url, progress=gr.Progress()):
+    if image_url:
+        # dn_image_list = []
+        # for img_url in progress.tqdm(image_url, desc=f"Images Files Loading"):  
+        #     dn_image_list.append(Image.open(img_url))                     
+        # return dn_image_list       
+        return image_url
+    return None
 
 # selected_saved_model_id 값을 초기화 시키기 위한 이벤트 헨들러이다.
 # saved_update_information_btn.click 에 두개가 묶여 있지만 이것이 먼저 리턴값을 낼것이다.
@@ -68,28 +130,6 @@ def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc=Tru
 # 갤러리에서 하나 선택할때
 def on_gallery_select(evt: gr.SelectData,version_images_url):  
      return evt.index, version_images_url[evt.index]
- 
-# 갤러리 방식으로 숏컬리스트 표시할때
-def on_sc_gallery_select(evt : gr.SelectData, selectecd_civitai_information_tabs=None):
-    if evt.value:
-        shortcut = evt.value 
-        sc_model_id = shortcut[0:shortcut.find(':')]      
-    
-    if selectecd_civitai_information_tabs is not None:
-        if selectecd_civitai_information_tabs == setting.civitai_information_tab:
-            return gr.update(value=sc_model_id),gr.update(value=None)
-        if selectecd_civitai_information_tabs == setting.saved_information_tab:
-            return gr.update(value=None),gr.update(value=sc_model_id)
-                
-    return gr.update(value=sc_model_id),gr.update(value=sc_model_id)
-
-# 갤러리 방식으로 숏컬리스트 표시할때
-def on_sc_downloaded_gallery_select(evt : gr.SelectData):
-    if evt.value:
-        shortcut = evt.value 
-        sc_model_id = shortcut[0:shortcut.find(':')]      
-                        
-    return gr.update(value=sc_model_id)
 
 def on_civitai_internet_url_upload(files, progress=gr.Progress(), selectecd_civitai_information_tabs=None):       
     model_id = ""
@@ -133,8 +173,72 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
 
     return gr.update(value=scan_list)
 # left menu action end
+              
+# user gallery information start
+def on_usergal_page_url_change( modelid, usergal_page_url, page_info):
+    
+    if usergal_page_url:
+        page_info, title_name, image_url = civitai_gallery_action.get_model_information( modelid , usergal_page_url, False) 
+        if page_info:
+            total_page = page_info['totalPages']
+            current_Page = page_info['currentPage']
+                    
+            return gr.update(value=title_name),\
+                image_url,\
+                image_url,\
+                gr.update(minimum=1, maximum=total_page, value=current_Page, step=1, label=f"Total {total_page} Pages"),\
+                page_info,\
+                gr.update(value=None)
+                                                    
+    return None,None,None,gr.update(minimum=1, maximum=1, value=1),None,None
 
+def on_load_usergal_model(modelid=None):
+    page_url = None
+    if modelid:
+        page_url = civitai_gallery_action. get_default_page_url(modelid,False)    
+    return page_url
+    
+def on_usergal_page_slider_release(usergal_page_url, page_slider):
+    page_url = usergal_page_url
+    if usergal_page_url:       
+        page_url = util.update_url(usergal_page_url,"page", page_slider)    
+    
+    return page_url
 
+def on_usergal_first_btn_click(usergal_page_url, page_info):
+    page_url = usergal_page_url
+    if page_info:        
+        if page_info['prevPage']:
+            page_url = util.update_url(page_info['prevPage'],"page",1)
+                    
+    return page_url
+
+def on_usergal_end_btn_click(usergal_page_url, page_info):
+    page_url = usergal_page_url
+    if page_info:
+        if page_info['nextPage']:            
+            page_url = util.update_url(page_info['nextPage'],"page",page_info['totalPages'])
+
+    return page_url
+
+def on_usergal_next_btn_click(usergal_page_url, page_info):
+    page_url = usergal_page_url
+    if page_info:        
+        if page_info['nextPage']:
+            page_url = page_info['nextPage']
+
+    return page_url
+
+def on_usergal_prev_btn_click(usergal_page_url, page_info):
+    page_url = usergal_page_url
+    if page_info:        
+        if page_info['prevPage']:
+            page_url = page_info['prevPage']
+
+    return page_url
+        
+# user gallery information end
+        
 # downloaded model information start
 def on_load_downloaded_model(modelid=None, versionid=None):
     model_info,versionid,version_name,model_url,model_type,versions_list,dhtml,triger,flist,title_name, gallery_url, images_url = model_action.get_model_information(modelid, versionid)    
@@ -182,12 +286,8 @@ def on_downloaded_versions_list_select(evt: gr.SelectData, modelid:str):
 def on_load_saved_model(modelid=None, versionid=None):
     model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name, gallery_url, images_url = ishortcut_action.get_model_information(modelid, versionid)    
     if model_info:
-        is_lora = False
         downloaded_info = None
         is_downloaded = False
-        if model_type == "LORA":
-            is_lora = True 
-
         if downloaded_versions_list:
             downloaded_info = "\n".join(downloaded_versions_list)
                     
@@ -217,12 +317,8 @@ def on_saved_versions_list_select(evt: gr.SelectData, modelid:str):
     if modelid:
         model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,gallery_url,images_url = ishortcut_action.get_model_information(modelid,None,evt.index)    
         if model_info:
-            is_lora = False
             downloaded_info = None
             is_downloaded = False            
-            if model_type == "LORA":
-                is_lora = True 
-
             if downloaded_versions_list:
                 downloaded_info = "\n".join(downloaded_versions_list)
                         
@@ -256,7 +352,7 @@ def on_load_model(modelid=None, versionid=None):
         is_lora = False
         downloaded_info = None
         is_downloaded = False
-        if model_type == "LORA":
+        if model_type == setting.model_types['lora'] or model_type == setting.model_types['locon']:
             is_lora = True 
 
         if downloaded_versions_list:
@@ -284,7 +380,8 @@ def on_versions_list_select(evt: gr.SelectData, modelid:str):
             is_lora = False
             downloaded_info = None
             is_downloaded = False            
-            if model_type == "LORA":
+
+            if model_type == setting.model_types['lora'] or model_type == setting.model_types['locon']:
                 is_lora = True 
 
             if downloaded_versions_list:
