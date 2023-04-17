@@ -45,28 +45,28 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         model_url = civitai.Url_ModelId() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info,model_info)
         title_name = f"### {model_info['name']} : {version_info['name']}"           
-        gallery_url, images_url = get_version_description_gallery(modelid, versionid)
+        images_url = get_version_description_gallery(modelid, versionid)
         
-        return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,gallery_url,images_url
-    return None, None,None,None,None,None,None,None,None,None,None,None,None
+        return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url
+    return None, None,None,None,None,None,None,None,None,None,None,None
 
 def get_version_description_gallery(modelid:str, versionid:str):
     if not modelid or not versionid:
-        return None, None
+        return None
 
     model_path = os.path.join(setting.shortcut_info_folder, modelid)         
     version_image_prefix = f"{versionid}-"
-    version_images_url = list()
+    images_url = list()
     try:        
         for file in os.listdir(model_path):
             if os.path.isdir(file):
                 continue
             if file.endswith(setting.preview_image_ext) and file.startswith(version_image_prefix):
-                version_images_url.append(os.path.join(model_path, file))            
+                images_url.append(os.path.join(model_path, file))            
     except:
-        return None,None
+        return None
                 
-    return version_images_url,version_images_url
+    return images_url
       
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""

@@ -219,7 +219,8 @@ def civitai_shortcut_ui():
         
         #civitai model information                
         img_index = gr.Number(show_label=False)
-        civitai_images_url = gr.State()
+        # 이미지 파일명 또는 URL 리스트였다가 이미지 리스트가됨 왔다갔다 함
+        civitai_images = gr.State()
         # 트리거를 위한것
         civitai_gallery_url = gr.Textbox(value=None)
         hidden = gr.Image(type="pil")
@@ -233,7 +234,8 @@ def civitai_shortcut_ui():
         
         #download model information                
         downloaded_img_index = gr.Number(show_label=False)
-        downloaded_images_url = gr.State()
+        # 이미지 파일명리스트 - 파일은 굳이 일부러 로딩할필요가 없다.
+        downloaded_images = gr.State()
         # 트리거를 위한것
         downloaded_gallery_url = gr.Textbox(value=None)
         downloaded_hidden = gr.Image(type="pil")
@@ -246,7 +248,8 @@ def civitai_shortcut_ui():
                 
         # saved shortcut information  
         saved_img_index = gr.Number(show_label=False)
-        saved_images_url = gr.State()
+        # 이미지 파일명리스트 - 파일은 굳이 일부러 로딩할필요가 없다.
+        saved_images = gr.State()
         # 트리거를 위한것
         saved_gallery_url = gr.Textbox(value=None)
         saved_hidden = gr.Image(type="pil")
@@ -259,7 +262,8 @@ def civitai_shortcut_ui():
                 
         # user gallery information  
         usergal_img_index = gr.Number(show_label=False)
-        usergal_images_url = gr.State()
+        # 이미지 파일명 또는 URL 리스트였다가 이미지 리스트가됨 왔다갔다 함
+        usergal_images = gr.State()
         # 트리거를 위한것
         usergal_gallery_url = gr.Textbox(value=None)
         usergal_hidden = gr.Image(type="pil")
@@ -489,7 +493,7 @@ def civitai_shortcut_ui():
             filename_list,
             model_title_name,                        
             civitai_gallery_url, 
-            civitai_images_url,
+            civitai_images,
             img_file_info            
         ] 
     )
@@ -512,7 +516,7 @@ def civitai_shortcut_ui():
             filename_list,
             model_title_name,                        
             civitai_gallery_url, 
-            civitai_images_url,            
+            civitai_images,            
             img_file_info          
         ]
     )    
@@ -520,15 +524,15 @@ def civitai_shortcut_ui():
     civitai_gallery_url.change(
         fn=civitai_shortcut_action.on_civitai_gallery_loading,
         inputs=[
-            civitai_images_url,
+            civitai_images,
         ],
         outputs=[
             civitai_gallery,
-            civitai_images_url
+            civitai_images
         ]                
     )
     
-    civitai_gallery.select(civitai_shortcut_action.on_gallery_select, civitai_images_url, [img_index, hidden])
+    civitai_gallery.select(civitai_shortcut_action.on_gallery_select, civitai_images, [img_index, hidden])
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])
     # civitai model information end
 
@@ -550,7 +554,7 @@ def civitai_shortcut_ui():
             saved_filename_list,
             saved_model_title_name,                        
             saved_gallery_url,
-            saved_images_url,
+            saved_images,
             saved_img_file_info   
         ] 
     )
@@ -572,7 +576,7 @@ def civitai_shortcut_ui():
             saved_filename_list,
             saved_model_title_name,                        
             saved_gallery_url,
-            saved_images_url,
+            saved_images,
             saved_img_file_info         
         ]
     )    
@@ -580,7 +584,7 @@ def civitai_shortcut_ui():
     saved_gallery_url.change(
         fn=civitai_shortcut_action.on_file_gallery_loading,
         inputs=[
-            saved_images_url 
+            saved_images 
         ],
         outputs=[               
             saved_gallery
@@ -617,7 +621,7 @@ def civitai_shortcut_ui():
         outputs=[selected_saved_model_id]                    
     ) 
     
-    saved_gallery.select(civitai_shortcut_action.on_gallery_select, saved_images_url, [saved_img_index, saved_hidden])
+    saved_gallery.select(civitai_shortcut_action.on_gallery_select, saved_images, [saved_img_index, saved_hidden])
     saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])    
     # civitai saved model information end
     
@@ -690,11 +694,11 @@ def civitai_shortcut_ui():
     usergal_gallery_url.change(
         fn=civitai_shortcut_action.on_civitai_gallery_loading,
         inputs=[
-            usergal_images_url 
+            usergal_images 
         ],
         outputs=[               
             usergal_gallery,
-            usergal_images_url
+            usergal_images
         ]                  
     )
     
@@ -708,7 +712,7 @@ def civitai_shortcut_ui():
         outputs=[               
             usergal_title_name,                               
             usergal_gallery_url,
-            usergal_images_url,
+            usergal_images,
             usergal_page_slider,
             usergal_page,
             usergal_img_file_info   
@@ -716,7 +720,7 @@ def civitai_shortcut_ui():
     )
     
     
-    usergal_gallery.select(civitai_shortcut_action.on_gallery_select, usergal_images_url, [usergal_img_index, usergal_hidden])
+    usergal_gallery.select(civitai_shortcut_action.on_gallery_select, usergal_images, [usergal_img_index, usergal_hidden])
     usergal_hidden.change(fn=modules.extras.run_pnginfo, inputs=[usergal_hidden], outputs=[usergal_info1, usergal_img_file_info, usergal_info2])
     
     # civitai user gallery information end
@@ -766,7 +770,7 @@ def civitai_shortcut_ui():
             downloaded_filename_list,
             downloaded_model_title_name,                        
             downloaded_gallery_url,
-            downloaded_images_url,
+            downloaded_images,
             downloaded_img_file_info   
         ] 
     )
@@ -786,7 +790,7 @@ def civitai_shortcut_ui():
             downloaded_filename_list,
             downloaded_model_title_name,                        
             downloaded_gallery_url,
-            downloaded_images_url,
+            downloaded_images,
             downloaded_img_file_info          
         ]
     ) 
@@ -794,7 +798,7 @@ def civitai_shortcut_ui():
     downloaded_gallery_url.change(
         fn=civitai_shortcut_action.on_file_gallery_loading,
         inputs=[
-            downloaded_images_url 
+            downloaded_images 
         ],
         outputs=[               
             downloaded_gallery
@@ -813,7 +817,7 @@ def civitai_shortcut_ui():
         ],        
     )
             
-    downloaded_gallery.select(civitai_shortcut_action.on_gallery_select, downloaded_images_url, [downloaded_img_index, downloaded_hidden])
+    downloaded_gallery.select(civitai_shortcut_action.on_gallery_select, downloaded_images, [downloaded_img_index, downloaded_hidden])
     downloaded_hidden.change(fn=modules.extras.run_pnginfo, inputs=[downloaded_hidden], outputs=[downloaded_info1, downloaded_img_file_info, downloaded_info2])
     # downloaded model information end
     ###### Downloaded Tab ######                                                  

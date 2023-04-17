@@ -50,20 +50,19 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         model_url = civitai.Url_ModelId() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info,model_info)
         title_name = f"### {model_info['name']} : {version_info['name']}"           
-        gallery_url, images_url = get_version_description_gallery(version_info)
+        images_url = get_version_description_gallery(version_info)
         
-        return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,gallery_url,images_url
-    return None, None,None,None,None,None,None,None,None,None,None,None,None
+        return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url
+    return None, None,None,None,None,None,None,None,None,None,None,None
 
 def get_version_description_gallery(version_info:dict):       
     if not version_info:
-        return None,None
+        return None
 
-    version_images_url = []
-    version_full_images_url = []
-
+    images_url = []
+    
     if 'images' not in version_info:
-        return None,None
+        return None
                     
     for pic in version_info["images"]:   
         if "url" in pic:
@@ -72,11 +71,10 @@ def get_version_description_gallery(version_info:dict):
             # 파일 인포가 있는 원본 이미지.
             if "width" in pic:
                 if pic["width"]:
-                    img_url = util.change_width_from_image_url(img_url, pic["width"])                                            
-            version_images_url.append(pic["url"])
-            version_full_images_url.append(img_url)     
+                    img_url = util.change_width_from_image_url(img_url, pic["width"])
+            images_url.append(img_url)
                 
-    return version_images_url,version_full_images_url
+    return images_url
       
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
@@ -331,12 +329,3 @@ def download_image_files(version_id, lora_an, vs_folder):
             
         message = f"Downloaded images"
     return message       
-
-                            
-
-
-
-
-
-
-        

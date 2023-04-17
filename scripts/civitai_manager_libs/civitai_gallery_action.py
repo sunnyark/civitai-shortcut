@@ -22,19 +22,18 @@ def get_model_information( modelid:str=None, page_url=None, show_nsfw=False,):
                             
     # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
     if model_info:
-        gallery_url = None
         images_url = None        
 
         title_name = f"### {model_info['name']}"
-        page_info , gallery_url, images_url = get_user_gallery(modelid, page_url, show_nsfw)
+        page_info , images_url = get_user_gallery(modelid, page_url, show_nsfw)
 
-        return page_info, title_name, gallery_url
+        return page_info, title_name, images_url
     return None,None,None
 
 def get_user_gallery(modelid, page_url, show_nsfw):
     
     if not modelid:
-        return None,None,None,None
+        return None,None
     
     images_list = []
     page_info , image_data = get_image_page(modelid, page_url, show_nsfw)
@@ -42,7 +41,7 @@ def get_user_gallery(modelid, page_url, show_nsfw):
     if image_data:
         images_list = [image_info['url'] for image_info in image_data]
     
-    return page_info, images_list, images_list
+    return page_info, images_list
            
 def get_image_page(modelid, page_url, show_nsfw=False):
     json_data = {}
