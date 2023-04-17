@@ -136,7 +136,7 @@ def civitai_shortcut_ui():
                                         except:
                                             pass 
                         #with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
-                            with gr.Row( visible=False):
+                            with gr.Row(visible=False):
                                 with gr.Column(scale=5):                                                   
                                     with gr.Row():
                                         with gr.Column(scale=1): 
@@ -523,7 +523,8 @@ def civitai_shortcut_ui():
             civitai_images_url,
         ],
         outputs=[
-            civitai_gallery        
+            civitai_gallery,
+            civitai_images_url
         ]                
     )
     
@@ -685,14 +686,15 @@ def civitai_shortcut_ui():
             usergal_page_url
         ]        
     )
-    
+        
     usergal_gallery_url.change(
         fn=civitai_shortcut_action.on_civitai_gallery_loading,
         inputs=[
             usergal_images_url 
         ],
         outputs=[               
-            usergal_gallery
+            usergal_gallery,
+            usergal_images_url
         ]                  
     )
     

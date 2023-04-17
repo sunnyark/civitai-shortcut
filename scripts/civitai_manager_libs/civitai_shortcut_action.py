@@ -61,21 +61,27 @@ def on_sc_downloaded_gallery_select(evt : gr.SelectData):
                         
     return gr.update(value=sc_model_id)
 
+# 이미지를 체크해서 둘다 다시넣어 줘야한다.
 def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
     if image_url:
         dn_image_list = []
-        for img_url in progress.tqdm(image_url, desc=f"Civitai Images Loading"):  
+        image_list = []
+        for img_url in progress.tqdm(image_url, desc=f"Civitai Images Loading"):
             try:
-                img_r = requests.get(img_url,stream=True)
-                if not img_r.ok:
-                    util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")            
-                    continue
-                img_r.raw.decode_content=True
-                dn_image_list.append(Image.open(img_r.raw))                     
+                with requests.get(img_url,stream=True) as img_r:
+                    if not img_r.ok:                        
+                        util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                        dn_image_list.append(Image.open(setting.no_card_preview_image))
+                        image_list.append(setting.no_card_preview_image)
+                        continue
+                    img_r.raw.decode_content=True
+                    dn_image_list.append(Image.open(img_r.raw))
+                    image_list.append(img_url)                     
             except:
-                dn_image_list.append(gr.Image(type="pil"))    
-        return dn_image_list       
-    return None
+                dn_image_list.append(Image.open(setting.no_card_preview_image))
+                image_list.append(setting.no_card_preview_image)
+        return dn_image_list, image_list
+    return None, None
 
 def on_file_gallery_loading(image_url, progress=gr.Progress()):
     if image_url:
