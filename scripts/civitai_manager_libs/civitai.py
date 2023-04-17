@@ -140,6 +140,17 @@ def get_files_by_version_info(version_info:dict)->dict:
     
     return download_files
 
+def get_files_by_version_info(version_info:dict)->dict:
+    download_files = {}
+    
+    if not version_info:                
+        return         
+    
+    for file in version_info['files']:
+        download_files[str(file['id'])] = file
+    
+    return download_files
+
 def get_files_by_version_id(version_id=None)->dict:   
     if not version_id:                
         return         

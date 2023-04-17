@@ -38,6 +38,17 @@ def printD(msg):
 #             break
 #         yield chunk
 
+def add_number_to_duplicate_files(filenames):    
+    counts = {}
+    for i, filename in enumerate(filenames):        
+        if filename in counts:
+            name, ext = os.path.splitext(filename)
+            counts[filename] += 1
+            filenames[i] = f"{name} ({counts[filename]}){ext}"
+        else:
+            counts[filename] = 0
+    return filenames
+    
 def open_folder(path):
     if os.path.exists(path):
         # Code from ui_common.py

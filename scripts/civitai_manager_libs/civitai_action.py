@@ -140,7 +140,7 @@ def get_version_description(version_info:dict,model_info:dict=None):
 
         if 'files' in version_info:                                
             for file in version_info['files']:
-                files_name.append(file['name'])
+                files_name.append(f"{file['id']}:{file['name']}")
                 html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
                             
         output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_model_tags + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
@@ -148,6 +148,22 @@ def get_version_description(version_info:dict,model_info:dict=None):
         return output_html, output_training, files_name             
     
     return "",None,None
+
+def add_number_to_duplicate_files(filenames)->dict:    
+    counts = {}
+    dup_file = {}
+    
+    for file in filenames:     
+        file_info = file.split(":", 1)
+        if len(file_info) > 1:
+            if file_info[1] in counts:
+                name, ext = os.path.splitext(file_info[1])
+                counts[file_info[1]] += 1
+                file_info[1] = f"{name} ({counts[file_info[1]]}){ext}"
+            else:
+                counts[file_info[1]] = 0        
+            dup_file[file_info[0]] = file_info[1]
+    return dup_file
     
 def download_file_thread(file_name, version_id, lora_an, vs_folder):               
     if not file_name:
@@ -170,15 +186,18 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
     
     if not model_folder:
         return
-                
-    for file in file_name:                    
+
+    dup_names = add_number_to_duplicate_files(file_name)
+    
+    for fid, file in dup_names.items():                    
         try:
             #모델 파일 저장
             path_dl_file = os.path.join(model_folder, file)            
-            thread = threading.Thread(target=downloader.download_file,args=(download_files[file]['downloadUrl'], path_dl_file))
+            thread = threading.Thread(target=downloader.download_file,args=(download_files[str(fid)]['downloadUrl'], path_dl_file))
             # Start the thread
             thread.start()                
-        except:
+        except Exception as e:
+            util.printD(e)
             pass
 
     # 버전 인포 파일 저장. primary 이름으로 저장한다.
