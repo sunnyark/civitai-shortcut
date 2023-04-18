@@ -346,8 +346,9 @@ def save(ISC:dict):
 def load()->dict:
     #util.printD("Load Civitai Internet Shortcut from: " + setting.shortcut)
 
-    if not os.path.isfile(setting.shortcut):
-        util.printD("No Civitai Internet Shortcut file, use blank")
+    if not os.path.isfile(setting.shortcut):        
+        util.printD("Unable to load the shortcut file. Starting with an empty file.")
+        save({})
         return
     
     json_data = None
@@ -359,7 +360,7 @@ def load()->dict:
 
     # check error
     if not json_data:
-        util.printD("load Civitai Internet Shortcut file failed")
+        util.printD("The loading of the shortcut file has failed or it is empty.")
         return None
 
     # check for new key
