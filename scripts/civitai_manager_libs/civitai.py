@@ -133,16 +133,16 @@ def get_version_id_by_version_name(model_id:str,name:str)->str:
         
     return version_id
 
-def get_files_by_version_info(version_info:dict)->dict:
-    download_files = {}
+# def get_files_by_version_info(version_info:dict)->dict:
+#     download_files = {}
     
-    if not version_info:                
-        return         
+#     if not version_info:                
+#         return         
     
-    for file in version_info['files']:
-        download_files[file['name']] = file
+#     for file in version_info['files']:
+#         download_files[file['name']] = file
     
-    return download_files
+#     return download_files
 
 def get_files_by_version_info(version_info:dict)->dict:
     download_files = {}
