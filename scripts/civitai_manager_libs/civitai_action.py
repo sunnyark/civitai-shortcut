@@ -51,7 +51,7 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         dhtml, triger, flist = get_version_description(version_info,model_info)
         title_name = f"### {model_info['name']} : {version_info['name']}"           
         images_url = get_version_description_gallery(version_info)
-        
+
         return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url
     return None, None,None,None,None,None,None,None,None,None,None,None
 

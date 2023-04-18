@@ -17,27 +17,27 @@ def on_open_folder_click(vid):
 
 def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_information_tabs , selected_modelid, selected_saved_modelid, selected_usergal_modelid):
     # util.printD(f"{evt.value},{evt.index}")
-    active_modleid = selected_modelid
+    active_modelid = selected_modelid
     if selected_civitai_information_tabs == setting.civitai_information_tab:
-        active_modleid = selected_modelid
+        active_modelid = selected_modelid
     if selected_civitai_information_tabs == setting.saved_information_tab:
-        active_modleid = selected_saved_modelid
+        active_modelid = selected_saved_modelid
     if selected_civitai_information_tabs == setting.usergal_information_tab:
-        active_modleid = selected_usergal_modelid
+        active_modelid = selected_usergal_modelid
         
     # civitai_information
     if evt.index == setting.civitai_information_tab:
-        return evt.index, active_modleid, selected_saved_modelid, selected_usergal_modelid
+        return evt.index, active_modelid, selected_saved_modelid, selected_usergal_modelid
     
     # saved_information
     if evt.index == setting.saved_information_tab:
-        return evt.index, selected_modelid, active_modleid, selected_usergal_modelid
+        return evt.index, selected_modelid, active_modelid, selected_usergal_modelid
 
     # usergallery_information
     if evt.index == setting.usergal_information_tab:
-        return evt.index, selected_modelid, selected_saved_modelid, active_modleid
+        return evt.index, selected_modelid, selected_saved_modelid, active_modelid
         
-    return evt.index, selected_modelid, selected_modelid
+    return evt.index, selected_modelid, selected_modelid, selected_modelid
 
 def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=None):
     if evt.value:
@@ -52,7 +52,7 @@ def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=
         if selected_civitai_information_tabs == setting.usergal_information_tab:
             return gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id)
                         
-    return gr.update(value=sc_model_id),gr.update(value=sc_model_id)
+    return gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id)
 
 def on_sc_downloaded_gallery_select(evt : gr.SelectData):
     if evt.value:
@@ -80,6 +80,7 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
             except:
                 dn_image_list.append(Image.open(setting.no_card_preview_image))
                 image_list.append(setting.no_card_preview_image)
+        #return dn_image_list, dn_image_list # 자꾸 이미지 정보가 사라진다 이렇게 할수밖에
         return dn_image_list, image_list
     return None, None
 
@@ -104,7 +105,7 @@ def on_saved_update_information_btn_click(modelid):
     return gr.update(value=modelid),gr.update(value="Done"),gr.update(value=None)
 
 def on_goto_civitai_model_tab_click(selected_downloaded_model_id):    
-    return gr.update(selected="civitai01"), gr.update(selected="civitai_info"),gr.update(value=selected_downloaded_model_id)
+    return gr.update(selected="civitai01"), gr.update(selected="civitai_info"), gr.update(value=setting.civitai_information_tab), gr.update(value=selected_downloaded_model_id)
 # download model information end
 
 # 다운 로드후 shortcut 리스트를 갱신한다.
@@ -137,7 +138,7 @@ def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc=Tru
 def on_gallery_select(evt: gr.SelectData,version_images_url):
     return evt.index, version_images_url[evt.index]
 
-def on_civitai_internet_url_upload(files, progress=gr.Progress(), selectecd_civitai_information_tabs=None):       
+def on_civitai_internet_url_upload(files, progress=gr.Progress(), selected_civitai_information_tabs=None):       
     model_id = ""
     if files:
         modelids = ishortcut_action.upload_shortcut_by_files(files,progress)
@@ -145,15 +146,17 @@ def on_civitai_internet_url_upload(files, progress=gr.Progress(), selectecd_civi
             model_id = modelids[0]
 
     if not model_id:
-        return gr.update(value=""),gr.update(value=""),gr.update(value="Upload shortcut is Done"), None
+        return gr.update(value=""),gr.update(value=""),gr.update(value=""),gr.update(value="Upload shortcut is Done"), None
 
-    if selectecd_civitai_information_tabs is not None:
-        if selectecd_civitai_information_tabs == setting.civitai_information_tab:
-            return gr.update(value=model_id),gr.update(value=None),gr.update(value="Upload shortcut is Done"), None
-        if selectecd_civitai_information_tabs == setting.saved_information_tab:
-            return gr.update(value=None),gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
-
-    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
+    if selected_civitai_information_tabs is not None:
+        if selected_civitai_information_tabs == setting.civitai_information_tab:
+            return gr.update(value=model_id),gr.update(value=None),gr.update(value=None),gr.update(value="Upload shortcut is Done"), None
+        if selected_civitai_information_tabs == setting.saved_information_tab:
+            return gr.update(value=None),gr.update(value=model_id),gr.update(value=None),gr.update(value="Upload shortcut is Done"), None
+        if selected_civitai_information_tabs == setting.usergal_information_tab:
+            return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
+        
+    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),gr.update(value="Upload shortcut is Done"), None
   
 def on_scan_to_shortcut_click(progress=gr.Progress()):
     model_action.Load_Downloaded_Models()

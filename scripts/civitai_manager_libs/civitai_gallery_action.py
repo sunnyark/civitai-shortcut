@@ -25,8 +25,9 @@ def get_model_information( modelid:str=None, page_url=None, show_nsfw=False,):
         images_url = None        
 
         title_name = f"### {model_info['name']}"
-        page_info , images_url = get_user_gallery(modelid, page_url, show_nsfw)
-
+        #page_info , images_url = get_user_gallery(modelid, page_url, show_nsfw)
+        page_info , images_infos = get_user_gallery(modelid, page_url, show_nsfw)
+        images_url = [image_info['url'] for image_info in images_infos.values()]
         return page_info, title_name, images_url
     return None,None,None
 
@@ -35,11 +36,12 @@ def get_user_gallery(modelid, page_url, show_nsfw):
     if not modelid:
         return None,None
     
-    images_list = []
+    images_list = {}
     page_info , image_data = get_image_page(modelid, page_url, show_nsfw)
 
     if image_data:
-        images_list = [image_info['url'] for image_info in image_data]
+        #images_list = [image_info['url'] for image_info in image_data]
+        images_list = {image_info['id']:image_info for image_info in image_data}
     
     return page_info, images_list
            
