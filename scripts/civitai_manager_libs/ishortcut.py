@@ -74,7 +74,7 @@ def write_model_information(modelid:str, progress=None):
         # 이미지 다운로드    
         if len(version_list) > 0:
             if progress:
-                for image_list in version_list:
+                for image_list in progress.tqdm(version_list):
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
                         try:
                             # get image

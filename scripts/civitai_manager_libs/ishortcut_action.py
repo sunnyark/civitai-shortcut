@@ -168,7 +168,7 @@ def upload_shortcut_by_files(files, progress):
             if shortcut:                                  
                 model_id = util.get_model_id_from_url(shortcut)                
                 if model_id:                    
-                    add_ISC = ishortcut.add(add_ISC, model_id)
+                    add_ISC = ishortcut.add(add_ISC, model_id, progress)
                     modelids.append(model_id)
                       
         ISC = ishortcut.load()
