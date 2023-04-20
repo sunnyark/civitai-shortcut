@@ -213,22 +213,40 @@ def write_InternetShortcut(path, url):
         return False    
     return True
     
+# def load_InternetShortcut(path)->str:
+#     urls = ""
+#     try:    
+#         with open(path, 'r') as f:
+#         #with open(path, 'r', encoding='utf8') as f:
+#             InternetShortcut = f.readline()
+#             if not InternetShortcut or not "[InternetShortcut]" in InternetShortcut:
+#                 return
+#             InternetShortcut = f.readline()
+#             if not InternetShortcut:
+#                 return
+#             urls = InternetShortcut[4:]
+#     except Exception as e:
+#         printD(e)
+#         return
+
+#     return urls.strip()
+
 def load_InternetShortcut(path)->str:
     urls = ""
     try:    
         with open(path, 'r') as f:
-            InternetShortcut = f.readline()
-            if not InternetShortcut or not "[InternetShortcut]" in InternetShortcut:
-                return
-            InternetShortcut = f.readline()
-            if not InternetShortcut:
-                return
-            urls = InternetShortcut[4:]
+        #with open(path, 'r', encoding='utf8') as f:            
+            content = f.readlines()
+            for line in content:
+                if line.startswith('URL='):
+                    urls = line[4:]
     except Exception as e:
         printD(e)
         return
 
     return urls.strip()
+
+
 
 # get image with full size
 # width is in number, not string
