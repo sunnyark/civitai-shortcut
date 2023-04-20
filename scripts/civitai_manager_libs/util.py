@@ -128,9 +128,42 @@ def write_json(contents, path):
             f.write(json.dumps(contents, indent=4))
     except Exception as e:
         return
+
+def scan_folder_for_info(folder):
+    info_list = search_file([folder],None,setting.info_ext)
+    
+    if not info_list:             
+        return None
+    
+    return info_list
         
-  
-def make_folder(version_info, lora_an=False, vs_folder=True):
+def generate_version_foldername(model_name,ver_name,ver_id):      
+    # return f"{model_name}-{ver_name}-{ver_id}"
+    return f"{model_name}-{ver_name}"
+
+def generate_model_foldername(model_name , content_type=None, lora_an=False):
+    
+    if not model_name:
+        return
+    
+    model_name = model_name.strip()
+    if len(model_name) <= 0:
+        return
+            
+    if lora_an and content_type == setting.model_types['lora']:
+        model_folder = setting.model_folders[setting.model_types['anlora']]
+    elif content_type in setting.model_folders.keys():
+        model_folder = setting.model_folders[content_type]        
+    elif content_type:
+        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']], replace_dirname(content_type))
+    else:
+        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']])
+                     
+    model_folder = os.path.join(model_folder, replace_dirname(model_name))
+                
+    return model_folder    
+    
+def make_version_folder(version_info, lora_an=False, vs_folder=True, user_folder_name=None):
     
     if not version_info:
         return
@@ -140,36 +173,22 @@ def make_folder(version_info, lora_an=False, vs_folder=True):
                        
     content_type = version_info['model']['type']
     model_name = version_info['model']['name']
+    model_folder = generate_model_foldername(model_name , content_type, lora_an)                     
     
-    if not model_name:
+    if not model_folder:
         return
     
-    model_name = model_name.strip()
+    if vs_folder:
+        # 설정되어있는데 펄더명이 비어있으면 기본으로 만들어준다.
+        vs_folder_name = generate_version_foldername(model_name,version_info['name'],version_info['id'])
+        # 있으면 그걸로 정한다.
+        if user_folder_name:
+            user_folder_name = user_folder_name.strip()            
+            if len(user_folder_name) > 0:
+                vs_folder_name = user_folder_name
 
-    if lora_an and content_type == setting.model_types['lora']:
-        model_folder = setting.model_folders[setting.model_types['anlora']]
-    elif content_type in setting.model_folders.keys():
-        model_folder = setting.model_folders[content_type]        
-    elif content_type:
-        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']], replace_dirname(content_type))
-    else:
-        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']])
-         
-    if vs_folder:  
+        model_folder = os.path.join(model_folder, replace_dirname(vs_folder_name))
 
-        vs_folder_name = None
-        primary_file = None
-        
-        if len(version_info['files']) > 0:
-            primary_file = version_info['files'][0]
-                        
-        if not primary_file:
-            vs_folder_name = replace_filename(version_info['model']['name'] + "." + version_info['name'])
-        vs_folder_name, ext = os.path.splitext(primary_file['name'])                 
-
-        model_folder = os.path.join(model_folder, replace_dirname(model_name), replace_dirname(vs_folder_name))
-    else:        
-        model_folder = os.path.join(model_folder, replace_dirname(model_name))
                 
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
@@ -250,11 +269,7 @@ def search_file(root_dirs:list,base,ext)->list:
     root_path = os.getcwd()
         
     for root_dir in root_dirs:
-        #print(f"{os.path.join(root_path,root_dir)}\n")
         for (root,dirs,files) in os.walk(os.path.join(root_path,root_dir)):
-            # if len(dirs) > 0:
-            #     for dir_name in dirs:
-            #         print("dir: " + dir_name)        
             if len(files) > 0:
                 for file_name in files:               
                     b, e = os.path.splitext(file_name) 
@@ -270,7 +285,4 @@ def search_file(root_dirs:list,base,ext)->list:
                     else:       
                         file_list.append(os.path.join(root,file_name))                        
                     
-    if len(file_list) > 0:
-        file_list = list(set(file_list))
-        return file_list
-    return None
+    return file_list if len(file_list) > 0 else None

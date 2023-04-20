@@ -11,6 +11,9 @@ from scripts.civitai_manager_libs import civitai_shortcut_action
 from scripts.civitai_manager_libs import util
 
 
+# def on_vs_folder_change(vs_folder):
+#     return gr.update(visible=vs_folder)
+
 def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
         
     with gr.Column(scale=5):                                                   
@@ -25,10 +28,9 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
                 with gr.Row():
                     usergal_next_btn = gr.Button(value="Next Page")
                     usergal_end_btn = gr.Button(value="End Page")
-        with gr.Row():                                                                                                 
-            usergal_title_name = gr.Markdown("###", visible=True)                                            
-        with gr.Row():                                                       
-            usergal_gallery = gr.Gallery(label="Civitai User Gallery", show_label=False, elem_id="civitai_user_gallery").style(grid=[5],height="auto")
+        with gr.Row():
+            with gr.Accordion("#", open=True) as usergal_title_name:
+                usergal_gallery = gr.Gallery(label="Civitai User Gallery", show_label=False, elem_id="civitai_user_gallery").style(grid=[5],height="auto")
     with gr.Column(scale=1):
         with gr.Row():                            
             usergal_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6).style(container=True, show_copy_button=True)                            
@@ -168,24 +170,25 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
             saved_civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
             
         with gr.Row(visible=False) as saved_downloaded_tab:
-            with gr.Tab("Downloaded Version"):
-                saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)
-                saved_openfolder = gr.Button(value="Open Download Folder",variant="primary")                                            
+            with gr.Accordion("Downloaded Version", open=False): 
+                saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)                
 
         with gr.Row():
             saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
         with gr.Row():
             saved_update_information_btn = gr.Button(value="Update Model Information")
         with gr.Row():
-            shortcut_del_btn = gr.Button(value="Delete Shortcut")                                    
+            shortcut_del_btn = gr.Button(value="Delete Shortcut")       
+        with gr.Row():                          
+            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)               
             
     with gr.Column(scale=4):                                                  
-        with gr.Row():                                                              
-            saved_model_title_name = gr.Markdown("###", visible=True)            
+        with gr.Row():  
+            with gr.Accordion("#", open=True) as saved_model_title_name:   
+                saved_gallery = gr.Gallery(label="Civitai Saved Gallery", show_label=False, elem_id="civitai_saved_gallery").style(grid=[setting.gallery_column],height="auto")
         with gr.Row():    
-            saved_gallery = gr.Gallery(label="Civitai Saved Gallery", show_label=False, elem_id="civitai_saved_gallery").style(grid=[setting.gallery_column],height="auto")
-        with gr.Row():    
-            saved_description_html = gr.HTML()                                                                                                   
+            with gr.Accordion("Model Description", open=True):  
+                saved_description_html = gr.HTML()                                                                                                   
     with gr.Column(scale=1):
         with gr.Row():                            
             saved_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6).style(container=True, show_copy_button=True)
@@ -230,7 +233,8 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
             saved_model_title_name,                        
             saved_gallery_url,
             saved_images,
-            saved_img_file_info   
+            saved_img_file_info,
+            saved_openfolder
         ] 
     )
     
@@ -252,7 +256,8 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
             saved_model_title_name,                        
             saved_gallery_url,
             saved_images,
-            saved_img_file_info         
+            saved_img_file_info,
+            saved_openfolder
         ]
     )    
 
@@ -265,13 +270,13 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
             saved_gallery
         ]                  
     )
-        
+
     shortcut_del_btn.click(
         fn=civitai_shortcut_action.on_shortcut_del_btn_click,
         inputs=[
             selected_saved_model_id,
         ],
-        outputs=[refresh_sc_list]               
+        outputs=[refresh_sc_list]
     )
     
     saved_update_information_btn.click(
@@ -279,27 +284,22 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
         inputs=[
             selected_saved_model_id,
         ],
-        outputs=[ 
+        outputs=[
             selected_saved_model_id,
             refresh_sc_list,
             # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
             saved_gallery
-        ]                    
-    )                 
+        ]
+    )
 
     # selected_saved_model_id 값을 초기화 시키기 위한 이벤트 헨들러이다.
     # saved_update_information_btn.click 에 두개가 묶여 있지만 이것이 먼저 실행될것이다.
-    # 하는게 없으므로
-    saved_update_information_btn.click(
-        fn=civitai_shortcut_action.on_blank_model_info,
-        inputs=None,
-        outputs=[selected_saved_model_id]                    
-    ) 
+    saved_update_information_btn.click(lambda :gr.update(value=None),None,selected_saved_model_id)
     
     saved_gallery.select(civitai_shortcut_action.on_gallery_select, saved_images, [saved_img_index, saved_hidden])
     saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])  
     
-    saved_openfolder.click(civitai_shortcut_action.on_open_folder_click,selected_saved_version_id,None)  
+    saved_openfolder.click(civitai_shortcut_action.on_open_folder_click,[selected_saved_model_id,selected_saved_version_id],None)  
     # civitai saved model information end
         
 def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
@@ -310,33 +310,37 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
         with gr.Row():
             model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
         with gr.Row():
-            trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)         
+            trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
         with gr.Row():
             civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
 
         with gr.Row(visible=False) as downloaded_tab:
-            with gr.Tab("Downloaded Version"):
-                downloaded_info = gr.Textbox(interactive=False,show_label=False)
-                civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary")   
-                        
-        with gr.Row():
-            filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
-        with gr.Row():
-            an_lora = gr.Checkbox(label="Download to additional-networks folder", value=False)          
-        with gr.Row():
-            vs_folder = gr.Checkbox(label="Create version specific folder", value=True)                                                                  
-        with gr.Row():
-            download_model = gr.Button(value="Download", variant="primary")                                                
-        with gr.Row():
-            gr.Markdown("Downloading may take some time.\nCheck console log for detail")                                                                         
+            with gr.Accordion("Downloaded Version", open=False):
+                downloaded_info = gr.Textbox(interactive=False,show_label=False)                
+
+        with gr.Accordion("Download", open=True):
+            with gr.Row():
+                filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True)
+            # with gr.Row():
+            #     an_lora = gr.Checkbox(label="Download to additional-networks folder", value=False)          
+            with gr.Row():
+                vs_folder = gr.Checkbox(label="Create specific folders with the following", value=True)               
+            with gr.Row():
+                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=True).style(container=True)
+                download_model = gr.Button(value="Download", variant="primary")
+            with gr.Row():
+                civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
+            with gr.Row():
+                gr.Markdown("Downloading may take some time.\nCheck console log for detail")
             
-    with gr.Column(scale=4):                                                  
-        with gr.Row():                                                              
-            model_title_name = gr.Markdown("###", visible=True)            
-        with gr.Row():    
-            civitai_gallery = gr.Gallery(label="Civitai Gallery", show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto")
-        with gr.Row():    
-            description_html = gr.HTML()                                                                                                   
+    with gr.Column(scale=4):    
+        with gr.Row(): 
+            with gr.Accordion("#", open=True) as model_title_name:   
+                civitai_gallery = gr.Gallery(label="Civitai Gallery", show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto")
+        with gr.Row():  
+            with gr.Accordion("Model Description", open=True):  
+                description_html = gr.HTML()
+
     with gr.Column(scale=1):
         with gr.Row():                            
             img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6).style(container=True, show_copy_button=True)
@@ -367,8 +371,9 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
         inputs=[
             selected_version_id,
             filename_list,            
-            an_lora,
-            vs_folder
+            # an_lora,
+            vs_folder,
+            vs_folder_name
         ],
         outputs=[refresh_sc_list]
     )  
@@ -383,7 +388,7 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
             civitai_model_url_txt, 
             downloaded_tab, 
             downloaded_info, 
-            an_lora, 
+            # an_lora, 
             model_type, 
             versions_list,
             description_html,
@@ -392,7 +397,9 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
             model_title_name,                        
             civitai_gallery_url, 
             civitai_images,
-            img_file_info            
+            img_file_info,
+            civitai_openfolder,
+            vs_folder_name            
         ] 
     )
     
@@ -406,7 +413,7 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
             civitai_model_url_txt, 
             downloaded_tab, 
             downloaded_info, 
-            an_lora, 
+            # an_lora, 
             model_type, 
             versions_list,
             description_html,
@@ -415,7 +422,9 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
             model_title_name,                        
             civitai_gallery_url, 
             civitai_images,            
-            img_file_info          
+            img_file_info,
+            civitai_openfolder,
+            vs_folder_name
         ]
     )    
     
@@ -430,10 +439,19 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
         ]                
     )
     
+    # civitai_gallery.select(lambda evt, version_images_url : evt.index, version_images_url[evt.index], civitai_images, [img_index, hidden])
     civitai_gallery.select(civitai_shortcut_action.on_gallery_select, civitai_images, [img_index, hidden])
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])
-    civitai_openfolder.click(civitai_shortcut_action.on_open_folder_click,selected_version_id,None)    
-            
+    civitai_openfolder.click(civitai_shortcut_action.on_open_folder_click,[selected_model_id,selected_version_id],None)    
+    
+    # vs_folder.change(
+    #     fn=on_vs_folder_change,
+    #     inputs=[vs_folder],
+    #     outputs=[vs_folder_name]
+    # )
+    
+    vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_folder_name)
+                
 def downloaded_model_information_ui(selected_downloaded_version_id:gr.Textbox(),selected_downloaded_model_id:gr.Textbox(),civitai_tab:gr.Tabs(),civitai_information_tabs:gr.Tabs(),selected_civitai_information_tabs: gr.Number(),selected_model_id: gr.Textbox()):
     with gr.Column(scale=1):
         with gr.Row():
@@ -451,13 +469,13 @@ def downloaded_model_information_ui(selected_downloaded_version_id:gr.Textbox(),
         with gr.Row():
             downloaded_openfolder = gr.Button(value="Open Download Folder",variant="primary")
                                                                                 
-    with gr.Column(scale=4):                                                  
-        with gr.Row():                                                              
-            downloaded_model_title_name = gr.Markdown("###", visible=True)            
+    with gr.Column(scale=4):
+        with gr.Row():
+            with gr.Accordion("#", open=True) as downloaded_model_title_name:
+                downloaded_gallery = gr.Gallery(label="Downloaded Version Gallery", show_label=False, elem_id="downloaded_version_gallery").style(grid=[setting.gallery_column],height="auto")
         with gr.Row():    
-            downloaded_gallery = gr.Gallery(label="Downloaded Version Gallery", show_label=False, elem_id="downloaded_version_gallery").style(grid=[setting.gallery_column],height="auto")
-        with gr.Row():    
-            downloaded_description_html = gr.HTML()                                                                                                   
+            with gr.Accordion("Model Description", open=True):  
+                downloaded_description_html = gr.HTML()                                                                                                   
     with gr.Column(scale=1):
         with gr.Row():                            
             downloaded_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6).style(container=True, show_copy_button=True)
@@ -545,14 +563,14 @@ def downloaded_model_information_ui(selected_downloaded_version_id:gr.Textbox(),
             selected_model_id,      
         ],        
     )
-            
+                    
     downloaded_gallery.select(civitai_shortcut_action.on_gallery_select, downloaded_images, [downloaded_img_index, downloaded_hidden])
     downloaded_hidden.change(fn=modules.extras.run_pnginfo, inputs=[downloaded_hidden], outputs=[downloaded_info1, downloaded_img_file_info, downloaded_info2])
     # downloaded model information end
     ###### Downloaded Tab ######                                                  
 
     ### open folder start    
-    downloaded_openfolder.click(civitai_shortcut_action.on_open_folder_click,selected_downloaded_version_id,None)
+    downloaded_openfolder.click(civitai_shortcut_action.on_open_folder_click,[selected_downloaded_model_id,selected_downloaded_version_id],None)
                 
 def civitai_shortcut_ui():    
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tab:
@@ -593,6 +611,8 @@ def civitai_shortcut_ui():
                                     gr.Markdown(value="Updating and scanning may take a lot of time, which can cause heavy traffic on the site.\nRecommend performing these tasks during off-peak hours when the site traffic is lower and the connection is smoother.\nYou can continue with other tasks.")                            
                                     thumb_progress = gr.Markdown(value="###", visible=True)                                                                                                                                    
                                     scan_progress = gr.Markdown(value="###", visible=True)
+                            with gr.Row():
+                                update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")                                                                    
                             with gr.Row(visible=False):
                                 upload_progress = gr.Markdown(value="###", visible=False)
                                 
@@ -626,9 +646,9 @@ def civitai_shortcut_ui():
                             with gr.Row():
                                 saved_model_information_ui(selected_saved_version_id,selected_saved_model_id,refresh_sc_list)
                                 
-                        # with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
-                        #     with gr.Row():
-                        #         civitai_user_gallery_ui(selected_usergal_model_id)                                 
+                        with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
+                            with gr.Row():
+                                civitai_user_gallery_ui(selected_usergal_model_id)                                 
                                         
         with gr.TabItem("Downloaded Model" , id="civitai02"):
             with gr.Row(): 
@@ -681,6 +701,12 @@ def civitai_shortcut_ui():
             thumb_progress,
         ]
     ) 
+    
+    update_modelfolder_btn.click(
+        fn=civitai_shortcut_action.on_update_modelfolder_btn_click,
+        inputs=None,
+        outputs=refresh_sc_list
+    )
     
     thumb_progress.change(
         fn=civitai_shortcut_action.on_refresh_progress_change,
@@ -814,6 +840,7 @@ def civitai_shortcut_ui():
         ]
     )
     
+    # sc 메류를 갱신시킨다.
     refresh_sc_list.change(
         fn=civitai_shortcut_action.on_refresh_progress_change,
         inputs= [

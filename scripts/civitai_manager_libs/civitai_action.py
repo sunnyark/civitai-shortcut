@@ -42,18 +42,38 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
     if model_info and version_info:        
         version_name = version_info["name"]
         model_type = model_info['type']                    
-        downloaded_versions_list = model.get_model_version_list(modelid)       
+        downloaded_versions = model.get_model_downloaded_versions(modelid)       
         versions_list = list()            
         for ver in model_info['modelVersions']:
             versions_list.append(ver['name'])
         
         model_url = civitai.Url_ModelId() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info,model_info)
-        title_name = f"### {model_info['name']} : {version_info['name']}"           
+        title_name = f"# {model_info['name']} : {version_info['name']}"           
         images_url = get_version_description_gallery(version_info)
-
-        return model_info, versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url
-    return None, None,None,None,None,None,None,None,None,None,None,None
+        vs_foldername = util.generate_version_foldername(model_info['name'],version_name,versionid)        
+        model_folder = util.generate_model_foldername(model_info['name'],model_type,False)
+        
+        # 정리하자... 
+        if  os.getcwd() in model_folder and os.path.exists(model_folder):
+            info_list = util.scan_folder_for_info(model_folder)
+            if info_list:
+                for info in info_list:
+                    info_dir = os.path.dirname(info)
+                    info_basename = os.path.basename(info_dir)
+                    if info_dir == model_folder:
+                        continue
+                    ver_info = util.read_json(info)
+                    if not ver_info:
+                        continue
+                    if 'id' not in ver_info.keys():
+                        continue
+                    if ver_info['id'] == versionid:
+                        vs_foldername = info_basename
+                        break
+                    
+        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,vs_foldername
+    return None, None,None,None,None,None,None,None,None,None,None,None,None
 
 def get_version_description_gallery(version_info:dict):       
     if not version_info:
@@ -163,7 +183,7 @@ def add_number_to_duplicate_files(filenames)->dict:
             dup_file[file_info[0]] = file_info[1]
     return dup_file
     
-def download_file_thread(file_name, version_id, lora_an, vs_folder):               
+def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldername=None):               
     if not file_name:
         return
 
@@ -180,7 +200,7 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
     if not download_files:
         return
 
-    model_folder = util.make_folder(version_info, lora_an , vs_folder)
+    model_folder = util.make_version_folder(version_info, lora_an , vs_folder, vs_foldername)
     
     if not model_folder:
         return
@@ -197,20 +217,45 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder):
         except Exception as e:
             util.printD(e)
             pass
-
-    # 버전 인포 파일 저장. primary 이름으로 저장한다.
-    info_file = civitai.write_version_info(model_folder,version_info)
+        
+    # 저장할 파일명을 생성한다.
+    savefile_base = util.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])    
+    if vs_folder:
+        # 개별폴더를 만들면 저장 파일명을 지정파일명을 폴더명으로 한다.
+        if vs_foldername:
+            vs_foldername = vs_foldername.strip()            
+            if len(vs_foldername) > 0:
+                savefile_base = vs_foldername
+                                
+    path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
+    info_file = civitai.write_version_info(path_file, version_info)
     if info_file:
-        util.printD(f"Wrote version info : {info_file}")
-            
-    # triger words 가 있으면 저장. primary 이름으로 저장한다.
-    triger_file = civitai.write_triger_words_by_version_info(model_folder,version_info)
+        util.printD(f"Wrote version info : {path_file}")
+
+    path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.triger_suffix}{setting.triger_ext}")
+    triger_file = civitai.write_triger_words_by_version_info(path_file, version_info)
     if triger_file:
-         util.printD(f"Wrote triger words : {triger_file}")
+         util.printD(f"Wrote triger words : {path_file}")
 
     return f"Download started"
 
-def download_preview_image(version_id, lora_an, vs_folder):
+def get_image_base_name(version_info):
+    # 이미지 파일명도 primary 이름으로 저장한다.
+    
+    # primary_file = civitai.get_primary_file_by_version_info(version_info)
+    # if not primary_file:
+    #     base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
+    # base, ext = os.path.splitext(primary_file['name'])
+        
+    base = None    
+    primary_file = civitai.get_primary_file_by_version_info(version_info)
+    if not primary_file:
+        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
+    else:
+        base, ext = os.path.splitext(primary_file['name'])   
+    return base
+
+def download_preview_image(version_id, lora_an, vs_folder,vs_foldername=None):
     message =""
     base = None
     
@@ -225,18 +270,13 @@ def download_preview_image(version_id, lora_an, vs_folder):
     if 'images' not in version_info.keys():
         return
         
-    model_folder = util.make_folder(version_info, lora_an , vs_folder)
+    model_folder = util.make_version_folder(version_info, lora_an , vs_folder,vs_foldername)
     
     if not model_folder:
         return
-    
-    # 이미지 파일명도 primary 이름으로 저장한다.
-    #없으면 임의로 만들어준다    
-    primary_file = civitai.get_primary_file_by_version_info(version_info)
-    if not primary_file:
-        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])        
-    base, ext = os.path.splitext(primary_file['name'])
-    base = os.path.join(setting.root_path, model_folder, base)
+
+    base = get_image_base_name(version_info)
+    base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
     
     if base and len(base.strip()) > 0:  
         if "images" in version_info.keys():
@@ -263,9 +303,10 @@ def download_preview_image(version_id, lora_an, vs_folder):
                 return
     return
 
-def download_image_files(version_id, lora_an, vs_folder):
+def download_image_files(version_id, lora_an, vs_folder,vs_foldername=None):
     message =""
     base = None
+    preview_base = None
     
     if not version_id:                
         return         
@@ -278,18 +319,13 @@ def download_image_files(version_id, lora_an, vs_folder):
     if 'images' not in version_info.keys():
         return
         
-    model_folder = util.make_folder(version_info, lora_an , vs_folder)
+    model_folder = util.make_version_folder(version_info, lora_an , vs_folder,vs_foldername)
     
     if not model_folder:
         return
-    
-    # 이미지 파일명도 primary 이름으로 저장한다.
-    primary_file = civitai.get_primary_file_by_version_info(version_info)
-    if not primary_file:
-        #없으면 임의로 만들어준다
-        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
-    base, ext = os.path.splitext(primary_file['name'])
-    base = os.path.join(setting.root_path, model_folder, base)
+
+    base = get_image_base_name(version_info)
+    base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
     
     if base and len(base.strip()) > 0:                                           
         #image_count = 0 
@@ -316,6 +352,7 @@ def download_image_files(version_id, lora_an, vs_folder):
                         # write to file
                         description_img = f'{base}_{image_count}{setting.preview_image_suffix}{setting.preview_image_ext}'
                         if image_count == 0:
+                            #첫 프리뷰는 호환성 때문에 filename에 따라간다.
                             description_img = f'{base}{setting.preview_image_suffix}{setting.preview_image_ext}'
                                                                                 
                         with open(description_img, 'wb') as f:

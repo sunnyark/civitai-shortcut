@@ -6,8 +6,9 @@ from . import setting
 # 이 모듈은 다운로드 받은 정보를 관리한다.
 # civitai 와의 연결은 최소화하고 local의 관리를 목표로 한다.
 
-Downloaded_Models = dict()      # modelid : [vid:path]
+Downloaded_Models = dict()      # modelid : [vid:path...]
 Downloaded_Versions = dict()    # versionid : path
+Downloaded_InfoPath = dict()    # infoPath : vid
 
 def Test_Models():
     if Downloaded_Models:
@@ -19,165 +20,71 @@ def Test_Models():
 def update_downloaded_model():
     global Downloaded_Models
     global Downloaded_Versions
+    global Downloaded_InfoPath 
     
-    Downloaded_Models, Downloaded_Versions = get_model_path()
+    Downloaded_Models, Downloaded_Versions, Downloaded_InfoPath = get_model_path()
+
+def get_model_downloaded_versions(modelid:str):
     
-# 단순히 소유한 모델의 modelid만을 리스트로 반환한다
-def get_modelid():
-    root_dirs = list(set(setting.model_folders.values()))
-    file_list = util.search_file(root_dirs,None,setting.info_ext)
-    modelid_list = list()   
-
-    if file_list:             
-        for file_path in file_list:        
-            try:
-                with open(file_path, 'r') as f:
-                    json_data = json.load(f)
-                    if "modelId" in json_data.keys():
-                        modelid_list.append(str(json_data['modelId']))    
-            except:
-                pass
-            
-    if len(modelid_list) > 0:
-        return modelid_list
+    if not modelid:
+        return None
     
-    return None
-
-# 단순히 소유한 모델의 타입별 modelid만을 리스트로 반환한다
-def get_modelid_byType(ctype):
-    root_dir = [setting.model_folders[setting.ui_model_types[ctype]]]
-    file_list = util.search_file(root_dir,None,setting.info_ext)
-    modelid_list = list()   
-
-    if file_list:             
-        for file_path in file_list:        
-            try:
-                with open(file_path, 'r') as f:
-                    json_data = json.load(f)
-                    if "modelId" in json_data.keys():
-                        modelid_list.append(str(json_data['modelId']))
-            except:
-                pass
-            
-    if len(modelid_list) > 0:
-        return modelid_list
+    if not Downloaded_Models:                        
+        return None
     
-    return None
-
-def get_model_version_list(modelid:str):
-    downloaded_version_list = list()
-    if modelid:
-        if Downloaded_Models:                        
-            if str(modelid) in Downloaded_Models.keys():
-                file_list = dict()
-                
-                for vid, version_paths in Downloaded_Models[str(modelid)]:
-                    file_list[os.path.basename(version_paths)] = version_paths
-                
-                for file,path in file_list.items():
-                    vinfo = util.read_json(path)
-                    if vinfo:                      
-                        downloaded_version_list.append(vinfo['name'])
+    downloaded_version = dict()
+    
+    if str(modelid) in Downloaded_Models.keys():       
+        for vid, version_paths in Downloaded_Models[str(modelid)]:
+            vinfo = util.read_json(version_paths)
+            if vinfo:                      
+                downloaded_version[vinfo['id']] = vinfo['name']
                         
-    return downloaded_version_list if len(downloaded_version_list) > 0 else None
+    return downloaded_version if len(downloaded_version) > 0 else None
 
 # modelid를 키로 modelid가 같은 version_info의 File Path를 list로 묶어 반환한다.
 def get_model_path()->dict:
     root_dirs = list(set(setting.model_folders.values()))
     file_list = util.search_file(root_dirs,None,setting.info_ext)
+    
     models = dict()
     versions = dict()
+    infopaths = dict()
     
-    if file_list:             
-        for file_path in file_list:        
-            try:
-                with open(file_path, 'r') as f:
-                    json_data = json.load(f)
-                    if "modelId" in json_data.keys():
-                        mid = str(json_data['modelId']).strip()
-                        vid = str(json_data['id']).strip()
-                        
-                        if mid not in models.keys():
-                            models[mid] = list()                        
-                        models[mid].append([vid, file_path])
-                        #models[mid].append(file_path)
+    if not file_list:             
+        return None,None,None
+    
+    for file_path in file_list:        
+        try:
+            with open(file_path, 'r') as f:
+                json_data = json.load(f)
+                if "modelId" in json_data.keys():
+                    mid = str(json_data['modelId']).strip()
+                    vid = str(json_data['id']).strip()
+                    
+                    infopaths[file_path] = vid
+                    
+                    if vid not in versions.keys():
                         versions[vid] = file_path
-                        
-            except:
-                pass
+
+                        if mid not in models.keys():
+                            models[mid] = list()
+                            
+                        models[mid].append([vid, file_path])                        
+        except:
+            pass
     
     if len(models) > 0:
-        return models, versions
+        return models, versions, infopaths
     
-    return None,None
+    return None,None,None
 
-def get_version_id_by_version_name(modelid, versionname):
-    if not modelid:
-        return 
-
-    if not Downloaded_Models:
-        return
+def get_infopaths( versionid ):
+    if not Downloaded_InfoPath:
+        return    
+    result = {path: vid for path, vid in Downloaded_InfoPath.items() if vid == versionid}
+    return result if len(result) > 0 else None    
         
-    if str(modelid) in Downloaded_Models.keys():
-        file_list = dict()
-        for vid, version_paths in Downloaded_Models[str(modelid)]:
-            file_list[os.path.basename(version_paths)] = version_paths
-        
-        for file, path in file_list.items():
-            vinfo = util.read_json(path)
-            try:  
-                if vinfo['name'] == versionname:
-                    return vinfo['id']
-            except:
-                pass        
-    return None
-
-def get_default_version_info(modelid):
-    if not modelid:
-        return 
-
-    if not Downloaded_Models:
-        return
-        
-    if str(modelid) in Downloaded_Models.keys():
-        file_list = dict()
-        for vid, version_paths in Downloaded_Models[str(modelid)]:
-            file_list[os.path.basename(version_paths)] = version_paths
-                
-        for file,path in file_list.items():
-            return util.read_json(path)
-        
-    return None        
-    
-
-def get_version_info(versionid:str)->dict:
-    if not versionid:
-        return None
-
-    if not Downloaded_Versions:
-        return None
-                 
-    try:
-        return util.read_json(Downloaded_Versions[versionid])
-    except:
-        pass
-    
-    return None
-
-def get_images():
-    if not Downloaded_Versions:
-        return
-
-    file_list = list()    
-    for versionid in Downloaded_Versions.keys():
-        tmp_list = get_version_images(versionid)
-        if tmp_list:
-            file_list.extend(tmp_list)
-    
-    file_list = list(set(file_list))
-        
-    return file_list if len(file_list) > 0 else None    
-
 def get_version_images(versionid:str):
     if not Downloaded_Versions:
         return
@@ -185,60 +92,32 @@ def get_version_images(versionid:str):
     file_list = list()    
     vfolder = None
     if versionid in Downloaded_Versions.keys():        
-        path = Downloaded_Versions[versionid]  
-        try:
-            vfolder , vfile = os.path.split(path)
-            # versionname . civitai.info 형식이다.
-            # 그래서 두번
-            base , ext = os.path.splitext(vfile)
-            base , ext = os.path.splitext(base)
-            
+        path = Downloaded_Versions[versionid]
+        
+        vinfo = get_version_info(versionid)
+        base = get_image_base_name(vinfo)
+        
+        try:                
+            vfolder , vfile = os.path.split(path)            
             for file in os.listdir(vfolder):
                 if os.path.isdir(file):
                     continue
-                if file.endswith(".png") and file.startswith(base):
+                if file.endswith(setting.preview_image_ext) and file.startswith(base):
                     file_list.append(os.path.join(vfolder, file))            
         except:
             return
         
     return file_list if len(file_list) > 0 else None
 
-# 다운로드 받은 파일만 리턴한다
-def get_version_files(versioninfo):
-    if not Downloaded_Versions:
-        return
-
-    if not versioninfo:
-        return
-    
-    versionid = str(versioninfo['id'])
-
-    infofiles = list()
-        
-    if 'files' in versioninfo.keys():
-        for file in versioninfo['files']:
-            infofiles.append(file['name'])
+def get_image_base_name(version_info):
+    base = None    
+    primary_file = get_primary_file_by_version_info(version_info)
+    if not primary_file:
+        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
     else:
-        return
-               
-    file_list = list()    
-    vfolder = None
-
-    if versionid in Downloaded_Versions.keys():        
-        path = Downloaded_Versions[versionid]  
-        try:
-            vfolder , vfile = os.path.split(path)
-            for file in os.listdir(vfolder):
-                if os.path.isdir(file):
-                    continue
-
-                if file in infofiles:
-                    file_list.append(os.path.join(vfolder, file))
-        except:
-            return
-        
-    return file_list if len(file_list) > 0 else None
-
+        base, ext = os.path.splitext(primary_file['name'])   
+    return base
+            
 def get_model_info(modelid):
     def_info = None
     versions_list = None
@@ -273,3 +152,178 @@ def get_model_info(modelid):
                         model_info['modelVersions'] = versions_list        
     # 모델 인포 를 만들어준다.
     return model_info
+
+def get_version_info(versionid:str)->dict:
+    if not versionid:
+        return None
+
+    if not Downloaded_Versions:
+        return None
+                 
+    try:
+        return util.read_json(Downloaded_Versions[versionid])
+    except:
+        pass
+    
+    return None
+
+def get_primary_file_by_version_info(version_info:dict)->dict:
+   
+    if not version_info:
+        return
+    
+    for file in version_info['files']:
+        if file['primary']:
+            return file        
+    return
+
+# def get_version_id_by_version_name(modelid, versionname):
+#     if not modelid:
+#         return 
+
+#     if not Downloaded_Models:
+#         return
+        
+#     if str(modelid) in Downloaded_Models.keys():
+#         file_list = dict()
+#         for vid, version_paths in Downloaded_Models[str(modelid)]:
+#             file_list[os.path.basename(version_paths)] = version_paths
+        
+#         for file, path in file_list.items():
+#             vinfo = util.read_json(path)
+#             try:  
+#                 if vinfo['name'] == versionname:
+#                     return vinfo['id']
+#             except:
+#                 pass        
+#     return None
+
+# def get_default_version_info(modelid):
+#     if not modelid:
+#         return 
+
+#     if not Downloaded_Models:
+#         return
+        
+#     if str(modelid) in Downloaded_Models.keys():
+#         file_list = dict()
+#         for vid, version_paths in Downloaded_Models[str(modelid)]:
+#             file_list[os.path.basename(version_paths)] = version_paths
+                
+#         for file,path in file_list.items():
+#             return util.read_json(path)
+        
+#     return None        
+    
+
+# def get_version_info(versionid:str)->dict:
+#     if not versionid:
+#         return None
+
+#     if not Downloaded_Versions:
+#         return None
+                 
+#     try:
+#         return util.read_json(Downloaded_Versions[versionid])
+#     except:
+#         pass
+    
+#     return None
+
+# def get_images():
+#     if not Downloaded_Versions:
+#         return
+
+#     file_list = list()    
+#     for versionid in Downloaded_Versions.keys():
+#         tmp_list = get_version_images(versionid)
+#         if tmp_list:
+#             file_list.extend(tmp_list)
+    
+#     file_list = list(set(file_list))
+        
+#     return file_list if len(file_list) > 0 else None    
+
+# # 다운로드 받은 파일만 리턴한다
+# def get_version_files(versioninfo):
+#     if not Downloaded_Versions:
+#         return
+
+#     if not versioninfo:
+#         return
+    
+#     versionid = str(versioninfo['id'])
+
+#     infofiles = list()
+        
+#     if 'files' in versioninfo.keys():
+#         for file in versioninfo['files']:
+#             infofiles.append(file['name'])
+#     else:
+#         return
+               
+#     file_list = list()    
+#     vfolder = None
+
+#     if versionid in Downloaded_Versions.keys():        
+#         path = Downloaded_Versions[versionid]  
+#         try:
+#             vfolder , vfile = os.path.split(path)
+#             for file in os.listdir(vfolder):
+#                 if os.path.isdir(file):
+#                     continue
+
+#                 if file in infofiles:
+#                     file_list.append(os.path.join(vfolder, file))
+#         except:
+#             return
+        
+#     return file_list if len(file_list) > 0 else None
+    
+# 단순히 소유한 모델의 modelid만을 리스트로 반환한다
+# def get_modelid():
+#     root_dirs = list(set(setting.model_folders.values()))
+#     file_list = util.search_file(root_dirs,None,setting.info_ext)
+
+#     modelid_list = list()   
+
+#     if file_list:             
+#         # 중복제거
+#         file_list = list(set(file_list))        
+#         for file_path in file_list:        
+#             try:
+#                 with open(file_path, 'r') as f:
+#                     json_data = json.load(f)
+#                     if "modelId" in json_data.keys():
+#                         modelid_list.append(str(json_data['modelId']))    
+#             except:
+#                 pass
+            
+#     if len(modelid_list) > 0:
+#         return modelid_list
+    
+#     return None
+
+# 단순히 소유한 모델의 타입별 modelid만을 리스트로 반환한다
+# def get_modelid_byType(ctype):
+#     root_dir = [setting.model_folders[setting.ui_model_types[ctype]]]
+#     file_list = util.search_file(root_dir,None,setting.info_ext)
+    
+#     modelid_list = list()   
+
+#     if file_list:             
+#         # 중복제거
+#         file_list = list(set(file_list))
+#         for file_path in file_list:        
+#             try:
+#                 with open(file_path, 'r') as f:
+#                     json_data = json.load(f)
+#                     if "modelId" in json_data.keys():
+#                         modelid_list.append(str(json_data['modelId']))
+#             except:
+#                 pass
+            
+#     if len(modelid_list) > 0:
+#         return modelid_list
+    
+#     return None

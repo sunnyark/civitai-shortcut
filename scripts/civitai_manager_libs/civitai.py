@@ -217,75 +217,57 @@ def get_triger_by_version_id(version_id=None)->str:
     
     return get_triger_by_version_info(version_info)
 
-
-def write_model_info(folder, model_info:dict)->str:   
+def write_model_info(file, model_info:dict)->str:   
     if not model_info:
         return
 
-    model_id = model_info['id']
-    model_name = model_info['name']
+    # model_id = model_info['id']
+    # model_name = model_info['name']
     
-    base = f"{str(model_id).strip()}-{util.replace_filename(model_name)}"
-    path_info_file = os.path.join(folder, f"{base}{setting.info_suffix}{setting.info_ext}")
+    # base = f"{util.replace_filename(model_name)}-{str(model_id).strip()}"
+    # path_info_file = os.path.join(folder, f"{base}{setting.info_suffix}{setting.info_ext}")
             
     try:
-        with open(path_info_file, 'w') as f:
+        with open(file, 'w') as f:
             f.write(json.dumps(model_info, indent=4))
     except Exception as e:
             return
     
-    return f"{base}{setting.info_suffix}{setting.info_ext}"
+    return True
 
-
-def write_version_info(folder, version_info:dict)->str:   
+def write_version_info(file, version_info:dict):   
     if not version_info:
         return
 
-    primary_file = get_primary_file_by_version_info(version_info)
-    
-    if not primary_file:
-        return
-
-    base, ext = os.path.splitext(primary_file['name'])
-    path_info_file = os.path.join(folder, f"{base}{setting.info_suffix}{setting.info_ext}")
-            
     try:
-        with open(path_info_file, 'w') as f:
+        with open(file, 'w') as f:
             f.write(json.dumps(version_info, indent=4))
     except Exception as e:
             return                
     
-    return f"{base}{setting.info_suffix}{setting.info_ext}"
+    return True
 
-def write_triger_words_by_version_id(folder, version_id:str)->str:
+def write_triger_words_by_version_id(file, version_id:str):
     if not version_id: 
         return    
         
     version_info = get_version_info_by_version_id(version_id)
     
-    return write_triger_words_by_version_info(folder,version_info)
+    return write_triger_words_by_version_info(file,version_info)
     
-def write_triger_words_by_version_info(folder, version_info:dict)->str:   
+def write_triger_words_by_version_info(file, version_info:dict):   
     if not version_info:
         return
     
     triger_words = get_triger_by_version_info(version_info)
-
+        
     if not triger_words:
         return 
 
-    primary_file = get_primary_file_by_version_info(version_info)
-    
-    if not primary_file:
-        return
-
-    base, ext = os.path.splitext(primary_file['name'])
-    path_triger_file = os.path.join(folder, f"{base}{setting.triger_suffix}{setting.triger_ext}")
-
     try:
-        with open(path_triger_file, 'w') as f:
+        with open(file, 'w') as f:
             f.write(triger_words)
     except Exception as e:
         return
         
-    return f"{base}{setting.triger_suffix}{setting.triger_ext}"
+    return True

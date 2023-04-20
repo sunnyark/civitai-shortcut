@@ -78,7 +78,7 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         
         model_url = civitai.Url_ModelId() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info, model_info)
-        title_name = f"### {model_info['name']} : {version_info['name']}"           
+        title_name = f"# {model_info['name']} : {version_info['name']}"           
         images_url = get_version_description_gallery(versionid)
         
         return model_info, versionid,version_name,model_url,model_type,versions_list,dhtml,triger,flist,title_name,images_url

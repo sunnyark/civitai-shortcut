@@ -24,7 +24,7 @@ def get_model_information( modelid:str=None, page_url=None, show_nsfw=False,):
     if model_info:
         images_url = None        
 
-        title_name = f"### {model_info['name']}"
+        title_name = f"# {model_info['name']}"
         #page_info , images_url = get_user_gallery(modelid, page_url, show_nsfw)
         page_info , images_infos = get_user_gallery(modelid, page_url, show_nsfw)
         images_url = [image_info['url'] for image_info in images_infos.values()]
