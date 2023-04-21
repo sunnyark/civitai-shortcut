@@ -35,6 +35,7 @@ For #2 and #3, the information is displayed based on the saved information, so i
 ![screenshot 2023-04-16 182342](https://user-images.githubusercontent.com/40237431/232289694-e9f75198-75b4-492a-8f60-6fc453137f5c.png)
 ![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503898-53fd19d2-13bf-4b05-801e-265472bac1b5.gif)
 ![filetobrowser](https://user-images.githubusercontent.com/40237431/233503915-0ebc4c6e-2218-4722-a83e-7d83d5580571.gif)
+![multifilestobrowser](https://user-images.githubusercontent.com/40237431/233578034-d8920f29-a66e-4939-b6c1-cb760d809c13.gif)
 
 * Upload : This function creates a shortcut that can be used by the extension when you enter the Civitai site's model URL. It only works when the site is functioning properly. You can either click and drag the URL from the address bar or drag and drop saved internet shortcuts. You can also select multiple internet shortcuts and drop them at once.
 * Update Shortcut's Model Information : This function updates the information of the shortcut you have received by referencing the site.
