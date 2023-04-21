@@ -36,7 +36,7 @@ def get_model_info(modelid:str):
     
     return contents
 
-def write_model_information(modelid:str, progress=None):    
+def write_model_information(modelid:str, register_only_information=False, progress=None):    
     if not modelid:
         return     
     model_info = civitai.get_model_info(modelid)
@@ -72,7 +72,7 @@ def write_model_information(modelid:str, progress=None):
             return
                         
         # 이미지 다운로드    
-        if len(version_list) > 0:
+        if not register_only_information and len(version_list) > 0:
             if progress:
                 for image_list in progress.tqdm(version_list):
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
@@ -276,7 +276,7 @@ def is_sc_image(model_id):
     
     return False        
 
-def add(ISC:dict, model_id, progress=None)->dict:
+def add(ISC:dict, model_id, register_information_only=False, progress=None)->dict:
 
     if not model_id:
         return ISC   
@@ -284,7 +284,7 @@ def add(ISC:dict, model_id, progress=None)->dict:
     if not ISC:
         ISC = dict()
     
-    model_info = write_model_information(model_id, progress)    
+    model_info = write_model_information(model_id, register_information_only, progress)    
     
     def_id = None
     def_image = None

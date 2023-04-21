@@ -158,7 +158,7 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
         return shortlist
     return None
     
-def upload_shortcut_by_files(files, progress):
+def upload_shortcut_by_files(files, register_information_only, progress):
     modelids = list()
     if files:
         shortcut = None
@@ -168,7 +168,7 @@ def upload_shortcut_by_files(files, progress):
             if shortcut:                                  
                 model_id = util.get_model_id_from_url(shortcut)                
                 if model_id:                    
-                    add_ISC = ishortcut.add(add_ISC, model_id, progress)
+                    add_ISC = ishortcut.add(add_ISC, model_id, register_information_only, progress)
                     modelids.append(model_id)
                       
         ISC = ishortcut.load()
@@ -197,9 +197,9 @@ def update_all_shortcut_model(progress):
     if not preISC:
         return
     
-    for k in progress.tqdm(preISC,desc="Update Shortcut's Model Information"):        
+    for k in progress.tqdm(preISC,desc="Updating Models Information"):        
         if k:
-            preISC = ishortcut.add(preISC,str(k))
+            preISC = ishortcut.add(preISC,str(k),False,progress)
                 
     # 중간에 변동이 있을수 있으므로 병합한다.                
     ISC = ishortcut.load()
@@ -220,9 +220,9 @@ def scan_downloadedmodel_to_shortcut(progress):
 
     # util.printD(len(model.Downloaded_Models))
     if model.Downloaded_Models:
-        for modelid in progress.tqdm(model.Downloaded_Models, desc=f"Scan Downloaded Models to shortcut"):        
+        for modelid in progress.tqdm(model.Downloaded_Models, desc=f"Scanning Models"):        
             if modelid:
-                add_ISC = ishortcut.add(add_ISC, str(modelid))
+                add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
             
     ISC = ishortcut.load()
     if ISC:

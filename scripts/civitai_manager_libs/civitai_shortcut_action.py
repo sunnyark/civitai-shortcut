@@ -133,10 +133,10 @@ def on_saved_update_information_btn_click(modelid):
         ishortcut_action.update_shortcut_model(modelid)  
     return gr.update(value=modelid),gr.update(value="Done"),gr.update(value=None)
     
-def on_civitai_internet_url_upload(files, progress=gr.Progress(), selected_civitai_information_tabs=None):       
+def on_civitai_internet_url_upload(files, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
     model_id = ""
     if files:
-        modelids = ishortcut_action.upload_shortcut_by_files(files, progress)
+        modelids = ishortcut_action.upload_shortcut_by_files(files, register_information_only, progress)
         if len(modelids) > 0:
             model_id = modelids[0]
 
@@ -156,11 +156,11 @@ def on_civitai_internet_url_upload(files, progress=gr.Progress(), selected_civit
 def on_scan_to_shortcut_click(progress=gr.Progress()):
     model_action.Load_Downloaded_Models()
     ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
-    return gr.update(value="Scan Downloaded Models to Shortcut is Done",visible=False)
+    return gr.update(value="Scan Downloaded Models to Shortcut is Done", visible=True)
 
 def on_shortcut_saved_update_btn(progress=gr.Progress()):
     ishortcut_action.update_all_shortcut_model(progress)
-    return gr.update(value="Update Shortcut's Model Information is Done",visible=False)
+    return gr.update(value="Update Shortcut's Model Information is Done", visible=True)
 
 # 새 버전이 있는지 스캔한다
 def on_scan_new_version_btn(sc_types, progress=gr.Progress()):

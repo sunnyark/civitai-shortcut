@@ -17,13 +17,13 @@ from scripts.civitai_manager_libs import util
 def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
         
     with gr.Column(scale=5):                                                   
-        with gr.Row():
+        with gr.Row():                  
             with gr.Column(scale=1): 
                 with gr.Row():
                     usergal_first_btn = gr.Button(value="First Page")
                     usergal_prev_btn = gr.Button(value="Prev Page")                                        
             with gr.Column(scale=1): 
-                usergal_page_slider = gr.Slider(minimum=1, maximum=100, value=1, step=1, label='Total Pages', interactive=True)
+                    usergal_page_slider = gr.Slider(minimum=1, maximum=1, value=1, step=1, label='Total Pages', interactive=True)
             with gr.Column(scale=1): 
                 with gr.Row():
                     usergal_next_btn = gr.Button(value="Next Page")
@@ -600,6 +600,8 @@ def civitai_shortcut_ui():
                 with gr.Column(scale=1):
                     with gr.Tabs() as civitai_shortcut_tabs:
                         with gr.TabItem("Upload"):
+                            with gr.Row(visible=False):                                 
+                                register_information_only = gr.Checkbox(label="Register only model information", value=False)
                             with gr.Row():
                                 civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
                             with gr.Row():                                
@@ -648,7 +650,7 @@ def civitai_shortcut_ui():
                                 
                         with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
                             with gr.Row():
-                                civitai_user_gallery_ui(selected_usergal_model_id)                                 
+                                civitai_user_gallery_ui(selected_usergal_model_id)      
                                         
         with gr.TabItem("Downloaded Model" , id="civitai02"):
             with gr.Row(): 
@@ -675,6 +677,7 @@ def civitai_shortcut_ui():
         fn=civitai_shortcut_action.on_civitai_internet_url_upload,
         inputs=[
             civitai_internet_url,
+            register_information_only,
             selected_civitai_information_tabs
         ],
         outputs=[
