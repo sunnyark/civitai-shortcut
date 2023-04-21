@@ -74,7 +74,7 @@ def write_model_information(modelid:str, register_only_information=False, progre
         # 이미지 다운로드    
         if not register_only_information and len(version_list) > 0:
             if progress:
-                for image_list in progress.tqdm(version_list):
+                for image_list in progress.tqdm(version_list,desc="downloading model images"):
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
                         try:
                             # get image

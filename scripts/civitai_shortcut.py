@@ -51,8 +51,12 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
         usergal_info1 = gr.Textbox()
         usergal_info2 = gr.Textbox()
         usergal_page = gr.State()
+        
         usergal_page_url = gr.Textbox(value=None)
-
+        
+        refresh_information = gr.Textbox()
+        refresh_gallery = gr.Textbox()
+                
     try:
         modules.generation_parameters_copypaste.bind_buttons(usergal_send_to_buttons, usergal_hidden,usergal_img_file_info)
     except:
@@ -60,7 +64,7 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
 
     # civitai user gallery information start
     selected_usergal_model_id.change(
-        fn=civitai_shortcut_action.on_load_usergal_model,
+        fn=civitai_shortcut_action.on_selected_usergal_model_id_change,
         inputs=[
             selected_usergal_model_id,            
         ],
@@ -68,7 +72,24 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
             usergal_page_url    
         ] 
     )    
-    
+
+    usergal_page_url.change(
+        fn=civitai_shortcut_action.on_load_usergal_model,
+        inputs=[
+            selected_usergal_model_id,
+            usergal_page_url,            
+            usergal_page
+        ],
+        outputs=[               
+            usergal_title_name,                               
+            usergal_gallery_url,
+            usergal_images,
+            usergal_page_slider,
+            usergal_page,
+            usergal_img_file_info   
+        ]         
+    )
+        
     usergal_first_btn.click(
         fn=civitai_shortcut_action.on_usergal_first_btn_click,
         inputs=[
@@ -134,9 +155,10 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
             usergal_images
         ]                  
     )
-    
-    usergal_page_url.change(
-        fn=civitai_shortcut_action.on_usergal_page_url_change,
+
+    # 일단은 만들어만 두자
+    refresh_information.change(
+        fn=civitai_shortcut_action.on_load_usergal_model,
         inputs=[
             selected_usergal_model_id,
             usergal_page_url,            
@@ -149,9 +171,20 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
             usergal_page_slider,
             usergal_page,
             usergal_img_file_info   
+        ]        
+    )
+    
+    refresh_gallery.change(
+        fn=civitai_shortcut_action.on_civitai_gallery_loading,
+        inputs=[
+            usergal_images 
+        ],
+        outputs=[               
+            usergal_gallery,
+            usergal_images
         ]         
     )
-        
+            
     usergal_gallery.select(civitai_shortcut_action.on_gallery_select, usergal_images, [usergal_img_index, usergal_hidden])
     usergal_hidden.change(fn=modules.extras.run_pnginfo, inputs=[usergal_hidden], outputs=[usergal_info1, usergal_img_file_info, usergal_info2])
     
@@ -208,7 +241,8 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
         saved_hidden = gr.Image(type="pil")
         saved_info1 = gr.Textbox()
         saved_info2 = gr.Textbox()
-
+        saved_refresh_information = gr.Textbox()
+        saved_refresh_gallery = gr.Textbox()
     try:
         modules.generation_parameters_copypaste.bind_buttons(saved_send_to_buttons, saved_hidden,saved_img_file_info)
     except:
@@ -288,13 +322,46 @@ def saved_model_information_ui(selected_saved_version_id:gr.Textbox(),selected_s
             selected_saved_model_id,
             refresh_sc_list,
             # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
-            saved_gallery
+            saved_gallery,
+            saved_refresh_information, #information update 용
+            saved_refresh_gallery
         ]
     )
 
-    # selected_saved_model_id 값을 초기화 시키기 위한 이벤트 헨들러이다.
-    # saved_update_information_btn.click 에 두개가 묶여 있지만 이것이 먼저 실행될것이다.
-    saved_update_information_btn.click(lambda :gr.update(value=None),None,selected_saved_model_id)
+    #information update 용 start
+    saved_refresh_information.change(
+        fn=civitai_shortcut_action.on_load_saved_model,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_version_id,
+            saved_civitai_model_url_txt,
+            saved_downloaded_tab, 
+            saved_downloaded_info, 
+            saved_model_type, 
+            saved_versions_list,                    
+            saved_description_html,
+            saved_trigger_words,
+            saved_filename_list,
+            saved_model_title_name,                        
+            saved_gallery_url,
+            saved_images,
+            saved_img_file_info,
+            saved_openfolder
+        ]
+    )
+    
+    saved_refresh_gallery.change(
+        fn=civitai_shortcut_action.on_file_gallery_loading,
+        inputs=[
+            saved_images 
+        ],
+        outputs=[               
+            saved_gallery
+        ]          
+    )
+    #information update 용 end    
     
     saved_gallery.select(civitai_shortcut_action.on_gallery_select, saved_images, [saved_img_index, saved_hidden])
     saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])  
@@ -361,6 +428,9 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
         info1 = gr.Textbox()
         info2 = gr.Textbox() 
 
+        refresh_information = gr.Textbox()
+        refresh_gallery = gr.Textbox()
+        
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
@@ -375,7 +445,7 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
             vs_folder,
             vs_folder_name
         ],
-        outputs=[refresh_sc_list]
+        outputs=[refresh_sc_list,refresh_information,refresh_gallery]
     )  
     
     selected_model_id.change(
@@ -438,7 +508,43 @@ def civitai_model_information_ui(selected_version_id:gr.Textbox(),selected_model
             civitai_images
         ]                
     )
+
+    refresh_information.change(
+        fn=civitai_shortcut_action.on_load_model,
+        inputs=[
+            selected_model_id,
+        ],
+        outputs=[
+            selected_version_id,
+            civitai_model_url_txt, 
+            downloaded_tab, 
+            downloaded_info, 
+            # an_lora, 
+            model_type, 
+            versions_list,
+            description_html,
+            trigger_words,
+            filename_list,
+            model_title_name,                        
+            civitai_gallery_url, 
+            civitai_images,
+            img_file_info,
+            civitai_openfolder,
+            vs_folder_name            
+        ]         
+    )
     
+    refresh_gallery.change(
+        fn=civitai_shortcut_action.on_civitai_gallery_loading,
+        inputs=[
+            civitai_images,
+        ],
+        outputs=[
+            civitai_gallery,
+            civitai_images
+        ]     
+    )
+            
     # civitai_gallery.select(lambda evt, version_images_url : evt.index, version_images_url[evt.index], civitai_images, [img_index, hidden])
     civitai_gallery.select(civitai_shortcut_action.on_gallery_select, civitai_images, [img_index, hidden])
     hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])
@@ -495,12 +601,29 @@ def downloaded_model_information_ui(selected_downloaded_version_id:gr.Textbox(),
         downloaded_hidden = gr.Image(type="pil")
         downloaded_info1 = gr.Textbox()
         downloaded_info2 = gr.Textbox()  
+        
+        refresh_information = gr.Textbox()
+        refresh_gallery = gr.Textbox()
                         
     try:
         modules.generation_parameters_copypaste.bind_buttons(downloaded_send_to_buttons, downloaded_hidden,downloaded_img_file_info)
     except:
         pass
 
+
+    goto_civitai_model_tab.click(
+        fn=civitai_shortcut_action.on_goto_civitai_model_tab_click,
+        inputs=[
+            selected_downloaded_model_id
+        ],        
+        outputs=[
+            civitai_tab,
+            civitai_information_tabs,
+            selected_civitai_information_tabs,
+            selected_model_id,      
+        ],        
+    )
+    
     selected_downloaded_model_id.change(
         fn=civitai_shortcut_action.on_load_downloaded_model,
         inputs=[
@@ -551,17 +674,34 @@ def downloaded_model_information_ui(selected_downloaded_version_id:gr.Textbox(),
         ]                  
     )       
 
-    goto_civitai_model_tab.click(
-        fn=civitai_shortcut_action.on_goto_civitai_model_tab_click,
+    refresh_information.change(
+        fn=civitai_shortcut_action.on_load_downloaded_model,
         inputs=[
-            selected_downloaded_model_id
-        ],        
+            selected_downloaded_model_id,
+        ],
         outputs=[
-            civitai_tab,
-            civitai_information_tabs,
-            selected_civitai_information_tabs,
-            selected_model_id,      
-        ],        
+            selected_downloaded_version_id,
+            downloaded_civitai_model_url_txt,
+            downloaded_model_type, 
+            downloaded_versions_list,                    
+            downloaded_description_html,
+            downloaded_trigger_words,
+            downloaded_filename_list,
+            downloaded_model_title_name,                        
+            downloaded_gallery_url,
+            downloaded_images,
+            downloaded_img_file_info   
+        ]         
+    )
+    
+    refresh_gallery.change(
+        fn=civitai_shortcut_action.on_file_gallery_loading,
+        inputs=[
+            downloaded_images 
+        ],
+        outputs=[               
+            downloaded_gallery
+        ]     
     )
                     
     downloaded_gallery.select(civitai_shortcut_action.on_gallery_select, downloaded_images, [downloaded_img_index, downloaded_hidden])

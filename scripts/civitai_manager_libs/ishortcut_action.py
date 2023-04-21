@@ -191,23 +191,47 @@ def update_shortcut_model(modelid):
         else:
             ISC = add_ISC            
         ishortcut.save(ISC)
-        
+
+def update_shortcut_models(modelid_list, progress):
+    if not modelid_list:       
+        return
+    
+    add_ISC = dict()                
+    for k in progress.tqdm(modelid_list,desc="Updating Models Information"):        
+        if k:
+            add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
+                    
+        ISC = ishortcut.load()
+        if ISC:
+            ISC.update(add_ISC)
+        else:
+            ISC = add_ISC            
+        ishortcut.save(ISC)
+
 def update_all_shortcut_model(progress):
     preISC = ishortcut.load()                           
     if not preISC:
         return
     
-    for k in progress.tqdm(preISC,desc="Updating Models Information"):        
-        if k:
-            preISC = ishortcut.add(preISC,str(k),False,progress)
+    modelid_list = [k for k in preISC]
+    update_shortcut_models(modelid_list,progress)
+                    
+# def update_all_shortcut_model(progress):
+#     preISC = ishortcut.load()                           
+#     if not preISC:
+#         return
+    
+#     for k in progress.tqdm(preISC,desc="Updating Models Information"):        
+#         if k:
+#             preISC = ishortcut.add(preISC,str(k),False,progress)
                 
-    # 중간에 변동이 있을수 있으므로 병합한다.                
-    ISC = ishortcut.load()
-    if ISC:
-        ISC.update(preISC)
-    else:
-        ISC = preISC            
-    ishortcut.save(ISC)
+#     # 중간에 변동이 있을수 있으므로 병합한다.                
+#     ISC = ishortcut.load()
+#     if ISC:
+#         ISC.update(preISC)
+#     else:
+#         ISC = preISC            
+#     ishortcut.save(ISC)
 
 def delete_shortcut_model(modelid):
     if modelid:
@@ -220,7 +244,8 @@ def scan_downloadedmodel_to_shortcut(progress):
 
     # util.printD(len(model.Downloaded_Models))
     if model.Downloaded_Models:
-        for modelid in progress.tqdm(model.Downloaded_Models, desc=f"Scanning Models"):        
+        modelid_list = [k for k in model.Downloaded_Models]
+        for modelid in progress.tqdm(modelid_list, desc=f"Scanning Models"):        
             if modelid:
                 add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
             
