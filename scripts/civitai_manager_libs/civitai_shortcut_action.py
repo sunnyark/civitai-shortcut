@@ -2,6 +2,7 @@ import os
 import gradio as gr
 import requests
 import datetime
+import modules.extras
 
 from PIL import Image
 from . import util
@@ -10,6 +11,7 @@ from . import civitai_action
 from . import ishortcut_action
 from . import model_action
 from . import civitai_gallery_action
+
 
 def on_open_folder_click(mid,vid):
     path = model_action.get_model_folder(vid)
@@ -37,7 +39,7 @@ def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_info
     # usergallery_information
     if evt.index == setting.usergal_information_tab:
         return evt.index, selected_modelid, selected_saved_modelid, active_modelid
-        
+
     return evt.index, selected_modelid, selected_modelid, selected_modelid
 
 def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=None):
@@ -54,13 +56,6 @@ def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=
             return gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id)
                         
     return gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id)
-
-def on_sc_downloaded_gallery_select(evt : gr.SelectData):
-    if evt.value:
-        shortcut = evt.value 
-        sc_model_id = shortcut[0:shortcut.find(':')]      
-                        
-    return gr.update(value=sc_model_id)
 
 # 이미지를 체크해서 둘다 다시넣어 줘야한다.
 def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
@@ -81,8 +76,8 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
             except:
                 dn_image_list.append(Image.open(setting.no_card_preview_image))
                 image_list.append(setting.no_card_preview_image)
-        #return dn_image_list, dn_image_list # 자꾸 이미지 정보가 사라진다 이렇게 할수밖에
-        return dn_image_list, image_list
+        return dn_image_list, dn_image_list # 어떤 때에는 갤러리가 이미지 생성 정보가 사라지게 한다 그레도 이리하면 이미지 선택시 다시 로딩할 필요가 없다. 오프라인에서 로딩할때는 이럴 필요가 없다.
+        #return dn_image_list, image_list
     return None, None
 
 def on_file_gallery_loading(image_url, progress=gr.Progress()):
@@ -93,12 +88,9 @@ def on_file_gallery_loading(image_url, progress=gr.Progress()):
         # for img_url in progress.tqdm(image_url, desc=f"Images Files Loading"):  
         #     dn_image_list.append(Image.open(img_url))                     
         # return dn_image_list       
-        return chk_image_url
-    return None
+        return chk_image_url, chk_image_url
+    return None, None
            
-def on_goto_civitai_model_tab_click(selected_downloaded_model_id):    
-    return gr.update(selected="civitai01"), gr.update(selected="civitai_info"), gr.update(value=setting.civitai_information_tab), gr.update(value=selected_downloaded_model_id)
-
 # 다운 로드후 shortcut 리스트를 갱신한다.
 def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
     msg = None
@@ -119,16 +111,16 @@ def on_shortcut_del_btn_click(model_id):
     return gr.update(value="Delete shortcut is Done", visible=False)
 # page download action end
 
-def on_refresh_progress_change(sc_types,sc_search,show_only_downloaded_sc,sc_downloaded_types,sc_downloaded_search):
-    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(value=ishortcut_action.get_thumbnail_list(sc_downloaded_types,True,sc_downloaded_search)),gr.update(value="###",visible=True)
+def on_refresh_progress_change(sc_types,sc_search,show_only_downloaded_sc):
+    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(value="###",visible=True)
 
 # left menu action start 
 def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc=True):
     return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search))
 
 # 갤러리에서 하나 선택할때
-def on_gallery_select(evt: gr.SelectData,version_images_url):
-    return evt.index, version_images_url[evt.index]
+def on_gallery_select(evt: gr.SelectData, civitai_images):
+    return evt.index, civitai_images[evt.index]
 
 def on_saved_update_information_btn_click(modelid, progress=gr.Progress()):
     if modelid:
@@ -194,19 +186,22 @@ def on_load_usergal_model( modelid, usergal_page_url, page_info):
             usergal_page_url = civitai_gallery_action.get_default_page_url(modelid,False)    
             
     if usergal_page_url:
-        page_info, title_name, image_url = civitai_gallery_action.get_model_information( modelid , usergal_page_url, False) 
+        page_info, title_name, image_url, images_meta = civitai_gallery_action.get_model_information( modelid , usergal_page_url, False) 
         if page_info:
             total_page = page_info['totalPages']
             current_Page = page_info['currentPage']
-                    
+            
+            current_time = datetime.datetime.now()
+                                
             return gr.update(label=title_name),\
+                current_time,\
                 image_url,\
-                image_url,\
+                images_meta,\
                 gr.update(minimum=1, maximum=total_page, value=current_Page, step=1, label=f"Total {total_page} Pages"),\
                 page_info,\
                 gr.update(value=None)
                                                     
-    return gr.update(label="#"),None,None,gr.update(minimum=1, maximum=1, value=1),None,None
+    return gr.update(label="#"),None,None,None,gr.update(minimum=1, maximum=1, value=1),None,None
 
 def on_selected_usergal_model_id_change(modelid=None):
     page_url = None
@@ -255,36 +250,15 @@ def on_usergal_prev_btn_click(usergal_page_url, page_info):
         
 # user gallery information end
         
-# downloaded model information start
-def on_load_downloaded_model(modelid=None, versionid=None):
-    return load_downloaded_model(modelid,versionid)    
-
-def on_downloaded_versions_list_select(evt: gr.SelectData, modelid:str):
-    return load_downloaded_model(modelid,evt.index)
-        
-def load_downloaded_model(modelid=None, versionid=None):
-    if modelid:
-        model_info,versionid,version_name,model_url,model_type,versions_list,dhtml,triger,flist,title_name,images_url = model_action.get_model_information(modelid,None,versionid)
-        if model_info:
-            file_text = ""
-        
-            if flist:
-                file_text = "\n".join(flist)
-                
-            return gr.update(value=versionid),gr.update(value=model_url),\
-                gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
-                gr.update(value=triger),gr.update(value=file_text),gr.update(label=title_name),\
-                images_url,images_url,gr.update(value=None)
-
-    # 모델 정보가 없다면 클리어 한다.
-    # clear model information
-    return gr.update(value=None),gr.update(value=None),\
-        gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
-        gr.update(value=None),gr.update(value=None),gr.update(label="#"),\
-        None,None,gr.update(value=None)              
-# downloaded model information end
-
 # saved model information start
+def on_civitai_hidden_change(hidden, index, civitai_images_meta):
+    
+    info1,info2,info3 = modules.extras.run_pnginfo(hidden)
+    # 이미지에 메타 데이터가 없으면 info 것을 사용한다.
+    if not info2:
+        info2 = civitai_images_meta[int(index)]        
+    return info1, info2, info3
+
 def on_load_saved_model(modelid=None, versionid=None):
     return load_saved_model(modelid, versionid)
 
@@ -293,7 +267,7 @@ def on_saved_versions_list_select(evt: gr.SelectData, modelid:str):
         
 def load_saved_model(modelid=None, versionid=None):
     if modelid:
-        model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url = ishortcut_action.get_model_information(modelid,None,versionid)    
+        model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta = ishortcut_action.get_model_information(modelid,None,versionid)    
         if model_info:
             downloaded_info = None
             is_downloaded = False       
@@ -312,12 +286,14 @@ def load_saved_model(modelid=None, versionid=None):
         
             if flist:
                 file_text = "\n".join(flist)
-                
+            
+            current_time = datetime.datetime.now()
+                            
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(value=file_text),gr.update(label=title_name),\
-                images_url,images_url,gr.update(value=None),gr.update(visible=is_visible_openfolder)
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
@@ -325,7 +301,7 @@ def load_saved_model(modelid=None, versionid=None):
         gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(value=None),gr.update(label="#"),\
-        None,None,gr.update(value=None),gr.update(visible=False)
+        None,None,None,gr.update(value=None),gr.update(visible=False)
         
 # saved model information end                    
 
@@ -338,7 +314,7 @@ def on_versions_list_select(evt: gr.SelectData, modelid:str):
 
 def load_model(modelid, versionid):
     if modelid:
-        model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url,vs_foldername = civitai_action.get_model_information(modelid,None,versionid)    
+        model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername = civitai_action.get_model_information(modelid,None,versionid)    
         if model_info:
             # is_lora = False
             downloaded_info = None
@@ -356,16 +332,18 @@ def load_model(modelid, versionid):
                         
             if downloaded_info:
                 is_downloaded = True 
-                                        
+            
+            current_time = datetime.datetime.now()
+                
             return gr.update(value=versionid),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
-                images_url,images_url,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername) 
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername) 
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
     return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
-        None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None)         
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None)         
 # civitai model information end

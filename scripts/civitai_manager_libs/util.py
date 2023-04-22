@@ -38,6 +38,28 @@ def printD(msg):
 #             break
 #         yield chunk
 
+def convert_civitai_meta_to_stable_meta(meta:dict):
+    meta_string = ""
+    different_key=['prompt', 'negativePrompt','steps','sampler','cfgScale','seed','resources','hashes']
+    if meta:
+        if "prompt" in meta:
+            meta_string = f"""{meta['prompt']}""" + "\n"
+        if "negativePrompt" in meta:
+            meta_string = meta_string + f"""Negative prompt:{meta['negativePrompt']}""" + "\n"
+        if "steps" in meta:
+            meta_string = meta_string + f",Steps:{meta['steps']}"                
+        if "sampler" in meta:
+            meta_string = meta_string + f",Sampler:{meta['sampler']}"
+        if "cfgScale" in meta:
+            meta_string = meta_string + f",CFG scale:{meta['cfgScale']}"
+        if "seed" in meta:
+            meta_string = meta_string + f",Seed:{meta['seed']}"
+            
+        addistion_string = ','.join([f'{key}:{value}' for key, value in meta.items() if key not in different_key])
+        meta_string = meta_string + "," + addistion_string       
+                    
+    return meta_string  
+
 def update_url(url, param_name, new_value):
     if param_name not in url:
         # If the parameter is not found in the URL, add it to the end with the new value

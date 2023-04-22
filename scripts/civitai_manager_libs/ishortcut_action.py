@@ -45,28 +45,48 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         model_url = civitai.Url_ModelId() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info,model_info)
         title_name = f"# {model_info['name']} : {version_info['name']}"
-        images_url = get_version_description_gallery(modelid, versionid)
+        images_url, images_meta = get_version_description_gallery(version_info)
         
-        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url
-    return None, None,None,None,None,None,None,None,None,None,None,None
-
-def get_version_description_gallery(modelid:str, versionid:str):
-    if not modelid or not versionid:
+        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta
+    return None, None,None,None,None,None,None,None,None,None,None,None   
+    
+def get_version_description_gallery(version_info):
+    modelid = None
+    versionid = None
+    ver_images = dict()
+    
+            
+    if not version_info:
         return None
 
+    if "modelId" in version_info.keys():
+        modelid = str(version_info['modelId'])   
+            
+    if "id" in version_info.keys():
+        versionid = str(version_info['id'])
+
+    if "images" in version_info.keys():
+        ver_images = version_info['images']
+    
     model_path = os.path.join(setting.shortcut_info_folder, modelid)         
     version_image_prefix = f"{versionid}-"
     images_url = list()
+    images_meta = list()
+    
     try:        
-        for file in os.listdir(model_path):
-            if os.path.isdir(file):
-                continue
-            if file.endswith(setting.preview_image_ext) and file.startswith(version_image_prefix):
-                images_url.append(os.path.join(model_path, file))            
+        for ver in ver_images:
+            image_id, ext = os.path.splitext(os.path.basename(ver['url']))
+            description_img = os.path.join(model_path, f"{version_image_prefix}{image_id}{setting.preview_image_ext}")            
+            meta_string = ""
+            if os.path.isfile(description_img):
+                meta_string = util.convert_civitai_meta_to_stable_meta(ver['meta'])
+                images_url.append(description_img)
+                images_meta.append(meta_string)  
+                  
     except:
         return None
                 
-    return images_url
+    return images_url,images_meta
       
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
@@ -199,6 +219,9 @@ def update_shortcut_models(modelid_list, progress):
     add_ISC = dict()                
     for k in progress.tqdm(modelid_list,desc="Updating Models Information"):        
         if k:
+            # 기존 infos/modelid  폴더를 삭제하고 
+            ishortcut.delete_model_information(str(k))
+            # 다시 만든다
             add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
                     
         ISC = ishortcut.load()
@@ -247,6 +270,7 @@ def scan_downloadedmodel_to_shortcut(progress):
         modelid_list = [k for k in model.Downloaded_Models]
         for modelid in progress.tqdm(modelid_list, desc=f"Scanning Models"):        
             if modelid:
+                ishortcut.delete_model_information(str(modelid))
                 add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
             
     ISC = ishortcut.load()

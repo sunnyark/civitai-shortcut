@@ -50,12 +50,14 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         model_url = civitai.Url_ModelId() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info,model_info)
         title_name = f"# {model_info['name']} : {version_info['name']}"           
-        images_url = get_version_description_gallery(version_info)
+        
+        images_url, images_meta = get_version_description_gallery(version_info)
+        
         vs_foldername = util.generate_version_foldername(model_info['name'],version_name,versionid)        
         model_folder = util.generate_model_foldername(model_info['name'],model_type,False)
         
         # 정리하자... 
-        if  os.getcwd() in model_folder and os.path.exists(model_folder):
+        if os.getcwd() in model_folder and os.path.exists(model_folder):
             info_list = util.scan_folder_for_info(model_folder)
             if info_list:
                 for info in info_list:
@@ -72,19 +74,24 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
                         vs_foldername = info_basename
                         break
                     
-        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,vs_foldername
-    return None, None,None,None,None,None,None,None,None,None,None,None,None
+        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername
+    return None, None,None,None,None,None,None,None,None,None,None,None,None,None
 
 def get_version_description_gallery(version_info:dict):       
     if not version_info:
         return None
 
     images_url = []
+    images_meta = []
     
     if 'images' not in version_info:
         return None
-                    
-    for pic in version_info["images"]:   
+        
+    for pic in version_info["images"]:  
+        meta_string = ""    
+        if "meta" in pic:
+            meta_string = util.convert_civitai_meta_to_stable_meta(pic["meta"])
+                
         if "url" in pic:
             img_url = pic["url"]
             # use max width
@@ -93,8 +100,11 @@ def get_version_description_gallery(version_info:dict):
                 if pic["width"]:
                     img_url = util.change_width_from_image_url(img_url, pic["width"])
             images_url.append(img_url)
-                
-    return images_url
+            images_meta.append(meta_string)                
+    return images_url, images_meta
+
+          
+
       
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
@@ -241,12 +251,7 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldernam
 
 def get_image_base_name(version_info):
     # 이미지 파일명도 primary 이름으로 저장한다.
-    
-    # primary_file = civitai.get_primary_file_by_version_info(version_info)
-    # if not primary_file:
-    #     base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
-    # base, ext = os.path.splitext(primary_file['name'])
-        
+           
     base = None    
     primary_file = civitai.get_primary_file_by_version_info(version_info)
     if not primary_file:
@@ -288,17 +293,17 @@ def download_preview_image(version_id, lora_an, vs_folder,vs_foldername=None):
                     if "width" in img_dict:
                         if img_dict["width"]:
                             img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
-                        # get image
-                        with requests.get(img_url, stream=True) as img_r:
-                            if not img_r.ok:
-                                util.printD("Get error code: " + str(img_r.status_code))
-                                return
-                            # write to file
-                            description_img = f"{base}{setting.preview_image_suffix}{setting.preview_image_ext}"
+                    # get image
+                    with requests.get(img_url, stream=True) as img_r:
+                        if not img_r.ok:
+                            util.printD("Get error code: " + str(img_r.status_code))
+                            return
+                        # write to file
+                        description_img = f"{base}{setting.preview_image_suffix}{setting.preview_image_ext}"
 
-                            with open(description_img, 'wb') as f:
-                                img_r.raw.decode_content = True
-                                shutil.copyfileobj(img_r.raw, f)
+                        with open(description_img, 'wb') as f:
+                            img_r.raw.decode_content = True
+                            shutil.copyfileobj(img_r.raw, f)
             except Exception as e:
                 return
     return
@@ -348,16 +353,20 @@ def download_image_files(version_id, lora_an, vs_folder,vs_foldername=None):
                         if not img_r.ok:
                             util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
                             continue
+                        
+                        image_id, ext = os.path.splitext(os.path.basename(img_url))
 
                         # write to file
-                        description_img = f'{base}_{image_count}{setting.preview_image_suffix}{setting.preview_image_ext}'
-                        if image_count == 0:
-                            #첫 프리뷰는 호환성 때문에 filename에 따라간다.
-                            description_img = f'{base}{setting.preview_image_suffix}{setting.preview_image_ext}'
-                                                                                
+                        description_img = f'{base}-{version_id}-{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}'
                         with open(description_img, 'wb') as f:
                             img_r.raw.decode_content = True
                             shutil.copyfileobj(img_r.raw, f)
+                                                    
+                        if image_count == 0:
+                            #프리뷰는 호환성 때문에 filename에 따라간다. 둘다 가지고 있자
+                            preview_img = f'{base}{setting.preview_image_suffix}{setting.preview_image_ext}'                           
+                            shutil.copyfile(description_img, preview_img)
+
                 except Exception as e:
                     pass
                 

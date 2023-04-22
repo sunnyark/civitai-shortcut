@@ -23,12 +23,15 @@ def get_model_information( modelid:str=None, page_url=None, show_nsfw=False,):
     # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
     if model_info:
         images_url = None        
-
+        images_meta = None
+        
         title_name = f"# {model_info['name']}"
-        #page_info , images_url = get_user_gallery(modelid, page_url, show_nsfw)
+
         page_info , images_infos = get_user_gallery(modelid, page_url, show_nsfw)
         images_url = [image_info['url'] for image_info in images_infos.values()]
-        return page_info, title_name, images_url
+        images_meta = [util.convert_civitai_meta_to_stable_meta(image_info['meta']) for image_info in images_infos.values()]
+
+        return page_info, title_name, images_url, images_meta
     return None,None,None
 
 def get_user_gallery(modelid, page_url, show_nsfw):
@@ -40,7 +43,6 @@ def get_user_gallery(modelid, page_url, show_nsfw):
     page_info , image_data = get_image_page(modelid, page_url, show_nsfw)
 
     if image_data:
-        #images_list = [image_info['url'] for image_info in image_data]
         images_list = {image_info['id']:image_info for image_info in image_data}
     
     return page_info, images_list

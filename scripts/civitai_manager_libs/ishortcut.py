@@ -36,6 +36,53 @@ def get_model_info(modelid:str):
     
     return contents
 
+def get_version_info(modelid, versionid):
+    
+    model_info = get_model_info(modelid)
+    if not model_info:
+        return None
+    
+    if "modelVersions" in model_info.keys():
+        for ver in model_info["modelVersions"]:                        
+            if versionid == ver["id"]:
+                return ver
+    return None
+
+def get_version_images(modelid, versionid):
+    
+    version_info = get_version_info(modelid, versionid)
+    if not version_info:
+        return None
+    
+    if "images" in version_info.keys():
+        return version_info["images"]
+
+    return None
+                            
+def get_version_image_id(filename):
+    version_image, ext = os.path.splitext(filename)
+    
+    ids = version_image.split("-")
+    
+    if len(ids) > 1 :
+        return ids
+        
+    return None
+
+def get_images_meta(images:dict, imageid):
+    
+    if not images:
+        return None
+    
+    if not imageid:
+        return None
+    
+    for img in images:
+        if imageid in img['url']:
+            return img['meta']
+    
+    return None
+    
 def write_model_information(modelid:str, register_only_information=False, progress=None):    
     if not modelid:
         return     
@@ -82,9 +129,12 @@ def write_model_information(modelid:str, register_only_information=False, progre
                                 if not img_r.ok:
                                     util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
                                     continue
-
+                                
+                                image_id, ext = os.path.splitext(os.path.basename(url))
+                                
                                 # write to file
-                                description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
+                                # description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
+                                description_img = os.path.join(model_path, f"{vid}-{image_id}{setting.preview_image_ext}")
                                 with open(description_img, 'wb') as f:
                                     img_r.raw.decode_content = True
                                     shutil.copyfileobj(img_r.raw, f)
@@ -100,8 +150,11 @@ def write_model_information(modelid:str, register_only_information=False, progre
                                     util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
                                     continue
 
+                                image_id, ext = os.path.splitext(os.path.basename(url))
+                                
                                 # write to file
-                                description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
+                                # description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
+                                description_img = os.path.join(model_path, f"{vid}-{image_id}{setting.preview_image_ext}")
                                 with open(description_img, 'wb') as f:
                                     img_r.raw.decode_content = True
                                     shutil.copyfileobj(img_r.raw, f)
