@@ -220,7 +220,7 @@ def update_shortcut_models(modelid_list, progress):
     for k in progress.tqdm(modelid_list,desc="Updating Models Information"):        
         if k:
             # 기존 infos/modelid  폴더를 삭제하고 
-            ishortcut.delete_model_information(str(k))
+            # ishortcut.delete_model_information(str(k))
             # 다시 만든다
             add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
                     
