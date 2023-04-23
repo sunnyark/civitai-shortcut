@@ -80,6 +80,29 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
         #return dn_image_list, image_list
     return None, None
 
+def on_user_gallery_loading(images_url, progress=gr.Progress()):
+    if images_url:
+        # image_url = [image_info['url'] for image_info in images_infos.values()]
+        dn_image_list = []
+        image_list = []
+        for img_url in progress.tqdm(images_url, desc=f"Civitai Images Loading"):
+            try:
+                with requests.get(img_url,stream=True) as img_r:
+                    if not img_r.ok:                        
+                        util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                        dn_image_list.append(Image.open(setting.no_card_preview_image))
+                        image_list.append(setting.no_card_preview_image)
+                        continue
+                    img_r.raw.decode_content=True
+                    dn_image_list.append(Image.open(img_r.raw))
+                    image_list.append(img_url)                     
+            except:
+                dn_image_list.append(Image.open(setting.no_card_preview_image))
+                image_list.append(setting.no_card_preview_image)
+        return dn_image_list, dn_image_list # 어떤 때에는 갤러리가 이미지 생성 정보가 사라지게 한다 그레도 이리하면 이미지 선택시 다시 로딩할 필요가 없다. 오프라인에서 로딩할때는 이럴 필요가 없다.
+        #return dn_image_list, image_list
+    return None, None
+
 def on_file_gallery_loading(image_url, progress=gr.Progress()):
     chk_image_url = image_url
     if image_url:

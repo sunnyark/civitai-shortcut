@@ -29,10 +29,12 @@ def get_model_information( modelid:str=None, page_url=None, show_nsfw=False,):
 
         page_info , images_infos = get_user_gallery(modelid, page_url, show_nsfw)
         images_url = [image_info['url'] for image_info in images_infos.values()]
+        #images_url = images_infos
+        
         images_meta = [util.convert_civitai_meta_to_stable_meta(image_info['meta']) for image_info in images_infos.values()]
 
         return page_info, title_name, images_url, images_meta
-    return None,None,None
+    return None,None,None,None
 
 def get_user_gallery(modelid, page_url, show_nsfw):
     

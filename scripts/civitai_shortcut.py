@@ -166,7 +166,7 @@ def civitai_user_gallery_ui(selected_usergal_model_id:gr.Textbox):
     )
     
     refresh_gallery.change(
-        fn=civitai_shortcut_action.on_civitai_gallery_loading,
+        fn=civitai_shortcut_action.on_user_gallery_loading,
         inputs=[
             usergal_images_url 
         ],
