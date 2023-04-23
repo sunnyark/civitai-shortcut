@@ -79,13 +79,13 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
 
 def get_version_description_gallery(version_info:dict):       
     if not version_info:
-        return None
+        return None,None
 
     images_url = []
     images_meta = []
     
     if 'images' not in version_info:
-        return None
+        return None,None
         
     for pic in version_info["images"]:  
         meta_string = ""    

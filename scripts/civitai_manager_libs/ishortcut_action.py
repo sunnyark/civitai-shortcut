@@ -48,7 +48,7 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         images_url, images_meta = get_version_description_gallery(version_info)
         
         return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta
-    return None, None,None,None,None,None,None,None,None,None,None,None   
+    return None, None,None,None,None,None,None,None,None,None,None,None,None     
     
 def get_version_description_gallery(version_info):
     modelid = None
@@ -57,7 +57,7 @@ def get_version_description_gallery(version_info):
     
             
     if not version_info:
-        return None
+        return None,None
 
     if "modelId" in version_info.keys():
         modelid = str(version_info['modelId'])   
@@ -84,7 +84,7 @@ def get_version_description_gallery(version_info):
                 images_meta.append(meta_string)  
                   
     except:
-        return None
+        return None,None
                 
     return images_url,images_meta
       
