@@ -125,16 +125,17 @@ def write_model_information(modelid:str, register_only_information=False, progre
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
                         try:
                             # get image
+                            image_id, ext = os.path.splitext(os.path.basename(url))
+                            description_img = os.path.join(model_path, f"{vid}-{image_id}{setting.preview_image_ext}")
+                            if os.path.exists(description_img):
+                                continue
+                                
                             with requests.get(url, stream=True) as img_r:
                                 if not img_r.ok:
                                     util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
                                     continue
-                                
-                                image_id, ext = os.path.splitext(os.path.basename(url))
-                                
+                                                                
                                 # write to file
-                                # description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
-                                description_img = os.path.join(model_path, f"{vid}-{image_id}{setting.preview_image_ext}")
                                 with open(description_img, 'wb') as f:
                                     img_r.raw.decode_content = True
                                     shutil.copyfileobj(img_r.raw, f)
@@ -145,16 +146,17 @@ def write_model_information(modelid:str, register_only_information=False, progre
                     for image_count, (vid, url) in enumerate(image_list,start=0):
                         try:
                             # get image
+                            image_id, ext = os.path.splitext(os.path.basename(url))
+                            description_img = os.path.join(model_path, f"{vid}-{image_id}{setting.preview_image_ext}")
+                            if os.path.exists(description_img):
+                                continue
+                            
                             with requests.get(url, stream=True) as img_r:
                                 if not img_r.ok:
                                     util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
                                     continue
 
-                                image_id, ext = os.path.splitext(os.path.basename(url))
-                                
                                 # write to file
-                                # description_img = os.path.join(model_path, f"{vid}-{image_count}{setting.preview_image_ext}")
-                                description_img = os.path.join(model_path, f"{vid}-{image_id}{setting.preview_image_ext}")
                                 with open(description_img, 'wb') as f:
                                     img_r.raw.decode_content = True
                                     shutil.copyfileobj(img_r.raw, f)

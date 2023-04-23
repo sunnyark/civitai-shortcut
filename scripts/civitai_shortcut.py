@@ -581,7 +581,6 @@ def civitai_shortcut_ui():
                                 scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
                             with gr.Row():
                                 with gr.Column():
-                                    gr.Markdown(value="Updating and scanning may take a lot of time, which can cause heavy traffic on the site.\nRecommend performing these tasks during off-peak hours when the site traffic is lower and the connection is smoother.\nYou can continue with other tasks.")                            
                                     thumb_progress = gr.Markdown(value="###", visible=True)                                                                                                                                    
                                     scan_progress = gr.Markdown(value="###", visible=True)
                             with gr.Row():

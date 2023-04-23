@@ -219,9 +219,7 @@ def update_shortcut_models(modelid_list, progress):
     add_ISC = dict()                
     for k in progress.tqdm(modelid_list,desc="Updating Models Information"):        
         if k:
-            # 기존 infos/modelid  폴더를 삭제하고 
             # ishortcut.delete_model_information(str(k))
-            # 다시 만든다
             add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
                     
         ISC = ishortcut.load()
@@ -239,23 +237,6 @@ def update_all_shortcut_model(progress):
     modelid_list = [k for k in preISC]
     update_shortcut_models(modelid_list,progress)
                     
-# def update_all_shortcut_model(progress):
-#     preISC = ishortcut.load()                           
-#     if not preISC:
-#         return
-    
-#     for k in progress.tqdm(preISC,desc="Updating Models Information"):        
-#         if k:
-#             preISC = ishortcut.add(preISC,str(k),False,progress)
-                
-#     # 중간에 변동이 있을수 있으므로 병합한다.                
-#     ISC = ishortcut.load()
-#     if ISC:
-#         ISC.update(preISC)
-#     else:
-#         ISC = preISC            
-#     ishortcut.save(ISC)
-
 def delete_shortcut_model(modelid):
     if modelid:
         ISC = ishortcut.load()                           
@@ -270,7 +251,7 @@ def scan_downloadedmodel_to_shortcut(progress):
         modelid_list = [k for k in model.Downloaded_Models]
         for modelid in progress.tqdm(modelid_list, desc=f"Scanning Models"):        
             if modelid:
-                ishortcut.delete_model_information(str(modelid))
+                # ishortcut.delete_model_information(str(modelid))
                 add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
             
     ISC = ishortcut.load()
