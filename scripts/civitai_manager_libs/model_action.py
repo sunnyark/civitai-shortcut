@@ -76,7 +76,7 @@ def is_latest(modelid:str)->bool:
 #         for ver in model_info['modelVersions']:
 #             versions_list.append(ver['name'])
         
-#         model_url = civitai.Url_ModelId() + str(modelid)        
+#         model_url = civitai.Url_Page() + str(modelid)        
 #         dhtml, triger, flist = get_version_description(version_info, model_info)
 #         title_name = f"# {model_info['name']} : {version_info['name']}"           
 #         images_url = get_version_description_gallery(versionid)

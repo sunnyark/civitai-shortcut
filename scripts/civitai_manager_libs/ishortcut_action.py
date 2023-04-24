@@ -42,11 +42,11 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         for ver in model_info['modelVersions']:
             versions_list.append(ver['name'])
         
-        model_url = civitai.Url_ModelId() + str(modelid)        
+        model_url = civitai.Url_Page() + str(modelid)        
         dhtml, triger, flist = get_version_description(version_info,model_info)
         title_name = f"# {model_info['name']} : {version_info['name']}"
         images_url, images_meta = get_version_description_gallery(version_info)
-        
+                
         return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta
     return None, None,None,None,None,None,None,None,None,None,None,None,None     
     

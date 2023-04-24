@@ -121,6 +121,7 @@ gallery_images_page_limit = 10
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
+shortcut_classification = "CivitaiShortCutClassification.json"
 shortcut_thumbnail_folder =  "sc_thumb_images"
 shortcut_save_folder =  "sc_saves"
 # have model_name subfolder ... 
@@ -134,6 +135,7 @@ no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
 
 
 setting_file = "CivitaiShortCut_Setting.json"
+
 Extensions_Name = "Civitai Shortcut"
 
 # CivitaiShortCut_Setting.json

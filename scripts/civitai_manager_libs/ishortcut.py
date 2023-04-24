@@ -9,16 +9,31 @@ from . import setting
 from . import civitai
 
 
+def sort_shortcut_by_value(ISC, key, reverse=False):
+    sorted_data = sorted(ISC.items(), key=lambda x: x[1][key], reverse=reverse)
+    return dict(sorted_data)
+
+def sort_shortcut_by_modelid(ISC, reverse=False):
+    sorted_data = {}
+    for key in sorted(ISC.keys(), reverse=reverse):
+        sorted_data[key] = ISC[key]
+    return sorted_data
+
 def get_tags():
-    tags = list()
     ISC = load()
-    for k, model in ISC.items():
-        for tag in model["tags"]:
-            if "name" in tag.keys():                
-                tag_name = tag["name"]
-                if tag_name not in tags:
-                    tags.append(tag_name)            
-    return tags
+    if not ISC:
+        return  
+      
+    result = []
+
+    for item in ISC.values():
+        name_values = set(tag['name'] for tag in item['tags'])
+        result.extend(name_values)        
+
+    result = list(set(result))
+    # util.printD(f"{len(result)}:{result}")
+    return result
+
 
 def get_model_info(modelid:str):
     if not modelid:
@@ -198,7 +213,7 @@ def update_thumbnail_images(progress):
     else:
         ISC = preISC            
     save(ISC)
-        
+    
 def get_list(shortcut_types=None)->str:
     
     ISC = load()                           
@@ -240,7 +255,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
                 pass
                 
     # type 을 걸러내자
-    result_list = list()    
+    result_list = list()        
     for k, v in ISC.items():
         # util.printD(ISC[k])
         if v:
@@ -354,7 +369,7 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                     img_dict = def_version["images"][0]
                     def_image = img_dict["url"]                
                         
-        cis = {
+        ISC[str(model_id)] = {
                 "id" : model_info['id'],
                 "type" : model_info['type'],
                 "name": model_info['name'],
@@ -365,9 +380,9 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                 "imageurl" : def_image
         }
 
-        ISC[str(model_id)] = cis
+        # ISC[str(model_id)] = cis
         
-        cis_to_file(cis)
+        cis_to_file(ISC[str(model_id)])
         
         download_thumbnail_image(model_id, def_image)
 
@@ -395,7 +410,7 @@ def cis_to_file(cis):
         if "name" in cis.keys() and 'id' in cis.keys():
                 if not os.path.exists(setting.shortcut_save_folder):
                     os.makedirs(setting.shortcut_save_folder)              
-                util.write_InternetShortcut(os.path.join(setting.shortcut_save_folder,f"{util.replace_filename(cis['name'])}.url"),f"{civitai.Url_ModelId()}{cis['id']}")
+                util.write_InternetShortcut(os.path.join(setting.shortcut_save_folder,f"{util.replace_filename(cis['name'])}.url"),f"{civitai.Url_Page()}{cis['id']}")
     
 def save(ISC:dict):
     #print("Saving Civitai Internet Shortcut to: " + setting.shortcut)
