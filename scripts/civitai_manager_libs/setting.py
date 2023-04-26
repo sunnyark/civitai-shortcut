@@ -114,7 +114,7 @@ preview_image_suffix = ".preview"
 
 # 갤럴리 ui설정
 gallery_column = 4
-shortcut_colunm = 2  
+shortcut_colunm = 3  
 
 # 
 gallery_images_page_limit = 10

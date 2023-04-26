@@ -1,11 +1,278 @@
 import os
 import json
+import gradio as gr
+import datetime
+import modules
+
 from . import util
 from . import model
 from . import civitai
 from . import ishortcut
 from . import setting
+from . import model_action
 
+def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
+
+    with gr.Column(scale=1):
+        with gr.Row():
+            saved_versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+        with gr.Row():
+            saved_model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+        with gr.Row():
+            saved_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
+        with gr.Row():
+            saved_civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
+            
+        with gr.Row(visible=False) as saved_downloaded_tab:
+            with gr.Accordion("Downloaded Version", open=False): 
+                saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)                
+
+        with gr.Row():
+            saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
+        with gr.Row():
+            saved_update_information_btn = gr.Button(value="Update Model Information")
+        with gr.Row():
+            shortcut_del_btn = gr.Button(value="Delete Shortcut")       
+        with gr.Row():                          
+            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)               
+            
+    with gr.Column(scale=4):                                                  
+        with gr.Row():  
+            with gr.Accordion("#", open=True) as saved_model_title_name:   
+                saved_gallery = gr.Gallery(label="Civitai Saved Gallery", show_label=False, elem_id="civitai_saved_gallery").style(grid=[setting.gallery_column],height="auto")
+        with gr.Row():    
+            with gr.Accordion("Model Description", open=True):  
+                saved_description_html = gr.HTML()                                                                                                   
+    with gr.Column(scale=1):
+        with gr.Row():                            
+            saved_img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
+        with gr.Row():
+            try:
+                saved_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+            except:
+                pass 
+
+    with gr.Row(visible=False): 
+        # saved shortcut information  
+        saved_img_index = gr.Number(show_label=False)
+        saved_images = gr.State() #실제 다운 로드되질 않으니 여기선 안쓰인다. 그냥 둔것임
+        saved_images_url = gr.State()
+        saved_images_meta = gr.State() # 생성 정보 로드
+        
+        # 트리거를 위한것
+        saved_hidden = gr.Image(type="pil")
+        saved_info1 = gr.Textbox()
+        saved_info2 = gr.Textbox()
+        
+        saved_refresh_information = gr.Textbox()
+        saved_refresh_gallery = gr.Textbox()
+    try:
+        modules.generation_parameters_copypaste.bind_buttons(saved_send_to_buttons, saved_hidden,saved_img_file_info)
+    except:
+        pass
+    
+    # civitai saved model information start
+    shortcut_del_btn.click(
+        fn=on_shortcut_del_btn_click,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[refresh_sc_list]
+    )
+    
+    saved_update_information_btn.click(
+        fn=on_saved_update_information_btn_click,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_model_id,
+            refresh_sc_list,
+            # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
+            saved_gallery,
+            saved_refresh_information, #information update 용
+            saved_refresh_gallery
+        ]
+    )
+        
+    selected_saved_model_id.change(
+        fn=on_load_saved_model,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_version_id,
+            saved_civitai_model_url_txt,
+            saved_downloaded_tab, 
+            saved_downloaded_info, 
+            saved_model_type, 
+            saved_versions_list,                    
+            saved_description_html,
+            saved_trigger_words,
+            saved_filename_list,
+            saved_model_title_name,                        
+            saved_refresh_gallery,
+            saved_images_url,
+            saved_images_meta,
+            saved_img_file_info,
+            saved_openfolder
+        ] 
+    )
+    
+    saved_versions_list.select(
+        fn=on_saved_versions_list_select,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_version_id,
+            saved_civitai_model_url_txt,
+            saved_downloaded_tab, 
+            saved_downloaded_info, 
+            saved_model_type, 
+            saved_versions_list,                    
+            saved_description_html,
+            saved_trigger_words,
+            saved_filename_list,
+            saved_model_title_name,                        
+            saved_refresh_gallery,
+            saved_images_url,
+            saved_images_meta,
+            saved_img_file_info,
+            saved_openfolder
+        ]
+    )    
+
+    #information update 용 start
+    saved_refresh_information.change(
+        fn=on_load_saved_model,
+        inputs=[
+            selected_saved_model_id,
+        ],
+        outputs=[
+            selected_saved_version_id,
+            saved_civitai_model_url_txt,
+            saved_downloaded_tab, 
+            saved_downloaded_info, 
+            saved_model_type, 
+            saved_versions_list,                    
+            saved_description_html,
+            saved_trigger_words,
+            saved_filename_list,
+            saved_model_title_name,                        
+            saved_refresh_gallery,
+            saved_images_url,
+            saved_images_meta,
+            saved_img_file_info,
+            saved_openfolder
+        ]
+    )
+    
+    saved_refresh_gallery.change(
+        fn=on_file_gallery_loading,
+        inputs=[
+            saved_images_url 
+        ],
+        outputs=[               
+            saved_gallery,
+            saved_images
+        ]          
+    )
+    
+    #information update 용 end    
+    
+    saved_gallery.select(on_gallery_select, saved_images, [saved_img_index, saved_hidden])
+    saved_hidden.change(on_civitai_hidden_change,[saved_hidden,saved_img_index,saved_images_meta],[saved_info1, saved_img_file_info, saved_info2])
+    #saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])  
+    
+    saved_openfolder.click(on_open_folder_click,[selected_saved_model_id,selected_saved_version_id],None)  
+    # civitai saved model information end
+    
+def on_open_folder_click(mid,vid):
+    path = model_action.get_model_folder(vid)
+    if path:
+        util.open_folder(path)
+
+def on_gallery_select(evt: gr.SelectData, civitai_images):
+    return evt.index, civitai_images[evt.index]
+
+def on_civitai_hidden_change(hidden, index, civitai_images_meta):
+    
+    info1,info2,info3 = modules.extras.run_pnginfo(hidden)
+    # 이미지에 메타 데이터가 없으면 info 것을 사용한다.
+    if not info2:
+        info2 = civitai_images_meta[int(index)]        
+    return info1, info2, info3
+
+def on_shortcut_del_btn_click(model_id):
+    #util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
+    if model_id:
+        delete_shortcut_model(model_id)            
+    return gr.update(value="Delete shortcut is Done", visible=False)
+
+def on_saved_update_information_btn_click(modelid, progress=gr.Progress()):
+    if modelid:
+        update_shortcut_models([modelid],progress)  
+    
+    current_time = datetime.datetime.now()
+    return gr.update(value=modelid),gr.update(value="Done"),gr.update(value=None),gr.update(value=current_time),gr.update(value=current_time)
+
+def on_load_saved_model(modelid=None, versionid=None):
+    return load_saved_model(modelid, versionid)
+
+def on_saved_versions_list_select(evt: gr.SelectData, modelid:str):
+    return load_saved_model(modelid, evt.index)
+        
+def load_saved_model(modelid=None, versionid=None):
+    if modelid:
+        model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta = get_model_information(modelid,None,versionid)    
+        if model_info:
+            downloaded_info = None
+            is_downloaded = False       
+            is_visible_openfolder = False
+                 
+            if downloaded_versions:
+                downloaded_info = "\n".join(downloaded_versions.values())
+                
+                if versionid in downloaded_versions:
+                    is_visible_openfolder=True                
+                        
+            if downloaded_info:
+                is_downloaded = True 
+                            
+            file_text = ""
+        
+            if flist:
+                file_text = "\n".join(flist)
+            
+            current_time = datetime.datetime.now()
+                            
+            return gr.update(value=versionid),gr.update(value=model_url),\
+                gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
+                gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
+                gr.update(value=triger),gr.update(value=file_text),gr.update(label=title_name),\
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder)
+
+    # 모델 정보가 없다면 클리어 한다.
+    # clear model information
+    return gr.update(value=None),gr.update(value=None),\
+        gr.update(visible=False),gr.update(value=None),\
+        gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
+        gr.update(value=None),gr.update(value=None),gr.update(label="#"),\
+        None,None,None,gr.update(value=None),gr.update(visible=False)
+
+def on_file_gallery_loading(image_url, progress=gr.Progress()):
+    chk_image_url = image_url
+    if image_url:
+        chk_image_url = [img if os.path.isfile(img) else setting.no_card_preview_image for img in image_url]
+        # dn_image_list = []
+        # for img_url in progress.tqdm(image_url, desc=f"Images Files Loading"):  
+        #     dn_image_list.append(Image.open(img_url))                     
+        # return dn_image_list       
+        return chk_image_url, chk_image_url
+    return None, None
+
+    
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
@@ -67,27 +334,23 @@ def get_version_description_gallery(version_info):
 
     if "images" in version_info.keys():
         ver_images = version_info['images']
-    
-    model_path = os.path.join(setting.shortcut_info_folder, modelid)         
-    version_image_prefix = f"{versionid}-"
+
     images_url = list()
     images_meta = list()
     
     try:        
         for ver in ver_images:
-            image_id, ext = os.path.splitext(os.path.basename(ver['url']))
-            description_img = os.path.join(model_path, f"{version_image_prefix}{image_id}{setting.preview_image_ext}")            
+            description_img = ishortcut.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
             meta_string = ""
             if os.path.isfile(description_img):
                 meta_string = util.convert_civitai_meta_to_stable_meta(ver['meta'])
                 images_url.append(description_img)
-                images_meta.append(meta_string)  
-                  
+                images_meta.append(meta_string)                    
     except:
         return None,None
                 
-    return images_url,images_meta
-      
+    return images_url,images_meta                  
+    
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
     output_training = ""

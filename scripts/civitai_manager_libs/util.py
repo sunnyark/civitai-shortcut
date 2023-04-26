@@ -1,12 +1,14 @@
 import re
 import os
 import json
-from . import setting
+
 
 import hashlib
 import io
 import platform
 import subprocess
+
+from . import setting
 
 from modules import shared
 import modules.scripts as scripts
@@ -38,6 +40,17 @@ def printD(msg):
 #             break
 #         yield chunk
 
+def is_url_or_filepath(input_string):
+    if not input_string:
+        return "unknown"
+    
+    if os.path.exists(input_string):
+        return "filepath"
+    elif input_string.lower().startswith("http://") or input_string.lower().startswith("https://"):
+        return "url"
+    else:
+        return "unknown"
+    
 def convert_civitai_meta_to_stable_meta(meta:dict):
     meta_string = ""
     different_key=['prompt', 'negativePrompt','steps','sampler','cfgScale','seed','resources','hashes']
@@ -125,7 +138,32 @@ def get_search_keyword(search:str):
                     
     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None
     
+def get_search_keyword2(search:str):
+    tags = []
+    keys = []
+    clfs = []
+        
+    if not search:
+        return None , None, None
     
+    for word in search.split(","):
+        word = word.strip().lower()
+        if word.startswith("#"):
+            if len(word) > 1:
+                tag = word[1:]
+                if tag not in tags:
+                    tags.append(tag)
+        elif word.startswith("@"):
+            if len(word) > 1:
+                clf = word[1:]
+                if clf not in clfs:
+                    clfs.append(clf)
+        else:
+            if word not in keys:
+                keys.append(word)
+                    
+    return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None    
+
 def read_json(path)->dict:
     contents = None
     if not path:
