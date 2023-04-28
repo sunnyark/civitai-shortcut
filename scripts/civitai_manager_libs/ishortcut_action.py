@@ -10,6 +10,7 @@ from . import civitai
 from . import ishortcut
 from . import setting
 from . import model_action
+from . import classification
 
 def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
 
@@ -25,17 +26,18 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
             
         with gr.Row(visible=False) as saved_downloaded_tab:
             with gr.Accordion("Downloaded Version", open=False): 
-                saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)                
+                saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)
 
         with gr.Row():
             saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
         with gr.Row():
-            saved_update_information_btn = gr.Button(value="Update Model Information")
+            saved_update_information_btn = gr.Button(value="Update Model Information")       
         with gr.Row():
-            shortcut_del_btn = gr.Button(value="Delete Shortcut")       
+            with gr.Accordion("Delete Civitai Shortcut", open=False):
+                shortcut_del_btn = gr.Button(value="Delete Shortcut")
         with gr.Row():                          
-            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)               
-            
+            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)
+                            
     with gr.Column(scale=4):                                                  
         with gr.Row():  
             with gr.Accordion("#", open=True) as saved_model_title_name:   
@@ -52,6 +54,11 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
             except:
                 pass 
 
+        with gr.Row():
+            with gr.Accordion("Model Classcification", open=True):
+                model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
+                model_classification_update_btn = gr.Button(value="Update",variant="primary")
+                
     with gr.Row(visible=False): 
         # saved shortcut information  
         saved_img_index = gr.Number(show_label=False)
@@ -61,8 +68,6 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
         
         # 트리거를 위한것
         saved_hidden = gr.Image(type="pil")
-        saved_info1 = gr.Textbox()
-        saved_info2 = gr.Textbox()
         
         saved_refresh_information = gr.Textbox()
         saved_refresh_gallery = gr.Textbox()
@@ -71,6 +76,15 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
     except:
         pass
     
+    model_classification_update_btn.click(
+        fn=on_model_classification_update_btn_click,
+        inputs=[
+            model_classification,
+            selected_saved_model_id
+        ],
+        outputs=[refresh_sc_list]
+    )
+        
     # civitai saved model information start
     shortcut_del_btn.click(
         fn=on_shortcut_del_btn_click,
@@ -115,7 +129,8 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
             saved_images_url,
             saved_images_meta,
             saved_img_file_info,
-            saved_openfolder
+            saved_openfolder,
+            model_classification
         ] 
     )
     
@@ -139,7 +154,8 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
             saved_images_url,
             saved_images_meta,
             saved_img_file_info,
-            saved_openfolder
+            saved_openfolder,
+            model_classification
         ]
     )    
 
@@ -164,7 +180,8 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
             saved_images_url,
             saved_images_meta,
             saved_img_file_info,
-            saved_openfolder
+            saved_openfolder,
+            model_classification
         ]
     )
     
@@ -182,12 +199,22 @@ def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Text
     #information update 용 end    
     
     saved_gallery.select(on_gallery_select, saved_images, [saved_img_index, saved_hidden])
-    saved_hidden.change(on_civitai_hidden_change,[saved_hidden,saved_img_index,saved_images_meta],[saved_info1, saved_img_file_info, saved_info2])
-    #saved_hidden.change(fn=modules.extras.run_pnginfo, inputs=[saved_hidden], outputs=[saved_info1, saved_img_file_info, saved_info2])  
-    
+    saved_hidden.change(on_civitai_hidden_change,[saved_hidden,saved_img_index,saved_images_meta],[saved_img_file_info])
+   
     saved_openfolder.click(on_open_folder_click,[selected_saved_model_id,selected_saved_version_id],None)  
     # civitai saved model information end
+
+def on_model_classification_update_btn_click(model_classification, modelid):
     
+    if modelid:
+        classification.clean_classification_shortcut(str(modelid))
+        
+    if model_classification and modelid:
+        for name in model_classification:
+            classification.add_classification_shortcut(name, str(modelid))
+    current_time = datetime.datetime.now()
+    return current_time
+                
 def on_open_folder_click(mid,vid):
     path = model_action.get_model_folder(vid)
     if path:
@@ -202,20 +229,20 @@ def on_civitai_hidden_change(hidden, index, civitai_images_meta):
     # 이미지에 메타 데이터가 없으면 info 것을 사용한다.
     if not info2:
         info2 = civitai_images_meta[int(index)]        
-    return info1, info2, info3
+    return info2
 
 def on_shortcut_del_btn_click(model_id):
-    #util.printD(f"Delete shortcut {model_id} {len(model_id)}")    
     if model_id:
         delete_shortcut_model(model_id)            
-    return gr.update(value="Delete shortcut is Done", visible=False)
+    current_time = datetime.datetime.now()
+    return current_time
 
 def on_saved_update_information_btn_click(modelid, progress=gr.Progress()):
     if modelid:
         update_shortcut_models([modelid],progress)  
     
     current_time = datetime.datetime.now()
-    return gr.update(value=modelid),gr.update(value="Done"),gr.update(value=None),gr.update(value=current_time),gr.update(value=current_time)
+    return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time),gr.update(value=current_time)
 
 def on_load_saved_model(modelid=None, versionid=None):
     return load_saved_model(modelid, versionid)
@@ -246,12 +273,15 @@ def load_saved_model(modelid=None, versionid=None):
                 file_text = "\n".join(flist)
             
             current_time = datetime.datetime.now()
-                            
+            
+            classification_list = classification.get_classification_names_by_modelid(modelid)
+                
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(value=file_text),gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder)
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),\
+                gr.update(choices=classification.get_list(),value=classification_list, interactive=True)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
@@ -259,7 +289,8 @@ def load_saved_model(modelid=None, versionid=None):
         gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(value=None),gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False)
+        None,None,None,gr.update(value=None),gr.update(visible=False),\
+        gr.update(choices=classification.get_list(),value=[], interactive=True)
 
 def on_file_gallery_loading(image_url, progress=gr.Progress()):
     chk_image_url = image_url
@@ -270,9 +301,7 @@ def on_file_gallery_loading(image_url, progress=gr.Progress()):
         #     dn_image_list.append(Image.open(img_url))                     
         # return dn_image_list       
         return chk_image_url, chk_image_url
-    return None, None
-
-    
+    return None, None    
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
@@ -340,9 +369,9 @@ def get_version_description_gallery(version_info):
     
     try:        
         for ver in ver_images:
-            description_img = ishortcut.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
+            description_img = setting.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
             meta_string = ""
-            if os.path.isfile(description_img):
+            if os.path.isfile(description_img):               
                 meta_string = util.convert_civitai_meta_to_stable_meta(ver['meta'])
                 images_url.append(description_img)
                 images_meta.append(meta_string)                    
@@ -433,10 +462,42 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
             downloaded_list = list()            
             for short in shortlist:
                 sc_name = short[1]
-                mid = str(sc_name[0:sc_name.find(':')])
+                mid = setting.get_modelid_from_shortcutname(sc_name)
                 if mid in model.Downloaded_Models.keys():
                     downloaded_list.append(short)
             return downloaded_list
+    else:
+        return shortlist
+    return None
+
+def get_thumbnail_list2(shortcut_types=None, show_downloaded=None, search=None):
+    
+    shortlist =  ishortcut.get_image_list(shortcut_types, search)
+    if not shortlist:
+        return None
+    
+    if show_downloaded:
+        if show_downloaded == 'Downloaded':
+            if model.Downloaded_Models:                
+                downloaded_list = list()            
+                for short in shortlist:
+                    sc_name = short[1]
+                    mid = setting.get_modelid_from_shortcutname(sc_name)
+                    if mid in model.Downloaded_Models.keys():
+                        downloaded_list.append(short)
+                return downloaded_list
+        elif show_downloaded == 'Not Downloaded':   
+            if model.Downloaded_Models:                
+                downloaded_list = list()            
+                for short in shortlist:
+                    sc_name = short[1]
+                    mid = setting.get_modelid_from_shortcutname(sc_name)
+                    if mid not in model.Downloaded_Models.keys():
+                        downloaded_list.append(short)
+                return downloaded_list
+            return shortlist
+        else:
+            return shortlist        
     else:
         return shortlist
     return None

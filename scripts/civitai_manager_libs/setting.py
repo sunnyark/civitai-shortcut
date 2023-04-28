@@ -144,6 +144,23 @@ Extensions_Name = "Civitai Shortcut"
 # }
 
 
+def get_modelid_from_shortcutname(sc_name):
+    if sc_name:
+        return sc_name[sc_name.rfind(':') + 1:]
+
+def set_shortcutname(modelname,modelid):
+    if modelname and modelid:
+        return f"{modelname}:{modelid}"
+    
+def get_image_url_to_shortcut_file(modelid, versionid, image_url):
+    if image_url:
+        version_image_prefix = f"{versionid}-"
+        model_path = os.path.join(shortcut_info_folder, str(modelid))      
+        image_id, ext = os.path.splitext(os.path.basename(image_url))
+        description_img = os.path.join(model_path, f"{version_image_prefix}{image_id}{preview_image_ext}")
+        return description_img
+    return None  
+
 def write(ui_type_folder):
     SettingData = dict()    
     SettingData["ModelUITypeFolder"] = ui_type_folder

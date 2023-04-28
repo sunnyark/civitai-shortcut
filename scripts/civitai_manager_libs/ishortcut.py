@@ -9,15 +9,6 @@ from . import setting
 from . import civitai
 from . import classification
 
-def get_image_url_to_shortcut_file(modelid, versionid, image_url):
-    if image_url:
-        version_image_prefix = f"{versionid}-"
-        model_path = os.path.join(setting.shortcut_info_folder, str(modelid))      
-        image_id, ext = os.path.splitext(os.path.basename(image_url))
-        description_img = os.path.join(model_path, f"{version_image_prefix}{image_id}{setting.preview_image_ext}")            
-        return description_img
-    return None  
-
 def sort_shortcut_by_value(ISC, key, reverse=False):
     sorted_data = sorted(ISC.items(), key=lambda x: x[1][key], reverse=reverse)
     return dict(sorted_data)
@@ -149,7 +140,7 @@ def write_model_information(modelid:str, register_only_information=False, progre
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
                         try:
                             # get image
-                            description_img = get_image_url_to_shortcut_file(modelid,vid,url)
+                            description_img = setting.get_image_url_to_shortcut_file(modelid,vid,url)
                             if os.path.exists(description_img):
                                 continue
                                 
@@ -169,7 +160,7 @@ def write_model_information(modelid:str, register_only_information=False, progre
                     for image_count, (vid, url) in enumerate(image_list,start=0):
                         try:
                             # get image
-                            description_img = get_image_url_to_shortcut_file(modelid,vid,url)
+                            description_img = setting.get_image_url_to_shortcut_file(modelid,vid,url)
                             if os.path.exists(description_img):
                                 continue
                             
@@ -241,9 +232,9 @@ def get_list(shortcut_types=None)->str:
         if v:
             if tmp_types:
                 if v['type'] in tmp_types:
-                    shotcutlist.append(f"{v['id']}:{v['name']}")
+                    shotcutlist.append(setting.set_shortcutname(v['name'],v['id']))
             else:                                
-                shotcutlist.append(f"{v['id']}:{v['name']}")                
+                shotcutlist.append(setting.set_shortcutname(v['name'],v['id']))                
                     
     return shotcutlist
     
@@ -255,27 +246,28 @@ def get_image_list(shortcut_types=None, search=None)->str:
     
     result_list = list()        
 
-    # keys, tags, clfs = util.get_search_keyword2(search)    
-    # # classification        
-    # if clfs:        
-    #     clfs_list = list()
-    #     CISC = classification.load()
-    #     if CISC:
-    #         for name in clfs:
-    #             name_list = classification.get_shortcut_list(CISC,name)
-    #             if name_list:
-    #                 clfs_list.extend(name_list)
-    #         clfs_list = list(set(clfs_list))
+    keys, tags, clfs = util.get_search_keyword(search)    
+    
+    # classification        
+    if clfs:        
+        clfs_list = list()
+        CISC = classification.load()
+        if CISC:
+            for name in clfs:
+                name_list = classification.get_shortcut_list(CISC,name)
+                if name_list:
+                    clfs_list.extend(name_list)
+            clfs_list = list(set(clfs_list))
             
-    #     if len(clfs_list) > 0:
-    #         for mid in clfs_list:
-    #             if str(mid) in ISC:
-    #                 result_list.append(ISC[str(mid)])
-    # else:
-    #     result_list = ISC.values()
+        if len(clfs_list) > 0:
+            for mid in clfs_list:
+                if str(mid) in ISC:
+                    result_list.append(ISC[str(mid)])
+    else:
+        result_list = ISC.values()
 
-    keys, tags = util.get_search_keyword(search)
-    result_list = ISC.values()
+    # keys, tags = util.get_search_keyword(search)
+    # result_list = ISC.values()
             
     # type 을 걸러내자
     tmp_types = list()
@@ -318,9 +310,9 @@ def get_image_list(shortcut_types=None, search=None)->str:
     for v in result_list:
         if v:
             if is_sc_image(v['id']):
-                shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),f"{v['id']}:{v['name']}"))
+                shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
             else:
-                shotcutlist.append((setting.no_card_preview_image,f"{v['id']}:{v['name']}"))
+                shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
 
     return shotcutlist                
 

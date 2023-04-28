@@ -4,25 +4,55 @@ import json
 from . import util
 from . import setting
 
+def get_classification_names_by_modelid(modelid):
+    c_name_list = list()
+    if not modelid:
+        return
+    
+    CISC = load()
+    if CISC:
+        c_name_list = [k for k , v in CISC.items() if str(modelid) in v['shortcuts']]
 
+    return c_name_list
+
+def clean_classification_shortcut(modelid):
+    CISC = load()
+    if CISC:
+        for cis in CISC.values():
+            if str(modelid) in cis['shortcuts']:
+                cis['shortcuts'].remove(str(modelid))
+                
+        save(CISC)
+        return True
+    return False
+
+def add_classification_shortcut(name, modelid):
+    if name and len(name.strip()) > 0:
+        CISC = load()
+        if CISC:                   
+            if name in CISC:
+                CISC[name]['shortcuts'].append(str(modelid))
+                save(CISC)
+                return True
+    return False
+                
 def create_classification(name, info):
     if name and len(name.strip()) > 0:
-        add_CISC = create(None, name.strip(), info)
-                      
         CISC = load()
+        
         if CISC:
-            CISC.update(add_CISC)
-        else:
-            CISC = add_CISC            
+            if name in CISC:
+                return False
+        
+        CISC = create(CISC, name.strip(), info)
         save(CISC)
         
         if CISC:
             if name in CISC:
                 return True
     return False
-        
-        
-def update_classification(s_name, name, info):
+                
+def update_classification(s_name, name, info, shortcuts):
     if not s_name:
         return
 
@@ -32,7 +62,9 @@ def update_classification(s_name, name, info):
     name = name.strip()
         
     CISC = load()
-    CISC = update(CISC,s_name, name, info)
+    CISC = update_shortcut(CISC,s_name, shortcuts)
+    CISC = update(CISC, s_name, name, info)    
+    
     save(CISC)
     
     if CISC:
@@ -49,6 +81,15 @@ def delete_classification(s_name):
     CISC = delete(CISC,s_name)
     save(CISC)
     
+def get_classification(s_name):
+    if not s_name:
+        return None
+    
+    CISC = load()
+    if s_name in CISC:
+        return CISC[s_name]
+    
+    return None
 
 def get_classification_info(s_name):
     if not s_name:
@@ -60,6 +101,15 @@ def get_classification_info(s_name):
     
     return None
 
+def get_classification_shortcuts(s_name):
+    if not s_name:
+        return None
+    
+    CISC = load()
+    if s_name in CISC:
+        return CISC[s_name]['shortcuts']
+    
+    return None
 
 def get_list():
     
@@ -70,7 +120,11 @@ def get_list():
         tmp_cisc_name = [k for k in CISC.keys()]
     
     return tmp_cisc_name
-        
+
+
+
+
+
 def get_shortcut_list(CISC:dict, classification):
     if not CISC:
         return None
@@ -85,24 +139,23 @@ def get_shortcut_list(CISC:dict, classification):
     
     return CISC[classification]['shortcuts']
     
-def add_shortcut(CISC:dict, classification, modelid):
+def update_shortcut(CISC:dict, classification, modelids):
         
     if not CISC:
         CISC = dict()
         
     if not classification:
         return CISC   
-        
-    if not modelid:
-        return CISC
-    
+           
     classification = classification.strip()
     
     if classification not in CISC:
         CISC = create(CISC,classification,None)
     
-    if str(modelid) not in CISC[classification]['shortcuts']:
-        CISC[classification]['shortcuts'].append(str(modelid))
+    if not modelids:
+        CISC[classification]['shortcuts'] = list()
+    else:        
+        CISC[classification]['shortcuts'] = modelids
             
     return CISC
 
@@ -194,7 +247,7 @@ def update(CISC:dict, classification, name, info):
     else:
         if name not in CISC:
             sc = CISC.pop(classification,None)
-            sc['info'] = info    
+            sc['info'] = info
             CISC[name] = sc            
             
     return CISC

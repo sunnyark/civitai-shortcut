@@ -45,6 +45,9 @@ For #2, the information is displayed based on the saved information, so it can b
 
 * Scan New Version : This is a function that searches for the latest version of downloaded models on the Civitai site. It retrieves information from the site and only functions properly when the site is operational.
 
+![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
+* Classification : Function for managing shortcuts by classification.
+
 # Features
 
 You can save the model URL of the Civitai site for future reference and storage.
@@ -57,21 +60,37 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 
 # Notice
 
-When using Civitai Shortcut, four items will be created:
+When using Civitai Shortcut, five items will be created:
 
 * sc_saves: a folder where registered model URLs are backed up and stored.
 * sc_thumb_images: a folder where thumbnails of registered URLs are stored.
 * sc_infos: a folder where model info and images are saved when registering a shortcut.
 * CivitaiShortCut.json: a JSON file that records and manages registered model URLs.
+* CivitaiShortCutClassification.json: a JSON file that records and manages registered classification.
 
-세개의 폴더와 하나의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
+세개의 폴더와 두개의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
 
 * sc_saves : 등록된 model url이 백업되는 폴더, 등록된 모든 url이 저장되는 폴더
 * sc_thumb_images : 등록된 url의 thumbnail이 저장되는 폴더
 * sc_infos : 등록시 모델정보와 이미지가 저장되는 폴더
 * CivitaiShortCut.json : 등록된 model url 을 기록 관리 하는  json 파일
+* CivitaiShortCutClassification.json: 분류항목을 관리하는 파일
 
 # Change Log
+
+v 1.3a
+
+* A new feature has been added that allows you to manage and classify items.
+  You can add, delete, and update classification items in the "manage" -> "classification" tab.
+  To add a shortcut, select the desired classification item in the center top and click on the list on the left to register the desired shortcut. When you click, the registered shortcut appears in the center of the screen, and you can remove it by clicking on the registered shortcut.
+  Click the "update" button to complete the registration.
+  In the "civitai shortcut" -> "information" tab, a "model classification" item has been added on the right side, and you can perform registration and deletion of shortcuts for the model corresponding to the desired classification item.
+  After modification, click the "update" button to complete the task.
+* In the browsing "search" feature, you can check the items registered in the classification.
+  When you select a classification item from the dropdown list, the selected item appears in the list and works in conjunction with the "filter model type" and "search" features.
+  The "search" feature works by entering items such as tags, classification, and search keywords.
+  The tags, classification, and search keywords are applied with "and" operation, and each item is applied with "or" operation. Each item is separated by ",".
+  Although only one item can be selected from the classification dropdown list, you can enter multiple items by using the "@" prefix.
 
 v 1.2a
 
@@ -137,6 +156,7 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
+![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
 
 ![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503936-cdf04502-04ee-41f3-8bd0-20349bc09f4a.gif)
 

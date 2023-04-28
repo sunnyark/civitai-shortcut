@@ -1,0 +1,7 @@
+.block.padded.cs_box {
+    padding: 10px !important;
+}
+
+.block.padded.cs_vpadding {
+    padding: 10px 0 !important;
+}

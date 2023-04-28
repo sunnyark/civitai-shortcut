@@ -2,7 +2,6 @@ import os
 from . import util
 from . import model
 from . import civitai
-from . import ishortcut
 
 
 def Load_Downloaded_Models():

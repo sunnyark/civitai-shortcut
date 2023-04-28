@@ -118,7 +118,7 @@ def open_folder(path):
             else:
                 subprocess.Popen(["xdg-open", path])
                 
-def get_search_keyword(search:str):
+def get_search_keyword_o(search:str):
     tags = []
     keys = []
     
@@ -138,7 +138,7 @@ def get_search_keyword(search:str):
                     
     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None
     
-def get_search_keyword2(search:str):
+def get_search_keyword(search:str):
     tags = []
     keys = []
     clfs = []

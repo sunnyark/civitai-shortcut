@@ -12,7 +12,7 @@ from . import civitai
 from . import setting
 from . import downloader
 from . import model_action
-from . import ishortcut
+from . import classification
 
 from tqdm import tqdm
 from PIL import Image
@@ -31,7 +31,7 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
 
         with gr.Row(visible=False) as downloaded_tab:
             with gr.Accordion("Downloaded Version", open=False):
-                downloaded_info = gr.Textbox(interactive=False,show_label=False)                
+                downloaded_info = gr.Textbox(interactive=False,show_label=False)
 
         with gr.Accordion("Download", open=True):
             with gr.Row():
@@ -47,13 +47,13 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
                 civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
             with gr.Row():
                 gr.Markdown("Downloading may take some time.\nCheck console log for detail")
-            
-    with gr.Column(scale=4):    
-        with gr.Row(): 
-            with gr.Accordion("#", open=True) as model_title_name:   
+                
+    with gr.Column(scale=4):
+        with gr.Row():
+            with gr.Accordion("#", open=True) as model_title_name:
                 civitai_gallery = gr.Gallery(label="Civitai Gallery", show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto")
-        with gr.Row():  
-            with gr.Accordion("Model Description", open=True):  
+        with gr.Row():
+            with gr.Accordion("Model Description", open=True):
                 description_html = gr.HTML()
 
     with gr.Column(scale=1):
@@ -64,6 +64,11 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
                 send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
             except:
                 pass      
+        with gr.Row():
+            with gr.Accordion("Model Classcification", open=True):
+                model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
+                model_classification_update_btn = gr.Button(value="Update",variant="primary")
+            
             
     with gr.Row(visible=False):
         #civitai model information                
@@ -74,8 +79,6 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
 
         # 트리거를 위한것
         hidden = gr.Image(type="pil")
-        # info1 = gr.Textbox()
-        # info2 = gr.Textbox() 
 
         refresh_information = gr.Textbox()
         refresh_gallery = gr.Textbox()
@@ -84,7 +87,16 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
-        
+
+    model_classification_update_btn.click(
+        fn=on_model_classification_update_btn_click,
+        inputs=[
+            model_classification,
+            selected_model_id
+        ],
+        outputs=[refresh_sc_list]
+    )        
+
     download_model.click(
         fn=on_download_model_click,
         inputs=[
@@ -96,7 +108,7 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
         ],
         outputs=[refresh_sc_list,refresh_information,refresh_gallery]
     )  
-    
+
     selected_model_id.change(
         fn=on_load_model,
         inputs=[
@@ -119,7 +131,8 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_images_meta,
             img_file_info,
             civitai_openfolder,
-            vs_folder_name            
+            vs_folder_name,
+            model_classification
         ] 
     )
     
@@ -145,7 +158,8 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_images_meta,     
             img_file_info,
             civitai_openfolder,
-            vs_folder_name
+            vs_folder_name,
+            model_classification
         ]
     )    
 
@@ -182,21 +196,30 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_images_meta,
             img_file_info,
             civitai_openfolder,
-            vs_folder_name            
+            vs_folder_name,
+            model_classification
         ]         
     )
             
     civitai_gallery.select(on_gallery_select, civitai_images, [img_index, hidden])    
     
-    #img_index.change(civitai_shortcut_action.on_civitai_hidden_change,[hidden,img_index,civitai_images_meta],[info1, img_file_info, info2])
     hidden.change(on_civitai_hidden_change,[img_index,civitai_images_meta],[img_file_info])
-    
-    #hidden.change(fn=modules.extras.run_pnginfo, inputs=[hidden], outputs=[info1, img_file_info, info2])
     
     civitai_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)    
 
     vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_folder_name)
 
+def on_model_classification_update_btn_click(model_classification, modelid):
+    
+    if modelid:
+        classification.clean_classification_shortcut(str(modelid))
+        
+    if model_classification and modelid:
+        for name in model_classification:
+            classification.add_classification_shortcut(name, str(modelid))
+    current_time = datetime.datetime.now()
+    return current_time
+    
 def on_load_model(modelid=None, versionid=None):
     return load_model(modelid,versionid)
 
@@ -226,17 +249,21 @@ def load_model(modelid, versionid):
             
             current_time = datetime.datetime.now()
                 
+            classification_list = classification.get_classification_names_by_modelid(modelid)
+                                
             return gr.update(value=versionid),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername) 
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername),\
+                gr.update(choices=classification.get_list(),value=classification_list)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
     return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None)         
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
+        gr.update(choices=classification.get_list(), value=[], interactive=True)
 
 def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
     if image_url:
@@ -280,7 +307,7 @@ def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
         model_action.Load_Downloaded_Models()
 
     current_time = datetime.datetime.now()    
-    return gr.update(value=msg, visible=False),gr.update(value=current_time),gr.update(value=current_time)    
+    return gr.update(value=current_time),gr.update(value=current_time),gr.update(value=current_time)    
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index]
@@ -293,16 +320,6 @@ def on_open_folder_click(mid,vid):
 def on_civitai_hidden_change(index, civitai_images_meta):    
     return civitai_images_meta[int(index)]
         
-# def on_civitai_hidden_change(hidden, index, civitai_images_meta):    
-    # info1,info2,info3 = modules.extras.run_pnginfo(hidden)
-    # # 이미지에 메타 데이터가 없으면 info 것을 사용한다.
-    
-    # if not info2:
-    #     info2 = civitai_images_meta[int(index)]        
-    # return info1, info2, info3  
-
-        
-
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
     
@@ -396,7 +413,7 @@ def get_version_description_gallery(version_info:dict):
                 if pic["width"]:
                     img_url = util.change_width_from_image_url(img_url, pic["width"])
                     
-            shortcut_img_file = ishortcut.get_image_url_to_shortcut_file(modelid,versionid,img_url)
+            shortcut_img_file = setting.get_image_url_to_shortcut_file(modelid,versionid,img_url)
             if os.path.isfile(shortcut_img_file):
                 # 다운 받은 이미지가 있으면 파일로 대체 그리고 이미지 인포역시
                 img_url = shortcut_img_file
