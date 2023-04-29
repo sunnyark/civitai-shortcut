@@ -70,7 +70,7 @@ def on_scan_progress_change():
     return current_time, gr.update(value="###")
 
 def on_civitai_internet_url_upload(files, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
-    model_id = ""    
+    model_id = None    
     if files:
         modelids = ishortcut_action.upload_shortcut_by_files(files, register_information_only, progress)
         if len(modelids) > 0:
@@ -92,12 +92,13 @@ def on_civitai_internet_url_upload(files, register_information_only, selected_ci
     return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
 
 def on_civitai_internet_url_txt_upload(url, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
-    model_id = ""    
+    model_id = None    
     if url:
-        modelids = ishortcut_action.upload_shortcut_by_urls([url], register_information_only, progress)
-        if len(modelids) > 0:
-            model_id = modelids[0]        
-
+        if len(url.strip()) > 0:
+            modelids = ishortcut_action.upload_shortcut_by_urls([url], register_information_only, progress)
+            if len(modelids) > 0:
+                model_id = modelids[0]        
+    
     current_time = datetime.datetime.now()
     
     if not model_id:
@@ -170,7 +171,7 @@ def on_ui(refresh_shortcut:gr.Textbox):
                 with gr.Row():
                     with gr.Column():
                         # with gr.Box(elem_classes="cs_box"):
-                        civitai_internet_url_txt = gr.Textbox(placeholder="Copy & Paste or Drag & Drop Civitai Model Url, No typing", show_label=False, interactive=True)
+                        civitai_internet_url_txt = gr.Textbox(placeholder="Copy & Paste or Drag & Drop Civitai Model Url", show_label=False, interactive=True)
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
                         shortcut_saved_update_btn = gr.Button(value="Update Shortcut's Model Information",variant="primary")
                         scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
