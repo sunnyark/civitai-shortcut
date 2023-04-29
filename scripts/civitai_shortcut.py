@@ -26,8 +26,7 @@ def civitai_shortcut_ui():
         with gr.TabItem("Civitai Shortcut" , id="Shortcut"):
             with gr.Row(visible=False):
           
-                # 이거 하나로 모든 SC 리스트틑 갱신하게 된다.
-                # 개별로 하려면 별도로 만들자
+                # SC 리스트틑 갱신하게 된다.
                 refresh_shortcut = gr.Textbox()              
                 refresh_classification = gr.Textbox()
                 

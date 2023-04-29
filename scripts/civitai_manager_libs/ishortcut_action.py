@@ -524,6 +524,26 @@ def upload_shortcut_by_files(files, register_information_only, progress):
         
     return modelids
 
+def upload_shortcut_by_urls(urls, register_information_only, progress):
+    modelids = list()
+    if urls:
+        add_ISC = dict()
+        for url in progress.tqdm(urls, desc=f"Civitai Shortcut"):                        
+            if url:                                  
+                model_id = util.get_model_id_from_url(url)
+                if model_id:                    
+                    add_ISC = ishortcut.add(add_ISC, model_id, register_information_only, progress)
+                    modelids.append(model_id)
+                      
+        ISC = ishortcut.load()
+        if ISC:
+            ISC.update(add_ISC)
+        else:
+            ISC = add_ISC            
+        ishortcut.save(ISC)
+        
+    return modelids
+
 def update_shortcut_model(modelid):
     if modelid:
         add_ISC = dict()                

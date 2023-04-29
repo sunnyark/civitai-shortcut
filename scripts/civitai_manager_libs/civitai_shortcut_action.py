@@ -79,7 +79,29 @@ def on_civitai_internet_url_upload(files, register_information_only, selected_ci
     current_time = datetime.datetime.now()
     
     if not model_id:
-        return gr.update(value=""),gr.update(value=""),gr.update(value=""),current_time, None
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None
+
+    if selected_civitai_information_tabs is not None:
+        if selected_civitai_information_tabs == setting.civitai_information_tab:
+            return gr.update(value=model_id),gr.update(value=None),gr.update(value=None),current_time, None
+        if selected_civitai_information_tabs == setting.saved_information_tab:
+            return gr.update(value=None),gr.update(value=model_id),gr.update(value=None),current_time, None
+        if selected_civitai_information_tabs == setting.usergal_information_tab:
+            return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),current_time, None
+        
+    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
+
+def on_civitai_internet_url_txt_upload(url, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
+    model_id = ""    
+    if url:
+        modelids = ishortcut_action.upload_shortcut_by_urls([url], register_information_only, progress)
+        if len(modelids) > 0:
+            model_id = modelids[0]        
+
+    current_time = datetime.datetime.now()
+    
+    if not model_id:
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None
 
     if selected_civitai_information_tabs is not None:
         if selected_civitai_information_tabs == setting.civitai_information_tab:
@@ -148,6 +170,7 @@ def on_ui(refresh_shortcut:gr.Textbox):
                 with gr.Row():
                     with gr.Column():
                         # with gr.Box(elem_classes="cs_box"):
+                        civitai_internet_url_txt = gr.Textbox(placeholder="Copy & Paste or Drag & Drop Civitai Model Url, No typing", show_label=False, interactive=True)
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
                         shortcut_saved_update_btn = gr.Button(value="Update Shortcut's Model Information",variant="primary")
                         scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
@@ -229,6 +252,22 @@ def on_ui(refresh_shortcut:gr.Textbox):
             refresh_sc_list,
             civitai_internet_url
         ]
+    )
+    
+    civitai_internet_url_txt.change(
+        fn=on_civitai_internet_url_txt_upload,
+        inputs=[
+            civitai_internet_url_txt,
+            register_information_only,
+            selected_civitai_information_tabs
+        ],
+        outputs=[
+            selected_model_id,
+            selected_saved_model_id,
+            selected_usergal_model_id,
+            refresh_sc_list,
+            civitai_internet_url_txt
+        ]        
     )
     
     scan_to_shortcut_btn.click(
