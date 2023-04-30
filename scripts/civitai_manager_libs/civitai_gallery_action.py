@@ -26,7 +26,7 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
                     usergal_end_btn = gr.Button(value="End Page")
         with gr.Row():
             with gr.Accordion("#", open=True) as usergal_title_name:
-                usergal_gallery = gr.Gallery(label="Civitai User Gallery", show_label=False, elem_id="civitai_user_gallery").style(grid=[5],height="auto")
+                usergal_gallery = gr.Gallery(label="Civitai User Gallery", show_label=False, elem_id="civitai_user_gallery").style(grid=[setting.usergallery_images_column],height="auto")
     with gr.Column(scale=1):
         with gr.Row():                            
             usergal_img_file_info = gr.Textbox(label="Generate Info", interactive=False, lines=6).style(container=True, show_copy_button=True)                            
@@ -280,7 +280,7 @@ def on_usergal_prev_btn_click(usergal_page_url, page_info):
     return page_url
     
 def get_default_page_url(modelid, show_nsfw=False):
-    page_url = f"{civitai.Url_ImagePage()}?limit={setting.gallery_images_page_limit}&modelId={modelid}&sort=Newest&page=1"
+    page_url = f"{civitai.Url_ImagePage()}?limit={setting.usergallery_images_page_limit}&modelId={modelid}&sort=Newest&page=1"
     if not show_nsfw:    
         page_url = f"{page_url}&nsfw=false"
                

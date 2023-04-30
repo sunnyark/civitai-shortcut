@@ -3,7 +3,6 @@ import re
 import json
 import requests
 from . import util
-from . import setting
 
 # Set the URL for the API endpoint
 
@@ -14,8 +13,6 @@ url_dict = {
     "modelHash": "https://civitai.com/api/v1/model-versions/by-hash/",
     "imagePage" :  "https://civitai.com/api/v1/images/"
 }
-
-models_exts = (".bin", ".pt", ".safetensors", ".ckpt")        
 
 def Url_Page():
     return url_dict["modelPage"]
@@ -72,6 +69,23 @@ def get_model_info_by_version_info(version_info) -> dict:
     if not version_info:
         return 
     return get_model_info(version_info['modelId'])
+  
+def get_version_info_by_hash(hash) -> dict:        
+    if not hash:                
+        return 
+    
+    content = None
+    
+    try:
+        with requests.get(f"{Url_Hash()}{hash}") as response:
+            content = response.json()
+    except Exception as e:
+        return None
+
+    if 'id' not in content.keys():
+        return None
+    
+    return content  
   
 def get_version_info_by_version_id(version_id:str) -> dict:        
     if not version_id:                
@@ -219,37 +233,31 @@ def get_triger_by_version_id(version_id=None)->str:
 
 def write_model_info(file, model_info:dict)->str:   
     if not model_info:
-        return
-
-    # model_id = model_info['id']
-    # model_name = model_info['name']
-    
-    # base = f"{util.replace_filename(model_name)}-{str(model_id).strip()}"
-    # path_info_file = os.path.join(folder, f"{base}{setting.info_suffix}{setting.info_ext}")
-            
+        return False
+           
     try:
         with open(file, 'w') as f:
             f.write(json.dumps(model_info, indent=4))
     except Exception as e:
-            return
+            return False
     
     return True
 
 def write_version_info(file, version_info:dict):   
     if not version_info:
-        return
+        return False
 
     try:
         with open(file, 'w') as f:
             f.write(json.dumps(version_info, indent=4))
     except Exception as e:
-            return                
+            return False              
     
     return True
 
 def write_triger_words_by_version_id(file, version_id:str):
     if not version_id: 
-        return    
+        return False
         
     version_info = get_version_info_by_version_id(version_id)
     
@@ -257,17 +265,17 @@ def write_triger_words_by_version_id(file, version_id:str):
     
 def write_triger_words_by_version_info(file, version_info:dict):   
     if not version_info:
-        return
+        return False
     
     triger_words = get_triger_by_version_info(version_info)
         
     if not triger_words:
-        return 
+        return False
 
     try:
         with open(file, 'w') as f:
             f.write(triger_words)
     except Exception as e:
-        return
+        return False
         
     return True

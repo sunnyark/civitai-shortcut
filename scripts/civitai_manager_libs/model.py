@@ -42,10 +42,18 @@ def get_model_downloaded_versions(modelid:str):
                         
     return downloaded_version if len(downloaded_version) > 0 else None
 
+def get_model_folder(vid):
+    if vid:
+        if vid in Downloaded_Versions:
+            path = Downloaded_Versions[str(vid)]        
+            vfolder , vfile = os.path.split(path)
+            return vfolder
+    return None
+
 # modelid를 키로 modelid가 같은 version_info의 File Path를 list로 묶어 반환한다.
 def get_model_path()->dict:
     root_dirs = list(set(setting.model_folders.values()))
-    file_list = util.search_file(root_dirs,None,setting.info_ext)
+    file_list = util.search_file(root_dirs,None,[setting.info_ext])
     
     models = dict()
     versions = dict()
@@ -95,7 +103,7 @@ def get_version_images(versionid:str):
         path = Downloaded_Versions[versionid]
         
         vinfo = get_version_info(versionid)
-        base = get_image_base_name(vinfo)
+        base = get_save_base_name(vinfo)
         
         try:                
             vfolder , vfile = os.path.split(path)            
@@ -109,11 +117,11 @@ def get_version_images(versionid:str):
         
     return file_list if len(file_list) > 0 else None
 
-def get_image_base_name(version_info):
+def get_save_base_name(version_info):
     base = None    
     primary_file = get_primary_file_by_version_info(version_info)
     if not primary_file:
-        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
+        base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
     else:
         base, ext = os.path.splitext(primary_file['name'])   
     return base
@@ -176,154 +184,3 @@ def get_primary_file_by_version_info(version_info:dict)->dict:
         if file['primary']:
             return file        
     return
-
-# def get_version_id_by_version_name(modelid, versionname):
-#     if not modelid:
-#         return 
-
-#     if not Downloaded_Models:
-#         return
-        
-#     if str(modelid) in Downloaded_Models.keys():
-#         file_list = dict()
-#         for vid, version_paths in Downloaded_Models[str(modelid)]:
-#             file_list[os.path.basename(version_paths)] = version_paths
-        
-#         for file, path in file_list.items():
-#             vinfo = util.read_json(path)
-#             try:  
-#                 if vinfo['name'] == versionname:
-#                     return vinfo['id']
-#             except:
-#                 pass        
-#     return None
-
-# def get_default_version_info(modelid):
-#     if not modelid:
-#         return 
-
-#     if not Downloaded_Models:
-#         return
-        
-#     if str(modelid) in Downloaded_Models.keys():
-#         file_list = dict()
-#         for vid, version_paths in Downloaded_Models[str(modelid)]:
-#             file_list[os.path.basename(version_paths)] = version_paths
-                
-#         for file,path in file_list.items():
-#             return util.read_json(path)
-        
-#     return None        
-    
-
-# def get_version_info(versionid:str)->dict:
-#     if not versionid:
-#         return None
-
-#     if not Downloaded_Versions:
-#         return None
-                 
-#     try:
-#         return util.read_json(Downloaded_Versions[versionid])
-#     except:
-#         pass
-    
-#     return None
-
-# def get_images():
-#     if not Downloaded_Versions:
-#         return
-
-#     file_list = list()    
-#     for versionid in Downloaded_Versions.keys():
-#         tmp_list = get_version_images(versionid)
-#         if tmp_list:
-#             file_list.extend(tmp_list)
-    
-#     file_list = list(set(file_list))
-        
-#     return file_list if len(file_list) > 0 else None    
-
-# # 다운로드 받은 파일만 리턴한다
-# def get_version_files(versioninfo):
-#     if not Downloaded_Versions:
-#         return
-
-#     if not versioninfo:
-#         return
-    
-#     versionid = str(versioninfo['id'])
-
-#     infofiles = list()
-        
-#     if 'files' in versioninfo.keys():
-#         for file in versioninfo['files']:
-#             infofiles.append(file['name'])
-#     else:
-#         return
-               
-#     file_list = list()    
-#     vfolder = None
-
-#     if versionid in Downloaded_Versions.keys():        
-#         path = Downloaded_Versions[versionid]  
-#         try:
-#             vfolder , vfile = os.path.split(path)
-#             for file in os.listdir(vfolder):
-#                 if os.path.isdir(file):
-#                     continue
-
-#                 if file in infofiles:
-#                     file_list.append(os.path.join(vfolder, file))
-#         except:
-#             return
-        
-#     return file_list if len(file_list) > 0 else None
-    
-# 단순히 소유한 모델의 modelid만을 리스트로 반환한다
-# def get_modelid():
-#     root_dirs = list(set(setting.model_folders.values()))
-#     file_list = util.search_file(root_dirs,None,setting.info_ext)
-
-#     modelid_list = list()   
-
-#     if file_list:             
-#         # 중복제거
-#         file_list = list(set(file_list))        
-#         for file_path in file_list:        
-#             try:
-#                 with open(file_path, 'r') as f:
-#                     json_data = json.load(f)
-#                     if "modelId" in json_data.keys():
-#                         modelid_list.append(str(json_data['modelId']))    
-#             except:
-#                 pass
-            
-#     if len(modelid_list) > 0:
-#         return modelid_list
-    
-#     return None
-
-# 단순히 소유한 모델의 타입별 modelid만을 리스트로 반환한다
-# def get_modelid_byType(ctype):
-#     root_dir = [setting.model_folders[setting.ui_model_types[ctype]]]
-#     file_list = util.search_file(root_dir,None,setting.info_ext)
-    
-#     modelid_list = list()   
-
-#     if file_list:             
-#         # 중복제거
-#         file_list = list(set(file_list))
-#         for file_path in file_list:        
-#             try:
-#                 with open(file_path, 'r') as f:
-#                     json_data = json.load(f)
-#                     if "modelId" in json_data.keys():
-#                         modelid_list.append(str(json_data['modelId']))
-#             except:
-#                 pass
-            
-#     if len(modelid_list) > 0:
-#         return modelid_list
-    
-#     return None

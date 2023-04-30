@@ -1,4 +1,4 @@
-# Civitai Shortcut
+# vitai Shortcut
 
 Stable Diffusion Webui Extension for Civitai, to download civitai shortcut and models.
 
@@ -14,39 +14,37 @@ Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으�
 
 # Usage instructions
 
-![screenshot 2023-04-16 182259](https://user-images.githubusercontent.com/40237431/232289602-0b0cab3d-e90c-49c1-95cc-decf3cbe40bf.png)
-
+![shot 2023-05-01 011915](https://user-images.githubusercontent.com/40237431/235365101-a5754678-8318-446e-85e2-2243fa892400.png)
 1. The information in the Civitai model information tab is obtained in real-time from the Civitai website.
    Download : downloads the model for the selected version. You can choose to create specific folders for each version. The downloaded model will be automatically saved in the appropriate location, and a preview image and info will be generated together with it.
-
-![screenshot 2023-04-16 182316](https://user-images.githubusercontent.com/40237431/232289625-48abfaab-8eb4-4af0-a58e-1a9716751302.png)
 2. The information in the Saved model information tab are composed of the information saved on the Civitai website when creating the shortcut.
-Update Model Information : updates the information of an individual shortcut to the latest information. This function only works when the site is functioning normally.
-Delete Shortcut : deletes the information of a registered shortcut.
+   Update Model Information : updates the information of an individual shortcut to the latest information. This function only works when the site is functioning normally.
+   Delete Shortcut : deletes the information of a registered shortcut.
+3. Civitai User Gallery : The Civitai User Gallery allows users to view uploaded images.
 
-For #1, since the information is obtained in real-time from the website, it can only be accessed when the site is operational.
-
-For #2, the information is displayed based on the saved information, so it can be accessed even when the site is not operational.
-
-![screenshot 2023-04-16 182342](https://user-images.githubusercontent.com/40237431/232289694-e9f75198-75b4-492a-8f60-6fc453137f5c.png)
 ![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503898-53fd19d2-13bf-4b05-801e-265472bac1b5.gif)
 ![filetobrowser](https://user-images.githubusercontent.com/40237431/233503915-0ebc4c6e-2218-4722-a83e-7d83d5580571.gif)
 ![multifilestobrowser](https://user-images.githubusercontent.com/40237431/233578034-d8920f29-a66e-4939-b6c1-cb760d809c13.gif)
 
 * Upload : This function creates a shortcut that can be used by the extension when you enter the Civitai site's model URL. It only works when the site is functioning properly. You can either click and drag the URL from the address bar or drag and drop saved internet shortcuts. You can also select multiple internet shortcuts and drop them at once.
-* Update Shortcut's Model Information : This function updates the information of the shortcut you have received by referencing the site.
-* Scan Downloaded Models to Shortcut : This function searches for downloaded models and registers shortcuts for them, in case you have accidentally deleted the shortcut or downloaded the models to a different location. Only models with version info files are registered. You can use Civitai Helper's Scan function to generate version info for models that don't have it. Note that only models available on the Civitai site can be registered with this function. This function only works when the site is functioning properly.
-
-![screenshot 2023-04-16 182349](https://user-images.githubusercontent.com/40237431/232289696-54479aec-4013-42f3-9ae8-9c1f203095f2.png)
-
 * Browsing : This function displays the registered shortcuts in thumbnail format, and when selected, displays their details on the right-hand side of the window. This function works independently of the Civitai site.
-
-![screenshot 2023-04-16 182354](https://user-images.githubusercontent.com/40237431/232289699-c8b87b7a-85f7-436a-91e0-0c10620599c3.png)
-
 * Scan New Version : This is a function that searches for the latest version of downloaded models on the Civitai site. It retrieves information from the site and only functions properly when the site is operational.
 
 ![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
+
 * Classification : Function for managing shortcuts by classification.
+
+![shot 2023-05-01 011850](https://user-images.githubusercontent.com/40237431/235365080-047f20a9-1a66-4a0d-9592-2fb63f67dcab.png)
+
+* Scan and Update Models
+  Scan Models for Civitai - Scan and register shortcut for models without model information that are currently held.
+  Update Shortcut - Move the shortcut update function from the Upload tab.
+  Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
+  Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
+
+![shot 2023-05-01 011859](https://user-images.githubusercontent.com/40237431/235365087-7357c1ea-754e-42cc-8ee7-7c0feb89bbbf.png)
+
+* Setting tab - Set the number of columns in the image gallery.
 
 # Features
 
@@ -67,6 +65,7 @@ When using Civitai Shortcut, five items will be created:
 * sc_infos: a folder where model info and images are saved when registering a shortcut.
 * CivitaiShortCut.json: a JSON file that records and manages registered model URLs.
 * CivitaiShortCutClassification.json: a JSON file that records and manages registered classification.
+* CivitaiShortCutSetting.json: a JSON file that records setting.
 
 세개의 폴더와 두개의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
 
@@ -75,8 +74,32 @@ When using Civitai Shortcut, five items will be created:
 * sc_infos : 등록시 모델정보와 이미지가 저장되는 폴더
 * CivitaiShortCut.json : 등록된 model url 을 기록 관리 하는  json 파일
 * CivitaiShortCutClassification.json: 분류항목을 관리하는 파일
+* CivitaiShortCutSetting.json: a JSON file that records setting.
 
 # Change Log
+
+v 1.3c
+
+* Add "Scan and Update Models" and "Settings" tabs to the Manage tab.
+* Scan and Update Models tab
+  Scan Models for Civitai - Scan and register shortcut for models without model information that are currently held.
+  Update Shortcut - Move the shortcut update function from the Upload tab.
+  Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
+  Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
+* Setting tab - Set the number of columns in the image gallery.
+* The name of the model info file that records information about the model has been changed.
+  As a result, even models with a normal model info file may be moved to a  new folder when scanning models for Civitai.
+  To prevent this, uncheck the "Create a model folder corresponding to the model type" option.
+* Manage tab 에 scan and update models 와 setting 탭추가
+* Scan and Update Models tab
+  Scan Models for Civitai - 보유하고 있는 모델중 모델 정보가 없는 파일을 스캔하고 숏컷으로 등록 함
+  Update Shortcut - Upload tab 에 있던 shortcut update 기능을 옯겨옴
+  Update the model information for the shortcut - 등록된 shortcut의 정보를 최신정보로 업데이트함
+  Scan downloaded models for shortcut registration - 다운 로드 받았지만 삭제되었거나 모델 정보가 있는 모델의 shortcut을 새로이 등록해줌
+* Setting tab - 이미지 갤러리의 컬럼의 수를 설정함.
+* 모델의 정보를 기록하는 모델 인포 파일의 이름이 변경되었습니다.
+  이에 따라 정상적인 model info 파일이 있는 모델도 "Scan Models for Civitai" 작업시 새로운 폴더로 이동되어질수 있습니다.
+  "Create a model folder corresponding to the model type." 옵션을 해제 하시면 이동을 막을수 있습니다.
 
 v 1.3a
 
@@ -156,6 +179,7 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
+
 ![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
 
 ![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503936-cdf04502-04ee-41f3-8bd0-20349bc09f4a.gif)

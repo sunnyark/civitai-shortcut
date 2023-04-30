@@ -13,33 +13,28 @@ from . import setting
 from modules import shared
 import modules.scripts as scripts
 
+from tqdm import tqdm
+
 def printD(msg):    
     print(f"{setting.Extensions_Name}: {msg}") 
 
-# # Now, hashing use the same way as pip's source code.
-# def gen_file_sha256(filname):
-#     printD("Use Memory Optimized SHA256")
-#     blocksize=1 << 20
-#     h = hashlib.sha256()
-#     length = 0
-#     with open(os.path.realpath(filname), 'rb') as f:
-#         for block in read_chunks(f, size=blocksize):
-#             length += len(block)
-#             h.update(block)
+def calculate_sha256(filname):
+    """
+    Calculate the SHA256 hash for a file.
+    """
+    block_size = 1024 * 1024 # 1MB
+    length = 0
+    with open(filname, 'rb') as file:
+        hash = hashlib.sha256()
+        for chunk in tqdm(iter(lambda: file.read(block_size), b""), total=(os.path.getsize(filname)//block_size)+1):
+            length += len(chunk)
+            hash.update(chunk)
 
-#     hash_value =  h.hexdigest()
-#     printD("sha256: " + hash_value)
-#     printD("length: " + str(length))
-#     return hash_value
-
-# def read_chunks(file, size=io.DEFAULT_BUFFER_SIZE):
-#     """Yield pieces of data from a file-like object until EOF."""
-#     while True:
-#         chunk = file.read(size)
-#         if not chunk:
-#             break
-#         yield chunk
-
+        hash_value = hash.hexdigest()
+        printD("sha256: " + hash_value)
+        printD("length: " + str(length))
+        return hash_value
+    
 def is_url_or_filepath(input_string):
     if not input_string:
         return "unknown"
@@ -190,39 +185,13 @@ def write_json(contents, path):
         return
 
 def scan_folder_for_info(folder):
-    info_list = search_file([folder],None,setting.info_ext)
+    info_list = search_file([folder],None,[setting.info_ext])
     
     if not info_list:             
         return None
     
     return info_list
-        
-def generate_version_foldername(model_name,ver_name,ver_id):      
-    # return f"{model_name}-{ver_name}-{ver_id}"
-    return f"{model_name}-{ver_name}"
-
-def generate_model_foldername(model_name , content_type=None, lora_an=False):
-    
-    if not model_name:
-        return
-    
-    model_name = model_name.strip()
-    if len(model_name) <= 0:
-        return
             
-    if lora_an and content_type == setting.model_types['lora']:
-        model_folder = setting.model_folders[setting.model_types['anlora']]
-    elif content_type in setting.model_folders.keys():
-        model_folder = setting.model_folders[content_type]        
-    elif content_type:
-        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']], replace_dirname(content_type))
-    else:
-        model_folder = os.path.join(setting.model_folders[setting.model_types['unknown']])
-                     
-    model_folder = os.path.join(model_folder, replace_dirname(model_name))
-                
-    return model_folder    
-    
 def make_version_folder(version_info, lora_an=False, vs_folder=True, user_folder_name=None):
     
     if not version_info:
@@ -233,14 +202,14 @@ def make_version_folder(version_info, lora_an=False, vs_folder=True, user_folder
                        
     content_type = version_info['model']['type']
     model_name = version_info['model']['name']
-    model_folder = generate_model_foldername(model_name , content_type, lora_an)                     
+    model_folder = setting.generate_model_foldername(model_name , content_type, lora_an)                     
     
     if not model_folder:
         return
     
     if vs_folder:
         # 설정되어있는데 펄더명이 비어있으면 기본으로 만들어준다.
-        vs_folder_name = generate_version_foldername(model_name,version_info['name'],version_info['id'])
+        vs_folder_name = setting.generate_version_foldername(model_name,version_info['name'],version_info['id'])
         # 있으면 그걸로 정한다.
         if user_folder_name:
             user_folder_name = user_folder_name.strip()            
@@ -273,24 +242,6 @@ def write_InternetShortcut(path, url):
         return False    
     return True
     
-# def load_InternetShortcut(path)->str:
-#     urls = ""
-#     try:    
-#         with open(path, 'r') as f:
-#         #with open(path, 'r', encoding='utf8') as f:
-#             InternetShortcut = f.readline()
-#             if not InternetShortcut or not "[InternetShortcut]" in InternetShortcut:
-#                 return
-#             InternetShortcut = f.readline()
-#             if not InternetShortcut:
-#                 return
-#             urls = InternetShortcut[4:]
-#     except Exception as e:
-#         printD(e)
-#         return
-
-#     return urls.strip()
-
 def load_InternetShortcut(path)->str:
     urls = ""
     try:    
@@ -305,8 +256,6 @@ def load_InternetShortcut(path)->str:
         return
 
     return urls.strip()
-
-
 
 # get image with full size
 # width is in number, not string
@@ -342,7 +291,7 @@ def get_model_id_from_url(url):
     
     return id
 
-def search_file(root_dirs:list,base,ext)->list:
+def search_file(root_dirs:list,base:list,exts:list)->list:
     file_list = list()
     root_path = os.getcwd()
         
@@ -351,14 +300,14 @@ def search_file(root_dirs:list,base,ext)->list:
             if len(files) > 0:
                 for file_name in files:               
                     b, e = os.path.splitext(file_name) 
-                    if base and ext:
-                        if e == ext and b == base:
+                    if base and exts:
+                        if e in exts and b in base:
                             file_list.append(os.path.join(root,file_name))                        
                     elif base:
-                        if b == base:
+                        if b in base:
                             file_list.append(os.path.join(root,file_name))
-                    elif ext:
-                        if e == ext:
+                    elif exts:
+                        if e in exts:
                             file_list.append(os.path.join(root,file_name))
                     else:       
                         file_list.append(os.path.join(root,file_name))                        

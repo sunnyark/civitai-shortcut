@@ -9,7 +9,6 @@ from . import model
 from . import civitai
 from . import ishortcut
 from . import setting
-from . import model_action
 from . import classification
 
 def on_ui(selected_saved_version_id:gr.Textbox(),selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
@@ -216,7 +215,7 @@ def on_model_classification_update_btn_click(model_classification, modelid):
     return current_time
                 
 def on_open_folder_click(mid,vid):
-    path = model_action.get_model_folder(vid)
+    path = model.get_model_folder(vid)
     if path:
         util.open_folder(path)
 
@@ -605,3 +604,16 @@ def scan_downloadedmodel_to_shortcut(progress):
         ISC = add_ISC            
     ishortcut.save(ISC) 
         
+def add_shortcut(modelid, progress):        
+    add_ISC = dict()
+
+    if modelid:
+        add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
+            
+    ISC = ishortcut.load()
+    if ISC:
+        ISC.update(add_ISC)
+    else:
+        ISC = add_ISC            
+    ishortcut.save(ISC) 
+            

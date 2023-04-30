@@ -3,12 +3,34 @@ import gradio as gr
 import datetime
 
 from . import util
+
+from . import model
+from . import civitai
 from . import setting
 from . import sc_browser
-from . import model_action
+
 from . import civitai_action
 from . import ishortcut_action
 from . import civitai_gallery_action
+
+def is_latest(modelid:str)->bool:
+    if not modelid:
+        return False
+   
+    if modelid in model.Downloaded_Models.keys():
+        # civitai 에서 최신 모델 정보를 가져온다.
+        version_info = civitai.get_latest_version_info_by_model_id(modelid)
+        if version_info:
+            latest_versionid = str(version_info['id']).strip()                
+            
+            # 현재 가지고 있는 버전들을 가져온다.                
+            dnver_list = list()                
+            for vid, version_paths in model.Downloaded_Models[str(modelid)]:
+                dnver_list.append(str(vid).strip())
+                
+            if latest_versionid in dnver_list:                        
+                return True
+    return False
 
 def on_refresh_shortcut_change():
     current_time = datetime.datetime.now()
@@ -61,14 +83,6 @@ def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=
                         
     return gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id)
 
-def on_thumb_progress_change():
-    current_time = datetime.datetime.now()
-    return current_time, gr.update(value="###")
-
-def on_scan_progress_change():
-    current_time = datetime.datetime.now()
-    return current_time, gr.update(value="###")
-
 def on_civitai_internet_url_upload(files, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
     model_id = None    
     if files:
@@ -113,19 +127,32 @@ def on_civitai_internet_url_txt_upload(url, register_information_only, selected_
             return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),current_time, None
         
     return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
-  
-def on_scan_to_shortcut_click(progress=gr.Progress()):
-    model_action.Load_Downloaded_Models()
-    ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
-    return gr.update(value="Scan Downloaded Models to Shortcut is Done")
 
-def on_shortcut_saved_update_btn(progress=gr.Progress()):
-    ishortcut_action.update_all_shortcut_model(progress)
-    return gr.update(value="Update Shortcut's Model Information is Done")
+# def on_thumb_progress_change():
+#     current_time = datetime.datetime.now()
+#     return current_time, gr.update(value="###")
+
+# def on_scan_progress_change():
+#     current_time = datetime.datetime.now()
+#     return current_time, gr.update(value="###")
+  
+# def on_scan_to_shortcut_click(progress=gr.Progress()):
+#     model.update_downloaded_model()
+#     ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
+#     return gr.update(value="Scan Downloaded Models to Shortcut is Done")
+
+# def on_shortcut_saved_update_btn(progress=gr.Progress()):
+#     ishortcut_action.update_all_shortcut_model(progress)
+#     return gr.update(value="Update Shortcut's Model Information is Done")
+
+# def on_update_modelfolder_btn_click():
+#     model.update_downloaded_model()
+#     current_time = datetime.datetime.now()
+#     return current_time
 
 # 새 버전이 있는지 스캔한다
 def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
-    model_action.Load_Downloaded_Models()
+    model.update_downloaded_model()
 
     scan_list = list()
     shortlist =  ishortcut_action.get_thumbnail_list(sc_types,True)
@@ -133,17 +160,10 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
         for short in progress.tqdm(shortlist, desc="Scanning new version model"):
             sc_name = short[1]
             mid = setting.get_modelid_from_shortcutname(sc_name) # str(sc_name[0:sc_name.find(':')])
-            if not model_action.is_latest(mid):
+            if not is_latest(mid):
                 scan_list.append(short)
 
     return gr.update(value=scan_list)
-
-def on_update_modelfolder_btn_click():
-    model_action.Load_Downloaded_Models()
-    current_time = datetime.datetime.now()
-    return current_time
-
-
 
 def on_ui(refresh_shortcut:gr.Textbox):
     with gr.Row(visible=False):
@@ -173,11 +193,11 @@ def on_ui(refresh_shortcut:gr.Textbox):
                         # with gr.Box(elem_classes="cs_box"):
                         civitai_internet_url_txt = gr.Textbox(placeholder="Copy & Paste or Drag & Drop Civitai Model Url", show_label=False, interactive=True)
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
-                        shortcut_saved_update_btn = gr.Button(value="Update Shortcut's Model Information",variant="primary")
-                        scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
-                        thumb_progress = gr.Markdown(value="###", visible=True)
-                        scan_progress = gr.Markdown(value="###", visible=True)
-                        update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
+                        # shortcut_saved_update_btn = gr.Button(value="Update Shortcut's Model Information",variant="primary")
+                        # scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
+                        # thumb_progress = gr.Markdown(value="###", visible=True)
+                        # scan_progress = gr.Markdown(value="###", visible=True)
+                        # update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
                                                     
             with gr.TabItem("Browsing"):    
                 with gr.Row():
@@ -189,7 +209,7 @@ def on_ui(refresh_shortcut:gr.Textbox):
                     with gr.Column():
                         shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_model_types], interactive=True)                                     
                         scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
-                        sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_colunm],height="auto")
+                        sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_column],height="auto")
                         gr.Markdown(value="The feature is to search for new versions of models on Civitai among the downloaded ones.", visible=True)
                 
     with gr.Column(scale=4):
@@ -272,39 +292,39 @@ def on_ui(refresh_shortcut:gr.Textbox):
         ]        
     )
     
-    scan_to_shortcut_btn.click(
-        fn=on_scan_to_shortcut_click,
-        inputs=None,
-        outputs=[
-            scan_progress,
-        ]                
-    )
+    # scan_to_shortcut_btn.click(
+    #     fn=on_scan_to_shortcut_click,
+    #     inputs=None,
+    #     outputs=[
+    #         scan_progress,
+    #     ]                
+    # )
     
-    shortcut_saved_update_btn.click(
-        fn=on_shortcut_saved_update_btn,
-        inputs=None,
-        outputs=[
-            thumb_progress,
-        ]
-    ) 
+    # shortcut_saved_update_btn.click(
+    #     fn=on_shortcut_saved_update_btn,
+    #     inputs=None,
+    #     outputs=[
+    #         thumb_progress,
+    #     ]
+    # ) 
     
-    update_modelfolder_btn.click(
-        fn=on_update_modelfolder_btn_click,
-        inputs=None,
-        outputs=refresh_sc_list
-    )
+    # update_modelfolder_btn.click(
+    #     fn=on_update_modelfolder_btn_click,
+    #     inputs=None,
+    #     outputs=refresh_sc_list
+    # )
     
-    thumb_progress.change(
-        fn=on_thumb_progress_change,
-        inputs=None,
-        outputs=[refresh_sc_list,thumb_progress]
-    )
+    # thumb_progress.change(
+    #     fn=on_thumb_progress_change,
+    #     inputs=None,
+    #     outputs=[refresh_sc_list,thumb_progress]
+    # )
     
-    scan_progress.change(
-        fn=on_scan_progress_change,
-        inputs=None,
-        outputs=[refresh_sc_list,scan_progress]
-    )
+    # scan_progress.change(
+    #     fn=on_scan_progress_change,
+    #     inputs=None,
+    #     outputs=[refresh_sc_list,scan_progress]
+    # )
     # civitai upload tab end
     
     # civitai scan new version tab start

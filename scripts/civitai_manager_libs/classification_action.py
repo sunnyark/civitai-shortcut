@@ -9,10 +9,6 @@ from . import classification
 from . import util
 from . import sc_browser
 
-def on_refresh_classification_change():
-    current_time = datetime.datetime.now()
-    return current_time, gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
-
 def on_ui(refresh_classification:gr.Textbox):
     with gr.Column(scale=1):
         with gr.Row(visible=False):
@@ -25,7 +21,7 @@ def on_ui(refresh_classification:gr.Textbox):
                 sc_gallery = sc_browser.on_ui(refresh_sc_list)
     with gr.Column(scale=5):  
         classification_list = gr.Dropdown(label='Classification List', multiselect=None, choices=[setting.PLACEHOLDER] + classification.get_list(), value=setting.PLACEHOLDER ,interactive=True)                          
-        classification_gallery = gr.Gallery(label="Classification Gallery", elem_id="classification_gallery", show_label=False, value="").style(grid=[8], height="auto")
+        classification_gallery = gr.Gallery(label="Classification Gallery", elem_id="classification_gallery", show_label=False, value="").style(grid=[setting.classification_gallery_column], height="auto")
         classification_name = gr.Textbox(label="Name", value="",interactive=True, lines=1)
         classification_info = gr.Textbox(label="Description", value="",interactive=True, lines=1)
         with gr.Row():
@@ -128,6 +124,10 @@ def on_ui(refresh_classification:gr.Textbox):
             refresh_gallery
         ]          
     )
+
+def on_refresh_classification_change():
+    current_time = datetime.datetime.now()
+    return current_time, gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
 
 def on_sc_gallery_select(evt: gr.SelectData, Classification_name , shortcuts):
     

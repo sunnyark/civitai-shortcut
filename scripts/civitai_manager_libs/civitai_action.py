@@ -11,7 +11,6 @@ from . import model
 from . import civitai
 from . import setting
 from . import downloader
-from . import model_action
 from . import classification
 
 from tqdm import tqdm
@@ -39,7 +38,7 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             # with gr.Row():
             #     an_lora = gr.Checkbox(label="Download to additional-networks folder", value=False)          
             with gr.Row():
-                vs_folder = gr.Checkbox(label="Create specific folders with the following", value=True)               
+                vs_folder = gr.Checkbox(label="Create individual folders with the following", value=True)               
             with gr.Row():
                 vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=True).style(container=True)
                 download_model = gr.Button(value="Download", variant="primary")
@@ -304,7 +303,7 @@ def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
         msg = download_file_thread(file_name, version_id, False, vs_folder,vs_foldername)
         download_image_files(version_id, False, vs_folder,vs_foldername)
         # 다운 받은 모델 정보를 갱신한다.    
-        model_action.Load_Downloaded_Models()
+        model.update_downloaded_model()
 
     current_time = datetime.datetime.now()    
     return gr.update(value=current_time),gr.update(value=current_time),gr.update(value=current_time)    
@@ -313,7 +312,7 @@ def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index]
 
 def on_open_folder_click(mid,vid):
-    path = model_action.get_model_folder(vid)
+    path = model.get_model_folder(vid)
     if path:
         util.open_folder(path)
 
@@ -363,8 +362,8 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         
         images_url, images_meta = get_version_description_gallery(version_info)
         
-        vs_foldername = util.generate_version_foldername(model_info['name'],version_name,versionid)        
-        model_folder = util.generate_model_foldername(model_info['name'],model_type,False)
+        vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)        
+        model_folder = setting.generate_model_foldername(model_info['name'],model_type,False)
         
         # 정리하자... 
         if os.getcwd() in model_folder and os.path.exists(model_folder):
@@ -551,13 +550,7 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldernam
             pass
         
     # 저장할 파일명을 생성한다.
-    savefile_base = util.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])    
-    if vs_folder:
-        # 개별폴더를 만들면 저장 파일명을 지정파일명을 폴더명으로 한다.
-        if vs_foldername:
-            vs_foldername = vs_foldername.strip()            
-            if len(vs_foldername) > 0:
-                savefile_base = vs_foldername
+    savefile_base = get_save_base_name(version_info)
                                 
     path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
     info_file = civitai.write_version_info(path_file, version_info)
@@ -571,64 +564,64 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldernam
 
     return f"Download started"
 
-def get_image_base_name(version_info):
+def get_save_base_name(version_info):
     # 이미지 파일명도 primary 이름으로 저장한다.
            
     base = None    
     primary_file = civitai.get_primary_file_by_version_info(version_info)
     if not primary_file:
-        base = util.replace_filename(version_info['model']['name'] + "." + version_info['name'])
+        base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
     else:
         base, ext = os.path.splitext(primary_file['name'])   
     return base
 
-def download_preview_image(version_id, lora_an, vs_folder,vs_foldername=None):
-    message =""
-    base = None
+# def download_preview_image(version_id, lora_an, vs_folder, vs_foldername=None):
+#     message =""
+#     base = None
     
-    if not version_id:                
-        return         
+#     if not version_id:                
+#         return         
     
-    version_info = civitai.get_version_info_by_version_id(version_id)          
+#     version_info = civitai.get_version_info_by_version_id(version_id)          
     
-    if not version_info:
-        return
+#     if not version_info:
+#         return
     
-    if 'images' not in version_info.keys():
-        return
+#     if 'images' not in version_info.keys():
+#         return
         
-    model_folder = util.make_version_folder(version_info, lora_an , vs_folder,vs_foldername)
+#     model_folder = util.make_version_folder(version_info, lora_an , vs_folder,vs_foldername)
     
-    if not model_folder:
-        return
+#     if not model_folder:
+#         return
 
-    base = get_image_base_name(version_info)
-    base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
+#     base = get_save_base_name(version_info)
+#     base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
     
-    if base and len(base.strip()) > 0:  
-        if "images" in version_info.keys():
-            try:            
-                img_dict = version_info["images"][0] 
-                if "url" in img_dict:
-                    img_url = img_dict["url"]
-                    # use max width
-                    if "width" in img_dict:
-                        if img_dict["width"]:
-                            img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
-                    # get image
-                    with requests.get(img_url, stream=True) as img_r:
-                        if not img_r.ok:
-                            util.printD("Get error code: " + str(img_r.status_code))
-                            return
-                        # write to file
-                        description_img = f"{base}{setting.preview_image_suffix}{setting.preview_image_ext}"
+#     if base and len(base.strip()) > 0:  
+#         if "images" in version_info.keys():
+#             try:            
+#                 img_dict = version_info["images"][0] 
+#                 if "url" in img_dict:
+#                     img_url = img_dict["url"]
+#                     # use max width
+#                     if "width" in img_dict:
+#                         if img_dict["width"]:
+#                             img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
+#                     # get image
+#                     with requests.get(img_url, stream=True) as img_r:
+#                         if not img_r.ok:
+#                             util.printD("Get error code: " + str(img_r.status_code))
+#                             return
+#                         # write to file
+#                         description_img = f"{base}{setting.preview_image_suffix}{setting.preview_image_ext}"
 
-                        with open(description_img, 'wb') as f:
-                            img_r.raw.decode_content = True
-                            shutil.copyfileobj(img_r.raw, f)
-            except Exception as e:
-                return
-    return
+#                         with open(description_img, 'wb') as f:
+#                             img_r.raw.decode_content = True
+#                             shutil.copyfileobj(img_r.raw, f)
+#             except Exception as e:
+#                 return
+#     return
 
 def download_image_files(version_id, lora_an, vs_folder,vs_foldername=None):
     message =""
@@ -651,7 +644,7 @@ def download_image_files(version_id, lora_an, vs_folder,vs_foldername=None):
     if not model_folder:
         return
 
-    base = get_image_base_name(version_info)
+    base = get_save_base_name(version_info)
     base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
     
     if base and len(base.strip()) > 0:                                           
