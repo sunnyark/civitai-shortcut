@@ -1,4 +1,4 @@
-# vitai Shortcut
+# Civitai Shortcut
 
 Stable Diffusion Webui Extension for Civitai, to download civitai shortcut and models.
 
