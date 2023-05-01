@@ -102,7 +102,26 @@ def init_civitai_shortcut():
             setting.usergallery_images_column = int(environment['usergallery_images_column'])
         if "usergallery_images_page_limit" in environment.keys():
             setting.usergallery_images_page_limit = int(environment['usergallery_images_page_limit'])
+
+        if "model_folders" in environment.keys():
             
+            user_folders = environment['model_folders']
+            
+            if setting.model_types['wildcards'] in user_folders.keys():
+                setting.model_folders[setting.model_types['wildcards']] = user_folders[setting.model_types['wildcards']]
+                
+            if setting.model_types['controlnet'] in user_folders.keys():
+                setting.model_folders[setting.model_types['controlnet']] = user_folders[setting.model_types['controlnet']]
+
+            if setting.model_types['aestheticgradient'] in user_folders.keys():
+                setting.model_folders[setting.model_types['aestheticgradient']] = user_folders[setting.model_types['aestheticgradient']]
+
+            if setting.model_types['poses'] in user_folders.keys():
+                setting.model_folders[setting.model_types['poses']] = user_folders[setting.model_types['poses']]
+
+            if setting.model_types['other'] in user_folders.keys():
+                setting.model_folders[setting.model_types['other']] = user_folders[setting.model_types['other']]
+                    
     # 소유한 모델을 스캔하여 저장한다.
     model.update_downloaded_model()
                

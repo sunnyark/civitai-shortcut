@@ -42,7 +42,7 @@ model_folders = {
     model_types['aestheticgradient']: os.path.join("extensions","stable-diffusion-webui-aesthetic-gradients","aesthetic_embeddings"),        
     model_types['controlnet']: os.path.join("extensions","sd-webui-controlnet","models"),
     model_types['poses']: os.path.join("models","Poses"),
-    model_types['wildcards']: os.path.join("extensions","stable-diffusion-webui-wildcards","Wildcards"),    
+    model_types['wildcards']: os.path.join("extensions","sd-dynamic-prompts","wildcards"),    
     model_types['other']: os.path.join("models","Other"),    
     
     model_types['vae']: os.path.join("models","VAE"),    

@@ -38,7 +38,7 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             # with gr.Row():
             #     an_lora = gr.Checkbox(label="Download to additional-networks folder", value=False)          
             with gr.Row():
-                vs_folder = gr.Checkbox(label="Create individual folders with the following", value=True)               
+                vs_folder = gr.Checkbox(label="Create individual folders with", value=True)               
             with gr.Row():
                 vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=True).style(container=True)
                 download_model = gr.Button(value="Download", variant="primary")

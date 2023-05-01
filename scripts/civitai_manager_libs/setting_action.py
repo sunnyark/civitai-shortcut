@@ -3,6 +3,7 @@ import gradio as gr
 import datetime
 import requests
 import shutil
+import json
 
 from . import util
 from . import model
@@ -36,6 +37,11 @@ def create_models_information(files, mfolder, vs_folder,register_shortcut, progr
                 model_folder = util.make_version_folder(version_info, False , vs_folder)
             else:
                 model_folder = vfolder
+            
+            # version info file name 으로 교체시
+            # savefile_base = get_save_base_name(version_info)   
+            # basename = savefile_base
+            # destination = os.path.join(model_folder, f"{basename}{ext}")
             
             # save info
             info_path = os.path.join(model_folder, f"{basename}{setting.info_suffix}{setting.info_ext}")       
@@ -80,12 +86,16 @@ def create_models_information(files, mfolder, vs_folder,register_shortcut, progr
                 
     return non_list
                     
-def scan_models(progress=gr.Progress()):    
+def scan_models(fix_information_filename, progress=gr.Progress()):    
     root_dirs = list(set(setting.model_folders.values()))
     file_list = util.search_file(root_dirs,None,setting.model_exts)    
 
     result = list()
     
+    if fix_information_filename:
+        # fix_version_information_filename()
+        pass
+        
     for file_path in progress.tqdm(file_list, desc=f"Scan Models for Civitai"): 
         
         vfolder , vfile = os.path.split(file_path) 
@@ -97,6 +107,48 @@ def scan_models(progress=gr.Progress()):
 
     return result
 
+def get_save_base_name(version_info):
+    # 이미지 파일명도 primary 이름으로 저장한다.
+           
+    base = None    
+    primary_file = civitai.get_primary_file_by_version_info(version_info)
+    if not primary_file:
+        base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
+    else:
+        base, ext = os.path.splitext(primary_file['name'])   
+    return base
+
+def fix_version_information_filename():
+    root_dirs = list(set(setting.model_folders.values()))
+    file_list = util.search_file(root_dirs,None,[setting.info_ext])
+    
+    version_info = None
+    if not file_list:             
+        return
+    
+    for file_path in file_list:        
+        
+        try:
+            with open(file_path, 'r') as f:
+                json_data = json.load(f)
+            
+                if 'id' in json_data.keys():
+                    version_info = json_data
+                    
+            file_path = file_path.strip()
+            vfolder , vfile = os.path.split(file_path)                     
+            savefile_base = get_save_base_name(version_info)                                
+            info_file = os.path.join(vfolder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")        
+                        
+            if file_path != info_file:
+                if not os.path.isfile(info_file):
+                    os.rename(file_path, info_file)
+
+        except:
+            pass
+    
+
+        
 def on_create_models_info_btn_click(files, mfolder, vsfolder, register_shortcut, progress=gr.Progress()):
     remain_files = create_models_information(files,mfolder,vsfolder,register_shortcut, progress)
     if remain_files and len(remain_files) > 0:
@@ -111,8 +163,8 @@ def on_scan_progress_change():
     current_time = datetime.datetime.now()
     return gr.update(value="###")
 
-def on_scan_models_btn_click(progress=gr.Progress()):
-    files = scan_models(progress)
+def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
+    files = scan_models(fix_information_filename, progress)
     return gr.update(choices=files,value=files,interactive=True,label="Scanned Model List"),gr.update(visible=True),gr.update(visible=True),gr.update(value=True, interactive=True),gr.update(value=True, interactive=True)
     
 def on_scan_to_shortcut_click(progress=gr.Progress()):
@@ -128,13 +180,14 @@ def on_scan_save_modelfolder_change(scan_save_modelfolder):
     if scan_save_modelfolder:
         return gr.update(value=True, interactive=True)
     return gr.update(value=False, interactive=False)
-
+    
 def on_scan_ui():
     with gr.Column():      
         with gr.Row():
             with gr.Accordion("Scan models for Civitai", open=True):    
                 with gr.Row():
                     with gr.Column():
+                        fix_information_filename = gr.Checkbox(label="Fix version information filename", value=False , visible=False) 
                         scan_models_btn = gr.Button(value="Scan Models",variant="primary") 
                         with gr.Box(elem_classes="cs_box", visible=False) as scanned_result:  
                             scan_models_result = gr.CheckboxGroup(visible=True, label="Scanned Model List").style(item_container=True,container=True)
@@ -151,7 +204,7 @@ def on_scan_ui():
                             with gr.Column():
                                 create_models_info_btn = gr.Button(value="Create Model Information",variant="primary")                                                       
         with gr.Row():
-            with gr.Accordion("Update Shortcuts", open=True):    
+            with gr.Accordion("Update Shortcuts", open=True):   
                 with gr.Row():
                     with gr.Column():
                         shortcut_saved_update_btn = gr.Button(value="Update the model information for the shortcut",variant="primary")
@@ -159,7 +212,7 @@ def on_scan_ui():
                     with gr.Column(): 
                         scan_to_shortcut_btn = gr.Button(value="Scan downloaded models for shortcut registration",variant="primary")                    
                         scan_progress = gr.Markdown(value="###", visible=True)
-
+    
     scan_save_modelfolder.change(
         fn=on_scan_save_modelfolder_change,
         inputs=[
@@ -187,7 +240,7 @@ def on_scan_ui():
          
     scan_models_btn.click(
         fn=on_scan_models_btn_click,
-        inputs=None,
+        inputs=[fix_information_filename],
         outputs=[
             scan_models_result,
             scanned_result,
@@ -225,13 +278,28 @@ def on_scan_ui():
         outputs=[scan_progress]
     ) 
     
-def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit):    
+def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
+                      wildcards,controlnet,aestheticgradient,poses,other):    
     environment = dict()
     environment['shortcut_column'] = shortcut_column
     environment['gallery_column'] = gallery_column
     environment['classification_gallery_column'] = classification_gallery_column
     environment['usergallery_images_column'] = usergallery_images_column
     environment['usergallery_images_page_limit'] = usergallery_images_page_limit
+    
+    model_folders = dict()
+    if wildcards:
+        model_folders[setting.model_types['wildcards']] = wildcards
+    if controlnet:
+        model_folders[setting.model_types['controlnet']] = controlnet
+    if aestheticgradient:        
+        model_folders[setting.model_types['aestheticgradient']] = aestheticgradient
+    if poses:        
+        model_folders[setting.model_types['poses']] = poses
+    if other:        
+        model_folders[setting.model_types['other']] = other
+    environment['model_folders'] = model_folders
+    
     setting.save(environment)
     
     util.printD("Save setting. Reload UI is needed")
@@ -251,6 +319,16 @@ def on_setting_ui():
                 with gr.Row():
                     usergallery_images_column = gr.Slider(minimum=1, maximum=10, value=setting.usergallery_images_column, step=1, label='User Gallery Column Count', interactive=True)
                     usergallery_images_page_limit = gr.Slider(minimum=1, maximum=24, value=setting.usergallery_images_page_limit, step=1, label='User Gallery Images Count Per Page', interactive=True)
+
+
+        with gr.Row():
+            with gr.Accordion("Download Folder for Extensions", open=True):
+                with gr.Column():
+                    extension_wildcards_folder = gr.Textbox(value=setting.model_folders[setting.model_types['wildcards']], label=setting.model_types['wildcards'], interactive=True)
+                    extension_controlnet_folder = gr.Textbox(value=setting.model_folders[setting.model_types['controlnet']], label=setting.model_types['controlnet'], interactive=True)
+                    extension_aestheticgradient_folder = gr.Textbox(value=setting.model_folders[setting.model_types['aestheticgradient']], label=setting.model_types['aestheticgradient'], interactive=True)
+                    extension_poses_folder = gr.Textbox(value=setting.model_folders[setting.model_types['poses']], label=setting.model_types['poses'], interactive=True)
+                    extension_other_folder = gr.Textbox(value=setting.model_folders[setting.model_types['other']], label=setting.model_types['other'], interactive=True)                    
                     
         with gr.Row():
             save_btn = gr.Button(value="Save Setting", variant="primary")
@@ -262,7 +340,12 @@ def on_setting_ui():
             gallery_column,
             classification_gallery_column,
             usergallery_images_column,
-            usergallery_images_page_limit
+            usergallery_images_page_limit,
+            extension_wildcards_folder,
+            extension_controlnet_folder,
+            extension_aestheticgradient_folder,
+            extension_poses_folder,
+            extension_other_folder            
         ],
         outputs=None    
     )   
