@@ -15,6 +15,7 @@ Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으�
 # Usage instructions
 
 ![shot 2023-05-01 011915](https://user-images.githubusercontent.com/40237431/235365101-a5754678-8318-446e-85e2-2243fa892400.png)
+
 1. The information in the Civitai model information tab is obtained in real-time from the Civitai website.
    Download : downloads the model for the selected version. You can choose to create specific folders for each version. The downloaded model will be automatically saved in the appropriate location, and a preview image and info will be generated together with it.
 2. The information in the Saved model information tab are composed of the information saved on the Civitai website when creating the shortcut.
@@ -86,7 +87,9 @@ v 1.3c
   Update Shortcut - Move the shortcut update function from the Upload tab.
   Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
   Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
-* Setting tab - Set the number of columns in the image gallery.
+* Setting tab 
+  Shortcut Browser and Information Images,User Gallery Images - Set the number of columns in the image gallery.
+  Download Folder for Extensions - Can set the download path for specific extensions.
 * The name of the model info file that records information about the model has been changed.
   As a result, even models with a normal model info file may be moved to a  new folder when scanning models for Civitai.
   To prevent this, uncheck the "Create a model folder corresponding to the model type" option.
@@ -96,7 +99,9 @@ v 1.3c
   Update Shortcut - Upload tab 에 있던 shortcut update 기능을 옯겨옴
   Update the model information for the shortcut - 등록된 shortcut의 정보를 최신정보로 업데이트함
   Scan downloaded models for shortcut registration - 다운 로드 받았지만 삭제되었거나 모델 정보가 있는 모델의 shortcut을 새로이 등록해줌
-* Setting tab - 이미지 갤러리의 컬럼의 수를 설정함.
+* Setting tab
+  Shortcut Browser and Information Images,User Gallery Images - 이미지 갤러리의 컬럼의 수를 설정함.
+  Download Folder for Extensions - 특정 확장프로그램의 다운로드 경로를 설정함
 * 모델의 정보를 기록하는 모델 인포 파일의 이름이 변경되었습니다.
   이에 따라 정상적인 model info 파일이 있는 모델도 "Scan Models for Civitai" 작업시 새로운 폴더로 이동되어질수 있습니다.
   "Create a model folder corresponding to the model type." 옵션을 해제 하시면 이동을 막을수 있습니다.
