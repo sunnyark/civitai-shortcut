@@ -207,7 +207,7 @@ def on_ui(refresh_shortcut:gr.Textbox):
             with gr.TabItem("Scan New Version"):
                 with gr.Row():
                     with gr.Column():
-                        shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_model_types], interactive=True)                                     
+                        shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)                                     
                         scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
                         sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_column],height="auto")
                         gr.Markdown(value="The feature is to search for new versions of models on Civitai among the downloaded ones.", visible=True)

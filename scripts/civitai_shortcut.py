@@ -67,62 +67,7 @@ def civitai_shortcut_ui():
     )
     
 def init_civitai_shortcut():
-   
-    setting.root_path = os.getcwd()
-    
-    if shared.cmd_opts.embeddings_dir:
-        setting.model_folders[setting.model_types['textualinversion']] = shared.cmd_opts.embeddings_dir
-
-    if shared.cmd_opts.hypernetwork_dir :
-        setting.model_folders[setting.model_types['hypernetwork']] = shared.cmd_opts.hypernetwork_dir
-
-    if shared.cmd_opts.ckpt_dir:
-        setting.model_folders[setting.model_types['checkpoint']] = shared.cmd_opts.ckpt_dir
-
-    if shared.cmd_opts.lora_dir:
-        setting.model_folders[setting.model_types['lora']] = shared.cmd_opts.lora_dir
-        setting.model_folders[setting.model_types['locon']] = shared.cmd_opts.lora_dir
-    
-    setting.shortcut = os.path.join(scripts.basedir(),setting.shortcut)
-    setting.shortcut_setting = os.path.join(scripts.basedir(),setting.shortcut_setting)
-    setting.shortcut_classification = os.path.join(scripts.basedir(),setting.shortcut_classification)
-    setting.shortcut_thumbnail_folder = os.path.join(scripts.basedir(),setting.shortcut_thumbnail_folder)
-    setting.shortcut_save_folder = os.path.join(scripts.basedir(),setting.shortcut_save_folder)
-    setting.shortcut_info_folder = os.path.join(scripts.basedir(),setting.shortcut_info_folder)
-    
-    environment = setting.load()
-    if environment:
-        if "shortcut_column" in environment.keys():
-            setting.shortcut_column = int(environment['shortcut_column'])
-        if "gallery_column" in environment.keys():            
-            setting.gallery_column = int(environment['gallery_column'])
-        if "classification_gallery_column" in environment.keys():
-            setting.classification_gallery_column = int(environment['classification_gallery_column'])
-        if "usergallery_images_column" in environment.keys():
-            setting.usergallery_images_column = int(environment['usergallery_images_column'])
-        if "usergallery_images_page_limit" in environment.keys():
-            setting.usergallery_images_page_limit = int(environment['usergallery_images_page_limit'])
-
-        if "model_folders" in environment.keys():
-            
-            user_folders = environment['model_folders']
-            
-            if setting.model_types['wildcards'] in user_folders.keys():
-                setting.model_folders[setting.model_types['wildcards']] = user_folders[setting.model_types['wildcards']]
-                
-            if setting.model_types['controlnet'] in user_folders.keys():
-                setting.model_folders[setting.model_types['controlnet']] = user_folders[setting.model_types['controlnet']]
-
-            if setting.model_types['aestheticgradient'] in user_folders.keys():
-                setting.model_folders[setting.model_types['aestheticgradient']] = user_folders[setting.model_types['aestheticgradient']]
-
-            if setting.model_types['poses'] in user_folders.keys():
-                setting.model_folders[setting.model_types['poses']] = user_folders[setting.model_types['poses']]
-
-            if setting.model_types['other'] in user_folders.keys():
-                setting.model_folders[setting.model_types['other']] = user_folders[setting.model_types['other']]
-                    
-    # 소유한 모델을 스캔하여 저장한다.
+    setting.init()
     model.update_downloaded_model()
                
 # init

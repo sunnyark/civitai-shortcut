@@ -223,9 +223,7 @@ def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index]
 
 def on_civitai_hidden_change(hidden, index, civitai_images_meta):
-    
     info1,info2,info3 = modules.extras.run_pnginfo(hidden)
-    # 이미지에 메타 데이터가 없으면 info 것을 사용한다.
     if not info2:
         info2 = civitai_images_meta[int(index)]        
     return info2
@@ -277,7 +275,7 @@ def load_saved_model(modelid=None, versionid=None):
                 
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
-                gr.update(value=model_type),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
+                gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(value=file_text),gr.update(label=title_name),\
                 current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),\
                 gr.update(choices=classification.get_list(),value=classification_list, interactive=True)

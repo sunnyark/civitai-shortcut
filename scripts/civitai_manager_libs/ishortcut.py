@@ -222,7 +222,7 @@ def get_list(shortcut_types=None)->str:
     if shortcut_types:
         for sc_type in shortcut_types:
             try:
-                tmp_types.append(setting.ui_model_types[sc_type])
+                tmp_types.append(setting.ui_typenames[sc_type])
             except:
                 pass
             
@@ -274,7 +274,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
     if shortcut_types:
         for sc_type in shortcut_types:
             try:
-                tmp_types.append(setting.ui_model_types[sc_type])
+                tmp_types.append(setting.ui_typenames[sc_type])
             except:
                 pass
                 

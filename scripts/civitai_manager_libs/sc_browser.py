@@ -37,7 +37,7 @@ def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search, sho
 def on_ui(refresh_sc_list: gr.Textbox):
 
     with gr.Accordion("Search", open=True):
-        shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_model_types], interactive=True)
+        shortcut_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
         sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @classification, ....",interactive=True, lines=1)
         sc_classification_list = gr.Dropdown(label='Classification', multiselect=None, value=setting.PLACEHOLDER, choices=[setting.PLACEHOLDER] + classification.get_list(), interactive=True)
         show_only_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)

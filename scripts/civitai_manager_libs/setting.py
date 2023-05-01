@@ -14,55 +14,55 @@ NORESULT = "<no result>"
     
 model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 
-# define model type name -> civitai system model type
-model_types = {
-    'checkpoint':'Checkpoint',
-    'lora':'LORA',
-    'locon':'LoCon',
-    'textualinversion':'TextualInversion',
-    'hypernetwork':'Hypernetwork',
-    'aestheticgradient':'AestheticGradient',
-    'controlnet':'Controlnet',
-    'poses':'Poses',
-    'wildcards':'Wildcards',
-    'other':'Other',
+# define model type name -> civitai model type
+# model_types = {
+#     'checkpoint':'Checkpoint',
+#     'lora':'LORA',
+#     'locon':'LoCon',
+#     'textualinversion':'TextualInversion',
+#     'hypernetwork':'Hypernetwork',
+#     'aestheticgradient':'AestheticGradient',
+#     'controlnet':'Controlnet',
+#     'poses':'Poses',
+#     'wildcards':'Wildcards',
+#     'other':'Other',
           
-    'vae':'VAE',          
-    "anlora":"ANLORA",
-    "unknown":"Unknown"
-}
+#     'vae':'VAE',          
+#     "anlora":"ANLORA",
+#     "unknown":"Unknown"
+# }
 
-# civitai system model type -> folder path
+# civitai model type -> folder path
 model_folders = {
-    model_types['checkpoint']: os.path.join("models","Stable-diffusion"),
-    model_types['lora']: os.path.join("models","Lora"),
-    model_types['locon']: os.path.join("models","Lora"),    
-    model_types['textualinversion']: os.path.join("embeddings"),   
-    model_types['hypernetwork']: os.path.join("models","hypernetworks"),         
-    model_types['aestheticgradient']: os.path.join("extensions","stable-diffusion-webui-aesthetic-gradients","aesthetic_embeddings"),        
-    model_types['controlnet']: os.path.join("extensions","sd-webui-controlnet","models"),
-    model_types['poses']: os.path.join("models","Poses"),
-    model_types['wildcards']: os.path.join("extensions","sd-dynamic-prompts","wildcards"),    
-    model_types['other']: os.path.join("models","Other"),    
+    'Checkpoint': os.path.join("models","Stable-diffusion"),
+    'LORA': os.path.join("models","Lora"),
+    'LoCon': os.path.join("models","Lora"),    
+    'TextualInversion': os.path.join("embeddings"),   
+    'Hypernetwork': os.path.join("models","hypernetworks"),         
+    'AestheticGradient': os.path.join("extensions","stable-diffusion-webui-aesthetic-gradients","aesthetic_embeddings"),        
+    'Controlnet': os.path.join("models","ControlNet"),
+    'Poses': os.path.join("models","Poses"),
+    'Wildcards': os.path.join("extensions","sd-dynamic-prompts","wildcards"),    
+    'Other': os.path.join("models","Other"),    
     
-    model_types['vae']: os.path.join("models","VAE"),    
-    model_types['anlora']: os.path.join("extensions","sd-webui-additional-networks","models","lora"),    
-    model_types['unknown']: os.path.join("models","Unkonwn"),
+    'VAE': os.path.join("models","VAE"),    
+    'ANLORA': os.path.join("extensions","sd-webui-additional-networks","models","lora"),    
+    'Unknown': os.path.join("models","Unkonwn"),
 }
 
 # UI 쪽에서 변환할때 쓰인다.
-# UI model type -> civitai system model type
-ui_model_types = {
-    "Checkpoint" : model_types['checkpoint'],
-    "LoRA" : model_types['lora'],
-    "LyCORIS" : model_types['locon'],
-    "Textual Inversion" : model_types['textualinversion'],
-    "Hypernetwork" : model_types['hypernetwork'],
-    "Aesthetic Gradient" : model_types['aestheticgradient'],
-    "Controlnet" : model_types['controlnet'],
-    "Poses" : model_types['poses'],
-    "Wildcards" : model_types['wildcards'],
-    "Other" : model_types['other'],
+# UI model type -> civitai model type
+ui_typenames = {
+    "Checkpoint" : 'Checkpoint',
+    "LoRA" : 'LORA',
+    "LyCORIS" : 'LoCon',
+    "Textual Inversion" : 'TextualInversion',
+    "Hypernetwork" : 'Hypernetwork',
+    "Aesthetic Gradient" : 'AestheticGradient',
+    "Controlnet" : 'Controlnet',
+    "Poses" : 'Poses',
+    "Wildcards" : 'Wildcards',
+    "Other" : 'Other',
 }
 
 #information tab 
@@ -96,12 +96,88 @@ shortcut_classification = "CivitaiShortCutClassification.json"
 shortcut_thumbnail_folder =  "sc_thumb_images"
 shortcut_save_folder =  "sc_saves"
 shortcut_info_folder =  "sc_infos"
+shortcut_gallery_folder =  "sc_gallery"
 
 no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
 
 
 shortcut_env = dict()
 
+def init():
+    global root_path
+    
+    global model_folders
+    
+    global shortcut
+    global shortcut_setting
+    global shortcut_classification
+    global shortcut_thumbnail_folder
+    global shortcut_save_folder
+    global shortcut_info_folder
+    global shortcut_gallery_folder
+    
+    global shortcut_column
+    global gallery_column
+    global classification_gallery_column
+    global usergallery_images_column
+    global usergallery_images_page_limit
+
+        
+    root_path = os.getcwd()
+
+    shortcut = os.path.join(scripts.basedir(),shortcut)
+    shortcut_setting = os.path.join(scripts.basedir(),shortcut_setting)
+    shortcut_classification = os.path.join(scripts.basedir(),shortcut_classification)
+    shortcut_thumbnail_folder = os.path.join(scripts.basedir(),shortcut_thumbnail_folder)
+    shortcut_save_folder = os.path.join(scripts.basedir(),shortcut_save_folder)
+    shortcut_info_folder = os.path.join(scripts.basedir(),shortcut_info_folder)
+    shortcut_gallery_folder = os.path.join(scripts.basedir(),shortcut_gallery_folder)
+        
+    if shared.cmd_opts.embeddings_dir:
+        model_folders['TextualInversion'] = shared.cmd_opts.embeddings_dir
+
+    if shared.cmd_opts.hypernetwork_dir :
+        model_folders['Hypernetwork'] = shared.cmd_opts.hypernetwork_dir
+
+    if shared.cmd_opts.ckpt_dir:
+        model_folders['Checkpoint'] = shared.cmd_opts.ckpt_dir
+
+    if shared.cmd_opts.lora_dir:
+        model_folders['LORA'] = shared.cmd_opts.lora_dir
+        model_folders['LoCon'] = shared.cmd_opts.lora_dir
+    
+    environment = load()
+    if environment:
+        if "shortcut_column" in environment.keys():
+            shortcut_column = int(environment['shortcut_column'])
+        if "gallery_column" in environment.keys():            
+            gallery_column = int(environment['gallery_column'])
+        if "classification_gallery_column" in environment.keys():
+            classification_gallery_column = int(environment['classification_gallery_column'])
+        if "usergallery_images_column" in environment.keys():
+            usergallery_images_column = int(environment['usergallery_images_column'])
+        if "usergallery_images_page_limit" in environment.keys():
+            usergallery_images_page_limit = int(environment['usergallery_images_page_limit'])
+
+        if "model_folders" in environment.keys():
+                
+            user_folders = environment['model_folders']
+            
+            if 'Wildcards' in user_folders.keys():
+                model_folders['Wildcards'] = user_folders['Wildcards']
+                
+            if 'Controlnet' in user_folders.keys():
+                model_folders['Controlnet'] = user_folders['Controlnet']
+
+            if 'AestheticGradient' in user_folders.keys():
+                model_folders['AestheticGradient'] = user_folders['AestheticGradient']
+
+            if 'Poses' in user_folders.keys():
+                model_folders['Poses'] = user_folders['Poses']
+
+            if 'Other' in user_folders.keys():
+                model_folders['Other'] = user_folders['Other']
+                
 def generate_version_foldername(model_name,ver_name,ver_id):      
     # return f"{model_name}-{ver_name}-{ver_id}"
     return f"{model_name}-{ver_name}"
@@ -115,19 +191,28 @@ def generate_model_foldername(model_name , content_type=None, lora_an=False):
     if len(model_name) <= 0:
         return
             
-    if lora_an and content_type == model_types['lora']:
-        model_folder = model_folders[model_types['anlora']]
+    if lora_an and content_type == 'LORA':
+        model_folder = model_folders['ANLORA']
     elif content_type in model_folders.keys():
         model_folder = model_folders[content_type]        
     elif content_type:
-        model_folder = os.path.join(model_folders[model_types['unknown']], util.replace_dirname(content_type))
+        model_folder = os.path.join(model_folders['Unknown'], util.replace_dirname(content_type))
     else:
-        model_folder = os.path.join(model_folders[model_types['unknown']])
+        model_folder = os.path.join(model_folders['Unknown'])
                      
     model_folder = os.path.join(model_folder, util.replace_dirname(model_name))
                 
     return model_folder 
+    
+def get_model_folders():
+    return model_folders.values()
 
+def get_ui_typename(model_type):
+    for k,v in ui_typenames.items():
+        if v == model_type:
+            return k
+    return model_type
+    
 def get_modelid_from_shortcutname(sc_name):
     if sc_name:
         return sc_name[sc_name.rfind(':') + 1:]
@@ -145,6 +230,12 @@ def get_image_url_to_shortcut_file(modelid, versionid, image_url):
         return description_img
     return None  
 
+def get_image_url_to_gallery_file(image_url):
+    if image_url:
+        image_id, ext = os.path.splitext(os.path.basename(image_url))
+        description_img = os.path.join(shortcut_gallery_folder, f"{image_id}{preview_image_ext}")
+        return description_img
+    return None  
 
 def save(env):
     try:
@@ -168,137 +259,10 @@ def load():
         pass
 
     return json_data
-
-# setting_file = "CivitaiShortCut_Setting.json"
-
-# ModelUITypeFolder = { "model_types" : model_types,  "model_folders" : model_folders, "ui_model_types" : ui_model_types }
-# CivitaiShortCut_Setting.json
-# {
-#     "ModelUITypeFolder" : { "model_types" : model_types,  "model_folders" : model_folders, "ui_model_types" : ui_model_types }
-# }
-
-# def write(ui_type_folder):
-#     SettingData = dict()    
-#     SettingData["ModelUITypeFolder"] = ui_type_folder
     
-#     path = os.path.join(scripts.basedir(), setting_file)
-#     try:
-#         with open(path, 'w') as f:
-#             json.dump(SettingData, f, indent=4)
-#     except Exception as e:
-#         return False
+# def add_custom_type(custom_types):
     
-#     return True
-
-# def read()->dict:
-#     path = os.path.join(scripts.basedir(), setting_file)
+#     global model_folders,ui_typenames        
     
-#     if not os.path.isfile(path):
-#         return None
-    
-#     m_types = None    
-#     m_folders = None
-#     ui_types = None
-    
-#     ui_type_folder = None
-#     try:
-#         json_data = None
-#         with open(path, 'r') as f:
-#             json_data = json.load(f)            
-#             ui_type_folder = json_data["ModelUITypeFolder"]
-#             if "model_types" in ui_type_folder:
-#                 m_types = ui_type_folder["model_types"]
-#             if "ui_model_types" in ui_type_folder:
-#                 ui_types = ui_type_folder["ui_model_types"]
-#             if "model_folders" in ui_type_folder:
-#                 m_folders = ui_type_folder["model_folders"]
-            
-#             ui_type_folder = { "model_types" : m_types, "ui_model_types" : ui_types, "model_folders" : m_folders }
-#     except:
-#         return None
-    
-#     return ui_type_folder
-    
-# def load(ui_type_folder:dict):
-#     global model_types, ui_model_types, model_folders
-
-#     if not ui_type_folder:
-#         return False
-    
-#     if "model_types" in ui_type_folder.keys():
-#         model_types.update(ui_type_folder['model_types'])
-
-#     if "model_folders" in ui_type_folder.keys():
-#         model_folders.update(ui_type_folder['model_folders'])
-
-#     if "ui_model_types" in ui_type_folder.keys():
-#         ui_model_types.update(ui_type_folder['ui_model_types'])
-    
-#     return True
-    
-# def make_model_type(civitai_type:str, ui_type:str, m_folder:str)->dict:
-    
-#     if not civitai_type:
-#         return
-
-#     if not ui_type:
-#         return
-    
-#     if not m_folder:
-#         return
-
-#     define_type = civitai_type.lower()
-
-#     m_types = dict()
-#     ui_types = dict()
-#     m_folders = dict()
-    
-#     m_types[define_type] = civitai_type
-#     ui_types[ui_type] = civitai_type
-#     m_folders[civitai_type] = m_folder
-    
-#     ui_type_folder = { "model_types" : m_types, "ui_model_types" : ui_types, "model_folders" : m_folders }
-    
-#     return ui_type_folder
-    
-# def add_model_type(ui_type_folder:dict, civitai_type:str, ui_type:str, m_folder:str)->dict:
-#     if not ui_type_folder:
-#         return None
-    
-#     utf = make_model_type(civitai_type, ui_type, m_folder)
-    
-#     if utf:
-#         ui_type_folder.update(utf)    
-    
-#     return ui_type_folder
-   
-# def delete_model_type(ui_type_folder:dict, civitai_type, ui_type):
-#     if not ui_type_folder:
-#         return None
-    
-#     if not civitai_type:
-#         return ui_type_folder
-
-#     if not ui_type:
-#         return ui_type_folder    
-    
-#     m_types = dict()
-#     ui_types = dict()
-#     m_folders = dict()
-        
-#     if "model_types" in ui_type_folder.keys():
-#         m_types = ui_type_folder['model_types']
-
-#     if "model_folders" in ui_type_folder.keys():
-#         m_folders = ui_type_folder['model_folders']
-
-#     if "ui_model_types" in ui_type_folder.keys():
-#         ui_types = ui_type_folder['ui_model_types']
-        
-#     define_type = civitai_type.lower()
-        
-#     m_types.pop(define_type,None)    
-#     ui_types.pop(ui_type,None)
-#     m_folders.pop(civitai_type,None)
-    
-#     return ui_type_folder
+#     model_folders[custom_types['model_type']] = custom_types['model_folder']
+#     ui_typenames[custom_types['ui_typename']] = custom_types['model_type']

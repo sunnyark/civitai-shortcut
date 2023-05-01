@@ -155,7 +155,7 @@ def on_create_models_info_btn_click(files, mfolder, vsfolder, register_shortcut,
         return gr.update(choices=remain_files, value=remain_files, interactive=True, label="These models are not registered with Civitai."),gr.update(visible=True),gr.update(visible=True)    
     return gr.update(choices=[], value=[], interactive=True),gr.update(visible=False),gr.update(visible=False)  
          
-def on_thumb_progress_change():
+def on_update_progress_change():
     current_time = datetime.datetime.now()
     return gr.update(value="###")
 
@@ -172,7 +172,7 @@ def on_scan_to_shortcut_click(progress=gr.Progress()):
     ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
     return gr.update(value="Scan downloaded models for shortcut registration is Done")
 
-def on_shortcut_saved_update_btn(progress=gr.Progress()):
+def on_update_all_shortcuts_btn(progress=gr.Progress()):
     ishortcut_action.update_all_shortcut_model(progress)
     return gr.update(value="Update the model information for the shortcut is Done")
 
@@ -207,8 +207,8 @@ def on_scan_ui():
             with gr.Accordion("Update Shortcuts", open=True):   
                 with gr.Row():
                     with gr.Column():
-                        shortcut_saved_update_btn = gr.Button(value="Update the model information for the shortcut",variant="primary")
-                        thumb_progress = gr.Markdown(value="###", visible=True)
+                        update_all_shortcuts_btn = gr.Button(value="Update the model information for the shortcut",variant="primary")
+                        update_progress = gr.Markdown(value="###", visible=True)
                     with gr.Column(): 
                         scan_to_shortcut_btn = gr.Button(value="Scan downloaded models for shortcut registration",variant="primary")                    
                         scan_progress = gr.Markdown(value="###", visible=True)
@@ -250,6 +250,22 @@ def on_scan_ui():
         ]                
     )
                  
+
+    
+    update_all_shortcuts_btn.click(
+        fn=on_update_all_shortcuts_btn,
+        inputs=None,
+        outputs=[
+            update_progress,
+        ]
+    ) 
+    
+    update_progress.change(
+        fn=on_update_progress_change,
+        inputs=None,
+        outputs=[update_progress]
+    )
+
     scan_to_shortcut_btn.click(
         fn=on_scan_to_shortcut_click,
         inputs=None,
@@ -257,21 +273,7 @@ def on_scan_ui():
             scan_progress,
         ]                
     )
-    
-    shortcut_saved_update_btn.click(
-        fn=on_shortcut_saved_update_btn,
-        inputs=None,
-        outputs=[
-            thumb_progress,
-        ]
-    ) 
-    
-    thumb_progress.change(
-        fn=on_thumb_progress_change,
-        inputs=None,
-        outputs=[thumb_progress]
-    )
-    
+        
     scan_progress.change(
         fn=on_scan_progress_change,
         inputs=None,
@@ -286,24 +288,33 @@ def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_co
     environment['classification_gallery_column'] = classification_gallery_column
     environment['usergallery_images_column'] = usergallery_images_column
     environment['usergallery_images_page_limit'] = usergallery_images_page_limit
-    
+
     model_folders = dict()
     if wildcards:
-        model_folders[setting.model_types['wildcards']] = wildcards
+        model_folders['Wildcards'] = wildcards
     if controlnet:
-        model_folders[setting.model_types['controlnet']] = controlnet
+        model_folders['Controlnet'] = controlnet
     if aestheticgradient:        
-        model_folders[setting.model_types['aestheticgradient']] = aestheticgradient
+        model_folders['AestheticGradient'] = aestheticgradient
     if poses:        
-        model_folders[setting.model_types['poses']] = poses
+        model_folders['Poses'] = poses
     if other:        
-        model_folders[setting.model_types['other']] = other
+        model_folders['Other'] = other
+        
     environment['model_folders'] = model_folders
     
     setting.save(environment)
     
     util.printD("Save setting. Reload UI is needed")
-                                    
+               
+def on_usergallery_openfolder_btn_click():
+    if os.path.exists(setting.shortcut_gallery_folder):
+        util.open_folder(setting.shortcut_gallery_folder)   
+
+def on_usergallery_cleangallery_btn_click():
+    if os.path.exists(setting.shortcut_gallery_folder):
+        shutil.rmtree(setting.shortcut_gallery_folder)
+        
 def on_setting_ui():
             
     with gr.Column():       
@@ -319,20 +330,35 @@ def on_setting_ui():
                 with gr.Row():
                     usergallery_images_column = gr.Slider(minimum=1, maximum=10, value=setting.usergallery_images_column, step=1, label='User Gallery Column Count', interactive=True)
                     usergallery_images_page_limit = gr.Slider(minimum=1, maximum=24, value=setting.usergallery_images_page_limit, step=1, label='User Gallery Images Count Per Page', interactive=True)
-
+                with gr.Row():                    
+                    usergallery_openfolder_btn = gr.Button(value="Open User Gallery Cache Folder", variant="primary")
+                    with gr.Accordion("Clean User Gallery Cache", open=False):
+                        usergallery_cleangallery_btn = gr.Button(value="Clean User Gallery Cache", variant="primary")
 
         with gr.Row():
             with gr.Accordion("Download Folder for Extensions", open=True):
                 with gr.Column():
-                    extension_wildcards_folder = gr.Textbox(value=setting.model_folders[setting.model_types['wildcards']], label=setting.model_types['wildcards'], interactive=True)
-                    extension_controlnet_folder = gr.Textbox(value=setting.model_folders[setting.model_types['controlnet']], label=setting.model_types['controlnet'], interactive=True)
-                    extension_aestheticgradient_folder = gr.Textbox(value=setting.model_folders[setting.model_types['aestheticgradient']], label=setting.model_types['aestheticgradient'], interactive=True)
-                    extension_poses_folder = gr.Textbox(value=setting.model_folders[setting.model_types['poses']], label=setting.model_types['poses'], interactive=True)
-                    extension_other_folder = gr.Textbox(value=setting.model_folders[setting.model_types['other']], label=setting.model_types['other'], interactive=True)                    
+                    extension_wildcards_folder = gr.Textbox(value=setting.model_folders['Wildcards'], label="Wildcards", interactive=True)
+                    extension_controlnet_folder = gr.Textbox(value=setting.model_folders['Controlnet'], label="Controlnet", interactive=True)
+                    extension_aestheticgradient_folder = gr.Textbox(value=setting.model_folders['AestheticGradient'], label="Aesthetic Gradient", interactive=True)
+                    extension_poses_folder = gr.Textbox(value=setting.model_folders['Poses'], label="Poses", interactive=True)
+                    extension_other_folder = gr.Textbox(value=setting.model_folders['Other'], label="Other", interactive=True)                    
                     
         with gr.Row():
             save_btn = gr.Button(value="Save Setting", variant="primary")
-                        
+
+    usergallery_openfolder_btn.click(
+        fn=on_usergallery_openfolder_btn_click,
+        inputs=None,
+        outputs=None    
+    )
+    
+    usergallery_cleangallery_btn.click(
+        fn=on_usergallery_cleangallery_btn_click,
+        inputs=None,
+        outputs=None    
+    )
+                            
     save_btn.click(
         fn=on_save_btn_click,
         inputs=[
