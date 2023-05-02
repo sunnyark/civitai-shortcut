@@ -267,29 +267,48 @@ def change_width_from_image_url(image_url, width):
     return re.sub('/width=\d+/', '/width=' + str(width) + '/', image_url)
 
 # get id from url
-def get_model_id_from_url(url):
-    id = ""
+# def get_model_id_from_url(url):
+#     id = ""
 
+#     if not url:
+#         return ""
+
+#     if url.isnumeric():
+#         # is already an id
+#         id = str(url)
+#         return id
+    
+#     s = url.split("/")
+#     if len(s) < 2:
+#         return ""
+    
+#     if s[-2].isnumeric():
+#         id  = s[-2]
+#     elif s[-1].isnumeric():
+#         id  = s[-1]
+#     else:
+#         return ""
+    
+#     return id
+
+def get_model_id_from_url(url):
     if not url:
         return ""
 
     if url.isnumeric():
-        # is already an id
-        id = str(url)
-        return id
+        return str(url)
     
     s = url.split("/")
     if len(s) < 2:
         return ""
     
-    if s[-2].isnumeric():
-        id  = s[-2]
-    elif s[-1].isnumeric():
-        id  = s[-1]
-    else:
-        return ""
+    for i in range(len(s)):
+        if s[i] == "models" and i < len(s)-1:
+            id_str = s[i+1].split("?")[0]
+            if id_str.isnumeric():
+                return id_str
     
-    return id
+    return ""
 
 def search_file(root_dirs:list,base:list,exts:list)->list:
     file_list = list()
