@@ -350,14 +350,15 @@ from tqdm import tqdm
 
 def download_images(dn_image_list:list):        
     if dn_image_list:
-        for img_url in tqdm(dn_image_list,desc=f"{setting.Extensions_Name} preloading"):            
+        # for img_url in tqdm(dn_image_list,desc=f"{setting.Extensions_Name} preloading"):            
+        for img_url in dn_image_list:
             gallery_img_file = setting.get_image_url_to_gallery_file(img_url)              
             # util.printD(gallery_img_file)
             if not os.path.isfile(gallery_img_file):                
                 with requests.get(img_url,stream=True) as img_r:
-                    if not img_r.ok:                        
-                        continue                                                                            
-                    
+                    if not img_r.ok:
+                        continue
+
                     with open(gallery_img_file, 'wb') as f:
                         img_r.raw.decode_content = True
                         shutil.copyfileobj(img_r.raw, f)
