@@ -16,7 +16,7 @@ from . import classification
 from tqdm import tqdm
 from PIL import Image
 
-def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
+def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     
     with gr.Column(scale=1):
         with gr.Row():
@@ -36,9 +36,9 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             with gr.Row():
                 filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True) 
             with gr.Row():
-                vs_folder = gr.Checkbox(label="Create individual folders with", value=True)               
+                vs_folder = gr.Checkbox(label="Create individual version folder with", value=False , interactive=True)               
             with gr.Row():
-                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=True).style(container=True)
+                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
                 download_model = gr.Button(value="Download", variant="primary")
             with gr.Row():
                 civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
@@ -68,6 +68,8 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             
             
     with gr.Row(visible=False):
+        selected_version_id = gr.Textbox()
+        
         #civitai model information                
         img_index = gr.Number(value=-1, show_label=False)
         civitai_images = gr.State() # 로드된 image_list
@@ -85,13 +87,26 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
     except:
         pass
 
+    gallery = refresh_gallery.change(
+        fn=on_civitai_gallery_loading,
+        inputs=[
+            civitai_images_url,
+        ],
+        outputs=[
+            civitai_gallery,
+            civitai_images,
+        ]     
+    )
+    
     model_classification_update_btn.click(
         fn=on_model_classification_update_btn_click,
         inputs=[
             model_classification,
             selected_model_id
         ],
-        outputs=[refresh_sc_list]
+        outputs=[
+            refresh_sc_list
+        ]
     )        
 
     download_model.click(
@@ -99,11 +114,14 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
         inputs=[
             selected_version_id,
             filename_list,            
-            # an_lora,
             vs_folder,
             vs_folder_name
         ],
-        outputs=[refresh_sc_list,refresh_information,refresh_gallery]
+        outputs=[
+            refresh_sc_list,
+            refresh_information,
+            refresh_gallery
+        ]
     )  
 
     selected_model_id.change(
@@ -116,7 +134,6 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_model_url_txt, 
             downloaded_tab, 
             downloaded_info, 
-            # an_lora, 
             model_type, 
             versions_list,
             description_html,
@@ -130,7 +147,8 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_openfolder,
             vs_folder_name,
             model_classification
-        ] 
+        ],
+        cancels=gallery
     )
     
     versions_list.select(
@@ -143,7 +161,6 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_model_url_txt, 
             downloaded_tab, 
             downloaded_info, 
-            # an_lora, 
             model_type, 
             versions_list,
             description_html,
@@ -157,19 +174,9 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_openfolder,
             vs_folder_name,
             model_classification
-        ]
-    )    
-
-    refresh_gallery.change(
-        fn=on_civitai_gallery_loading,
-        inputs=[
-            civitai_images_url,
         ],
-        outputs=[
-            civitai_gallery,
-            civitai_images,
-        ]     
-    )
+        cancels=gallery
+    )    
 
     refresh_information.change(
         fn=on_load_model,
@@ -181,7 +188,6 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_model_url_txt, 
             downloaded_tab, 
             downloaded_info, 
-            # an_lora, 
             model_type, 
             versions_list,
             description_html,
@@ -195,7 +201,8 @@ def on_ui(selected_version_id:gr.Textbox(),selected_model_id:gr.Textbox(),refres
             civitai_openfolder,
             vs_folder_name,
             model_classification
-        ]         
+        ],
+        cancels=gallery
     )
             
     civitai_gallery.select(on_gallery_select, civitai_images, [img_index, hidden])    
@@ -216,47 +223,6 @@ def on_model_classification_update_btn_click(model_classification, modelid):
             classification.add_classification_shortcut(name, str(modelid))
     current_time = datetime.datetime.now()
     return current_time
-    
-def on_load_model(modelid=None, versionid=None):
-    return load_model(modelid,versionid)
-
-def on_versions_list_select(evt: gr.SelectData, modelid:str):
-    return load_model(modelid,evt.index)
-
-def load_model(modelid, versionid):
-    if modelid:
-        model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,versionid)    
-        if model_info:
-            downloaded_info = None
-            is_downloaded = False            
-            is_visible_openfolder = False
-
-            if downloaded_versions_list:
-                downloaded_info = "\n".join(downloaded_versions_list.values())
-                
-                if versionid in downloaded_versions_list:
-                    is_visible_openfolder=True                
-                        
-            if downloaded_info:
-                is_downloaded = True 
-            
-            current_time = datetime.datetime.now()
-                
-            classification_list = classification.get_classification_names_by_modelid(modelid)
-                                
-            return gr.update(value=versionid),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
-                gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
-                gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername),\
-                gr.update(choices=classification.get_list(),value=classification_list)
-
-    # 모델 정보가 없다면 클리어 한다.
-    # clear model information
-    return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
-        gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
-        gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
-        gr.update(choices=classification.get_list(), value=[], interactive=True)
 
 def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
     if image_url:
@@ -294,8 +260,8 @@ def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
     msg = None
     if version_id:    
         # 프리뷰이미지와 파일 모두를 다운 받는다.
-        msg = download_file_thread(file_name, version_id, False, vs_folder,vs_foldername)
-        download_image_files(version_id, False, vs_folder,vs_foldername)
+        msg = download_file_thread(file_name, version_id, vs_folder, vs_foldername)
+        # download_image_files(version_id, vs_folder, vs_foldername)
         # 다운 받은 모델 정보를 갱신한다.    
         model.update_downloaded_model()
 
@@ -316,9 +282,48 @@ def on_civitai_hidden_change(hidden, index, civitai_images_meta):
     if not info2:
         info2 = civitai_images_meta[int(index)]        
     return info2
-    
-    # return civitai_images_meta[int(index)]
-        
+
+def on_load_model(modelid=None, ver_index=None):
+    return load_model(modelid, ver_index)
+
+def on_versions_list_select(evt: gr.SelectData, modelid:str):
+    return load_model(modelid, evt.index)
+
+def load_model(modelid, ver_index):
+    if modelid:
+        model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,ver_index)    
+        if model_info:
+            downloaded_info = None
+            is_downloaded = False            
+            is_visible_openfolder = False
+
+            if downloaded_versions_list:
+                downloaded_info = "\n".join(downloaded_versions_list.values())
+                
+                if versionid in downloaded_versions_list:
+                    is_visible_openfolder=True                
+                        
+            if downloaded_info:
+                is_downloaded = True 
+            
+            current_time = datetime.datetime.now()
+                
+            classification_list = classification.get_classification_names_by_modelid(modelid)
+                                
+            return gr.update(value=versionid),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
+                gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
+                gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername),\
+                gr.update(choices=classification.get_list(),value=classification_list)
+
+    # 모델 정보가 없다면 클리어 한다.
+    # clear model information
+    return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
+        gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
+        gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
+        gr.update(choices=classification.get_list(), value=[], interactive=True)
+
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
     
@@ -363,7 +368,7 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         images_url, images_meta = get_version_description_gallery(version_info)
         
         vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)        
-        model_folder = setting.generate_model_foldername(model_info['name'],model_type,False)
+        model_folder = setting.generate_model_foldername( model_type, model_info['name'],)
         
         # 정리하자... 
         if os.getcwd() in model_folder and os.path.exists(model_folder):
@@ -510,7 +515,7 @@ def add_number_to_duplicate_files(filenames)->dict:
             dup_file[file_info[0]] = file_info[1]
     return dup_file
     
-def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldername=None):               
+def download_file_thread(file_name, version_id, vs_folder, vs_foldername=None):               
     if not file_name:
         return
 
@@ -527,7 +532,7 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldernam
     if not download_files:
         return
 
-    model_folder = util.make_version_folder(version_info, lora_an , vs_folder, vs_foldername)
+    model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername)
     
     if not model_folder:
         return
@@ -553,12 +558,46 @@ def download_file_thread(file_name, version_id, lora_an, vs_folder, vs_foldernam
     if info_file:
         util.printD(f"Wrote version info : {path_file}")
 
-    path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.triger_suffix}{setting.triger_ext}")
-    triger_file = civitai.write_triger_words_by_version_info(path_file, version_info)
-    if triger_file:
-         util.printD(f"Wrote triger words : {path_file}")
+    path_img = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
+    preview_file = download_preview_image(path_img, version_info)
+    if preview_file:
+         util.printD(f"Wrote preview image : {path_img}")
+        
+    # path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.triger_suffix}{setting.triger_ext}")
+    # triger_file = civitai.write_triger_words_by_version_info(path_file, version_info)
+    # if triger_file:
+    #      util.printD(f"Wrote triger words : {path_file}")
 
     return f"Download started"
+
+
+def download_preview_image(filepath, version_info):
+      
+    if not version_info:
+        return False
+
+    # save preview            
+    if "images" in version_info.keys():
+        try:            
+            img_dict = version_info["images"][0] 
+            if "url" in img_dict:
+                img_url = img_dict["url"]
+                if "width" in img_dict:
+                    if img_dict["width"]:
+                        img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
+                # get image
+                with requests.get(img_url, stream=True) as img_r:
+                    if not img_r.ok:
+                        util.printD("Get error code: " + str(img_r.status_code))
+                        return False
+
+                    with open(filepath, 'wb') as f:
+                        img_r.raw.decode_content = True
+                        shutil.copyfileobj(img_r.raw, f)                                                    
+        except Exception as e:
+            pass
+                    
+    return True                    
 
 def get_save_base_name(version_info):
     # 이미지 파일명도 primary 이름으로 저장한다.
@@ -571,55 +610,7 @@ def get_save_base_name(version_info):
         base, ext = os.path.splitext(primary_file['name'])   
     return base
 
-# def download_preview_image(version_id, lora_an, vs_folder, vs_foldername=None):
-#     message =""
-#     base = None
-    
-#     if not version_id:                
-#         return         
-    
-#     version_info = civitai.get_version_info_by_version_id(version_id)          
-    
-#     if not version_info:
-#         return
-    
-#     if 'images' not in version_info.keys():
-#         return
-        
-#     model_folder = util.make_version_folder(version_info, lora_an , vs_folder,vs_foldername)
-    
-#     if not model_folder:
-#         return
-
-#     base = get_save_base_name(version_info)
-#     base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
-    
-#     if base and len(base.strip()) > 0:  
-#         if "images" in version_info.keys():
-#             try:            
-#                 img_dict = version_info["images"][0] 
-#                 if "url" in img_dict:
-#                     img_url = img_dict["url"]
-#                     # use max width
-#                     if "width" in img_dict:
-#                         if img_dict["width"]:
-#                             img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
-#                     # get image
-#                     with requests.get(img_url, stream=True) as img_r:
-#                         if not img_r.ok:
-#                             util.printD("Get error code: " + str(img_r.status_code))
-#                             return
-#                         # write to file
-#                         description_img = f"{base}{setting.preview_image_suffix}{setting.preview_image_ext}"
-
-#                         with open(description_img, 'wb') as f:
-#                             img_r.raw.decode_content = True
-#                             shutil.copyfileobj(img_r.raw, f)
-#             except Exception as e:
-#                 return
-#     return
-
-def download_image_files(version_id, lora_an, vs_folder,vs_foldername=None):
+def download_image_files(version_id, vs_folder,vs_foldername=None):
     message =""
     base = None
     preview_base = None
@@ -635,7 +626,7 @@ def download_image_files(version_id, lora_an, vs_folder,vs_foldername=None):
     if 'images' not in version_info.keys():
         return
         
-    model_folder = util.make_version_folder(version_info, lora_an , vs_folder,vs_foldername)
+    model_folder = util.make_version_folder(version_info, vs_folder,vs_foldername)
     
     if not model_folder:
         return

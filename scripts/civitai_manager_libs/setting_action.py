@@ -11,7 +11,8 @@ from . import setting
 from . import civitai
 
 from . import ishortcut_action
-
+import modules.scripts as scripts   
+    
 def create_models_information(files, mfolder, vs_folder,register_shortcut, progress=gr.Progress()):
     
     non_list = list()    
@@ -34,7 +35,7 @@ def create_models_information(files, mfolder, vs_folder,register_shortcut, progr
             
             # 저장할 폴더 생성
             if mfolder:
-                model_folder = util.make_version_folder(version_info, False , vs_folder)
+                model_folder = util.make_version_folder(version_info, vs_folder)
             else:
                 model_folder = vfolder
             
@@ -157,11 +158,11 @@ def on_create_models_info_btn_click(files, mfolder, vsfolder, register_shortcut,
          
 def on_update_progress_change():
     current_time = datetime.datetime.now()
-    return gr.update(value="###")
+    return gr.update(value=current_time)
 
 def on_scan_progress_change():
     current_time = datetime.datetime.now()
-    return gr.update(value="###")
+    return gr.update(value=current_time)
 
 def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
     files = scan_models(fix_information_filename, progress)
@@ -170,11 +171,11 @@ def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
 def on_scan_to_shortcut_click(progress=gr.Progress()):
     model.update_downloaded_model()
     ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
-    return gr.update(value="Scan downloaded models for shortcut registration is Done")
+    return gr.update(value="This feature scans for models that have information files available and registers a shortcut for them, downloading any necessary images in the process. If there is no information available for a particular model, please use the 'Scan Models' feature.")
 
 def on_update_all_shortcuts_btn(progress=gr.Progress()):
     ishortcut_action.update_all_shortcut_model(progress)
-    return gr.update(value="Update the model information for the shortcut is Done")
+    return gr.update(value="This feature updates registered shortcuts with the latest information and downloads any new images if available.")
 
 def on_scan_save_modelfolder_change(scan_save_modelfolder):
     if scan_save_modelfolder:
@@ -189,14 +190,15 @@ def on_scan_ui():
                     with gr.Column():
                         fix_information_filename = gr.Checkbox(label="Fix version information filename", value=False , visible=False) 
                         scan_models_btn = gr.Button(value="Scan Models",variant="primary") 
+                        gr.Markdown(value="This feature targets models that do not have information files available in the saved models. It calculates the hash value and searches for the model in Civitai, registering it as a shortcut. Calculating the hash value can take a significant amount of time.", visible=True)
                         with gr.Box(elem_classes="cs_box", visible=False) as scanned_result:  
                             scan_models_result = gr.CheckboxGroup(visible=True, label="Scanned Model List").style(item_container=True,container=True)
                 with gr.Row(visible=False) as update_information:
                     with gr.Column():
                         with gr.Row():
-                            with gr.Column(size=1):
+                            with gr.Column(scale=1):
                                 scan_register_shortcut = gr.Checkbox(label="Register a shortcut when creating the model information file.", value=True)
-                            with gr.Column(size=1):
+                            with gr.Column(scale=1):
                                 with gr.Row():
                                     scan_save_modelfolder = gr.Checkbox(label="Create a model folder corresponding to the model type.", value=True)
                                     scan_save_vsfolder = gr.Checkbox(label="Create individual model version folder.", value=True) 
@@ -208,10 +210,10 @@ def on_scan_ui():
                 with gr.Row():
                     with gr.Column():
                         update_all_shortcuts_btn = gr.Button(value="Update the model information for the shortcut",variant="primary")
-                        update_progress = gr.Markdown(value="###", visible=True)
+                        update_progress = gr.Markdown(value="This feature updates registered shortcuts with the latest information and downloads any new images if available.", visible=True)
                     with gr.Column(): 
                         scan_to_shortcut_btn = gr.Button(value="Scan downloaded models for shortcut registration",variant="primary")                    
-                        scan_progress = gr.Markdown(value="###", visible=True)
+                        scan_progress = gr.Markdown(value="This feature scans for models that have information files available and registers a shortcut for them, downloading any necessary images in the process. If there is no information available for a particular model, please use the 'Scan Models' feature.", visible=True)
     
     scan_save_modelfolder.change(
         fn=on_scan_save_modelfolder_change,

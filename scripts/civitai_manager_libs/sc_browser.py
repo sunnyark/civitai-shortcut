@@ -2,14 +2,34 @@ import gradio as gr
 
 from . import util
 from . import setting
-from . import ishortcut_action
+from . import model
 from . import classification
+from . import ishortcut
+
+def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
+    
+    shortlist =  ishortcut.get_image_list(shortcut_types, search)
+    if not shortlist:
+        return None
+    
+    if only_downloaded:
+        if model.Downloaded_Models:                
+            downloaded_list = list()            
+            for short in shortlist:
+                sc_name = short[1]
+                mid = setting.get_modelid_from_shortcutname(sc_name)
+                if mid in model.Downloaded_Models.keys():
+                    downloaded_list.append(short)
+            return downloaded_list
+    else:
+        return shortlist
+    return None
 
 def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc):
-    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
+    return gr.update(value=get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
 
 def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc):
-    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search))
+    return gr.update(value=get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search))
 
 def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search, show_only_downloaded_sc):
     keys, tags, clfs = util.get_search_keyword(sc_search)
@@ -32,7 +52,7 @@ def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search, sho
     if new_search:
         search = ", ".join(new_search)
         
-    return gr.update(value=search),gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,search))
+    return gr.update(value=search),gr.update(value=get_thumbnail_list(sc_types,show_only_downloaded_sc,search))
 
 def on_ui(refresh_sc_list: gr.Textbox):
 
@@ -41,7 +61,7 @@ def on_ui(refresh_sc_list: gr.Textbox):
         sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @classification, ....",interactive=True, lines=1)
         sc_classification_list = gr.Dropdown(label='Classification', multiselect=None, value=setting.PLACEHOLDER, choices=[setting.PLACEHOLDER] + classification.get_list(), interactive=True)
         show_only_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
-    sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=ishortcut_action.get_thumbnail_list()).style(grid=[setting.shortcut_column], height="auto")    
+    sc_gallery = gr.Gallery(label="SC Gallery", elem_id="sc_gallery", show_label=False, value=get_thumbnail_list()).style(grid=[setting.shortcut_column], height="auto")    
     
     refresh_sc_list.change(
         fn=on_refresh_sc_list_change,

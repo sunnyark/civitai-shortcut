@@ -128,34 +128,17 @@ def on_civitai_internet_url_txt_upload(url, register_information_only, selected_
         
     return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
 
-# def on_thumb_progress_change():
-#     current_time = datetime.datetime.now()
-#     return current_time, gr.update(value="###")
-
-# def on_scan_progress_change():
-#     current_time = datetime.datetime.now()
-#     return current_time, gr.update(value="###")
-  
-# def on_scan_to_shortcut_click(progress=gr.Progress()):
-#     model.update_downloaded_model()
-#     ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
-#     return gr.update(value="Scan Downloaded Models to Shortcut is Done")
-
-# def on_shortcut_saved_update_btn(progress=gr.Progress()):
-#     ishortcut_action.update_all_shortcut_model(progress)
-#     return gr.update(value="Update Shortcut's Model Information is Done")
-
-# def on_update_modelfolder_btn_click():
-#     model.update_downloaded_model()
-#     current_time = datetime.datetime.now()
-#     return current_time
+def on_update_modelfolder_btn_click():
+    model.update_downloaded_model()
+    current_time = datetime.datetime.now()
+    return current_time
 
 # 새 버전이 있는지 스캔한다
 def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
     model.update_downloaded_model()
 
     scan_list = list()
-    shortlist =  ishortcut_action.get_thumbnail_list(sc_types,True)
+    shortlist =  sc_browser.get_thumbnail_list(sc_types,True)
     if shortlist:
         for short in progress.tqdm(shortlist, desc="Scanning new version model"):
             sc_name = short[1]
@@ -168,11 +151,9 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
 def on_ui(refresh_shortcut:gr.Textbox):
     with gr.Row(visible=False):
         #civitai model select model
-        selected_version_id = gr.Textbox()
         selected_model_id = gr.Textbox()
                         
         # saved shortcut model select model
-        selected_saved_version_id = gr.Textbox()
         selected_saved_model_id = gr.Textbox()
 
         # user gallery select model                        
@@ -193,11 +174,8 @@ def on_ui(refresh_shortcut:gr.Textbox):
                         # with gr.Box(elem_classes="cs_box"):
                         civitai_internet_url_txt = gr.Textbox(placeholder="Copy & Paste or Drag & Drop Civitai Model Url", show_label=False, interactive=True)
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
-                        # shortcut_saved_update_btn = gr.Button(value="Update Shortcut's Model Information",variant="primary")
-                        # scan_to_shortcut_btn = gr.Button(value="Scan Downloaded Models to Shortcut",variant="primary")
-                        # thumb_progress = gr.Markdown(value="###", visible=True)
-                        # scan_progress = gr.Markdown(value="###", visible=True)
-                        # update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
+                        update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
+                        gr.Markdown(value="If you have made direct modifications(e.g. moving or renaming a folder) to the downloaded model during runtime, please execute the \"Update Downloaded Model Information\" function, which rescans the downloaded model and updates its information accordingly. ", visible=True)
                                                     
             with gr.TabItem("Browsing"):    
                 with gr.Row():
@@ -216,11 +194,11 @@ def on_ui(refresh_shortcut:gr.Textbox):
         with gr.Tabs() as civitai_information_tabs:
             with gr.TabItem("Civitai Model Information" , id="civitai_info"):
                 with gr.Row():
-                    civitai_action.on_ui(selected_version_id,selected_model_id,refresh_sc_list)
+                    civitai_action.on_ui(selected_model_id,refresh_sc_list)
                     
             with gr.TabItem("Saved Model Information" , id="saved_info"):
                 with gr.Row():
-                    ishortcut_action.on_ui(selected_saved_version_id,selected_saved_model_id,refresh_sc_list)
+                    ishortcut_action.on_ui(selected_saved_model_id,refresh_sc_list)
                     
             with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
                 with gr.Row():
@@ -291,40 +269,13 @@ def on_ui(refresh_shortcut:gr.Textbox):
             civitai_internet_url_txt
         ]        
     )
+       
+    update_modelfolder_btn.click(
+        fn=on_update_modelfolder_btn_click,
+        inputs=None,
+        outputs=refresh_sc_list
+    )
     
-    # scan_to_shortcut_btn.click(
-    #     fn=on_scan_to_shortcut_click,
-    #     inputs=None,
-    #     outputs=[
-    #         scan_progress,
-    #     ]                
-    # )
-    
-    # shortcut_saved_update_btn.click(
-    #     fn=on_shortcut_saved_update_btn,
-    #     inputs=None,
-    #     outputs=[
-    #         thumb_progress,
-    #     ]
-    # ) 
-    
-    # update_modelfolder_btn.click(
-    #     fn=on_update_modelfolder_btn_click,
-    #     inputs=None,
-    #     outputs=refresh_sc_list
-    # )
-    
-    # thumb_progress.change(
-    #     fn=on_thumb_progress_change,
-    #     inputs=None,
-    #     outputs=[refresh_sc_list,thumb_progress]
-    # )
-    
-    # scan_progress.change(
-    #     fn=on_scan_progress_change,
-    #     inputs=None,
-    #     outputs=[refresh_sc_list,scan_progress]
-    # )
     # civitai upload tab end
     
     # civitai scan new version tab start

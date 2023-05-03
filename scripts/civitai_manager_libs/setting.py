@@ -7,6 +7,10 @@ import modules.scripts as scripts
 from . import util
 
 root_path = os.getcwd()
+extension_base = scripts.basedir()
+
+headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
+
 Extensions_Name = "Civitai Shortcut"
 
 PLACEHOLDER = "<no select>"
@@ -85,9 +89,11 @@ preview_image_suffix = ".preview"
 gallery_column = 4
 shortcut_column = 3  
 classification_gallery_column = 8
-# 
+# 유저 갤러리 설정
 usergallery_images_column = 5
 usergallery_images_page_limit = 10
+# usergallery_preload_page_count = 1
+
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
@@ -105,7 +111,7 @@ shortcut_env = dict()
 
 def init():
     global root_path
-    
+    global extension_base
     global model_folders
     
     global shortcut
@@ -124,14 +130,14 @@ def init():
 
         
     root_path = os.getcwd()
-
-    shortcut = os.path.join(scripts.basedir(),shortcut)
-    shortcut_setting = os.path.join(scripts.basedir(),shortcut_setting)
-    shortcut_classification = os.path.join(scripts.basedir(),shortcut_classification)
-    shortcut_thumbnail_folder = os.path.join(scripts.basedir(),shortcut_thumbnail_folder)
-    shortcut_save_folder = os.path.join(scripts.basedir(),shortcut_save_folder)
-    shortcut_info_folder = os.path.join(scripts.basedir(),shortcut_info_folder)
-    shortcut_gallery_folder = os.path.join(scripts.basedir(),shortcut_gallery_folder)
+       
+    shortcut = os.path.join(extension_base,shortcut)
+    shortcut_setting = os.path.join(extension_base,shortcut_setting)
+    shortcut_classification = os.path.join(extension_base,shortcut_classification)
+    shortcut_thumbnail_folder = os.path.join(extension_base,shortcut_thumbnail_folder)
+    shortcut_save_folder = os.path.join(extension_base,shortcut_save_folder)
+    shortcut_info_folder = os.path.join(extension_base,shortcut_info_folder)
+    shortcut_gallery_folder = os.path.join(extension_base,shortcut_gallery_folder)
         
     if shared.cmd_opts.embeddings_dir:
         model_folders['TextualInversion'] = shared.cmd_opts.embeddings_dir
@@ -182,7 +188,7 @@ def generate_version_foldername(model_name,ver_name,ver_id):
     # return f"{model_name}-{ver_name}-{ver_id}"
     return f"{model_name}-{ver_name}"
 
-def generate_model_foldername(model_name , content_type=None, lora_an=False):
+def generate_model_foldername(content_type, model_name=None):
     
     if not model_name:
         return
@@ -191,9 +197,7 @@ def generate_model_foldername(model_name , content_type=None, lora_an=False):
     if len(model_name) <= 0:
         return
             
-    if lora_an and content_type == 'LORA':
-        model_folder = model_folders['ANLORA']
-    elif content_type in model_folders.keys():
+    if content_type in model_folders.keys():
         model_folder = model_folders[content_type]        
     elif content_type:
         model_folder = os.path.join(model_folders['Unknown'], util.replace_dirname(content_type))

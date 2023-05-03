@@ -3,7 +3,6 @@ import gradio as gr
 import datetime
 
 from . import setting
-from . import ishortcut_action
 from . import ishortcut
 from . import classification
 from . import util
@@ -200,13 +199,13 @@ def on_classification_gallery_select(evt: gr.SelectData, shortcuts):
     return shortcuts, None
 
 def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc):
-    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
+    return gr.update(value=sc_browser.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
 
 def on_sc_search_submit(sc_types, sc_search):
-    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,False,sc_search))
+    return gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
 
 def on_shortcut_type_change(sc_types, sc_search):
-    return gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,False,sc_search))
+    return gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
 
 def on_classification_create_btn_click(new_name,new_info,classification_shortcuts):
     current_time = datetime.datetime.now()
@@ -263,5 +262,5 @@ def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search):
     if new_search:
         sc_search = ", ".join(new_search)
         
-    return gr.update(value=sc_search),gr.update(value=ishortcut_action.get_thumbnail_list(sc_types,False,sc_search))
+    return gr.update(value=sc_search),gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
                    

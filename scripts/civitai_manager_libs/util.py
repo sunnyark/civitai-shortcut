@@ -192,7 +192,7 @@ def scan_folder_for_info(folder):
     
     return info_list
             
-def make_version_folder(version_info, lora_an=False, vs_folder=True, user_folder_name=None):
+def make_version_folder(version_info, vs_folder=True, user_folder_name=None):
     
     if not version_info:
         return
@@ -202,13 +202,13 @@ def make_version_folder(version_info, lora_an=False, vs_folder=True, user_folder
                        
     content_type = version_info['model']['type']
     model_name = version_info['model']['name']
-    model_folder = setting.generate_model_foldername(model_name , content_type, lora_an)                     
+    model_folder = setting.generate_model_foldername(content_type, model_name)                     
     
     if not model_folder:
         return
     
     if vs_folder:
-        # 설정되어있는데 펄더명이 비어있으면 기본으로 만들어준다.
+        # 설정되어있는데 폴더명이 비어있으면 기본으로 만들어준다.
         vs_folder_name = setting.generate_version_foldername(model_name,version_info['name'],version_info['id'])
         # 있으면 그걸로 정한다.
         if user_folder_name:

@@ -3,6 +3,7 @@ import re
 import json
 import requests
 from . import util
+from . import setting 
 
 # Set the URL for the API endpoint
 
@@ -146,17 +147,6 @@ def get_version_id_by_version_name(model_id:str,name:str)->str:
             break
         
     return version_id
-
-# def get_files_by_version_info(version_info:dict)->dict:
-#     download_files = {}
-    
-#     if not version_info:                
-#         return         
-    
-#     for file in version_info['files']:
-#         download_files[file['name']] = file
-    
-#     return download_files
 
 def get_files_by_version_info(version_info:dict)->dict:
     download_files = {}

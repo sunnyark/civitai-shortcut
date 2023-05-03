@@ -119,17 +119,22 @@ def write_model_information(modelid:str, register_only_information=False, progre
                             image_list.append([version_id,img_url])        
                     if len(image_list) > 0:
                         version_list.append(image_list)
+                        
         try:
             # model 폴더 생성
             model_path = os.path.join(setting.shortcut_info_folder, modelid)        
             if not os.path.exists(model_path):
                 os.makedirs(model_path)
-
+        except Exception as e:
+            return
+        
+        try:            
             # model info 저장            
+            tmp_info_file = os.path.join(model_path, f"tmp{setting.info_suffix}{setting.info_ext}")
             model_info_file = os.path.join(model_path, f"{modelid}{setting.info_suffix}{setting.info_ext}")            
-            with open(model_info_file, 'w') as f:
+            with open(tmp_info_file, 'w') as f:
                 f.write(json.dumps(model_info, indent=4))
-                
+            os.replace(tmp_info_file, model_info_file)
         except Exception as e:
             return
                         
@@ -332,9 +337,6 @@ def download_thumbnail_image(model_id, url):
     
     if not os.path.exists(setting.shortcut_thumbnail_folder):
         os.makedirs(setting.shortcut_thumbnail_folder)    
-        
-    # if os.path.isfile(os.path.join(setting.shortcut_thumbnail_folder,f"{model_id}{setting.preview_image_ext}")):
-    #     return True
     
     try:
         # get image
