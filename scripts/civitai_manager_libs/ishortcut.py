@@ -142,11 +142,19 @@ def write_model_information(modelid:str, register_only_information=False, progre
         if not register_only_information and len(version_list) > 0:
             if progress:
                 for image_list in progress.tqdm(version_list,desc="downloading model images"):
+                    dn_count = 0 # 진짜로 다운 받은 이미지를 뜻한다.
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
+                        
+                        # 0이면 전체를 지정수를 넘어가면 스킵한다.
+                        if setting.shortcut_max_download_image_per_version != 0:
+                            if dn_count >= setting.shortcut_max_download_image_per_version:
+                                continue
+                            
                         try:
                             # get image
                             description_img = setting.get_image_url_to_shortcut_file(modelid,vid,url)
                             if os.path.exists(description_img):
+                                dn_count = dn_count + 1
                                 continue
                                 
                             with requests.get(url, stream=True) as img_r:
@@ -158,15 +166,24 @@ def write_model_information(modelid:str, register_only_information=False, progre
                                 with open(description_img, 'wb') as f:
                                     img_r.raw.decode_content = True
                                     shutil.copyfileobj(img_r.raw, f)
+                                    dn_count = dn_count + 1
                         except Exception as e:
                             pass
             else:
                 for image_list in version_list:
+                    dn_count = 0 # 진짜로 다운 받은 이미지를 뜻한다.
                     for image_count, (vid, url) in enumerate(image_list,start=0):
+                        
+                        # 0이면 전체를 지정수를 넘어가면 스킵한다.
+                        if setting.shortcut_max_download_image_per_version != 0:
+                            if dn_count >= setting.shortcut_max_download_image_per_version:
+                                continue
+                        
                         try:
                             # get image
                             description_img = setting.get_image_url_to_shortcut_file(modelid,vid,url)
                             if os.path.exists(description_img):
+                                dn_count = dn_count + 1
                                 continue
                             
                             with requests.get(url, stream=True) as img_r:
@@ -178,8 +195,10 @@ def write_model_information(modelid:str, register_only_information=False, progre
                                 with open(description_img, 'wb') as f:
                                     img_r.raw.decode_content = True
                                     shutil.copyfileobj(img_r.raw, f)
+                                    dn_count = dn_count + 1
                         except Exception as e:
-                            pass                
+                            pass  
+                                      
     return model_info
 
 def delete_model_information(modelid:str):

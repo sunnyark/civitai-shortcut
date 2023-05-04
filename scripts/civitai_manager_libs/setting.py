@@ -93,7 +93,8 @@ classification_gallery_column = 8
 usergallery_images_column = 5
 usergallery_images_page_limit = 10
 # usergallery_preload_page_count = 1
-
+# 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
+shortcut_max_download_image_per_version = 0
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
@@ -127,7 +128,7 @@ def init():
     global classification_gallery_column
     global usergallery_images_column
     global usergallery_images_page_limit
-
+    global shortcut_max_download_image_per_version
         
     root_path = os.getcwd()
        
@@ -164,6 +165,8 @@ def init():
             usergallery_images_column = int(environment['usergallery_images_column'])
         if "usergallery_images_page_limit" in environment.keys():
             usergallery_images_page_limit = int(environment['usergallery_images_page_limit'])
+        if "shortcut_max_download_image_per_version" in environment.keys():
+            shortcut_max_download_image_per_version = int(environment['shortcut_max_download_image_per_version'])
 
         if "model_folders" in environment.keys():
                 

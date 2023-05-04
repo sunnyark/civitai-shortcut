@@ -283,6 +283,7 @@ def on_scan_ui():
     ) 
     
 def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
+                      shortcut_max_download_image_per_version,
                       wildcards,controlnet,aestheticgradient,poses,other):    
     environment = dict()
     environment['shortcut_column'] = shortcut_column
@@ -290,7 +291,8 @@ def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_co
     environment['classification_gallery_column'] = classification_gallery_column
     environment['usergallery_images_column'] = usergallery_images_column
     environment['usergallery_images_page_limit'] = usergallery_images_page_limit
-
+    environment['shortcut_max_download_image_per_version'] = shortcut_max_download_image_per_version
+    
     model_folders = dict()
     if wildcards:
         model_folders['Wildcards'] = wildcards
@@ -326,7 +328,9 @@ def on_setting_ui():
                     shortcut_column = gr.Slider(minimum=1, maximum=6, value=setting.shortcut_column, step=1, label='Shortcut Browser Column Count', interactive=True)
                     gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
                     classification_gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
-
+                with gr.Row():
+                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of downloaded images per version', interactive=True)
+                    gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)
         with gr.Row():
             with gr.Accordion("User Gallery Images", open=True):    
                 with gr.Row():
@@ -369,6 +373,7 @@ def on_setting_ui():
             classification_gallery_column,
             usergallery_images_column,
             usergallery_images_page_limit,
+            shortcut_max_download_image_per_version,
             extension_wildcards_folder,
             extension_controlnet_folder,
             extension_aestheticgradient_folder,
