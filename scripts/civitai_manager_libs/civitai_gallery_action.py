@@ -37,13 +37,19 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
             try:
                 usergal_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
             except:
-                pass  
+                pass
+            download_images = gr.Button(value="Download Images")  
         
     with gr.Row(visible=False):                                                           
         # user gallery information  
         usergal_img_index = gr.Number(show_label=False)
+        
+        # 실재 로드된것
         usergal_images = gr.State()
+                
+        # 로드 해야 할것
         usergal_images_url = gr.State()
+        
         usergal_images_meta = gr.State()
         
         # 트리거를 위한것
@@ -63,6 +69,15 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
     except:
         pass            
 
+    download_images.click(
+        fn=on_download_images_click,
+        inputs=[
+            usergal_page_url,
+            usergal_images_url       
+        ],
+        outputs=None 
+    )
+    
     gallery = refresh_gallery.change(
         fn=on_refresh_gallery_change,
         inputs=[
@@ -136,19 +151,7 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         ],
         cancels=gallery         
     )    
-         
-    # gallery = refresh_gallery.change(
-    #     fn=on_refresh_gallery_change,
-    #     inputs=[
-    #         usergal_images_url,
-    #     ],
-    #     outputs=[               
-    #         usergal_gallery,
-    #         usergal_images,
-    #         pre_loading
-    #     ]         
-    # )        
-
+                
     pre_loading.change(
         fn=on_pre_loading_change,
         inputs=[
@@ -217,7 +220,11 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
     usergal_gallery.select(on_gallery_select, usergal_images, [usergal_img_index, usergal_hidden])
     usergal_hidden.change(on_civitai_hidden_change,[usergal_hidden,usergal_img_index,usergal_images_meta],[usergal_img_file_info])
 
-
+def on_download_images_click(page_url,images_url):
+    if page_url:
+        modelid , versionid = extract_model_info(page_url)
+        download_user_gallery_images(modelid,images_url)
+    
 def on_usergal_page_slider_release(usergal_page_url, page_info, page_slider):
     page_url = usergal_page_url
     if usergal_page_url:       
@@ -499,37 +506,109 @@ def gallery_loading(images_url, progress):
             os.makedirs(setting.shortcut_gallery_folder)
                             
         for i,  img_url in enumerate(progress.tqdm(images_url, desc=f"Civitai Images Loading")):
-            result = util.is_url_or_filepath(img_url)
+            # result = util.is_url_or_filepath(img_url)            
+            # if result == "filepath":
+            #     dn_image_list.append(img_url)
+            #     image_list.append(img_url) 
+            # elif result == "url":   
+            #     description_img = setting.get_image_url_to_gallery_file(img_url)             
+            #     try:
+            #         with requests.get(img_url,stream=True) as img_r:
+            #             if not img_r.ok:                        
+            #                 util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")                            
+            #                 dn_image_list.append(setting.no_card_preview_image)
+            #                 image_list.append(setting.no_card_preview_image)
+            #                 continue
+                                                                       
+            #             # sc_gallery 에 저장한다.                        
+            #             with open(description_img, 'wb') as f:
+            #                 img_r.raw.decode_content = True
+            #                 shutil.copyfileobj(img_r.raw, f)      
+                                              
+            #             dn_image_list.append(description_img)
+            #             image_list.append(description_img)
+            #     except:
+            #         dn_image_list.append(setting.no_card_preview_image)
+            #         image_list.append(setting.no_card_preview_image)
+            # else:
+            #     dn_image_list.append(setting.no_card_preview_image)
+            #     image_list.append(setting.no_card_preview_image)
+            
+            result = util.is_url_or_filepath(img_url) 
+            description_img = setting.get_image_url_to_gallery_file(img_url)             
             if result == "filepath":
-                dn_image_list.append(img_url)
-                image_list.append(img_url) 
-            elif result == "url":   
-                description_img = setting.get_image_url_to_gallery_file(img_url)             
+                description_img = img_url
+            elif result == "url":                   
                 try:
                     with requests.get(img_url,stream=True) as img_r:
                         if not img_r.ok:                        
-                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
-                            dn_image_list.append(Image.open(setting.no_card_preview_image))
-                            image_list.append(setting.no_card_preview_image)
-                            continue
-                                                                       
-                        # sc_gallery 에 저장한다.                        
-                        with open(description_img, 'wb') as f:
-                            img_r.raw.decode_content = True
-                            shutil.copyfileobj(img_r.raw, f)                        
-                        dn_image_list.append(description_img)
-                        image_list.append(description_img)
+                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")                            
+                            description_img = setting.no_card_preview_image
+                        else:                                                                        
+                            # sc_gallery 에 저장한다.                        
+                            with open(description_img, 'wb') as f:
+                                img_r.raw.decode_content = True
+                                shutil.copyfileobj(img_r.raw, f)      
                 except:
-                    dn_image_list.append(Image.open(setting.no_card_preview_image))
-                    image_list.append(setting.no_card_preview_image)
+                    description_img = setting.no_card_preview_image
             else:
-                dn_image_list.append(Image.open(setting.no_card_preview_image))
-                image_list.append(setting.no_card_preview_image)
-            
-            current_time = datetime.datetime.now()                
+                description_img = setting.no_card_preview_image
+
+            dn_image_list.append(description_img)
+            image_list.append(description_img)
+                                        
+            current_time = datetime.datetime.now()     
+                       
         # return dn_image_list, dn_image_list
         return dn_image_list, image_list , current_time       
     return None, None, gr.update(visible=False)
+
+def download_user_gallery_images(model_id, image_urls):
+    base = None
+    
+    if not model_id:                
+        return         
+    
+    model_info = civitai.get_model_info(model_id)
+    
+    if not model_info:
+        return 
+    
+    model_folder = util.make_model_folder(model_info)
+    
+    if not model_folder:
+        return
+    
+    save_folder = os.path.join(setting.root_path, model_folder ,"user_gallery_images")
+    
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)        
+    
+    if image_urls and len(image_urls) > 0:                                           
+        for image_count, img_url in enumerate(tqdm(image_urls, desc=f"Download user gallery image"), start=0):       
+
+            result = util.is_url_or_filepath(img_url)          
+            if result == "filepath":
+                if os.path.basename(img_url) != setting.no_card_preview_image:
+                    description_img = os.path.join(save_folder,os.path.basename(img_url))
+                    shutil.copyfile(img_url,description_img)
+            elif result == "url":                                
+                try:
+                    # get image
+                    with requests.get(img_url, stream=True) as img_r:
+                        if not img_r.ok:
+                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                        else:
+                            # write to file
+                            image_id, ext = os.path.splitext(os.path.basename(img_url))
+                            description_img = os.path.join(save_folder,f'{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}')
+                            with open(description_img, 'wb') as f:
+                                img_r.raw.decode_content = True
+                                shutil.copyfileobj(img_r.raw, f)
+
+                except Exception as e:
+                    pass
+    return 
 
 def extract_model_info(url):
     model_id_match = re.search(r'modelId=(\d+)', url)

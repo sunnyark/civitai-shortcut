@@ -63,8 +63,8 @@ def on_ui(selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
         
         # saved shortcut information  
         saved_img_index = gr.Number(show_label=False)
-        saved_images = gr.State() #실제 다운 로드되질 않으니 여기선 안쓰인다. 그냥 둔것임
-        saved_images_url = gr.State()
+        saved_images = gr.State() # 로드된것
+        saved_images_url = gr.State() #로드 해야 하는것
         saved_images_meta = gr.State() # 생성 정보 로드
         
         # 트리거를 위한것

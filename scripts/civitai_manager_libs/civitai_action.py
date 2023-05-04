@@ -40,6 +40,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             with gr.Row():
                 vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
                 download_model = gr.Button(value="Download", variant="primary")
+                download_images = gr.Button(value="Download Images")
             with gr.Row():
                 civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
             with gr.Row():
@@ -124,6 +125,17 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
         ]
     )  
 
+    download_images.click(
+        fn=on_download_images_click,
+        inputs=[
+            selected_version_id,
+            civitai_images_url,
+            vs_folder,
+            vs_folder_name            
+        ],
+        outputs=None 
+    )
+    
     selected_model_id.change(
         fn=on_load_model,
         inputs=[
@@ -228,8 +240,7 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
     if image_url:
         dn_image_list = []
         image_list = []
-        for i, img_url in enumerate(progress.tqdm(image_url, desc=f"Civitai Images Loading"), start=0):
-            
+        for i, img_url in enumerate(progress.tqdm(image_url, desc=f"Civitai Images Loading"), start=0):            
             result = util.is_url_or_filepath(img_url)
             if result == "filepath":
                 dn_image_list.append(img_url)
@@ -239,21 +250,21 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
                     with requests.get(img_url,stream=True) as img_r:
                         if not img_r.ok:                        
                             util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
-                            dn_image_list.append(Image.open(setting.no_card_preview_image))
+                            dn_image_list.append(setting.no_card_preview_image)
                             image_list.append(setting.no_card_preview_image)
-                            continue
-                        img_r.raw.decode_content=True
-                        dn_image_list.append(Image.open(img_r.raw))
-                        image_list.append(img_url)                     
+                        else:
+                            img_r.raw.decode_content=True
+                            dn_image_list.append(Image.open(img_r.raw))
+                            image_list.append(img_url)                     
                 except:
-                    dn_image_list.append(Image.open(setting.no_card_preview_image))
+                    dn_image_list.append(setting.no_card_preview_image)
                     image_list.append(setting.no_card_preview_image)
             else:
-                dn_image_list.append(Image.open(setting.no_card_preview_image))
+                dn_image_list.append(setting.no_card_preview_image)
                 image_list.append(setting.no_card_preview_image)
-                
-        return dn_image_list, dn_image_list
-        # return dn_image_list, image_list
+               
+        return dn_image_list, image_list
+        # return dn_image_list, dn_image_list
     return None, None    
 
 def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
@@ -267,6 +278,12 @@ def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
 
     current_time = datetime.datetime.now()    
     return gr.update(value=current_time),gr.update(value=current_time),gr.update(value=current_time)    
+
+def on_download_images_click(version_id:str, images_url, vs_folder, vs_foldername):
+    msg = None
+    if version_id:    
+        download_image_files(version_id, images_url, vs_folder, vs_foldername)
+    current_time = datetime.datetime.now()    
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index]
@@ -570,12 +587,9 @@ def download_file_thread(file_name, version_id, vs_folder, vs_foldername=None):
 
     return f"Download started"
 
-
 def download_preview_image(filepath, version_info):
-      
     if not version_info:
         return False
-
     # save preview            
     if "images" in version_info.keys():
         try:            
@@ -599,6 +613,52 @@ def download_preview_image(filepath, version_info):
                     
     return True                    
 
+def download_image_files(version_id, image_urls, vs_folder,vs_foldername = None):    
+    if not version_id:                
+        return      
+    
+    version_info = civitai.get_version_info_by_version_id(version_id)          
+    
+    if not version_info:
+        return
+        
+    model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername)
+    
+    if not model_folder:
+        return
+    
+    save_folder = os.path.join(setting.root_path, model_folder,"images")
+    
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)        
+        
+    if image_urls and len(image_urls) > 0:                
+        for image_count, img_url in enumerate(tqdm(image_urls, desc=f"Download images"), start=0):
+
+            result = util.is_url_or_filepath(img_url)
+            if result == "filepath":
+                if os.path.basename(img_url) != setting.no_card_preview_image:
+                    description_img = os.path.join(save_folder,os.path.basename(img_url))
+                    shutil.copyfile(img_url,description_img)
+            elif result == "url":
+                try:
+                    # get image
+                    with requests.get(img_url, stream=True) as img_r:
+                        if not img_r.ok:
+                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                        else:
+                            # write to file
+                            image_id, ext = os.path.splitext(os.path.basename(img_url))
+                            description_img = os.path.join(save_folder,f'{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}')
+                            with open(description_img, 'wb') as f:
+                                img_r.raw.decode_content = True
+                                shutil.copyfileobj(img_r.raw, f)
+                except Exception as e:
+                    pass
+    return 
+
+
+
 def get_save_base_name(version_info):
     # 이미지 파일명도 primary 이름으로 저장한다.
            
@@ -610,70 +670,69 @@ def get_save_base_name(version_info):
         base, ext = os.path.splitext(primary_file['name'])   
     return base
 
-def download_image_files(version_id, vs_folder,vs_foldername=None):
-    message =""
-    base = None
-    preview_base = None
+# def download_image_files(version_id, vs_folder,vs_foldername = None):
+#     message =""
+#     base = None
     
-    if not version_id:                
-        return         
+#     if not version_id:                
+#         return         
     
-    version_info = civitai.get_version_info_by_version_id(version_id)          
+#     version_info = civitai.get_version_info_by_version_id(version_id)          
     
-    if not version_info:
-        return
+#     if not version_info:
+#         return
     
-    if 'images' not in version_info.keys():
-        return
+#     if 'images' not in version_info.keys():
+#         return
         
-    model_folder = util.make_version_folder(version_info, vs_folder,vs_foldername)
+#     model_folder = util.make_version_folder(version_info, vs_folder,vs_foldername)
     
-    if not model_folder:
-        return
-
-    base = get_save_base_name(version_info)
-    base = os.path.join(setting.root_path, model_folder, util.replace_filename(base))
+#     if not model_folder:
+#         return
     
-    if base and len(base.strip()) > 0:                                           
-        #image_count = 0 
+#     save_folder = os.path.join(setting.root_path, model_folder,"images")
+    
+#     if not os.path.exists(save_folder):
+#         os.makedirs(save_folder)
         
-        for image_count, img_dict in enumerate(tqdm(version_info["images"], desc=f"Download image"), start=0):
-            # if "nsfw" in img_dict:
-            #     if img_dict["nsfw"]:
-            #         printD("This image is NSFW")
+#     base = get_save_base_name(version_info)
+#     base = os.path.join(save_folder,util.replace_filename(base))
+    
+#     if base and len(base.strip()) > 0:                                           
+#         #image_count = 0 
+        
+#         for image_count, img_dict in enumerate(tqdm(version_info["images"], desc=f"Download image"), start=0):
+#             # if "nsfw" in img_dict:
+#             #     if img_dict["nsfw"]:
+#             #         printD("This image is NSFW")
 
-            if "url" in img_dict:
-                img_url = img_dict["url"]
-                # use max width
-                if "width" in img_dict:
-                    if img_dict["width"]:
-                        img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
+#             if "url" in img_dict:
+#                 img_url = img_dict["url"]
+#                 # use max width
+#                 if "width" in img_dict:
+#                     if img_dict["width"]:
+#                         img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
                 
-                try:
-                    # get image
-                    with requests.get(img_url, stream=True) as img_r:
-                        if not img_r.ok:
-                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
-                            continue
+#                 try:
+#                     # get image
+#                     with requests.get(img_url, stream=True) as img_r:
+#                         if not img_r.ok:
+#                             util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+#                             continue
                         
-                        image_id, ext = os.path.splitext(os.path.basename(img_url))
+#                         image_id, ext = os.path.splitext(os.path.basename(img_url))
 
-                        # write to file
-                        description_img = f'{base}-{version_id}-{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}'
-                        with open(description_img, 'wb') as f:
-                            img_r.raw.decode_content = True
-                            shutil.copyfileobj(img_r.raw, f)
-                                                    
-                        if image_count == 0:
-                            #프리뷰는 호환성 때문에 filename에 따라간다. 둘다 가지고 있자
-                            preview_img = f'{base}{setting.preview_image_suffix}{setting.preview_image_ext}'                           
-                            shutil.copyfile(description_img, preview_img)
+#                         # write to file
+#                         description_img = f'{base}-{version_id}-{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}'
+#                         with open(description_img, 'wb') as f:
+#                             img_r.raw.decode_content = True
+#                             shutil.copyfileobj(img_r.raw, f)
 
-                except Exception as e:
-                    pass
+#                 except Exception as e:
+#                     pass
                 
-                # set image_counter
-                image_count = image_count + 1
+#                 # set image_counter
+#                 image_count = image_count + 1
             
-        message = f"Downloaded images"
-    return message       
+#         message = f"Downloaded images"
+#     return message       

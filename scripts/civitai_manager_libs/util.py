@@ -191,6 +191,23 @@ def scan_folder_for_info(folder):
         return None
     
     return info_list
+
+def make_model_folder(model_info):
+    
+    if not model_info:
+        return
+                       
+    content_type = model_info['type']
+    model_name = model_info['name']
+    model_folder = setting.generate_model_foldername(content_type, model_name)                     
+    
+    if not model_folder:
+        return
+                
+    if not os.path.exists(model_folder):
+        os.makedirs(model_folder)
+                
+    return model_folder
             
 def make_version_folder(version_info, vs_folder=True, user_folder_name=None):
     

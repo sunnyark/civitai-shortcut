@@ -252,6 +252,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
     result_list = list()        
 
     keys, tags, clfs = util.get_search_keyword(search)    
+    # util.printD(f"keys:{keys} ,tags:{tags},clfs:{clfs}")
     
     # classification        
     if clfs:        

@@ -3,7 +3,8 @@ import json
 
 from . import util
 from . import setting
-
+#============================================================
+#=======================wrap=================================
 def get_classification_names_by_modelid(modelid):
     c_name_list = list()
     if not modelid:
@@ -35,7 +36,28 @@ def add_classification_shortcut(name, modelid):
                 save(CISC)
                 return True
     return False
-                
+
+def update_classification_shortcut(s_name, shortcuts):
+    if not s_name:
+        return
+        
+    CISC = load()
+    CISC = update_shortcut(CISC,s_name, shortcuts)
+    
+    save(CISC)
+
+    return True
+
+def get_classification_shortcuts(s_name):
+    if not s_name:
+        return None
+    
+    CISC = load()
+    if s_name in CISC:
+        return CISC[s_name]['shortcuts']
+    
+    return None
+
 def create_classification(name, info):
     if name and len(name.strip()) > 0:
         CISC = load()
@@ -51,7 +73,15 @@ def create_classification(name, info):
             if name in CISC:
                 return True
     return False
-                
+
+def delete_classification(s_name):
+    if not s_name:
+        return
+        
+    CISC = load()
+    CISC = delete(CISC,s_name)
+    save(CISC)
+                    
 def update_classification(s_name, name, info, shortcuts):
     if not s_name:
         return
@@ -72,14 +102,6 @@ def update_classification(s_name, name, info, shortcuts):
             return True
         
     return False
-
-def delete_classification(s_name):
-    if not s_name:
-        return
-        
-    CISC = load()
-    CISC = delete(CISC,s_name)
-    save(CISC)
     
 def get_classification(s_name):
     if not s_name:
@@ -101,16 +123,6 @@ def get_classification_info(s_name):
     
     return None
 
-def get_classification_shortcuts(s_name):
-    if not s_name:
-        return None
-    
-    CISC = load()
-    if s_name in CISC:
-        return CISC[s_name]['shortcuts']
-    
-    return None
-
 def get_list():
     
     CISC = load()                           
@@ -120,10 +132,12 @@ def get_list():
         tmp_cisc_name = [k for k in CISC.keys()]
     
     return tmp_cisc_name
+#=========================================================
 
 
 
-
+#=========================================================
+#================= raw ===================================
 
 def get_shortcut_list(CISC:dict, classification):
     if not CISC:
@@ -286,3 +300,4 @@ def load()->dict:
 
     # check for new key
     return json_data
+#=========================================================================
