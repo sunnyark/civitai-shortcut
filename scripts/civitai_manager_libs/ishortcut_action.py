@@ -120,8 +120,7 @@ def on_ui(selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             refresh_sc_list,
             # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
             saved_gallery,
-            saved_refresh_information, #information update 용
-            saved_refresh_gallery
+            saved_refresh_information #information update 용
         ]
     )
         
@@ -248,7 +247,7 @@ def on_saved_update_information_btn_click(modelid, progress=gr.Progress()):
         update_shortcut_models([modelid],progress)  
     
     current_time = datetime.datetime.now()
-    return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time),gr.update(value=current_time)
+    return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time)
 
 def on_load_saved_model(modelid=None, ver_index=None):
     return load_saved_model(modelid, ver_index)

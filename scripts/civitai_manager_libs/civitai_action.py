@@ -120,8 +120,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
         ],
         outputs=[
             refresh_sc_list,
-            refresh_information,
-            refresh_gallery
+            refresh_information
         ]
     )  
 
@@ -267,7 +266,7 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
         # return dn_image_list, dn_image_list
     return None, None    
 
-def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
+def on_download_model_click(version_id, file_name, vs_folder, vs_foldername):
     msg = None
     if version_id:    
         # 프리뷰이미지와 파일 모두를 다운 받는다.
@@ -277,7 +276,7 @@ def on_download_model_click(version_id:str, file_name,vs_folder,vs_foldername):
         model.update_downloaded_model()
 
     current_time = datetime.datetime.now()    
-    return gr.update(value=current_time),gr.update(value=current_time),gr.update(value=current_time)    
+    return gr.update(value=current_time),gr.update(value=current_time)    
 
 def on_download_images_click(version_id:str, images_url, vs_folder, vs_foldername):
     msg = None
