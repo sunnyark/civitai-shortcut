@@ -329,7 +329,7 @@ def on_setting_ui():
                     gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
                     classification_gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
                 with gr.Row():
-                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of downloaded images per version', interactive=True)
+                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of download images per version', interactive=True)
                     gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)
         with gr.Row():
             with gr.Accordion("User Gallery Images", open=True):    
