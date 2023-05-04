@@ -49,7 +49,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     with gr.Column(scale=4):
         with gr.Row():
             with gr.Accordion("#", open=True) as model_title_name:
-                civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(columns=[setting.gallery_column],height="auto")
+                civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto")
         with gr.Row():
             with gr.Accordion("Model Description", open=True):
                 description_html = gr.HTML()
@@ -275,8 +275,9 @@ def on_download_model_click(version_id, file_name, vs_folder, vs_foldername):
         # 다운 받은 모델 정보를 갱신한다.    
         model.update_downloaded_model()
 
-    current_time = datetime.datetime.now()    
-    return gr.update(value=current_time),gr.update(value=current_time)    
+        current_time = datetime.datetime.now()    
+        return gr.update(value=current_time),gr.update(value=current_time)    
+    return gr.update(visible=True),gr.update(visible=True)
 
 def on_download_images_click(version_id:str, images_url, vs_folder, vs_foldername):
     msg = None

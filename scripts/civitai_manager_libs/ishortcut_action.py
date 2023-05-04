@@ -40,7 +40,7 @@ def on_ui(selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     with gr.Column(scale=4):                                                  
         with gr.Row():  
             with gr.Accordion("#", open=True) as saved_model_title_name:   
-                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(columns=[setting.gallery_column],height="auto")
+                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height="auto")
         with gr.Row():    
             with gr.Accordion("Model Description", open=True):  
                 saved_description_html = gr.HTML()                                                                                                   
@@ -246,8 +246,9 @@ def on_saved_update_information_btn_click(modelid, progress=gr.Progress()):
     if modelid:
         update_shortcut_models([modelid],progress)  
     
-    current_time = datetime.datetime.now()
-    return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time)
+        current_time = datetime.datetime.now()
+        return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time)
+    return gr.update(value=modelid),gr.update(visible=True),gr.update(value=None),gr.update(visible=True)
 
 def on_load_saved_model(modelid=None, ver_index=None):
     return load_saved_model(modelid, ver_index)
