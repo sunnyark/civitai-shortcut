@@ -28,7 +28,7 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
                     usergal_end_btn = gr.Button(value="End Page")
         with gr.Row():
             with gr.Accordion("#", open=True) as usergal_title_name:
-                usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column],height="auto", object_fit="scale-down")
+                usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
                 usergal_versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
     with gr.Column(scale=1):
         with gr.Row():                            

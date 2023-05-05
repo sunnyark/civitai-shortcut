@@ -95,6 +95,7 @@ usergallery_images_page_limit = 10
 # usergallery_preload_page_count = 1
 # 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
 shortcut_max_download_image_per_version = 0
+gallery_thumbnail_image_style = "scale-down"
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
@@ -129,7 +130,8 @@ def init():
     global usergallery_images_column
     global usergallery_images_page_limit
     global shortcut_max_download_image_per_version
-        
+    global gallery_thumbnail_image_style
+            
     root_path = os.getcwd()
        
     shortcut = os.path.join(extension_base,shortcut)
@@ -167,7 +169,9 @@ def init():
             usergallery_images_page_limit = int(environment['usergallery_images_page_limit'])
         if "shortcut_max_download_image_per_version" in environment.keys():
             shortcut_max_download_image_per_version = int(environment['shortcut_max_download_image_per_version'])
-
+        if "gallery_thumbnail_image_style" in environment.keys():
+            gallery_thumbnail_image_style = environment['gallery_thumbnail_image_style']
+            
         if "model_folders" in environment.keys():
                 
             user_folders = environment['model_folders']

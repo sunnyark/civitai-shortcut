@@ -40,7 +40,7 @@ def on_ui(selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     with gr.Column(scale=4):                                                  
         with gr.Row():  
             with gr.Accordion("#", open=True) as saved_model_title_name:   
-                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height="auto", object_fit="scale-down")
+                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
         with gr.Row():    
             with gr.Accordion("Model Description", open=True):  
                 saved_description_html = gr.HTML()                                                                                                   
