@@ -61,7 +61,7 @@ def on_ui(refresh_sc_list: gr.Textbox):
         sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @classification, ....",interactive=True, lines=1)
         sc_classification_list = gr.Dropdown(label='Classification', multiselect=None, value=setting.PLACEHOLDER, choices=[setting.PLACEHOLDER] + classification.get_list(), interactive=True)
         show_only_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
-    sc_gallery = gr.Gallery(show_label=False,value=get_thumbnail_list()).style(grid=[setting.shortcut_column], height="auto")    
+    sc_gallery = gr.Gallery(show_label=False,value=get_thumbnail_list()).style(grid=[setting.shortcut_column], height="auto", object_fit="scale-down")    
     
     refresh_sc_list.change(
         fn=on_refresh_sc_list_change,

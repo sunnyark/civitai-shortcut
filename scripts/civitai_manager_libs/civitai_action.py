@@ -49,7 +49,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     with gr.Column(scale=4):
         with gr.Row():
             with gr.Accordion("#", open=True) as model_title_name:
-                civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto")
+                civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto", object_fit="scale-down")
         with gr.Row():
             with gr.Accordion("Model Description", open=True):
                 description_html = gr.HTML()
