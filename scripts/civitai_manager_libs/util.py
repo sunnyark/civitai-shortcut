@@ -142,10 +142,10 @@ def get_search_keyword(search:str):
         return None , None, None
     
     for word in search.split(","):
-        word = word.strip().lower()
+        word = word.strip()
         if word.startswith("#"):
             if len(word) > 1:
-                tag = word[1:]
+                tag = word[1:].lower()
                 if tag not in tags:
                     tags.append(tag)
         elif word.startswith("@"):
@@ -154,7 +154,8 @@ def get_search_keyword(search:str):
                 if clf not in clfs:
                     clfs.append(clf)
         else:
-            if word not in keys:
+            word = word.lower()
+            if word not in keys:                
                 keys.append(word)
                     
     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None    

@@ -286,7 +286,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
             
         if len(clfs_list) > 0:
             for mid in clfs_list:
-                if str(mid) in ISC:
+                if str(mid) in ISC.keys():
                     result_list.append(ISC[str(mid)])
     else:
         result_list = ISC.values()
