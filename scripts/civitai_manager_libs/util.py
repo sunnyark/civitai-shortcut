@@ -192,25 +192,57 @@ def scan_folder_for_info(folder):
         return None
     
     return info_list
-
-def make_model_folder(model_info):
+            
+# def make_version_folder(version_info, vs_folder=True, vs_foldername=None, ms_foldername=None):
     
-    if not model_info:
-        return
+#     if not version_info:
+#         return
+                
+#     if "model" not in version_info.keys():
+#         return
                        
-    content_type = model_info['type']
-    model_name = model_info['name']
-    model_folder = setting.generate_model_foldername(content_type, model_name)                     
+#     content_type = version_info['model']['type']
     
-    if not model_folder:
+#     if not ms_foldername:
+#         ms_foldername = version_info['model']['name']
+#     elif len(ms_foldername.strip()) <= 0:
+#         ms_foldername = version_info['model']['name']
+#     ms_foldername = ms_foldername.strip()
+        
+#     model_folder = setting.generate_model_foldername(content_type, ms_foldername)                     
+    
+#     if not model_folder:
+#         return
+    
+#     if vs_folder:        
+#         if not vs_foldername:
+#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
+#         elif len(vs_foldername.strip()) <= 0:
+#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
+
+#         model_folder = os.path.join(model_folder, replace_dirname(vs_foldername.strip()))
+                
+#     if not os.path.exists(model_folder):
+#         os.makedirs(model_folder)
+                
+#     return model_folder  
+
+def make_download_image_folder(ms_foldername):
+
+    if not ms_foldername:
         return
+
+    if not setting.download_images_folder:
+        return
+                        
+    model_folder = os.path.join(setting.download_images_folder.strip(), replace_dirname(ms_foldername.strip()))
                 
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
                 
-    return model_folder
-            
-def make_version_folder(version_info, vs_folder=True, user_folder_name=None):
+    return model_folder  
+
+def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None):
     
     if not version_info:
         return
@@ -219,23 +251,29 @@ def make_version_folder(version_info, vs_folder=True, user_folder_name=None):
         return
                        
     content_type = version_info['model']['type']
-    model_name = version_info['model']['name']
-    model_folder = setting.generate_model_foldername(content_type, model_name)                     
+    ms_foldername = version_info['model']['name']
+               
+    model_folder = setting.generate_type_basefolder(content_type)
     
     if not model_folder:
         return
     
-    if vs_folder:
-        # 설정되어있는데 폴더명이 비어있으면 기본으로 만들어준다.
-        vs_folder_name = setting.generate_version_foldername(model_name,version_info['name'],version_info['id'])
-        # 있으면 그걸로 정한다.
-        if user_folder_name:
-            user_folder_name = user_folder_name.strip()            
-            if len(user_folder_name) > 0:
-                vs_folder_name = user_folder_name
+    if not cs_foldername and not ms_folder:
+        return
+    
+    if cs_foldername:
+        model_folder = os.path.join(model_folder, replace_dirname(cs_foldername.strip()))
+                
+    if ms_folder:
+        model_folder = os.path.join(model_folder, replace_dirname(ms_foldername.strip()))
+        
+    if vs_folder:        
+        if not vs_foldername:
+            vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
+        elif len(vs_foldername.strip()) <= 0:
+            vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
 
-        model_folder = os.path.join(model_folder, replace_dirname(vs_folder_name))
-
+        model_folder = os.path.join(model_folder, replace_dirname(vs_foldername.strip()))
                 
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)

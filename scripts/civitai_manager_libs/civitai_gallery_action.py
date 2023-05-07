@@ -573,13 +573,14 @@ def download_user_gallery_images(model_id, image_urls):
     
     if not model_info:
         return 
-    
-    model_folder = util.make_model_folder(model_info)
+                      
+    model_folder = util.make_download_image_folder(model_info['name'])    
     
     if not model_folder:
         return
     
-    save_folder = os.path.join(setting.root_path, model_folder ,"user_gallery_images")
+    # save_folder = os.path.join(setting.root_path, model_folder ,"user_gallery_images")
+    save_folder = os.path.join(model_folder ,"user_gallery_images")
     
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)        

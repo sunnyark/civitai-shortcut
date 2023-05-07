@@ -13,7 +13,7 @@ from . import civitai
 from . import ishortcut_action
 import modules.scripts as scripts   
     
-def create_models_information(files, mfolder, vs_folder,register_shortcut, progress=gr.Progress()):
+def create_models_information(files, mfolder, vs_folder, register_shortcut, progress=gr.Progress()):
     
     non_list = list()    
     if not files:
@@ -35,7 +35,8 @@ def create_models_information(files, mfolder, vs_folder,register_shortcut, progr
             
             # 저장할 폴더 생성
             if mfolder:
-                model_folder = util.make_version_folder(version_info, vs_folder)
+                model_folder = util.make_download_model_folder(version_info, True, vs_folder)
+                # model_folder = util.make_version_folder(version_info, vs_folder)
             else:
                 model_folder = vfolder
             
@@ -119,36 +120,35 @@ def get_save_base_name(version_info):
         base, ext = os.path.splitext(primary_file['name'])   
     return base
 
-def fix_version_information_filename():
-    root_dirs = list(set(setting.model_folders.values()))
-    file_list = util.search_file(root_dirs,None,[setting.info_ext])
+# def fix_version_information_filename():
+#     root_dirs = list(set(setting.model_folders.values()))
+#     file_list = util.search_file(root_dirs,None,[setting.info_ext])
     
-    version_info = None
-    if not file_list:             
-        return
+#     version_info = None
+#     if not file_list:             
+#         return
     
-    for file_path in file_list:        
+#     for file_path in file_list:        
         
-        try:
-            with open(file_path, 'r') as f:
-                json_data = json.load(f)
+#         try:
+#             with open(file_path, 'r') as f:
+#                 json_data = json.load(f)
             
-                if 'id' in json_data.keys():
-                    version_info = json_data
+#                 if 'id' in json_data.keys():
+#                     version_info = json_data
                     
-            file_path = file_path.strip()
-            vfolder , vfile = os.path.split(file_path)                     
-            savefile_base = get_save_base_name(version_info)                                
-            info_file = os.path.join(vfolder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")        
+#             file_path = file_path.strip()
+#             vfolder , vfile = os.path.split(file_path)                     
+#             savefile_base = get_save_base_name(version_info)                                
+#             info_file = os.path.join(vfolder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")        
                         
-            if file_path != info_file:
-                if not os.path.isfile(info_file):
-                    os.rename(file_path, info_file)
+#             if file_path != info_file:
+#                 if not os.path.isfile(info_file):
+#                     os.rename(file_path, info_file)
 
-        except:
-            pass
+#         except:
+#             pass
     
-
         
 def on_create_models_info_btn_click(files, mfolder, vsfolder, register_shortcut, progress=gr.Progress()):
     remain_files = create_models_information(files,mfolder,vsfolder,register_shortcut, progress)
@@ -285,7 +285,7 @@ def on_scan_ui():
 def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
-                      wildcards,controlnet,aestheticgradient,poses,other):    
+                      wildcards,controlnet,aestheticgradient,poses,other,download_images_folder):    
     environment = dict()
     environment['shortcut_column'] = shortcut_column
     environment['gallery_column'] = gallery_column
@@ -306,8 +306,14 @@ def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_co
         model_folders['Poses'] = poses
     if other:        
         model_folders['Other'] = other
-        
+    
     environment['model_folders'] = model_folders
+    
+    download_folders = dict()
+    if download_images_folder:
+        download_folders['download_images'] = download_images_folder        
+            
+    environment['download_folders'] = download_folders
     
     setting.save(environment)
     
@@ -337,8 +343,7 @@ def on_setting_ui():
                         with gr.Row():                            
                             shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of download images per version', interactive=True)
                             gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
-                    
-                    
+                                        
         with gr.Row():
             with gr.Accordion("User Gallery Images", open=True):    
                 with gr.Row():
@@ -357,6 +362,7 @@ def on_setting_ui():
                     extension_aestheticgradient_folder = gr.Textbox(value=setting.model_folders['AestheticGradient'], label="Aesthetic Gradient", interactive=True)
                     extension_poses_folder = gr.Textbox(value=setting.model_folders['Poses'], label="Poses", interactive=True)
                     extension_other_folder = gr.Textbox(value=setting.model_folders['Other'], label="Other", interactive=True)                    
+                    download_images_folder = gr.Textbox(value=setting.download_images_folder, label="Download Images Folder", interactive=True)                    
                     
         with gr.Row():
             save_btn = gr.Button(value="Save Setting", variant="primary")
@@ -387,7 +393,8 @@ def on_setting_ui():
             extension_controlnet_folder,
             extension_aestheticgradient_folder,
             extension_poses_folder,
-            extension_other_folder            
+            extension_other_folder,
+            download_images_folder
         ],
         outputs=None    
     )   

@@ -16,6 +16,11 @@ from . import classification
 from tqdm import tqdm
 from PIL import Image
 
+def on_cs_foldername_select(evt: gr.SelectData):
+    if evt.value == setting.CREATE_MODEL_FOLDER:
+        return gr.update(visible=True,value=False),gr.update(visible=False)
+    return gr.update(visible=False,value=False),gr.update(visible=False)
+
 def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     
     with gr.Column(scale=1):
@@ -36,8 +41,10 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             with gr.Row():
                 filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True) 
             with gr.Row():
-                vs_folder = gr.Checkbox(label="Create individual version folder with", value=False , interactive=True)               
-            with gr.Row():
+                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+            with gr.Row():                
+                vs_folder = gr.Checkbox(label="Create individual version folder with", value=False, visible=True , interactive=True)               
+            with gr.Row():                
                 vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
                 download_model = gr.Button(value="Download", variant="primary")
                 download_images = gr.Button(value="Download Images")
@@ -110,13 +117,23 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
         ]
     )        
 
+    cs_foldername.select(    
+        fn=on_cs_foldername_select,
+        inputs=None,
+        outputs=[
+            vs_folder,
+            vs_folder_name
+        ]          
+    )
+    
     download_model.click(
         fn=on_download_model_click,
         inputs=[
             selected_version_id,
             filename_list,            
             vs_folder,
-            vs_folder_name
+            vs_folder_name,
+            cs_foldername,
         ],
         outputs=[
             refresh_sc_list,
@@ -128,9 +145,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
         fn=on_download_images_click,
         inputs=[
             selected_version_id,
-            civitai_images_url,
-            vs_folder,
-            vs_folder_name            
+            civitai_images_url              
         ],
         outputs=None 
     )
@@ -266,12 +281,15 @@ def on_civitai_gallery_loading(image_url, progress=gr.Progress()):
         # return dn_image_list, dn_image_list
     return None, None    
 
-def on_download_model_click(version_id, file_name, vs_folder, vs_foldername):
+def on_download_model_click(version_id, file_name, vs_folder, vs_foldername, cs_foldername=None):
     msg = None
     if version_id:    
         # 프리뷰이미지와 파일 모두를 다운 받는다.
-        msg = download_file_thread(file_name, version_id, vs_folder, vs_foldername)
-        # download_image_files(version_id, vs_folder, vs_foldername)
+        if cs_foldername == setting.CREATE_MODEL_FOLDER:
+            msg = download_file_thread(file_name, version_id, True, vs_folder, vs_foldername, None)
+        else:
+            msg = download_file_thread(file_name, version_id, False, False, None , cs_foldername)
+            
         # 다운 받은 모델 정보를 갱신한다.    
         model.update_downloaded_model()
 
@@ -279,10 +297,10 @@ def on_download_model_click(version_id, file_name, vs_folder, vs_foldername):
         return gr.update(value=current_time),gr.update(value=current_time)    
     return gr.update(visible=True),gr.update(visible=True)
 
-def on_download_images_click(version_id:str, images_url, vs_folder, vs_foldername):
+def on_download_images_click(version_id:str, images_url):
     msg = None
     if version_id:    
-        download_image_files(version_id, images_url, vs_folder, vs_foldername)
+        download_image_files(version_id, images_url)
     current_time = datetime.datetime.now()    
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
@@ -384,26 +402,7 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         
         images_url, images_meta = get_version_description_gallery(version_info)
         
-        vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)        
-        model_folder = setting.generate_model_foldername( model_type, model_info['name'],)
-        
-        # 정리하자... 
-        if os.getcwd() in model_folder and os.path.exists(model_folder):
-            info_list = util.scan_folder_for_info(model_folder)
-            if info_list:
-                for info in info_list:
-                    info_dir = os.path.dirname(info)
-                    info_basename = os.path.basename(info_dir)
-                    if info_dir == model_folder:
-                        continue
-                    ver_info = util.read_json(info)
-                    if not ver_info:
-                        continue
-                    if 'id' not in ver_info.keys():
-                        continue
-                    if ver_info['id'] == versionid:
-                        vs_foldername = info_basename
-                        break
+        vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)
                     
         return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername
     return None, None,None,None,None,None,None,None,None,None,None,None,None,None
@@ -532,7 +531,7 @@ def add_number_to_duplicate_files(filenames)->dict:
             dup_file[file_info[0]] = file_info[1]
     return dup_file
     
-def download_file_thread(file_name, version_id, vs_folder, vs_foldername=None):               
+def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername):               
     if not file_name:
         return
 
@@ -549,7 +548,8 @@ def download_file_thread(file_name, version_id, vs_folder, vs_foldername=None):
     if not download_files:
         return
 
-    model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername)
+    # model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername, ms_foldername)
+    model_folder = util.make_download_model_folder(version_info, ms_folder, vs_folder, vs_foldername, cs_foldername)
     
     if not model_folder:
         return
@@ -613,7 +613,7 @@ def download_preview_image(filepath, version_info):
                     
     return True                    
 
-def download_image_files(version_id, image_urls, vs_folder,vs_foldername = None):    
+def download_image_files(version_id, image_urls):    
     if not version_id:                
         return      
     
@@ -621,13 +621,17 @@ def download_image_files(version_id, image_urls, vs_folder,vs_foldername = None)
     
     if not version_info:
         return
-        
-    model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername)
+
+    if "model" not in version_info.keys():
+        return
+
+    model_folder = util.make_download_image_folder(version_info['model']['name'])
     
     if not model_folder:
         return
     
-    save_folder = os.path.join(setting.root_path, model_folder,"images")
+    # save_folder = os.path.join(setting.root_path, model_folder, "images")
+    save_folder = os.path.join(model_folder, "images")
     
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)        
@@ -657,8 +661,6 @@ def download_image_files(version_id, image_urls, vs_folder,vs_foldername = None)
                     pass
     return 
 
-
-
 def get_save_base_name(version_info):
     # 이미지 파일명도 primary 이름으로 저장한다.
            
@@ -669,70 +671,3 @@ def get_save_base_name(version_info):
     else:
         base, ext = os.path.splitext(primary_file['name'])   
     return base
-
-# def download_image_files(version_id, vs_folder,vs_foldername = None):
-#     message =""
-#     base = None
-    
-#     if not version_id:                
-#         return         
-    
-#     version_info = civitai.get_version_info_by_version_id(version_id)          
-    
-#     if not version_info:
-#         return
-    
-#     if 'images' not in version_info.keys():
-#         return
-        
-#     model_folder = util.make_version_folder(version_info, vs_folder,vs_foldername)
-    
-#     if not model_folder:
-#         return
-    
-#     save_folder = os.path.join(setting.root_path, model_folder,"images")
-    
-#     if not os.path.exists(save_folder):
-#         os.makedirs(save_folder)
-        
-#     base = get_save_base_name(version_info)
-#     base = os.path.join(save_folder,util.replace_filename(base))
-    
-#     if base and len(base.strip()) > 0:                                           
-#         #image_count = 0 
-        
-#         for image_count, img_dict in enumerate(tqdm(version_info["images"], desc=f"Download image"), start=0):
-#             # if "nsfw" in img_dict:
-#             #     if img_dict["nsfw"]:
-#             #         printD("This image is NSFW")
-
-#             if "url" in img_dict:
-#                 img_url = img_dict["url"]
-#                 # use max width
-#                 if "width" in img_dict:
-#                     if img_dict["width"]:
-#                         img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
-                
-#                 try:
-#                     # get image
-#                     with requests.get(img_url, stream=True) as img_r:
-#                         if not img_r.ok:
-#                             util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
-#                             continue
-                        
-#                         image_id, ext = os.path.splitext(os.path.basename(img_url))
-
-#                         # write to file
-#                         description_img = f'{base}-{version_id}-{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}'
-#                         with open(description_img, 'wb') as f:
-#                             img_r.raw.decode_content = True
-#                             shutil.copyfileobj(img_r.raw, f)
-
-#                 except Exception as e:
-#                     pass
-                
-#                 # set image_counter
-#                 image_count = image_count + 1
-            
-#         message = f"Downloaded images"
-#     return message       

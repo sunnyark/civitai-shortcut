@@ -15,7 +15,9 @@ Extensions_Name = "Civitai Shortcut"
 
 PLACEHOLDER = "<no select>"
 NORESULT = "<no result>"  
-    
+
+CREATE_MODEL_FOLDER = "Create Model Name Folder"    
+
 model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 
 # define model type name -> civitai model type
@@ -89,6 +91,7 @@ preview_image_suffix = ".preview"
 gallery_column = 4
 shortcut_column = 3  
 classification_gallery_column = 8
+
 # 유저 갤러리 설정
 usergallery_images_column = 5
 usergallery_images_page_limit = 10
@@ -96,6 +99,9 @@ usergallery_images_page_limit = 10
 # 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
 shortcut_max_download_image_per_version = 0
 gallery_thumbnail_image_style = "scale-down"
+
+# 다운로드 설정
+download_images_folder = os.path.join("outputs","download-images")
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
@@ -131,7 +137,9 @@ def init():
     global usergallery_images_page_limit
     global shortcut_max_download_image_per_version
     global gallery_thumbnail_image_style
-            
+
+    global download_images_folder
+                
     root_path = os.getcwd()
        
     shortcut = os.path.join(extension_base,shortcut)
@@ -190,6 +198,23 @@ def init():
 
             if 'Other' in user_folders.keys():
                 model_folders['Other'] = user_folders['Other']
+
+        if "download_folders" in environment.keys():
+                
+            download_folders = environment['download_folders']
+            if 'download_images' in download_folders.keys():
+                download_images_folder = download_folders['download_images']            
+
+def generate_type_basefolder(content_type):
+    
+    if content_type in model_folders.keys():
+        model_folder = model_folders[content_type]        
+    elif content_type:
+        model_folder = os.path.join(model_folders['Unknown'], util.replace_dirname(content_type))
+    else:
+        model_folder = os.path.join(model_folders['Unknown'])                    
+                
+    return model_folder
                 
 def generate_version_foldername(model_name,ver_name,ver_id):      
     # return f"{model_name}-{ver_name}-{ver_id}"
@@ -203,18 +228,15 @@ def generate_model_foldername(content_type, model_name=None):
     model_name = model_name.strip()
     if len(model_name) <= 0:
         return
-            
-    if content_type in model_folders.keys():
-        model_folder = model_folders[content_type]        
-    elif content_type:
-        model_folder = os.path.join(model_folders['Unknown'], util.replace_dirname(content_type))
-    else:
-        model_folder = os.path.join(model_folders['Unknown'])
-                     
-    model_folder = os.path.join(model_folder, util.replace_dirname(model_name))
-                
-    return model_folder 
     
+    type_basefolder = generate_type_basefolder(content_type)
+                         
+    model_folder = os.path.join(type_basefolder, util.replace_dirname(model_name))
+                
+    return model_folder
+
+
+
 def get_model_folders():
     return model_folders.values()
 
