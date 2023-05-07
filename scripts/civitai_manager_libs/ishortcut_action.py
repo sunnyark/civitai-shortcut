@@ -14,49 +14,34 @@ from . import classification
 def on_ui(selected_saved_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
 
     with gr.Column(scale=1):
-        with gr.Row():
-            saved_versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
-        with gr.Row():
-            saved_model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
-        with gr.Row():
-            saved_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
-        with gr.Row():
-            saved_civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
-            
-        with gr.Row(visible=False) as saved_downloaded_tab:
-            with gr.Accordion("Downloaded Version", open=False): 
-                saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)
+        saved_versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+        saved_model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+        saved_trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
+        saved_civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
+        
+        with gr.Accordion("Downloaded Version", open=False, visible=False) as saved_downloaded_tab: 
+            saved_downloaded_info = gr.Textbox(interactive=False,show_label=False)
 
-        with gr.Row():
-            saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
-        with gr.Row():
-            saved_update_information_btn = gr.Button(value="Update Model Information")       
-        with gr.Row():
-            with gr.Accordion("Delete Civitai Shortcut", open=False):
-                shortcut_del_btn = gr.Button(value="Delete Shortcut")
-        with gr.Row():                          
-            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)
+        saved_filename_list = gr.Textbox(label="Model Version File", interactive=False)
+        saved_update_information_btn = gr.Button(value="Update Model Information")       
+        with gr.Accordion("Delete Civitai Shortcut", open=False):
+            shortcut_del_btn = gr.Button(value="Delete Shortcut")
+        saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)
                             
     with gr.Column(scale=4):                                                  
-        with gr.Row():  
-            with gr.Accordion("#", open=True) as saved_model_title_name:   
-                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-        with gr.Row():    
-            with gr.Accordion("Model Description", open=True):  
-                saved_description_html = gr.HTML()                                                                                                   
+        with gr.Accordion("#", open=True) as saved_model_title_name:   
+            saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
+        with gr.Accordion("Model Description", open=True):  
+            saved_description_html = gr.HTML()                                                                                                   
     with gr.Column(scale=1):
-        with gr.Row():                            
-            saved_img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
-        with gr.Row():
-            try:
-                saved_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-            except:
-                pass 
-
-        with gr.Row():
-            with gr.Accordion("Model Classcification", open=True):
-                model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
-                model_classification_update_btn = gr.Button(value="Update",variant="primary")
+        saved_img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
+        try:
+            saved_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+        except:
+            pass 
+        with gr.Accordion("Model Classcification", open=True):
+            model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
+            model_classification_update_btn = gr.Button(value="Update",variant="primary")
                 
     with gr.Row(visible=False): 
         selected_saved_version_id = gr.Textbox()

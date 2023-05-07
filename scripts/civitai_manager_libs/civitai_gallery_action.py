@@ -26,19 +26,18 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
                 with gr.Row():
                     usergal_next_btn = gr.Button(value="Next Page")
                     usergal_end_btn = gr.Button(value="End Page")
-        with gr.Row():
-            with gr.Accordion("#", open=True) as usergal_title_name:
-                usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-                usergal_versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
+                    
+        with gr.Accordion("#", open=True) as usergal_title_name:
+            usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
+            usergal_versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
+                
     with gr.Column(scale=1):
-        with gr.Row():                            
-            usergal_img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
-        with gr.Row():
-            try:
-                usergal_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-            except:
-                pass
-            download_images = gr.Button(value="Download Images")  
+        usergal_img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
+        try:
+            usergal_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+        except:
+            pass
+        download_images = gr.Button(value="Download Images")  
         
     with gr.Row(visible=False):                                                           
         # user gallery information  

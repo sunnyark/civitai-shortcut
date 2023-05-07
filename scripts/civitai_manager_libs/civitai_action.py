@@ -24,56 +24,39 @@ def on_cs_foldername_select(evt: gr.SelectData):
 def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
     
     with gr.Column(scale=1):
-        with gr.Row():
-            versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
-        with gr.Row():
-            model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
-        with gr.Row():
-            trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
-        with gr.Row():
-            civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
+        versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+        model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+        trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
+        civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
 
-        with gr.Row(visible=False) as downloaded_tab:
-            with gr.Accordion("Downloaded Version", open=False):
-                downloaded_info = gr.Textbox(interactive=False,show_label=False)
+        with gr.Accordion("Downloaded Version", open=False)  as downloaded_tab:
+            downloaded_info = gr.Textbox(interactive=False,show_label=False)
 
         with gr.Accordion("Download", open=True):
-            with gr.Row():
-                filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True) 
-            with gr.Row():
-                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
-            with gr.Row():                
-                vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
-            with gr.Row():
-                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
-            with gr.Row():
-                download_model = gr.Button(value="Download", variant="primary")
-                download_images = gr.Button(value="Download Images")
-            with gr.Row():
-                civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
-            with gr.Row():
-                gr.Markdown("Downloading may take some time.\nCheck console log for detail")
+            filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True) 
+            cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+            vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
+            vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+            download_model = gr.Button(value="Download", variant="primary")
+            download_images = gr.Button(value="Download Images")
+            civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
+            gr.Markdown("Downloading may take some time.\nCheck console log for detail")
                 
     with gr.Column(scale=4):
-        with gr.Row():
-            with gr.Accordion("#", open=True) as model_title_name:
-                civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-        with gr.Row():
-            with gr.Accordion("Model Description", open=True):
-                description_html = gr.HTML()
+        with gr.Accordion("#", open=True) as model_title_name:
+            civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
+        with gr.Accordion("Model Description", open=True):
+            description_html = gr.HTML()
 
     with gr.Column(scale=1):
-        with gr.Row():                            
-            img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
-        with gr.Row():
-            try:
-                send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-            except:
-                pass      
-        with gr.Row():
-            with gr.Accordion("Model Classcification", open=True):
-                model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
-                model_classification_update_btn = gr.Button(value="Update",variant="primary")
+        img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
+        try:
+            send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+        except:
+            pass      
+        with gr.Accordion("Model Classcification", open=True):
+            model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
+            model_classification_update_btn = gr.Button(value="Update",variant="primary")
             
             
     with gr.Row(visible=False):
@@ -364,9 +347,9 @@ def load_model(modelid, ver_index):
     return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=False, visible=True),gr.update(value=None,visible=False),\
-        gr.update(choices=classification.get_list(), value=[], interactive=True),\
-        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=False, visible=True),gr.update(value="",visible=False),\
+        gr.update(choices=classification.get_list(), value=[]),\
+        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
