@@ -43,9 +43,10 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             with gr.Row():
                 cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
             with gr.Row():                
-                vs_folder = gr.Checkbox(label="Create individual version folder with", value=False, visible=True , interactive=True)               
-            with gr.Row():                
+                vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
+            with gr.Row():
                 vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+            with gr.Row():
                 download_model = gr.Button(value="Download", variant="primary")
                 download_images = gr.Button(value="Download Images")
             with gr.Row():
@@ -171,6 +172,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             civitai_images_meta,
             img_file_info,
             civitai_openfolder,
+            vs_folder,
             vs_folder_name,
             model_classification,
             cs_foldername
@@ -199,6 +201,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             civitai_images_meta,     
             img_file_info,
             civitai_openfolder,
+            vs_folder,            
             vs_folder_name,
             model_classification,
             cs_foldername
@@ -227,6 +230,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             civitai_images_meta,
             img_file_info,
             civitai_openfolder,
+            vs_folder,            
             vs_folder_name,
             model_classification,
             cs_foldername
@@ -351,7 +355,7 @@ def load_model(modelid, ver_index):
             return gr.update(value=versionid),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername),\
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=False, visible=True),gr.update(value=vs_foldername, visible=False),\
                 gr.update(choices=classification.get_list(),value=classification_list),\
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
 
@@ -360,9 +364,9 @@ def load_model(modelid, ver_index):
     return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=False, visible=True),gr.update(value=None,visible=False),\
         gr.update(choices=classification.get_list(), value=[], interactive=True),\
-        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), interactive=True)
+        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.

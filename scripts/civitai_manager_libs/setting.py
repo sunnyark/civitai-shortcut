@@ -220,22 +220,20 @@ def generate_version_foldername(model_name,ver_name,ver_id):
     # return f"{model_name}-{ver_name}-{ver_id}"
     return f"{model_name}-{ver_name}"
 
-def generate_model_foldername(content_type, model_name=None):
+# def generate_model_foldername(content_type, model_name=None):
     
-    if not model_name:
-        return
+#     if not model_name:
+#         return
     
-    model_name = model_name.strip()
-    if len(model_name) <= 0:
-        return
+#     model_name = model_name.strip()
+#     if len(model_name) <= 0:
+#         return
     
-    type_basefolder = generate_type_basefolder(content_type)
+#     type_basefolder = generate_type_basefolder(content_type)
                          
-    model_folder = os.path.join(type_basefolder, util.replace_dirname(model_name))
+#     model_folder = os.path.join(type_basefolder, util.replace_dirname(model_name))
                 
-    return model_folder
-
-
+#     return model_folder
 
 def get_model_folders():
     return model_folders.values()
