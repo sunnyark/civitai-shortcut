@@ -62,6 +62,27 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutSetting.json: a JSON file that records setting.
 
 # Change Log
+v 1.3ss
+
+* 모델의 다운로드 규칙, 방법에 변경이 있습니다.
+  다운로드시 폴더를 지정할수 있습니다. 사용자 분류 항목을 모델의 다운로드 항목으로 설정할수있습니다. 
+
+* 사용자가 등록한 분류 항목으로 설정하면 하위폴더는 작성할 수 없으며 사용자가 지정한 분류항목의 폴더가 model type base folder(e.g. model/lora) 에 만들어지고 다운로드 됩니다. 
+
+* "Create Model Name Folder" 선택하면 model type base folder(e.g. model/lora) 에 모델명을 베이스로 폴더가 만들어지며 버전에 따라 서브폴더를 원하는 이름으로 만들수 있습니다.
+
+* 다운로드된 모델파일은 원하는 폴더로 자유롭게 이동하셔도 됩니다. 
+본 확장프로그램은 파일의 다운로드의 편의를 돕기만할뿐 다운로드된 파일을 관리 하지는 않습니다. 
+편하게 이동 하셔도 문제 없습니다.
+
+* 이미지 다운로드는 기본으로 outputs/download-images 에 다운 로드되며 setting->download for extension->Download Images Folder 에서 설정할수 있습니다. 시스템에따라 접근권한의 설정이 필요할수 있습니다.
+
+* 사용자 정의 분류항목이 폴더명으로 사용되어지므로 폴더생성에 사용하기 어려운 문자는 변경을 권장드립니다.
+폴더 생성시 "-" 문자로 대체됩니다.
+
+* thumbnail 이미지의 display type 을 변경할수 있습니다. setting->Shortcut Browser and Information Images->Gallery Thumbnail Image Style 에서 설정할수 있습니다.
+
+* 쇼컷 등록시 다운로드 되는 이미지의 수를 설정할수 있습니다. setting->Shortcut Browser and Information Images->Maximum number of download images per version 에서 절정하룻 있으며 0일때는 모두 다운로드 됩니다.
 
 v 1.3c
 
