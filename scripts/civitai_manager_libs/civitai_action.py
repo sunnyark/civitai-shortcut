@@ -172,7 +172,8 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             img_file_info,
             civitai_openfolder,
             vs_folder_name,
-            model_classification
+            model_classification,
+            cs_foldername
         ],
         cancels=gallery
     )
@@ -199,7 +200,8 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             img_file_info,
             civitai_openfolder,
             vs_folder_name,
-            model_classification
+            model_classification,
+            cs_foldername
         ],
         cancels=gallery
     )    
@@ -226,7 +228,8 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             img_file_info,
             civitai_openfolder,
             vs_folder_name,
-            model_classification
+            model_classification,
+            cs_foldername
         ],
         cancels=gallery
     )
@@ -349,7 +352,8 @@ def load_model(modelid, ver_index):
                 gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
                 current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=vs_foldername),\
-                gr.update(choices=classification.get_list(),value=classification_list)
+                gr.update(choices=classification.get_list(),value=classification_list),\
+                gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
@@ -357,7 +361,8 @@ def load_model(modelid, ver_index):
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
         None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
-        gr.update(choices=classification.get_list(), value=[], interactive=True)
+        gr.update(choices=classification.get_list(), value=[], interactive=True),\
+        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), interactive=True)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
