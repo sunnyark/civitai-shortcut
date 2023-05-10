@@ -16,7 +16,7 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None, 
     result = None
     
     if not shortlist:
-        return None, max_page, total
+        return None, total, max_page
     
     if only_downloaded:
         if model.Downloaded_Models:                
@@ -34,10 +34,12 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None, 
         total = len(shortlist)
         result = shortlist
         
+    if total > 0:
         if setting.shortcut_count_per_page > 0:
             max_page = math.ceil(total / setting.shortcut_count_per_page)
-                
+
         if page > 0 and setting.shortcut_count_per_page > 0:
+
             item_start = setting.shortcut_count_per_page * (page - 1)
             item_end = (setting.shortcut_count_per_page * page)
             if total < item_end:
@@ -47,7 +49,7 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None, 
     return result, total, max_page
 
 def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc,sc_page):
-    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_page)
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_page)      
     return gr.update(value=thumb_list),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, step=1, label=f"Total {thumb_max_page} Pages")
 
 def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc):
