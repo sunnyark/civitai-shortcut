@@ -35,11 +35,12 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None, 
         result = shortlist
         
     if total > 0:
+        # page 즉 페이징이 아닌 전체가 필요할때도 총페이지 수를 구할때도 있으므로..
+        # page == 0 은 전체 리스트를 반환한다
         if setting.shortcut_count_per_page > 0:
             max_page = math.ceil(total / setting.shortcut_count_per_page)
 
         if page > 0 and setting.shortcut_count_per_page > 0:
-
             item_start = setting.shortcut_count_per_page * (page - 1)
             item_end = (setting.shortcut_count_per_page * page)
             if total < item_end:
@@ -49,8 +50,15 @@ def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None, 
     return result, total, max_page
 
 def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc,sc_page):
-    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_page)      
-    return gr.update(value=thumb_list),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, step=1, label=f"Total {thumb_max_page} Pages")
+    
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_page)
+    
+    # 현재 페이지가 최대 페이지보다 크면 (최대 페이지를 현재 페이지로 넣고)다시한번 리스트를 구한다.
+    if thumb_max_page < sc_page:
+        sc_page = thumb_max_page
+        thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search, sc_page)
+        
+    return gr.update(value=thumb_list),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages")
 
 def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc):
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,1)
