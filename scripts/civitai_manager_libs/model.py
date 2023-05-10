@@ -78,7 +78,7 @@ def get_model_path()->dict:
     infopaths = dict()
     
     if not file_list:             
-        return None,None,None
+        return None,None
     
     for file_path in file_list:        
         try:
