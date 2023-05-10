@@ -6,18 +6,19 @@ from . import setting
 from . import ishortcut
 from . import classification
 from . import util
-from . import sc_browser
+from . import sc_browser_page
 
-def on_ui(refresh_classification:gr.Textbox):
+def on_ui():
     with gr.Column(scale=1):
         with gr.Row(visible=False):
             classification_shortcuts = gr.State()
             refresh_gallery = gr.Textbox()
-            refresh_sc_list = gr.Textbox()
+            refresh_classification = gr.Textbox()
             
         with gr.Row():
             with gr.Column():
-                sc_gallery = sc_browser.on_ui(refresh_sc_list)
+                sc_gallery, refresh_sc_list = sc_browser_page.on_ui()
+                
     with gr.Column(scale=5):  
         classification_list = gr.Dropdown(label='Classification List', multiselect=None, choices=[setting.PLACEHOLDER] + classification.get_list(), value=setting.PLACEHOLDER ,interactive=True)                          
         classification_gallery = gr.Gallery(elem_id="classification_gallery", show_label=False).style(grid=[setting.classification_gallery_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
@@ -26,15 +27,20 @@ def on_ui(refresh_classification:gr.Textbox):
         with gr.Row():
             classification_create_btn = gr.Button(value="Create", variant="primary")
             classification_update_btn = gr.Button(value="Update", variant="primary")
-        with gr.Accordion("Delete Classification", open=False): 
-            classification_delete_btn = gr.Button(value="Delete")    
+        with gr.Row():
+            with gr.Accordion("Delete Classification", open=False): 
+                classification_delete_btn = gr.Button(value="Delete")    
+            classification_reload_btn = gr.Button(value="Reload", variant="primary")
 
     refresh_classification.change(
         fn=on_refresh_classification_change,
-        inputs=None,
+        inputs=classification_list,
         outputs=[
+            classification_name,
+            classification_info,
+            classification_shortcuts,
+            refresh_gallery,                        
             refresh_sc_list,
-            classification_list,
         ]
     )
     
@@ -100,6 +106,8 @@ def on_ui(refresh_classification:gr.Textbox):
         ]         
     )
 
+    classification_reload_btn.click(lambda :datetime.datetime.now(),None,refresh_classification)
+    
     classification_delete_btn.click(
         fn=on_classification_delete_btn_click,
         inputs=[
@@ -124,9 +132,18 @@ def on_ui(refresh_classification:gr.Textbox):
         ]          
     )
 
-def on_refresh_classification_change():
-    current_time = datetime.datetime.now()
-    return current_time, gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
+    return refresh_classification
+
+def on_refresh_classification_change(select_name):
+
+    if select_name != setting.PLACEHOLDER:
+        info = classification.get_classification_info(select_name)
+        shortcuts = classification.get_classification_shortcuts(select_name)
+        
+        current_time = datetime.datetime.now()
+        
+        return gr.update(value=select_name), gr.update(value=info), shortcuts, current_time, current_time
+    return gr.update(value=""), gr.update(value=""), None, gr.update(visible=False), gr.update(visible=False)
 
 def on_sc_gallery_select(evt: gr.SelectData, Classification_name , shortcuts):
     
@@ -198,15 +215,6 @@ def on_classification_gallery_select(evt: gr.SelectData, shortcuts):
             return shortcuts, current_time    
     return shortcuts, None
 
-def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc):
-    return gr.update(value=sc_browser.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
-
-def on_sc_search_submit(sc_types, sc_search):
-    return gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
-
-def on_shortcut_type_change(sc_types, sc_search):
-    return gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
-
 def on_classification_create_btn_click(new_name,new_info,classification_shortcuts):
     current_time = datetime.datetime.now()
     if classification.create_classification(new_name,new_info):                
@@ -238,29 +246,38 @@ def on_classification_list_select(evt: gr.SelectData):
         
         current_time = datetime.datetime.now()
         
-        return gr.update(value=select_name),gr.update(value=info), shortcuts, current_time
+        return gr.update(value=select_name), gr.update(value=info), shortcuts, current_time
     return gr.update(value=""), gr.update(value=""), None, None
 
-def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search):
-    keys, tags, clfs = util.get_search_keyword(sc_search)
-    sc_search = ""    
-    new_search = list()
+# def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc):
+#     return gr.update(value=sc_browser.get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search)),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list())
 
-    if keys:                
-        new_search.extend(keys)
+# def on_sc_search_submit(sc_types, sc_search):
+#     return gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
 
-    if tags:                
-        new_tags = [f"#{tag}" for tag in tags]
-        new_search.extend(new_tags)
+# def on_shortcut_type_change(sc_types, sc_search):
+#     return gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
+
+# def on_sc_classification_list_select(evt: gr.SelectData, sc_types, sc_search):
+#     keys, tags, clfs = util.get_search_keyword(sc_search)
+#     sc_search = ""    
+#     new_search = list()
+
+#     if keys:                
+#         new_search.extend(keys)
+
+#     if tags:                
+#         new_tags = [f"#{tag}" for tag in tags]
+#         new_search.extend(new_tags)
     
-    if evt.value != setting.PLACEHOLDER:
-        select_name = evt.value
+#     if evt.value != setting.PLACEHOLDER:
+#         select_name = evt.value
         
-        if select_name and len(select_name.strip()) > 0:       
-            new_search.append(f"@{select_name.strip()}")
+#         if select_name and len(select_name.strip()) > 0:       
+#             new_search.append(f"@{select_name.strip()}")
         
-    if new_search:
-        sc_search = ", ".join(new_search)
+#     if new_search:
+#         sc_search = ", ".join(new_search)
         
-    return gr.update(value=sc_search),gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
+#     return gr.update(value=sc_search),gr.update(value=sc_browser.get_thumbnail_list(sc_types,False,sc_search))
                    

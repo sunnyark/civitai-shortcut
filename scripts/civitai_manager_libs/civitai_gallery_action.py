@@ -12,36 +12,39 @@ from . import util
 from . import civitai
 from . import setting
 
-def on_ui(selected_usergal_model_id:gr.Textbox):
+def on_ui():
            
     with gr.Column(scale=5):                                                   
         with gr.Row():                  
             with gr.Column(scale=1): 
                 with gr.Row():
-                    usergal_first_btn = gr.Button(value="First Page")
-                    usergal_prev_btn = gr.Button(value="Prev Page")                                        
+                    first_btn = gr.Button(value="First Page")
+                    prev_btn = gr.Button(value="Prev Page")                                        
             with gr.Column(scale=1): 
-                    usergal_page_slider = gr.Slider(minimum=1, maximum=1, value=1, step=1, label='Total Pages', interactive=True)
+                    page_slider = gr.Slider(minimum=1, maximum=1, value=1, step=1, label='Total Pages', interactive=True)
             with gr.Column(scale=1): 
                 with gr.Row():
-                    usergal_next_btn = gr.Button(value="Next Page")
-                    usergal_end_btn = gr.Button(value="End Page")
+                    next_btn = gr.Button(value="Next Page")
+                    end_btn = gr.Button(value="End Page")
                     
-        with gr.Accordion("#", open=True) as usergal_title_name:
+        with gr.Accordion("#", open=True) as model_title_name:
             usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-            usergal_versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
+            versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
                 
     with gr.Column(scale=1):
-        usergal_img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
+        img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
         try:
-            usergal_send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+            send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
         except:
             pass
         download_images = gr.Button(value="Download Images")  
         
     with gr.Row(visible=False):                                                           
+        
+        selected_model_id = gr.Textbox()
+        
         # user gallery information  
-        usergal_img_index = gr.Number(show_label=False)
+        img_index = gr.Number(show_label=False)
         
         # 실재 로드된것
         usergal_images = gr.State()
@@ -52,7 +55,7 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         usergal_images_meta = gr.State()
         
         # 트리거를 위한것
-        usergal_hidden = gr.Image(type="pil")
+        hidden = gr.Image(type="pil")
         usergal_page = gr.State()
         
         usergal_page_url = gr.Textbox(value=None)
@@ -62,9 +65,11 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         
         # 미리 다음페이지를 로딩한다.
         pre_loading = gr.Textbox()
+        
+        
                 
     try:
-        modules.generation_parameters_copypaste.bind_buttons(usergal_send_to_buttons, usergal_hidden,usergal_img_file_info)
+        modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden,img_file_info)
     except:
         pass            
 
@@ -90,49 +95,52 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
     ) 
     
     # civitai user gallery information start
-    selected_usergal_model_id.change(
-        fn=on_selected_usergal_model_id_change,
+    selected_model_id.change(
+        fn=on_selected_model_id_change,
         inputs=[
-            selected_usergal_model_id,
+            selected_model_id,
         ],
         outputs=[   
-            usergal_title_name,             
+            model_title_name,             
             usergal_page_url,
-            usergal_versions_list,
+            versions_list,
         ],
         cancels=gallery
     ) 
 
-    usergal_versions_list.select(
-        fn=on_usergal_versions_list_select,
+    versions_list.select(
+        fn=on_versions_list_select,
         inputs=[
-            selected_usergal_model_id,            
+            selected_model_id,            
         ],
         outputs=[            
-            usergal_title_name,             
+            model_title_name,             
             usergal_page_url,
-            usergal_versions_list 
+            versions_list 
         ],
         cancels=gallery
     )
  
-    # refresh_information.change(
+    # refresh_information.select(
     #     fn=on_refresh_information_change,
     #     inputs=[
-    #         selected_usergal_model_id,
-    #         usergal_page_url,            
-    #         usergal_page
+    #         selected_model_id,
+    #         usergal_page_url
     #     ],
-    #     outputs=[               
-    #         usergal_title_name,                               
+    #     outputs=[            
+    #         model_title_name,             
+    #         #usergal_page_url,
+    
     #         refresh_gallery,
     #         usergal_images_url,
     #         usergal_images_meta,
-    #         usergal_page_slider,
+    #         page_slider,
     #         usergal_page,
-    #         usergal_img_file_info,
-    #         usergal_versions_list   
-    #     ]        
+    #         img_file_info,            
+       
+    #         versions_list 
+    #     ],
+    #     cancels=gallery
     # )
     
     usergal_page_url.change(
@@ -144,9 +152,9 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
             refresh_gallery,
             usergal_images_url,
             usergal_images_meta,
-            usergal_page_slider,
+            page_slider,
             usergal_page,
-            usergal_img_file_info,            
+            img_file_info,            
         ],
         cancels=gallery         
     )    
@@ -160,8 +168,8 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         outputs=None
     )
     
-    usergal_first_btn.click(
-        fn=on_usergal_first_btn_click,
+    first_btn.click(
+        fn=on_first_btn_click,
         inputs=[
             usergal_page_url,
             usergal_page
@@ -171,8 +179,8 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         ]        
     )
 
-    usergal_end_btn.click(
-        fn=on_usergal_end_btn_click,
+    end_btn.click(
+        fn=on_end_btn_click,
         inputs=[
             usergal_page_url,
             usergal_page
@@ -182,8 +190,8 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         ]        
     )
 
-    usergal_prev_btn.click(
-        fn=on_usergal_prev_btn_click,
+    prev_btn.click(
+        fn=on_prev_btn_click,
         inputs=[
             usergal_page_url,
             usergal_page
@@ -193,8 +201,8 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         ]        
     )
     
-    usergal_next_btn.click(
-        fn=on_usergal_next_btn_click,
+    next_btn.click(
+        fn=on_next_btn_click,
         inputs=[
             usergal_page_url,
             usergal_page
@@ -204,33 +212,35 @@ def on_ui(selected_usergal_model_id:gr.Textbox):
         ]        
     )
 
-    usergal_page_slider.release(
-        fn=on_usergal_page_slider_release,
+    page_slider.release(
+        fn=on_page_slider_release,
         inputs=[
             usergal_page_url,
             usergal_page,
-            usergal_page_slider
+            page_slider
         ],
         outputs=[            
             usergal_page_url
         ]        
     )
             
-    usergal_gallery.select(on_gallery_select, usergal_images, [usergal_img_index, usergal_hidden])
-    usergal_hidden.change(on_civitai_hidden_change,[usergal_hidden,usergal_img_index,usergal_images_meta],[usergal_img_file_info])
+    usergal_gallery.select(on_gallery_select, usergal_images, [img_index, hidden])
+    hidden.change(on_civitai_hidden_change,[hidden,img_index,usergal_images_meta],[img_file_info])
+    
+    return selected_model_id
 
 def on_download_images_click(page_url,images_url):
     if page_url:
         modelid , versionid = extract_model_info(page_url)
         download_user_gallery_images(modelid,images_url)
     
-def on_usergal_page_slider_release(usergal_page_url, page_info, page_slider):
+def on_page_slider_release(usergal_page_url, page_info, page_slider):
     page_url = usergal_page_url
     if usergal_page_url:       
         page_url = util.update_url(usergal_page_url,"page", page_slider)    
     return page_url
      
-def on_usergal_first_btn_click(usergal_page_url, page_info):
+def on_first_btn_click(usergal_page_url, page_info):
     page_url = usergal_page_url
     if page_info:        
         if page_info['prevPage']:
@@ -238,7 +248,7 @@ def on_usergal_first_btn_click(usergal_page_url, page_info):
                     
     return page_url
 
-def on_usergal_end_btn_click(usergal_page_url, page_info):
+def on_end_btn_click(usergal_page_url, page_info):
     page_url = usergal_page_url
     if page_info:
         if page_info['nextPage']:            
@@ -246,7 +256,7 @@ def on_usergal_end_btn_click(usergal_page_url, page_info):
 
     return page_url
 
-def on_usergal_next_btn_click(usergal_page_url, page_info):
+def on_next_btn_click(usergal_page_url, page_info):
     page_url = usergal_page_url
     if page_info:        
         if page_info['nextPage']:
@@ -254,7 +264,7 @@ def on_usergal_next_btn_click(usergal_page_url, page_info):
 
     return page_url
 
-def on_usergal_prev_btn_click(usergal_page_url, page_info):
+def on_prev_btn_click(usergal_page_url, page_info):
     page_url = usergal_page_url
     if page_info:        
         if page_info['prevPage']:
@@ -272,7 +282,7 @@ def on_civitai_hidden_change(hidden, index, civitai_images_meta):
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index]
 
-def on_selected_usergal_model_id_change(modelid):
+def on_selected_model_id_change(modelid):
     page_url = None
     versions_list = None
     title_name = None
@@ -284,7 +294,7 @@ def on_selected_usergal_model_id_change(modelid):
     
     return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER)
 
-def on_usergal_versions_list_select(evt: gr.SelectData, modelid=None): 
+def on_versions_list_select(evt: gr.SelectData, modelid=None): 
     page_url = None
     versions_list = None
     title_name = None

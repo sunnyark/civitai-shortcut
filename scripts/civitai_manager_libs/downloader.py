@@ -4,6 +4,50 @@ import time
 import requests
 from tqdm import tqdm
 
+
+import shutil
+from . import util
+from . import setting
+
+def download_image_file(model_name, image_urls):    
+    if not model_name:                
+        return      
+
+    model_folder = util.make_download_image_folder(model_name)
+    
+    if not model_folder:
+        return
+    
+    save_folder = os.path.join(model_folder, "images")
+    
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)        
+        
+    if image_urls and len(image_urls) > 0:                
+        for image_count, img_url in enumerate(tqdm(image_urls, desc=f"Download images"), start=0):
+
+            result = util.is_url_or_filepath(img_url)
+            if result == "filepath":
+                if os.path.basename(img_url) != setting.no_card_preview_image:
+                    description_img = os.path.join(save_folder,os.path.basename(img_url))
+                    shutil.copyfile(img_url,description_img)
+            elif result == "url":
+                try:
+                    # get image
+                    with requests.get(img_url, stream=True) as img_r:
+                        if not img_r.ok:
+                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+                        else:
+                            # write to file
+                            image_id, ext = os.path.splitext(os.path.basename(img_url))
+                            description_img = os.path.join(save_folder,f'{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}')
+                            with open(description_img, 'wb') as f:
+                                img_r.raw.decode_content = True
+                                shutil.copyfileobj(img_r.raw, f)
+                except Exception as e:
+                    pass
+    return 
+
 def download_file(url, file_name):
     # Maximum number of retries
     max_retries = 5

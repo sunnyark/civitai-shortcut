@@ -20,24 +20,6 @@ CREATE_MODEL_FOLDER = "Create Model Name Folder"
 
 model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 
-# define model type name -> civitai model type
-# model_types = {
-#     'checkpoint':'Checkpoint',
-#     'lora':'LORA',
-#     'locon':'LoCon',
-#     'textualinversion':'TextualInversion',
-#     'hypernetwork':'Hypernetwork',
-#     'aestheticgradient':'AestheticGradient',
-#     'controlnet':'Controlnet',
-#     'poses':'Poses',
-#     'wildcards':'Wildcards',
-#     'other':'Other',
-          
-#     'vae':'VAE',          
-#     "anlora":"ANLORA",
-#     "unknown":"Unknown"
-# }
-
 # civitai model type -> folder path
 model_folders = {
     'Checkpoint': os.path.join("models","Stable-diffusion"),
@@ -75,6 +57,7 @@ ui_typenames = {
 civitai_information_tab = 0
 saved_information_tab = 1
 usergal_information_tab = 2
+download_information_tab = 3
 
 # civitai helper 호환성
 info_ext = ".info"
@@ -90,6 +73,7 @@ preview_image_suffix = ".preview"
 # 갤러리 ui설정
 gallery_column = 4
 shortcut_column = 3  
+shortcut_count_per_page = 15
 classification_gallery_column = 8
 
 # 유저 갤러리 설정
@@ -131,6 +115,7 @@ def init():
     global shortcut_gallery_folder
     
     global shortcut_column
+    global shortcut_count_per_page
     global gallery_column
     global classification_gallery_column
     global usergallery_images_column
@@ -167,6 +152,8 @@ def init():
     if environment:
         if "shortcut_column" in environment.keys():
             shortcut_column = int(environment['shortcut_column'])
+        if "shortcut_count_per_page" in environment.keys():
+            shortcut_count_per_page = int(environment['shortcut_count_per_page'])
         if "gallery_column" in environment.keys():            
             gallery_column = int(environment['gallery_column'])
         if "classification_gallery_column" in environment.keys():
@@ -219,21 +206,6 @@ def generate_type_basefolder(content_type):
 def generate_version_foldername(model_name,ver_name,ver_id):      
     # return f"{model_name}-{ver_name}-{ver_id}"
     return f"{model_name}-{ver_name}"
-
-# def generate_model_foldername(content_type, model_name=None):
-    
-#     if not model_name:
-#         return
-    
-#     model_name = model_name.strip()
-#     if len(model_name) <= 0:
-#         return
-    
-#     type_basefolder = generate_type_basefolder(content_type)
-                         
-#     model_folder = os.path.join(type_basefolder, util.replace_dirname(model_name))
-                
-#     return model_folder
 
 def get_model_folders():
     return model_folders.values()

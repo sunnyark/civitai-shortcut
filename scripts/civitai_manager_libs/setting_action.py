@@ -166,7 +166,7 @@ def on_scan_progress_change():
 
 def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
     files = scan_models(fix_information_filename, progress)
-    return gr.update(choices=files,value=files,interactive=True,label="Scanned Model List"),gr.update(visible=True),gr.update(visible=True),gr.update(value=True, interactive=True),gr.update(value=True, interactive=True)
+    return gr.update(choices=files,value=files,interactive=True,label="Scanned Model List"),gr.update(visible=True),gr.update(visible=True),gr.update(value=False, interactive=True),gr.update(value=False, interactive=True)
     
 def on_scan_to_shortcut_click(progress=gr.Progress()):
     model.update_downloaded_model()
@@ -179,7 +179,7 @@ def on_update_all_shortcuts_btn(progress=gr.Progress()):
 
 def on_scan_save_modelfolder_change(scan_save_modelfolder):
     if scan_save_modelfolder:
-        return gr.update(value=True, interactive=True)
+        return gr.update(interactive=True)
     return gr.update(value=False, interactive=False)
     
 def on_scan_ui():
@@ -200,8 +200,8 @@ def on_scan_ui():
                                 scan_register_shortcut = gr.Checkbox(label="Register a shortcut when creating the model information file.", value=True)
                             with gr.Column(scale=1):
                                 with gr.Row():
-                                    scan_save_modelfolder = gr.Checkbox(label="Create a model folder corresponding to the model type.", value=True)
-                                    scan_save_vsfolder = gr.Checkbox(label="Create individual model version folder.", value=True) 
+                                    scan_save_modelfolder = gr.Checkbox(label="Create a model folder corresponding to the model type.", value=False)
+                                    scan_save_vsfolder = gr.Checkbox(label="Create individual model version folder.", value=False) 
                         with gr.Row():
                             with gr.Column():
                                 create_models_info_btn = gr.Button(value="Create Model Information",variant="primary")                                                       
@@ -282,12 +282,14 @@ def on_scan_ui():
         outputs=[scan_progress]
     ) 
     
-def on_save_btn_click(shortcut_column, gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
+def on_save_btn_click(shortcut_column, shortcut_count_per_page,
+                      gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       wildcards,controlnet,aestheticgradient,poses,other,download_images_folder):    
     environment = dict()
     environment['shortcut_column'] = shortcut_column
+    environment['shortcut_count_per_page'] = shortcut_count_per_page
     environment['gallery_column'] = gallery_column
     environment['classification_gallery_column'] = classification_gallery_column
     environment['usergallery_images_column'] = usergallery_images_column
@@ -334,16 +336,16 @@ def on_setting_ui():
             with gr.Accordion("Shortcut Browser and Information Images", open=True):    
                 with gr.Row():
                     shortcut_column = gr.Slider(minimum=1, maximum=6, value=setting.shortcut_column, step=1, label='Shortcut Browser Column Count', interactive=True)
+                    shortcut_count_per_page = gr.Slider(minimum=0, maximum=100, value=setting.shortcut_count_per_page, step=1, label='Shortcut Browser Thumbnail Count per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
+                with gr.Row():                    
                     gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
                     classification_gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
-                with gr.Row():
-                    with gr.Column(scale=1):
-                        gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, label="Gallery Thumbnail Image Style")
-                    with gr.Column(scale=5):
-                        with gr.Row():                            
-                            shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of download images per version', interactive=True)
-                            gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
-                                        
+                with gr.Row():                        
+                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of download images per version', interactive=True)
+                    gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
+                with gr.Row():                                                
+                    gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, label="Gallery Thumbnail Image Style")
+                                                                
         with gr.Row():
             with gr.Accordion("User Gallery Images", open=True):    
                 with gr.Row():
@@ -383,6 +385,7 @@ def on_setting_ui():
         fn=on_save_btn_click,
         inputs=[
             shortcut_column,
+            shortcut_count_per_page,
             gallery_column,
             classification_gallery_column,
             usergallery_images_column,

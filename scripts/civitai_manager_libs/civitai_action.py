@@ -16,12 +16,7 @@ from . import classification
 from tqdm import tqdm
 from PIL import Image
 
-def on_cs_foldername_select(evt: gr.SelectData):
-    if evt.value == setting.CREATE_MODEL_FOLDER:
-        return gr.update(visible=True,value=False),gr.update(visible=False)
-    return gr.update(visible=False,value=False),gr.update(visible=False)
-
-def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
+def on_ui(refresh_sc_list:gr.Textbox()):
     
     with gr.Column(scale=1):
         versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
@@ -37,8 +32,7 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
             vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
             vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
-            download_model = gr.Button(value="Download", variant="primary")
-            download_images = gr.Button(value="Download Images")
+            download_model = gr.Button(value="Download", variant="primary")            
             civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
             gr.Markdown("Downloading may take some time.\nCheck console log for detail")
                 
@@ -54,12 +48,14 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
             send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
         except:
             pass      
+        download_images = gr.Button(value="Download Images")
+        refresh_btn = gr.Button(value="Refresh")
         with gr.Accordion("Model Classcification", open=True):
             model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
             model_classification_update_btn = gr.Button(value="Update",variant="primary")
-            
-            
+                    
     with gr.Row(visible=False):
+        selected_model_id  = gr.Textbox()
         selected_version_id = gr.Textbox()
         
         #civitai model information                
@@ -220,14 +216,19 @@ def on_ui(selected_model_id:gr.Textbox(),refresh_sc_list:gr.Textbox()):
         ],
         cancels=gallery
     )
-            
-    civitai_gallery.select(on_gallery_select, civitai_images, [img_index, hidden])    
-    
-    hidden.change(on_civitai_hidden_change,[hidden,img_index,civitai_images_meta],[img_file_info])
-    
-    civitai_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)    
 
+    refresh_btn.click(lambda :datetime.datetime.now(),None,refresh_information,cancels=gallery)             
+    civitai_gallery.select(on_gallery_select, civitai_images, [img_index, hidden])    
+    hidden.change(on_civitai_hidden_change,[hidden,img_index,civitai_images_meta],[img_file_info])
+    civitai_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)    
     vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_folder_name)
+
+    return selected_model_id , refresh_information
+
+def on_cs_foldername_select(evt: gr.SelectData):
+    if evt.value == setting.CREATE_MODEL_FOLDER:
+        return gr.update(visible=True,value=False),gr.update(visible=False)
+    return gr.update(visible=False,value=False),gr.update(visible=False)
 
 def on_model_classification_update_btn_click(model_classification, modelid):
     
@@ -289,15 +290,22 @@ def on_download_model_click(version_id, file_name, vs_folder, vs_foldername, cs_
 
 def on_download_images_click(version_id:str, images_url):
     msg = None
-    if version_id:    
-        download_image_files(version_id, images_url)
+    if version_id:        
+        version_info = civitai.get_version_info_by_version_id(version_id)              
+        if not version_info:
+            return
+
+        if "model" not in version_info.keys():
+            return
+            
+        downloader.download_image_file(version_info['model']['name'], images_url)
     current_time = datetime.datetime.now()    
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index]
 
 def on_open_folder_click(mid,vid):
-    path = model.get_model_folder(vid)
+    path = model.get_default_version_folder(vid)
     if path:
         util.open_folder(path)
 
@@ -522,6 +530,17 @@ def add_number_to_duplicate_files(filenames)->dict:
                 counts[file_info[1]] = 0        
             dup_file[file_info[0]] = file_info[1]
     return dup_file
+
+def get_save_base_name(version_info):
+    # 이미지 파일명도 primary 이름으로 저장한다.
+           
+    base = None    
+    primary_file = civitai.get_primary_file_by_version_info(version_info)
+    if not primary_file:
+        base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
+    else:
+        base, ext = os.path.splitext(primary_file['name'])   
+    return base
     
 def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername):               
     if not file_name:
@@ -605,61 +624,52 @@ def download_preview_image(filepath, version_info):
                     
     return True                    
 
-def download_image_files(version_id, image_urls):    
-    if not version_id:                
-        return      
+# def download_image_files(version_id, image_urls):    
+#     if not version_id:                
+#         return      
     
-    version_info = civitai.get_version_info_by_version_id(version_id)          
+#     version_info = civitai.get_version_info_by_version_id(version_id)          
     
-    if not version_info:
-        return
+#     if not version_info:
+#         return
 
-    if "model" not in version_info.keys():
-        return
+#     if "model" not in version_info.keys():
+#         return
 
-    model_folder = util.make_download_image_folder(version_info['model']['name'])
+#     model_folder = util.make_download_image_folder(version_info['model']['name'])
     
-    if not model_folder:
-        return
+#     if not model_folder:
+#         return
     
-    # save_folder = os.path.join(setting.root_path, model_folder, "images")
-    save_folder = os.path.join(model_folder, "images")
+#     # save_folder = os.path.join(setting.root_path, model_folder, "images")
+#     save_folder = os.path.join(model_folder, "images")
     
-    if not os.path.exists(save_folder):
-        os.makedirs(save_folder)        
+#     if not os.path.exists(save_folder):
+#         os.makedirs(save_folder)        
         
-    if image_urls and len(image_urls) > 0:                
-        for image_count, img_url in enumerate(tqdm(image_urls, desc=f"Download images"), start=0):
+#     if image_urls and len(image_urls) > 0:                
+#         for image_count, img_url in enumerate(tqdm(image_urls, desc=f"Download images"), start=0):
 
-            result = util.is_url_or_filepath(img_url)
-            if result == "filepath":
-                if os.path.basename(img_url) != setting.no_card_preview_image:
-                    description_img = os.path.join(save_folder,os.path.basename(img_url))
-                    shutil.copyfile(img_url,description_img)
-            elif result == "url":
-                try:
-                    # get image
-                    with requests.get(img_url, stream=True) as img_r:
-                        if not img_r.ok:
-                            util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
-                        else:
-                            # write to file
-                            image_id, ext = os.path.splitext(os.path.basename(img_url))
-                            description_img = os.path.join(save_folder,f'{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}')
-                            with open(description_img, 'wb') as f:
-                                img_r.raw.decode_content = True
-                                shutil.copyfileobj(img_r.raw, f)
-                except Exception as e:
-                    pass
-    return 
+#             result = util.is_url_or_filepath(img_url)
+#             if result == "filepath":
+#                 if os.path.basename(img_url) != setting.no_card_preview_image:
+#                     description_img = os.path.join(save_folder,os.path.basename(img_url))
+#                     shutil.copyfile(img_url,description_img)
+#             elif result == "url":
+#                 try:
+#                     # get image
+#                     with requests.get(img_url, stream=True) as img_r:
+#                         if not img_r.ok:
+#                             util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")
+#                         else:
+#                             # write to file
+#                             image_id, ext = os.path.splitext(os.path.basename(img_url))
+#                             description_img = os.path.join(save_folder,f'{image_id}{setting.preview_image_suffix}{setting.preview_image_ext}')
+#                             with open(description_img, 'wb') as f:
+#                                 img_r.raw.decode_content = True
+#                                 shutil.copyfileobj(img_r.raw, f)
+#                 except Exception as e:
+#                     pass
+#     return 
 
-def get_save_base_name(version_info):
-    # 이미지 파일명도 primary 이름으로 저장한다.
-           
-    base = None    
-    primary_file = civitai.get_primary_file_by_version_info(version_info)
-    if not primary_file:
-        base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
-    else:
-        base, ext = os.path.splitext(primary_file['name'])   
-    return base
+

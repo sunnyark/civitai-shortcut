@@ -16,10 +16,11 @@ from scripts.civitai_manager_libs import util
 def on_civitai_tabs_select(evt: gr.SelectData):
     if evt.index == 0:
         current_time = datetime.datetime.now() 
-        return current_time,gr.update(visible=False)
+        return current_time,gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
+        # return current_time,current_time,current_time,gr.update(visible=False)
     elif evt.index == 1:
         current_time = datetime.datetime.now() 
-        return gr.update(visible=False),current_time
+        return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),current_time
             
     return gr.update(visible=False),gr.update(visible=False)
 
@@ -46,21 +47,15 @@ def on_civitai_manage_tabs_select(evt: gr.SelectData):
                    
 def civitai_shortcut_ui():    
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tabs:
-        with gr.TabItem("Civitai Shortcut" , id="Shortcut"):
-            with gr.Row(visible=False):
-          
-                # SC 리스트틑 갱신하게 된다.
-                refresh_shortcut = gr.Textbox()              
-                refresh_classification = gr.Textbox()
-                
+        with gr.TabItem("Civitai Shortcut" , id="Shortcut"):                          
             with gr.Row():
-                civitai_shortcut_action.on_ui(refresh_shortcut)
+                refresh_shortcut , refresh_information , refresh_saved_information = civitai_shortcut_action.on_ui()
      
         with gr.TabItem("Manage" , id="Manage"):
             with gr.Tabs() as civitai_manage_tabs:        
                 with gr.TabItem("Classification"):
                     with gr.Row():
-                        classification_action.on_ui(refresh_classification)
+                        refresh_classification = classification_action.on_ui()
                 with gr.TabItem("Scan and Update Models"):
                     with gr.Row():
                         setting_action.on_scan_ui()
@@ -74,7 +69,7 @@ def civitai_shortcut_ui():
     civitai_tabs.select(
         fn=on_civitai_tabs_select,
         inputs=None,
-        outputs=[refresh_shortcut,refresh_classification]
+        outputs=[refresh_shortcut, refresh_information , refresh_saved_information, refresh_classification]
     )
     
     civitai_manage_tabs.select(

@@ -7,11 +7,12 @@ from . import util
 from . import model
 from . import civitai
 from . import setting
-from . import sc_browser
+from . import sc_browser_page
 
 from . import civitai_action
 from . import ishortcut_action
 from . import civitai_gallery_action
+from . import model_action
 
 def is_latest(modelid:str)->bool:
     if not modelid:
@@ -138,7 +139,8 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
     model.update_downloaded_model()
 
     scan_list = list()
-    shortlist =  sc_browser.get_thumbnail_list(sc_types,True)
+    # shortlist =  sc_browser.get_thumbnail_list(sc_types,True)
+    shortlist, thumb_totals, thumb_max_page =  sc_browser_page.get_thumbnail_list(sc_types,True)
     if shortlist:
         for short in progress.tqdm(shortlist, desc="Scanning new version model"):
             sc_name = short[1]
@@ -148,22 +150,12 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
 
     return gr.update(value=scan_list)
 
-def on_ui(refresh_shortcut:gr.Textbox):
-    with gr.Row(visible=False):
-        #civitai model select model
-        selected_model_id = gr.Textbox()
-                        
-        # saved shortcut model select model
-        selected_saved_model_id = gr.Textbox()
-
-        # user gallery select model                        
-        selected_usergal_model_id = gr.Textbox()
-        
+def on_ui():
+    with gr.Row(visible=False):       
         # information select tab 
         selected_civitai_information_tabs = gr.Number(value=0, show_label=False)
-        
-        refresh_sc_list = gr.Textbox()   
-                
+        refresh_shortcut = gr.Textbox()
+                        
     with gr.Column(scale=1):
         with gr.Tabs() as civitai_shortcut_tabs:
             with gr.TabItem("Upload"):
@@ -180,7 +172,8 @@ def on_ui(refresh_shortcut:gr.Textbox):
             with gr.TabItem("Browsing"):    
                 with gr.Row():
                     with gr.Column():
-                        sc_gallery = sc_browser.on_ui(refresh_sc_list)
+                        # sc_gallery, refresh_sc_list = sc_browser.on_ui()
+                        sc_gallery, refresh_sc_list = sc_browser_page.on_ui()
                         
             with gr.TabItem("Scan New Version"):
                 with gr.Row():
@@ -194,16 +187,20 @@ def on_ui(refresh_shortcut:gr.Textbox):
         with gr.Tabs() as civitai_information_tabs:
             with gr.TabItem("Civitai Model Information" , id="civitai_info"):
                 with gr.Row():
-                    civitai_action.on_ui(selected_model_id,refresh_sc_list)
+                    selected_model_id , refresh_civitai_information = civitai_action.on_ui(refresh_sc_list)
                     
             with gr.TabItem("Saved Model Information" , id="saved_info"):
                 with gr.Row():
-                    ishortcut_action.on_ui(selected_saved_model_id,refresh_sc_list)
+                    selected_saved_model_id , refresh_saved_information = ishortcut_action.on_ui(refresh_sc_list)
                     
             with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
                 with gr.Row():
-                    civitai_gallery_action.on_ui(selected_usergal_model_id)      
-                                    
+                    selected_usergal_model_id = civitai_gallery_action.on_ui()
+
+            # with gr.TabItem("Downloaded Model Information" , id="download_info"):
+            #     with gr.Row():
+            #         selected_download_model_id = model_action.on_ui()
+                                                        
     sc_gallery.select(on_sc_gallery_select, selected_civitai_information_tabs,[selected_model_id,selected_saved_model_id,selected_usergal_model_id])    
     sc_new_version_gallery.select(on_sc_gallery_select,selected_civitai_information_tabs,[selected_model_id,selected_saved_model_id,selected_usergal_model_id])
 
@@ -289,3 +286,5 @@ def on_ui(refresh_shortcut:gr.Textbox):
         ]                
     )
     # civitai scan new version tab end    
+    
+    return refresh_shortcut, refresh_civitai_information , refresh_saved_information
