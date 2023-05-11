@@ -7,7 +7,6 @@ from . import setting
 # civitai 와의 연결은 최소화하고 local의 관리를 목표로 한다.
 
 Downloaded_Models = dict()      # modelid : [vid:path...] #현재 가지고 있는 모델을 저장한다. 대표 경로가 저장되어 있다.
-# Downloaded_Versions = dict()  # versionid : path        #현재 가지고 있는 버전을 저장한다. 같은 버전이 여러개 있더라도 대표 하나만 저장한다.
 Downloaded_InfoPath = dict()    # infoPath : vid          #경로를 기준으로 저장한다. info 파일 하나당 버전 하나 / 버전 아이디로 저장된 경로파일을 찾을수 있다. 
                                 # get_infopaths 해당버전의 중복된 모든 경로를 구할수 있다
 
@@ -20,11 +19,9 @@ def Test_Models():
 
 def update_downloaded_model():
     global Downloaded_Models
-    # global Downloaded_Versions
     global Downloaded_InfoPath 
     
     Downloaded_Models, Downloaded_InfoPath = get_model_path()
-    # Downloaded_Models, Downloaded_Versions, Downloaded_InfoPath = get_model_path()
 
 def get_default_version_folder(vid):
     if vid:
@@ -38,10 +35,6 @@ def get_default_version_folder(vid):
             vfolder , vfile = os.path.split(path)
             return vfolder
             
-        # if vid in Downloaded_Versions:
-        #     path = Downloaded_Versions[str(vid)]        
-        #     vfolder , vfile = os.path.split(path)
-        #     return vfolder
     return None    
     
 def get_model_downloaded_versions(modelid:str):
@@ -74,7 +67,6 @@ def get_model_path()->dict:
     file_list = util.search_file(root_dirs,None,[setting.info_ext])
     
     models = dict()
-    # versions = dict()
     infopaths = dict()
     
     if not file_list:             
@@ -94,23 +86,13 @@ def get_model_path()->dict:
                         models[mid] = list()
                         
                     models[mid].append([vid, file_path])    
-                                            
-                    # if vid not in versions.keys():
-                    #     versions[vid] = file_path
-
-                    #     if mid not in models.keys():
-                    #         models[mid] = list()
-                            
-                    #     models[mid].append([vid, file_path])                        
         except:
             pass
     
     if len(models) > 0:
         return models, infopaths
-        # return models, versions, infopaths
     
     return None,None
-    # return None,None,None  
         
 # def get_version_images(versionid:str):
 #     if not Downloaded_Versions:

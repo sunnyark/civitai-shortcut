@@ -227,6 +227,21 @@ def scan_folder_for_info(folder):
                 
 #     return model_folder  
 
+def get_download_image_folder(ms_foldername):
+
+    if not ms_foldername:
+        return
+
+    if not setting.download_images_folder:
+        return
+                        
+    model_folder = os.path.join(setting.download_images_folder.strip(), replace_dirname(ms_foldername.strip()))
+                
+    if not os.path.exists(model_folder):
+        return None
+                
+    return model_folder  
+
 def make_download_image_folder(ms_foldername):
 
     if not ms_foldername:

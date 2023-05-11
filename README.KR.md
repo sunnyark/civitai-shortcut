@@ -62,6 +62,26 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutSetting.json: a JSON file that records setting.
 
 # Change Log
+v 1.4
+* 인포메이션 탭에 Downloaded Model Information 탭이 추가 되었습니다.
+  현재 다운로드한 파일의 정보를 확인 할 수 있는 탭입니다. 다운로드한 모델의 버전 리스트가 나타나며 선택시 하단에 세부 정보가 나타납니다. 세부표시 항목에서는 실제 다운 로드한 파일의 정보를 확인할수 있으며 다운로드된 폴더에 접근할수 있습니다. 파일 중복등의 사유로 다소 부정확할수 있습니다. 또한 해당버전의 Civitai 제공 정보를 json형태로 확인 하실수 있습니다. 
+  모든 Open Folder 기능은 해당 폴더가 존재 할때만 작동됩니다.
+  - Open Download Image Folder : 다운로드한 이미지들이 포함되어 있는 폴더를 열어줍니다.
+  - Open Saved Information Folder : Shortcut 등록시 모델의 정보파일과 이미지들이 다운로드 되는 폴더를 열어줍니다.
+                                    삭제시 되었을시 Civitai Shortcut->Saved Model Inforamtion : Update Model Information 이나 Manage->Scan and Update Models->Update Shortcuts : Update the model information for the shortcut 으로 복구할 수 있습니다.
+
+* 좌측의 shortcut browser의 표시 방식을 설정할 수 있습니다. 
+  Manage->Setting->Shortcut Browser and Information Images : Shortcut Browser Thumbnail Count per Page 
+  항목에서 설정할 수 있으며 0으로 설정시 기존의 방식처럼 전체 리스트가 출력됩니다.
+
+* 추가 기능 설명 1 (Update the model information for the shortcut)
+  Manage->Scan and Update Models->Update Shortcuts : Update the model information for the shortcut
+  기능은 이미등록된 shortcut 의 정보를 최신 정보로 업데이트 하는 기능입니다. 이는 등록된 모든 숏컷을 대상으로 합니다.
+  숏컷의 개별적인 업데이트는 Civitai Shortcut->Saved Model Inforamtion : Update Model Information 에서 할수 있습니다.
+
+* 추가 기능 설명 2 (Scan new version model)
+  Civitai Shortcut->Scan New Version : Scan new version model: 의 기능은 다운 로드된 모델 버전파일의 새로운 버전이 있는지 스캔하는 기능입니다. 다운로드하지 않은 모델은 검색하지 않습니다.
+
 v 1.3ss
 
 * 모델의 다운로드 규칙, 방법에 변경이 있습니다.
@@ -158,6 +178,11 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
+![screenshot 2023-05-11 114638](https://github.com/sunnyark/civitai-shortcut/assets/40237431/44bd5e89-b467-4cc5-9dfc-9f759ac9e483)
+
+![screenshot 2023-05-11 113805](https://github.com/sunnyark/civitai-shortcut/assets/40237431/f863236e-618f-46cd-952e-afc4bdac3208)
+
+![screenshot 2023-05-11 113816](https://github.com/sunnyark/civitai-shortcut/assets/40237431/51df48ea-c849-4704-89bd-595f8bff3906)
 
 ![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
 

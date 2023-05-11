@@ -43,8 +43,48 @@ def on_civitai_shortcut_tabs_select(evt: gr.SelectData):
         return current_time
         
     return gr.update(visible=False)
-   
-def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_information_tabs , selected_modelid, selected_saved_modelid, selected_usergal_modelid):
+  
+# def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_information_tabs , selected_modelid, selected_saved_modelid, selected_usergal_modelid):
+#     # util.printD(f"{evt.value},{evt.index}")
+#     active_modelid = selected_modelid
+#     if selected_civitai_information_tabs == setting.civitai_information_tab:
+#         active_modelid = selected_modelid
+#     if selected_civitai_information_tabs == setting.saved_information_tab:
+#         active_modelid = selected_saved_modelid
+#     if selected_civitai_information_tabs == setting.usergal_information_tab:
+#         active_modelid = selected_usergal_modelid
+        
+#     # civitai_information
+#     if evt.index == setting.civitai_information_tab:
+#         return evt.index, active_modelid, selected_saved_modelid, selected_usergal_modelid
+    
+#     # saved_information
+#     if evt.index == setting.saved_information_tab:
+#         return evt.index, selected_modelid, active_modelid, selected_usergal_modelid
+
+#     # usergallery_information
+#     if evt.index == setting.usergal_information_tab:
+#         return evt.index, selected_modelid, selected_saved_modelid, active_modelid
+
+#     return evt.index, selected_modelid, selected_modelid, selected_modelid
+
+# def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=None):
+#     if evt.value:
+#         shortcut = evt.value 
+#         sc_model_id = setting.get_modelid_from_shortcutname(shortcut) #shortcut[0:shortcut.find(':')]      
+        
+#     if selected_civitai_information_tabs is not None:
+#         if selected_civitai_information_tabs == setting.civitai_information_tab:
+#             return gr.update(value=sc_model_id),gr.update(value=None),gr.update(value=None)
+#         if selected_civitai_information_tabs == setting.saved_information_tab:
+#             return gr.update(value=None),gr.update(value=sc_model_id),gr.update(value=None)
+#         if selected_civitai_information_tabs == setting.usergal_information_tab:
+#             return gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id)
+                        
+#     return gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id)
+
+
+def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_information_tabs , selected_modelid, selected_saved_modelid, selected_usergal_modelid, selected_download_modelid):
     # util.printD(f"{evt.value},{evt.index}")
     active_modelid = selected_modelid
     if selected_civitai_information_tabs == setting.civitai_information_tab:
@@ -53,20 +93,27 @@ def on_civitai_information_tabs_select(evt: gr.SelectData, selected_civitai_info
         active_modelid = selected_saved_modelid
     if selected_civitai_information_tabs == setting.usergal_information_tab:
         active_modelid = selected_usergal_modelid
+    if selected_civitai_information_tabs == setting.download_information_tab:
+        active_modelid = selected_download_modelid
         
     # civitai_information
     if evt.index == setting.civitai_information_tab:
-        return evt.index, active_modelid, selected_saved_modelid, selected_usergal_modelid
+        return evt.index, active_modelid, selected_saved_modelid, selected_usergal_modelid ,selected_download_modelid
     
     # saved_information
     if evt.index == setting.saved_information_tab:
-        return evt.index, selected_modelid, active_modelid, selected_usergal_modelid
+        return evt.index, selected_modelid, active_modelid, selected_usergal_modelid, selected_download_modelid
 
     # usergallery_information
     if evt.index == setting.usergal_information_tab:
-        return evt.index, selected_modelid, selected_saved_modelid, active_modelid
+        return evt.index, selected_modelid, selected_saved_modelid, active_modelid, selected_download_modelid
 
-    return evt.index, selected_modelid, selected_modelid, selected_modelid
+    # download_information
+    if evt.index == setting.download_information_tab:
+        return evt.index, selected_modelid, selected_saved_modelid, selected_usergal_modelid, active_modelid
+    
+    return evt.index, selected_modelid, selected_modelid, selected_modelid, selected_modelid
+
 
 ##### sc_gallery 함수 정의 #####
 def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=None):
@@ -76,13 +123,15 @@ def on_sc_gallery_select(evt : gr.SelectData, selected_civitai_information_tabs=
         
     if selected_civitai_information_tabs is not None:
         if selected_civitai_information_tabs == setting.civitai_information_tab:
-            return gr.update(value=sc_model_id),gr.update(value=None),gr.update(value=None)
+            return gr.update(value=sc_model_id),gr.update(value=None),gr.update(value=None),gr.update(value=None)
         if selected_civitai_information_tabs == setting.saved_information_tab:
-            return gr.update(value=None),gr.update(value=sc_model_id),gr.update(value=None)
+            return gr.update(value=None),gr.update(value=sc_model_id),gr.update(value=None),gr.update(value=None)
         if selected_civitai_information_tabs == setting.usergal_information_tab:
-            return gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id)
-                        
-    return gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id)
+            return gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id),gr.update(value=None)
+        if selected_civitai_information_tabs == setting.download_information_tab:
+            return gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(value=sc_model_id)
+                                
+    return gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id),gr.update(value=sc_model_id)
 
 def on_civitai_internet_url_upload(files, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
     model_id = None    
@@ -94,17 +143,19 @@ def on_civitai_internet_url_upload(files, register_information_only, selected_ci
     current_time = datetime.datetime.now()
     
     if not model_id:
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None
 
     if selected_civitai_information_tabs is not None:
         if selected_civitai_information_tabs == setting.civitai_information_tab:
-            return gr.update(value=model_id),gr.update(value=None),gr.update(value=None),current_time, None
+            return gr.update(value=model_id),gr.update(value=None),gr.update(value=None),gr.update(value=None), current_time, None
         if selected_civitai_information_tabs == setting.saved_information_tab:
-            return gr.update(value=None),gr.update(value=model_id),gr.update(value=None),current_time, None
+            return gr.update(value=None),gr.update(value=model_id),gr.update(value=None),gr.update(value=None), current_time, None
         if selected_civitai_information_tabs == setting.usergal_information_tab:
-            return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),current_time, None
-        
-    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
+            return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),gr.update(value=None), current_time, None
+        if selected_civitai_information_tabs == setting.download_information_tab:
+            return gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(value=model_id), current_time, None
+                
+    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id), current_time, None
 
 def on_civitai_internet_url_txt_upload(url, register_information_only, selected_civitai_information_tabs=None, progress=gr.Progress()):       
     model_id = None    
@@ -117,17 +168,19 @@ def on_civitai_internet_url_txt_upload(url, register_information_only, selected_
     current_time = datetime.datetime.now()
     
     if not model_id:
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None
 
     if selected_civitai_information_tabs is not None:
         if selected_civitai_information_tabs == setting.civitai_information_tab:
-            return gr.update(value=model_id),gr.update(value=None),gr.update(value=None),current_time, None
+            return gr.update(value=model_id),gr.update(value=None),gr.update(value=None),gr.update(value=None),current_time, None
         if selected_civitai_information_tabs == setting.saved_information_tab:
-            return gr.update(value=None),gr.update(value=model_id),gr.update(value=None),current_time, None
+            return gr.update(value=None),gr.update(value=model_id),gr.update(value=None),gr.update(value=None),current_time, None
         if selected_civitai_information_tabs == setting.usergal_information_tab:
-            return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),current_time, None
-        
-    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
+            return gr.update(value=None),gr.update(value=None),gr.update(value=model_id),gr.update(value=None),current_time, None
+        if selected_civitai_information_tabs == setting.download_information_tab:
+            return gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(value=model_id),current_time, None
+                
+    return gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),gr.update(value=model_id),current_time, None
 
 def on_update_modelfolder_btn_click():
     model.update_downloaded_model()
@@ -197,12 +250,15 @@ def on_ui():
                 with gr.Row():
                     selected_usergal_model_id = civitai_gallery_action.on_ui()
 
-            # with gr.TabItem("Downloaded Model Information" , id="download_info"):
-            #     with gr.Row():
-            #         selected_download_model_id = model_action.on_ui()
-                                                        
-    sc_gallery.select(on_sc_gallery_select, selected_civitai_information_tabs,[selected_model_id,selected_saved_model_id,selected_usergal_model_id])    
-    sc_new_version_gallery.select(on_sc_gallery_select,selected_civitai_information_tabs,[selected_model_id,selected_saved_model_id,selected_usergal_model_id])
+            with gr.TabItem("Downloaded Model Information" , id="download_info"):
+                with gr.Row():
+                    selected_download_model_id , refresh_download_information = model_action.on_ui()
+    
+                    # 히든 대용
+                    # selected_download_model_id = gr.Textbox(visible=False)
+                    
+    sc_gallery.select(on_sc_gallery_select, selected_civitai_information_tabs,[selected_model_id,selected_saved_model_id,selected_usergal_model_id,selected_download_model_id])    
+    sc_new_version_gallery.select(on_sc_gallery_select,selected_civitai_information_tabs,[selected_model_id,selected_saved_model_id,selected_usergal_model_id,selected_download_model_id])
 
     refresh_shortcut.change(
         fn=on_refresh_shortcut_change,
@@ -224,17 +280,18 @@ def on_ui():
             selected_civitai_information_tabs,
             selected_model_id,
             selected_saved_model_id,
-            selected_usergal_model_id
+            selected_usergal_model_id,
+            selected_download_model_id
         ],
         outputs=[
             selected_civitai_information_tabs,
             selected_model_id,
             selected_saved_model_id,
-            selected_usergal_model_id     
+            selected_usergal_model_id,
+            selected_download_model_id
         ]
     )
-     
-    # civitai upload tab start
+    
     civitai_internet_url.upload(
         fn=on_civitai_internet_url_upload,
         inputs=[
@@ -246,6 +303,7 @@ def on_ui():
             selected_model_id,
             selected_saved_model_id,
             selected_usergal_model_id,
+            selected_download_model_id,
             refresh_sc_list,
             civitai_internet_url
         ]
@@ -262,6 +320,7 @@ def on_ui():
             selected_model_id,
             selected_saved_model_id,
             selected_usergal_model_id,
+            selected_download_model_id,
             refresh_sc_list,
             civitai_internet_url_txt
         ]        
@@ -272,10 +331,7 @@ def on_ui():
         inputs=None,
         outputs=refresh_sc_list
     )
-    
-    # civitai upload tab end
-    
-    # civitai scan new version tab start
+
     scan_new_version_btn.click(
         fn=on_scan_new_version_btn,
         inputs=[
@@ -285,6 +341,5 @@ def on_ui():
             sc_new_version_gallery,
         ]                
     )
-    # civitai scan new version tab end    
     
     return refresh_shortcut, refresh_civitai_information , refresh_saved_information

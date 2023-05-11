@@ -61,21 +61,34 @@ When using Civitai Shortcut, five items will be created:
 * CivitaiShortCutSetting.json: a JSON file that records setting.
 
 # Change Log
+
+v 1.4
+
+* A new tab called "Downloaded Model Information" has been added to the Information tab.
+  This tab allows you to view information about the currently downloaded files. A list of versions of the downloaded model is displayed, and selecting a version shows detailed information about the file in the bottom section. In the detailed display section, you can see the actual information about the downloaded file and access the downloaded folder. Please note that the information may be somewhat inaccurate due to reasons such as file duplication. In addition, you can view Civitai-provided information for that version in JSON format.
+
+  All "Open Folder" functions only work when the folder exists.
+
+  - The "Open Download Image Folder" function opens the folder containing the downloaded images.
+  - The "Open Saved Information Folder" function opens the folder where the model's information files and images are downloaded when the shortcut is registered. If the folder is deleted, it can be restored using the "Update Model Information" function under "Civitai Shortcut -> Saved Model Information" or "Manage -> Scan and Update Models -> Update Shortcuts: Update the model information for the shortcut".
+
+* You can set the display style of the Shortcut Browser on the left side. This can be done in "Manage->Setting->Shortcut Browser and Information Images: Shortcut Browser Thumbnail Count per Page". If you set it to 0, the entire list will be displayed as before.
+
+* Additional feature description 1 (Update the model information for the shortcut):
+  "Manage->Scan and Update Models->Update Shortcuts" is a function that updates the information of already registered shortcuts to the latest information. This applies to all registered shortcuts. Individual updates for shortcuts can be done in "Civitai Shortcut->Saved Model Information: Update Model Information".
+
+* Additional feature description 2 (Scan new version model):
+The "Civitai Shortcut->Scan New Version: Scan new version model" function scans for new versions of downloaded model version files. It does not search for models that have not been downloaded.
+
 v 1.3ss
+
 * There have been changes to the rules and methods for downloading the model. You can now specify the folder to download to and set the user-defined classification item as the download item for the model.
-
 * If you set the user-defined classification item as the download item, you cannot create subfolders. The folder for the user-defined classification item specified by the user will be created in the model type base folder (e.g. model/lora) and downloaded.
-
 * If you select "Create Model Name Folder," a folder will be created based on the model name in the model type base folder (e.g. model/lora), and you can create a subfolder with the desired name according to the version.
-
 * Downloaded model files can be freely moved to any desired folder. This extension only facilitates the convenience of downloading files and does not manage downloaded files. You can move them comfortably without any problems.
-
 * Image downloads are downloaded by default to outputs/download-images, and can be set in setting->download for extension->Download Images Folder. Depending on the system, permission settings may be required.
-
 * Since the user-defined classification item is used as the folder name, it is recommended to change difficult-to-use characters for folder creation. The "-" character will be replaced when creating the folder.
-
 * The display type of thumbnail images can be changed. You can set it in setting->Shortcut Browser and Information Images->Gallery Thumbnail Image Style.
-
 * When registering a shortcut, you can set the number of images to download. You can set it in setting->Shortcut Browser and Information Images->Maximum number of download images per version, and when set to 0, all images will be downloaded.
 
 v 1.3c
@@ -110,7 +123,6 @@ v 1.3a
 v 1.2a
 
 * The Downloaded Model tab, which duplicated the functionality of the Saved Model Information tab, has been removed
-
 * The application method for generating image information has been internally modified to include information from Civitai's 'information' field in addition to the image. As a result, there have been changes to the naming convention for saved images. Please update the images using 'Update Shortcut's Model Information' accordingly.
 
 v 1.2
@@ -140,8 +152,11 @@ v 1.1
 * "Update Model Information" button is added to "Saved Model Information" Tab for individual updating of model information, in addition to "Update Shortcut's Model Information" that updates all model information.
 
 # Screenshot
+
 ![screenshot 2023-05-11 114638](https://github.com/sunnyark/civitai-shortcut/assets/40237431/44bd5e89-b467-4cc5-9dfc-9f759ac9e483)
+
 ![screenshot 2023-05-11 113805](https://github.com/sunnyark/civitai-shortcut/assets/40237431/f863236e-618f-46cd-952e-afc4bdac3208)
+
 ![screenshot 2023-05-11 113816](https://github.com/sunnyark/civitai-shortcut/assets/40237431/51df48ea-c849-4704-89bd-595f8bff3906)
 
 ![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
