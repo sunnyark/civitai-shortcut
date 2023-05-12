@@ -145,11 +145,12 @@ def on_downloaded_information_select(evt: gr.SelectData, df):
             try:
                 with open(vlocation, 'r') as f:
                     contents = json.load(f)            
+                    
+                if 'id' not in contents.keys():
+                    contents = None
+                
             except:
                 pass
-    
-            if 'id' not in contents.keys():
-                contents = None            
                 
         if contents:
             file_list = list()
