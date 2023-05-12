@@ -51,10 +51,11 @@ def get_model_info(id:str) -> dict:
     try:            
         with requests.get(Url_ModelId()+str(id)) as response:
             content = response.json()
+
+        if 'id' not in content.keys():
+            return None
+        
     except Exception as e:
-        return None
-    
-    if 'id' not in content.keys():
         return None
     
     return content
@@ -80,10 +81,11 @@ def get_version_info_by_hash(hash) -> dict:
     try:
         with requests.get(f"{Url_Hash()}{hash}") as response:
             content = response.json()
-    except Exception as e:
-        return None
 
-    if 'id' not in content.keys():
+        if 'id' not in content.keys():
+            return None
+    
+    except Exception as e:
         return None
     
     return content  
@@ -97,10 +99,11 @@ def get_version_info_by_version_id(version_id:str) -> dict:
     try:
         with requests.get(Url_VersionId()+str(version_id)) as response:
             content = response.json()
-    except Exception as e:
-        return None
 
-    if 'id' not in content.keys():
+        if 'id' not in content.keys():
+            return None
+        
+    except Exception as e:
         return None
     
     return content   

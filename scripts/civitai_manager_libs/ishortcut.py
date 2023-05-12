@@ -43,10 +43,10 @@ def get_model_info(modelid:str):
     try:
         with open(model_path, 'r') as f:
             contents = json.load(f)            
+
+        if 'id' not in contents.keys():
+            return None
     except:
-        return None
-    
-    if 'id' not in contents.keys():
         return None
     
     return contents
