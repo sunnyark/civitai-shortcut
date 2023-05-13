@@ -2,17 +2,17 @@ import re
 import os
 import json
 
-
 import hashlib
 import io
 import platform
 import subprocess
 
+# from modules import shared
+# import modules.scripts as scripts
+
+from modules import scripts, script_callbacks, shared
+
 from . import setting
-
-from modules import shared
-import modules.scripts as scripts
-
 from tqdm import tqdm
 
 def printD(msg):    
@@ -313,20 +313,32 @@ def write_InternetShortcut(path, url):
         return False    
     return True
     
+# def load_InternetShortcut(path)->str:
+#     urls = ""
+#     try:    
+#         with open(path, 'r') as f:
+#         #with open(path, 'r', encoding='utf8') as f:            
+#             content = f.readlines()
+#             for line in content:
+#                 if line.startswith('URL='):
+#                     urls = line[4:]
+#     except Exception as e:
+#         printD(e)
+#         return
+
+#     return urls.strip()
+
 def load_InternetShortcut(path)->str:
-    urls = ""
+    urls = list()
     try:    
         with open(path, 'r') as f:
-        #with open(path, 'r', encoding='utf8') as f:            
-            content = f.readlines()
-            for line in content:
-                if line.startswith('URL='):
-                    urls = line[4:]
+            content = f.read()
+            urls = re.findall("(?P<url>https?://[^\s]+)", content)
     except Exception as e:
         printD(e)
         return
-
-    return urls.strip()
+    # printD(urls)
+    return urls
 
 # get image with full size
 # width is in number, not string

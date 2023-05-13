@@ -194,13 +194,15 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
     scan_list = list()
     # shortlist =  sc_browser.get_thumbnail_list(sc_types,True)
     shortlist, thumb_totals, thumb_max_page =  sc_browser_page.get_thumbnail_list(sc_types,True)
-    if shortlist:
+    if shortlist:        
         for short in progress.tqdm(shortlist, desc="Scanning new version model"):
             sc_name = short[1]
             mid = setting.get_modelid_from_shortcutname(sc_name) # str(sc_name[0:sc_name.find(':')])
+            # util.printD(mid)
             if not is_latest(mid):
                 scan_list.append(short)
-
+    #             util.printD(short)
+    # util.printD("end")
     return gr.update(value=scan_list)
 
 def on_ui():
@@ -209,7 +211,7 @@ def on_ui():
         selected_civitai_information_tabs = gr.Number(value=0, show_label=False)
         refresh_shortcut = gr.Textbox()
                         
-    with gr.Column(scale=1):
+    with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs() as civitai_shortcut_tabs:
             with gr.TabItem("Upload"):
                 with gr.Row(visible=False):                                 
@@ -233,10 +235,10 @@ def on_ui():
                     with gr.Column():
                         shortcut_new_version_type = gr.Dropdown(label='Filter Model type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)                                     
                         scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
-                        sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_column],height="auto")
+                        sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_column], height="fit", object_fit=setting.gallery_thumbnail_image_style)
                         gr.Markdown(value="The feature is to search for new versions of models on Civitai among the downloaded ones.", visible=True)
                 
-    with gr.Column(scale=4):
+    with gr.Column(scale=setting.shortcut_browser_screen_split_ratio_max):
         with gr.Tabs() as civitai_information_tabs:
             with gr.TabItem("Civitai Model Information" , id="civitai_info"):
                 with gr.Row():

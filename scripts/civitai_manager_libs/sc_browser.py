@@ -5,7 +5,7 @@ from . import setting
 from . import model
 from . import classification
 from . import ishortcut
-from PIL import Image
+
 
 def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None):
     
@@ -63,7 +63,7 @@ def on_ui():
         sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @classification, ....",interactive=True, lines=1)
         sc_classification_list = gr.Dropdown(label='Classification', multiselect=None, value=setting.PLACEHOLDER, choices=[setting.PLACEHOLDER] + classification.get_list(), interactive=True)
         show_only_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
-    sc_gallery = gr.Gallery(show_label=False,value=get_thumbnail_list()).style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)    
+    sc_gallery = gr.Gallery(show_label=False,value=get_thumbnail_list()).style(grid=[setting.shortcut_column], height=["full" if setting.shortcut_count_per_page != 0 else "auto"], object_fit=setting.gallery_thumbnail_image_style)    
     # for v in get_thumbnail_list():
     #     util.printD(v)
     # im = gr.Image(visible=False)

@@ -7,14 +7,16 @@ import modules
 import re
 import threading
 
-from PIL import Image
 from . import util
 from . import civitai
 from . import setting
 
 def on_ui():
            
-    with gr.Column(scale=5):                                                   
+    with gr.Column(scale=3):                                                   
+        with gr.Accordion("#", open=True) as model_title_name:            
+            versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
+        usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column], height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)
         with gr.Row():                  
             with gr.Column(scale=1): 
                 with gr.Row():
@@ -25,20 +27,21 @@ def on_ui():
             with gr.Column(scale=1): 
                 with gr.Row():
                     next_btn = gr.Button(value="Next Page")
-                    end_btn = gr.Button(value="End Page")
-                    
-        with gr.Accordion("#", open=True) as model_title_name:
-            usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-            versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
-                
-    with gr.Column(scale=1):
-        img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
-        try:
-            send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-        except:
-            pass
-        download_images = gr.Button(value="Download Images")  
-        
+                    end_btn = gr.Button(value="End Page")        
+        with gr.Row():
+            download_images = gr.Button(value="Download Images")
+            open_image_folder = gr.Button(value="Open Download Image Folder")                    
+
+    with gr.Column(scale=1):     
+        with gr.Tabs() as info_tabs:
+            with gr.TabItem("Image" , id="Image_Information"):   
+                with gr.Column():
+                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
+                    try:
+                        send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                    except:
+                        pass
+                        
     with gr.Row(visible=False):                                                           
         
         selected_model_id = gr.Textbox()
@@ -224,11 +227,22 @@ def on_ui():
         ]        
     )
             
-    usergal_gallery.select(on_gallery_select, usergal_images, [img_index, hidden])
+    usergal_gallery.select(on_gallery_select, usergal_images, [img_index, hidden, info_tabs])
     hidden.change(on_civitai_hidden_change,[hidden,img_index,usergal_images_meta],[img_file_info])
-    
+
+    open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
+        
     return selected_model_id
 
+def on_open_image_folder_click(modelid):
+    if modelid:                
+        model_info = civitai.get_model_info(modelid)
+        if model_info:  
+            model_name = model_info['name']
+            image_folder = util.get_download_image_folder(model_name)
+            if image_folder:
+                util.open_folder(image_folder)
+                
 def on_download_images_click(page_url,images_url):
     if page_url:
         modelid , versionid = extract_model_info(page_url)
@@ -280,7 +294,7 @@ def on_civitai_hidden_change(hidden, index, civitai_images_meta):
     return info2
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
-    return evt.index, civitai_images[evt.index]
+    return evt.index, civitai_images[evt.index], gr.update(selected="Image_Information")
 
 def on_selected_model_id_change(modelid):
     page_url = None

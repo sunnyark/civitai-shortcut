@@ -57,7 +57,7 @@ def get_model_info(id:str) -> dict:
         
     except Exception as e:
         return None
-    
+
     return content
 
 def get_model_info_by_version_id(version_id:str) -> dict:        
@@ -81,13 +81,13 @@ def get_version_info_by_hash(hash) -> dict:
     try:
         with requests.get(f"{Url_Hash()}{hash}") as response:
             content = response.json()
-
+            
         if 'id' not in content.keys():
             return None
-    
+        
     except Exception as e:
         return None
-    
+
     return content  
   
 def get_version_info_by_version_id(version_id:str) -> dict:        

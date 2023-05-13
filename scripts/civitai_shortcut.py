@@ -1,9 +1,10 @@
 import os
 import datetime
 import gradio as gr
-import modules.scripts as scripts
+# import modules.scripts as scripts
+# from modules import shared
+# from modules import script_callbacks
 
-from modules import shared
 from modules import script_callbacks
 
 from scripts.civitai_manager_libs import model
@@ -81,6 +82,9 @@ def civitai_shortcut_ui():
 def init_civitai_shortcut():
     setting.init()
     model.update_downloaded_model()
+
+#    util.printD(os.path.abspath(__file__))
+#    util.printD(os.path.abspath(root_path))
                
 # init
 init_civitai_shortcut()

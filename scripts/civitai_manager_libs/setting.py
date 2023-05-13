@@ -1,8 +1,11 @@
 import os
 import json
 import shutil
-from modules import shared
-import modules.scripts as scripts
+
+from modules import scripts, script_callbacks, shared
+
+# from modules import shared
+# import modules.scripts as scripts
 
 from . import util
 
@@ -24,7 +27,7 @@ model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 model_folders = {
     'Checkpoint': os.path.join("models","Stable-diffusion"),
     'LORA': os.path.join("models","Lora"),
-    'LoCon': os.path.join("models","Lora"),    
+    'LoCon': os.path.join("models","LyCORIS"),    
     'TextualInversion': os.path.join("embeddings"),   
     'Hypernetwork': os.path.join("models","hypernetworks"),         
     'AestheticGradient': os.path.join("extensions","stable-diffusion-webui-aesthetic-gradients","aesthetic_embeddings"),        
@@ -40,6 +43,23 @@ model_folders = {
 
 # UI 쪽에서 변환할때 쓰인다.
 # UI model type -> civitai model type
+
+# UI type 하나에 다중의 civitai type을 대입할때 대상이 되는것은  get_ui_typename 함수와 ishortcut->get_image_list 와 get_list 뿐이다.
+# 나머지는 key로만 쓰이기 때문에 value 값이 배열이라 해도문제가 안될듯한다. 
+# ishortcut 부분은 여기를
+# tmp_types.append(setting.ui_typenames[sc_type])
+# ->
+# for type_name in setting.ui_typenames[sc_type]:
+#     tmp_types.append(type_name)
+# 이리 하면 될듯
+
+# get_ui_typename는 이렇게 수정해도 문제 없을것 같다. 대신 모두 "" : ["",""] 형식으로 바꿔야 할듯(안해도 되나?)
+# def get_ui_typename(model_type):
+#     for k,v in ui_typenames.items():
+#         if model_type in v:
+#             return k
+#     return model_type
+
 ui_typenames = {
     "Checkpoint" : 'Checkpoint',
     "LoRA" : 'LORA',
@@ -70,18 +90,23 @@ preview_image_ext = ".png"
 preview_image_suffix = ".preview"
 
 
+# 갤러리 height 설정
+information_gallery_height = "auto" # auto , fit
+
+# 화면 분할 비율
+shortcut_browser_screen_split_ratio = 4
+shortcut_browser_screen_split_ratio_max  = 10
+
 # 갤러리 ui설정
-gallery_column = 4
-shortcut_column = 3  
-shortcut_count_per_page = 15
+gallery_column = 7
+shortcut_column = 5  
+shortcut_count_per_page = 20
 classification_gallery_column = 8
 
 # 유저 갤러리 설정
-usergallery_images_column = 5
-usergallery_images_page_limit = 10
-# usergallery_preload_page_count = 1
-# 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
-shortcut_max_download_image_per_version = 0
+usergallery_images_column = 6
+usergallery_images_page_limit = 12
+shortcut_max_download_image_per_version = 0 # 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
 gallery_thumbnail_image_style = "scale-down"
 
 # 다운로드 설정
@@ -124,9 +149,14 @@ def init():
     global gallery_thumbnail_image_style
 
     global download_images_folder
-                
+    global shortcut_browser_screen_split_ratio
+    global information_gallery_height
+                        
     root_path = os.getcwd()
        
+    # util.printD(os.path.abspath(__file__))
+    # util.printD(os.path.abspath(root_path))
+    
     shortcut = os.path.join(extension_base,shortcut)
     shortcut_setting = os.path.join(extension_base,shortcut_setting)
     shortcut_classification = os.path.join(extension_base,shortcut_classification)
@@ -145,11 +175,16 @@ def init():
         model_folders['Checkpoint'] = shared.cmd_opts.ckpt_dir
 
     if shared.cmd_opts.lora_dir:
-        model_folders['LORA'] = shared.cmd_opts.lora_dir
-        model_folders['LoCon'] = shared.cmd_opts.lora_dir
+        model_folders['LORA'] = shared.cmd_opts.lora_dir        
     
     environment = load()
     if environment:
+        if "shortcut_browser_screen_split_ratio" in environment.keys():
+            shortcut_browser_screen_split_ratio = int(environment['shortcut_browser_screen_split_ratio'])       
+        if "information_gallery_height" in environment.keys():
+            if environment['information_gallery_height'].strip():
+                information_gallery_height = environment['information_gallery_height']
+
         if "shortcut_column" in environment.keys():
             shortcut_column = int(environment['shortcut_column'])
         if "shortcut_count_per_page" in environment.keys():
@@ -170,6 +205,9 @@ def init():
         if "model_folders" in environment.keys():
                 
             user_folders = environment['model_folders']
+            
+            if 'LoCon' in user_folders.keys():
+                model_folders['LoCon'] = user_folders['LoCon']
             
             if 'Wildcards' in user_folders.keys():
                 model_folders['Wildcards'] = user_folders['Wildcards']

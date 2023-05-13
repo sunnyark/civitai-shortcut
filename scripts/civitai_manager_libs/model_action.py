@@ -2,15 +2,12 @@ import os
 import json
 import gradio as gr
 import datetime
-import modules
-
-import pandas as pd
 
 from . import util
 from . import model
-from . import civitai
 from . import setting
 from . import ishortcut
+# from . import civitai
 
 def on_ui():
             
@@ -145,13 +142,11 @@ def on_downloaded_information_select(evt: gr.SelectData, df):
             try:
                 with open(vlocation, 'r') as f:
                     contents = json.load(f)            
-                    
                 if 'id' not in contents.keys():
-                    contents = None
-                
+                    contents = None    
             except:
                 pass
-                
+    
         if contents:
             file_list = list()
             if "files" in contents:

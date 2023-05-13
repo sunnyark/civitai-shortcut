@@ -2,7 +2,6 @@ import os
 import json
 import shutil
 import requests
-import gradio as gr
 
 from . import util
 from . import setting

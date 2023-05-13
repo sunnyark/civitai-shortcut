@@ -62,6 +62,44 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutSetting.json: a JSON file that records setting.
 
 # Change Log
+v 1.4a
+* 인터페이스 디자인 인이 변경되었습니다.
+* 다운 받을 파일에 대한 좀더 자세한 정보를 제공하도록 변경되었습니다.
+* 파일을 선택하지 않고 다운로드 시에도 version information 파일과 preview 이미지를 생성 하도록 변경하였습니다. 
+*  실제 파일을 다운 로드 하지 않고도 Downloaded Model Information을 이용하실수 있습니다.
+* 파일을 다운 받지 않았어도 다운 받은걸로 인식되므로 참고 부탁드립니다. 
+* 인포메이션탭에서 제공하는 open folder 기능은 여러곳에 중복 다운로드했을시 부정확할수 있습니다. 
+  정확한 내용을 알고 싶으시면 Downloaded Model Information tab 을 활용해주세요.
+* Downloaded Model Information tab 에서 파일명이 동일한 파일을 다운 받을 경우 모두 다은받은걸로 인식되는 오류가 있습니다.
+
+* Manage -> Classification 디자인 과 기능에 일부 변경이 있습니다.
+* Classification 의 생성 수정 삭제 업데이트 기능이 좌측의 Shortcut Item 항목과 통합되었습니다. 
+   - Update 기능은 classification 의 이름과 설명의 Update만 합니다. 
+   - classification에 등록되는 shortcut Item 의 저장은 Save Classification Shortcuts 을 이용하셔야 합니다.
+
+* Manage -> Setting 에 Screen Style 항목이 추가되었습니다. 
+  Shortcut Brower 와 Information Tab 간의 비율을 설정할수있습니다. 
+ 자신의 모니터나 작업취향에 따라 적절한 비율을 선택하시고 적용할수 있습니다. 
+ Shortcut Browser and Information Images 항목과 적절히 조합하시길 추천드립니다.
+
+* Download Folder for Extensions 에 LyCORIS의 다운로드 위치를 설정할수 있는 항목이 추가 되었습니다.
+  기존에 는 LoRA 폴더를 같이 이용했지만 LyCORIS확장을 사용하시면 extra networks 에서도 인식되는것을 알게되어 적절히 수정 하실수 있게 추가 하였습니다.
+  (알려주시어 감사합니다.)
+
+* Reload UI 버튼이 추가 되었습니다. SDUI 를 리로드 시킵니다. 
+  단 setting을 저장하는 기능은 넣지 않았습니다. 저장은 옆의 Save Setting 버튼을 이용해주세요. :)
+
+* Upload 항목에 업로드 되는 파일의 내부 형식을 조금 변경하였습니다. 
+   - url=civitai model url 의 구성을하면 인식되도록 수정하였습니다. 
+   - e.g.) 
+  sample.txt :
+	url=https://civitai.com/models/64863/cute-oil-impasto-chibi
+	url=https://civitai.com/models/64850/koga-tomoe-from-bunny-girl-senpai
+	url=https://civitai.com/models/64849/blackwhite
+
+* Upload 의 드래그 & 드롭이 리눅스 환경에서 제대로 작동 되지 않습니다. 
+   불편하시겠지만 당분간 윗쪽의 Textbox 를 활용해주세요.  
+
 v 1.4
 * 인포메이션 탭에 Downloaded Model Information 탭이 추가 되었습니다.
   현재 다운로드한 파일의 정보를 확인 할 수 있는 탭입니다. 다운로드한 모델의 버전 리스트가 나타나며 선택시 하단에 세부 정보가 나타납니다. 세부표시 항목에서는 실제 다운 로드한 파일의 정보를 확인할수 있으며 다운로드된 폴더에 접근할수 있습니다. 파일 중복등의 사유로 다소 부정확할수 있습니다. 또한 해당버전의 Civitai 제공 정보를 json형태로 확인 하실수 있습니다. 
@@ -178,6 +216,14 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
+![screenshot 2023-05-13 183202](https://github.com/sunnyark/civitai-shortcut/assets/40237431/52943efb-6e7e-4cc9-bbac-a6717bfcee72)
+
+![screenshot 2023-05-13 183214](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3867dcf2-bc6e-4fd3-85e5-05f4fba0ff8a)
+
+![screenshot 2023-05-13 183245](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a9e9e1a6-6fe9-4beb-b54c-f092d785c9ea)
+
+![screenshot 2023-05-13 183323](https://github.com/sunnyark/civitai-shortcut/assets/40237431/28dc11b9-1b6e-4690-a506-9775eea61647)
+
 ![screenshot 2023-05-11 114638](https://github.com/sunnyark/civitai-shortcut/assets/40237431/44bd5e89-b467-4cc5-9dfc-9f759ac9e483)
 
 ![screenshot 2023-05-11 113805](https://github.com/sunnyark/civitai-shortcut/assets/40237431/f863236e-618f-46cd-952e-afc4bdac3208)

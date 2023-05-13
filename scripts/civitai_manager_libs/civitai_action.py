@@ -13,47 +13,67 @@ from . import setting
 from . import downloader
 from . import classification
 
-from tqdm import tqdm
 from PIL import Image
 
+   
 def on_ui(refresh_sc_list:gr.Textbox()):
-    
+    with gr.Column(scale=3):
+        with gr.Accordion("#", open=True) as model_title_name:            
+            versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+        with gr.Tabs():    
+            with gr.TabItem("Images" , id="Model_Images"): 
+                civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column], height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)        
+                with gr.Row():
+                    download_images = gr.Button(value="Download Images")
+                    open_image_folder = gr.Button(value="Open Download Image Folder")
+            with gr.TabItem("Description" , id="Model_Description"): 
+                description_html = gr.HTML()
+            with gr.TabItem("Download" , id="Model_Download"): 
+                gr.Markdown("Downloadable Files")
+                downloadable_files = gr.DataFrame(
+                        headers=["","ID","Filename","Type","SizeKB","DownloadUrl"],
+                        datatype=["str","str","str","str","str","str"], 
+                        col_count=(6,"fixed"),
+                        interactive=False,
+                        type="array",
+                    )                  
+                filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)                 
+            
+                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
+                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+                download_model = gr.Button(value="Download", variant="primary")
+                gr.Markdown("Downloading may take some time. Check console log for detail")     
+                                                           
     with gr.Column(scale=1):
-        versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
-        model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
-        trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
-        civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
+        with gr.Tabs() as info_tabs:
+            with gr.TabItem("Information" , id="Model_Information"):
+                model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+                trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
+                civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
 
-        with gr.Accordion("Downloaded Version", open=False)  as downloaded_tab:
-            downloaded_info = gr.Textbox(interactive=False,show_label=False)
-
-        with gr.Accordion("Download", open=True):
-            filename_list = gr.CheckboxGroup (label="Model Version File", info="Select the files you want to download", choices=[], value=[], interactive=True) 
-            cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
-            vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
-            vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
-            download_model = gr.Button(value="Download", variant="primary")            
-            civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
-            gr.Markdown("Downloading may take some time.\nCheck console log for detail")
-                
-    with gr.Column(scale=4):
-        with gr.Accordion("#", open=True) as model_title_name:
-            civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-        with gr.Accordion("Model Description", open=True):
-            description_html = gr.HTML()
-
-    with gr.Column(scale=1):
-        img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
-        try:
-            send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-        except:
-            pass      
-        download_images = gr.Button(value="Download Images")
-        refresh_btn = gr.Button(value="Refresh")
-        with gr.Accordion("Model Classcification", open=True):
-            model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
-            model_classification_update_btn = gr.Button(value="Update",variant="primary")
-                    
+                with gr.Row():                        
+                    with gr.Column():
+                        with gr.Accordion("Classcification", open=True):
+                            model_classification = gr.Dropdown(label='Classcification', show_label=False ,multiselect=True, interactive=True, choices=classification.get_list())
+                            model_classification_update_btn = gr.Button(value="Update",variant="primary")     
+                                                                                    
+                        with gr.Accordion("Downloaded Version", open=True, visible=False)  as downloaded_tab:
+                            downloaded_info = gr.Textbox(interactive=False,show_label=False)
+                            civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
+                with gr.Row():
+                    with gr.Column():   
+                        
+                        
+                        refresh_btn = gr.Button(value="Refresh")                  
+            with gr.TabItem("Image Information" , id="Image_Information"):  
+                with gr.Column():
+                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
+                    try:
+                        send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                    except:
+                        pass
+                                                
     with gr.Row(visible=False):
         selected_model_id  = gr.Textbox()
         selected_version_id = gr.Textbox()
@@ -75,6 +95,18 @@ def on_ui(refresh_sc_list:gr.Textbox()):
     except:
         pass
 
+    downloadable_files.select(
+        fn=on_downloadable_files_select,
+        inputs=[
+            downloadable_files,
+            filename_list
+        ],
+        outputs=[
+            downloadable_files,
+            filename_list,
+        ]
+    ) 
+    
     gallery = refresh_gallery.change(
         fn=on_civitai_gallery_loading,
         inputs=[
@@ -145,6 +177,7 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             description_html,
             trigger_words,
             filename_list,
+            downloadable_files,
             model_title_name,                        
             refresh_gallery, 
             civitai_images_url,
@@ -174,6 +207,7 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             description_html,
             trigger_words,
             filename_list,
+            downloadable_files,
             model_title_name,                        
             refresh_gallery, 
             civitai_images_url,       
@@ -203,6 +237,7 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             description_html,
             trigger_words,
             filename_list,
+            downloadable_files,
             model_title_name,                        
             refresh_gallery, 
             civitai_images_url,
@@ -218,13 +253,50 @@ def on_ui(refresh_sc_list:gr.Textbox()):
     )
 
     refresh_btn.click(lambda :datetime.datetime.now(),None,refresh_information,cancels=gallery)             
-    civitai_gallery.select(on_gallery_select, civitai_images, [img_index, hidden])    
+    civitai_gallery.select(on_gallery_select, civitai_images, [img_index, hidden, info_tabs])    
     hidden.change(on_civitai_hidden_change,[hidden,img_index,civitai_images_meta],[img_file_info])
     civitai_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)    
     vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_folder_name)
-
+    
+    open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
+    
     return selected_model_id , refresh_information
 
+def on_open_image_folder_click(modelid):
+    if modelid:                
+        model_info = civitai.get_model_info(modelid)
+        if model_info:  
+            model_name = model_info['name']
+            image_folder = util.get_download_image_folder(model_name)
+            if image_folder:
+                util.open_folder(image_folder)
+                
+def on_downloadable_files_select(evt: gr.SelectData, df, filenames):
+    # util.printD(evt.index)
+    # index[0] # 행,열
+    vid = None
+    vname = None
+    dn_name = None
+    
+    if df:
+        vid = df[evt.index[0]][1]
+        vname = df[evt.index[0]][2]
+        dn_name = f"{vid}:{vname}"
+
+    if vid:        
+        if filenames:
+            if dn_name in filenames:
+                filenames.remove(dn_name)
+                df[evt.index[0]][0] = '⬜️'
+            else:
+                filenames.append(dn_name)
+                df[evt.index[0]][0] = '✅'
+        else:
+            filenames = [dn_name]    
+            df[evt.index[0]][0] = '✅'
+
+    return df, gr.update(value=filenames)
+    
 def on_cs_foldername_select(evt: gr.SelectData):
     if evt.value == setting.CREATE_MODEL_FOLDER:
         return gr.update(visible=True,value=False),gr.update(visible=False)
@@ -302,7 +374,7 @@ def on_download_images_click(version_id:str, images_url):
     current_time = datetime.datetime.now()    
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
-    return evt.index, civitai_images[evt.index]
+    return evt.index, civitai_images[evt.index], gr.update(selected="Image_Information")
 
 def on_open_folder_click(mid,vid):
     path = model.get_default_version_folder(vid)
@@ -324,7 +396,7 @@ def on_versions_list_select(evt: gr.SelectData, modelid:str):
 
 def load_model(modelid, ver_index):
     if modelid:
-        model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,ver_index)    
+        model_info,versionid,version_name,model_url,downloaded_versions_list,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,ver_index)    
         if model_info:
             downloaded_info = None
             is_downloaded = False            
@@ -342,10 +414,17 @@ def load_model(modelid, ver_index):
             current_time = datetime.datetime.now()
                 
             classification_list = classification.get_classification_names_by_modelid(modelid)
-                                
+                
+            flist = list()
+            downloadable = list()
+            for file in files:            
+                flist.append(f"{file['id']}:{file['name']}")
+                downloadable.append(['✅',file['id'],file['name'],file['type'],round(file['sizeKB']),file['downloadUrl']])
+                                                                            
             return gr.update(value=versionid),gr.update(value=model_url),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
-                gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []),gr.update(label=title_name),\
+                gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []), downloadable if len(downloadable) > 0 else None,\
+                gr.update(label=title_name),\
                 current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=False, visible=True),gr.update(value=vs_foldername, visible=False),\
                 gr.update(choices=classification.get_list(),value=classification_list),\
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
@@ -354,7 +433,8 @@ def load_model(modelid, ver_index):
     # clear model information
     return gr.update(value=None),gr.update(value=None),gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
-        gr.update(value=None),gr.update(choices=[], value=None),gr.update(label="#"),\
+        gr.update(value=None),gr.update(choices=[], value=None),None,\
+        gr.update(label="#"),\
         None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=False, visible=True),gr.update(value="",visible=False),\
         gr.update(choices=classification.get_list(), value=[]),\
         gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
@@ -397,14 +477,14 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
             versions_list.append(ver['name'])
         
         model_url = civitai.Url_Page() + str(modelid)        
-        dhtml, triger, flist = get_version_description(version_info,model_info)
+        dhtml, triger, files = get_version_description(version_info,model_info)
         title_name = f"# {model_info['name']} : {version_info['name']}"           
         
         images_url, images_meta = get_version_description_gallery(version_info)
         
         vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)
-                    
-        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta,vs_foldername
+
+        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta,vs_foldername
     return None, None,None,None,None,None,None,None,None,None,None,None,None,None
 
 def get_version_description_gallery(version_info:dict):       
@@ -448,7 +528,7 @@ def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
     output_training = ""
 
-    files_name = []
+    files = []
     
     html_typepart = ""
     html_creatorpart = ""
@@ -506,12 +586,13 @@ def get_version_description(version_info:dict,model_info:dict=None):
 
         if 'files' in version_info:                                
             for file in version_info['files']:
-                files_name.append(f"{file['id']}:{file['name']}")
+                files.append(file)
+                # files_name.append(f"{file['id']}:{file['name']}")
                 html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
                             
         output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_model_tags + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
         
-        return output_html, output_training, files_name             
+        return output_html, output_training, files            
     
     return "",None,None
 
@@ -543,8 +624,8 @@ def get_save_base_name(version_info):
     return base
     
 def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername):               
-    if not file_name:
-        return
+    # if not file_name:
+    #     return
 
     if not version_id:
         return
@@ -565,19 +646,20 @@ def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldern
     if not model_folder:
         return
 
-    dup_names = add_number_to_duplicate_files(file_name)
-    
-    for fid, file in dup_names.items():                    
-        try:
-            #모델 파일 저장
-            path_dl_file = os.path.join(model_folder, file)            
-            thread = threading.Thread(target=downloader.download_file,args=(download_files[str(fid)]['downloadUrl'], path_dl_file))
-            # Start the thread
-            thread.start()                
-        except Exception as e:
-            util.printD(e)
-            pass
+    if file_name:
+        dup_names = add_number_to_duplicate_files(file_name)
         
+        for fid, file in dup_names.items():                    
+            try:
+                #모델 파일 저장
+                path_dl_file = os.path.join(model_folder, file)            
+                thread = threading.Thread(target=downloader.download_file,args=(download_files[str(fid)]['downloadUrl'], path_dl_file))
+                # Start the thread
+                thread.start()                
+            except Exception as e:
+                util.printD(e)
+                pass
+            
     # 저장할 파일명을 생성한다.
     savefile_base = get_save_base_name(version_info)
                                 

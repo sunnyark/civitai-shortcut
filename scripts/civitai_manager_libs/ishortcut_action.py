@@ -11,43 +11,69 @@ from . import ishortcut
 from . import setting
 from . import classification
 from . import downloader
+from . import civitai_action 
 
 def on_ui(refresh_sc_list:gr.Textbox()):
+    with gr.Column(scale=3):    
+        with gr.Accordion("#", open=True) as model_title_name:               
+            versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)             
+        with gr.Tabs():    
+            with gr.TabItem("Images" , id="Model_Images"):                                 
+                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
+                with gr.Row():
+                    download_images = gr.Button(value="Download Images")
+                    open_image_folder = gr.Button(value="Open Download Image Folder")                 
+            with gr.TabItem("Description" , id="Model_Description"):                             
+                description_html = gr.HTML()       
+            with gr.TabItem("Download" , id="Model_Download"): 
+                gr.Markdown("Downloadable Files")
+                downloadable_files = gr.DataFrame(
+                        headers=["","ID","Filename","Type","SizeKB","DownloadUrl"],
+                        datatype=["str","str","str","str","str","str"], 
+                        col_count=(6,"fixed"),
+                        interactive=False,
+                        type="array",
+                    )                  
+                filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
 
-    with gr.Column(scale=1):
-        versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
-        model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
-        trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
-        civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
-        
-        with gr.Accordion("Downloaded Version", open=False, visible=False) as downloaded_tab: 
-            downloaded_info = gr.Textbox(interactive=False,show_label=False)
+                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
+                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+                download_model = gr.Button(value="Download", variant="primary")
+                gr.Markdown("Downloading may take some time. Check console log for detail")     
 
-        filename_list = gr.Textbox(label="Model Version File", interactive=False)
-        update_information_btn = gr.Button(value="Update Model Information")       
-        with gr.Accordion("Delete Civitai Shortcut", open=False):
-            shortcut_del_btn = gr.Button(value="Delete Shortcut")
-        saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)
                             
-    with gr.Column(scale=4):                                                  
-        with gr.Accordion("#", open=True) as model_title_name:   
-            saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height="auto", object_fit=setting.gallery_thumbnail_image_style)
-        with gr.Accordion("Model Description", open=True):  
-            description_html = gr.HTML()                                                                                                   
-    with gr.Column(scale=1):
-        img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
-        try:
-            send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-        except:
-            pass 
-        download_images = gr.Button(value="Download Images")
-        refresh_btn = gr.Button(value="Refresh")
-        with gr.Accordion("Model Classcification", open=True):
-            model_classification = gr.Dropdown(label='Classcification', multiselect=True, interactive=True, choices=classification.get_list())
-            model_classification_update_btn = gr.Button(value="Update",variant="primary")
-        
-        
+    with gr.Column(scale=1):            
+        with gr.Tabs() as info_tabs:
+            with gr.TabItem("Information" , id="Model_Information"):
+                model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+                trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
+                civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)                   
+                with gr.Row():            
+                    with gr.Column():
+                        with gr.Accordion("Classcification", open=True):
+                            model_classification = gr.Dropdown(label='Classcification', show_label=False ,multiselect=True, interactive=True, choices=classification.get_list())
+                            model_classification_update_btn = gr.Button(value="Update",variant="primary")
+
+                        with gr.Accordion("Downloaded Version", open=True, visible=False) as downloaded_tab:                             
+                            downloaded_info = gr.Textbox(interactive=False,show_label=False)
+                            saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)
+                with gr.Row():
+                    with gr.Column():                                                    
+                        refresh_btn = gr.Button(value="Refresh")                          
+                        update_information_btn = gr.Button(value="Update Model Information")       
+                        with gr.Accordion("Delete Civitai Shortcut", open=False):
+                            shortcut_del_btn = gr.Button(value="Delete Shortcut")                                                                        
+
+            with gr.TabItem("Image Information" , id="Image_Information"):      
+                with gr.Column():            
+                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
+                    try:
+                        send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                    except:
+                        pass 
                 
+                            
     with gr.Row(visible=False): 
         selected_model_id = gr.Textbox()
         selected_version_id = gr.Textbox()
@@ -67,7 +93,44 @@ def on_ui(refresh_sc_list:gr.Textbox()):
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden,img_file_info)
     except:
         pass
+   
 
+    downloadable_files.select(
+        fn=on_downloadable_files_select,
+        inputs=[
+            downloadable_files,
+            filename_list
+        ],
+        outputs=[
+            downloadable_files,
+            filename_list,
+        ]
+    ) 
+
+    cs_foldername.select(    
+        fn=on_cs_foldername_select,
+        inputs=None,
+        outputs=[
+            vs_folder,
+            vs_folder_name
+        ]          
+    )
+    
+    download_model.click(
+        fn=on_download_model_click,
+        inputs=[
+            selected_version_id,
+            filename_list,            
+            vs_folder,
+            vs_folder_name,
+            cs_foldername,
+        ],
+        outputs=[
+            refresh_sc_list,
+            refresh_information
+        ]
+    )  
+        
     download_images.click(
         fn=on_download_images_click,
         inputs=[
@@ -139,13 +202,17 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             description_html,
             trigger_words,
             filename_list,
+            downloadable_files,            
             model_title_name,                        
             refresh_gallery,
             saved_images_url,
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            model_classification
+            vs_folder,
+            vs_folder_name,
+            model_classification,
+            cs_foldername
         ],
         cancels=gallery 
     )
@@ -165,13 +232,17 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             description_html,
             trigger_words,
             filename_list,
+            downloadable_files,            
             model_title_name,                        
             refresh_gallery,
             saved_images_url,
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            model_classification
+            vs_folder,
+            vs_folder_name,
+            model_classification,
+            cs_foldername
         ],
         cancels=gallery
     )    
@@ -192,23 +263,65 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             description_html,
             trigger_words,
             filename_list,
+            downloadable_files,            
             model_title_name,                        
             refresh_gallery,
             saved_images_url,
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            model_classification
+            vs_folder,
+            vs_folder_name,
+            model_classification,
+            cs_foldername
         ],
         cancels=gallery
     )
     
     refresh_btn.click(lambda :datetime.datetime.now(),None,refresh_information,cancels=gallery)    
-    saved_gallery.select(on_gallery_select, saved_images, [img_index, hidden])
+    saved_gallery.select(on_gallery_select, saved_images, [img_index, hidden, info_tabs])
     hidden.change(on_civitai_hidden_change,[hidden,img_index,saved_images_meta],[img_file_info])
     saved_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)  
+    vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_folder_name)
+    
+    open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
     
     return selected_model_id, refresh_information
+
+def on_open_image_folder_click(modelid):
+    if modelid:                
+        model_info = ishortcut.get_model_info(modelid)
+        if model_info:  
+            model_name = model_info['name']
+            image_folder = util.get_download_image_folder(model_name)
+            if image_folder:
+                util.open_folder(image_folder)
+                
+def on_downloadable_files_select(evt: gr.SelectData, df, filenames):
+    # util.printD(evt.index)
+    # index[0] # 행,열
+    vid = None
+    vname = None
+    dn_name = None
+    
+    if df:
+        vid = df[evt.index[0]][1]
+        vname = df[evt.index[0]][2]
+        dn_name = f"{vid}:{vname}"
+
+    if vid:        
+        if filenames:
+            if dn_name in filenames:
+                filenames.remove(dn_name)
+                df[evt.index[0]][0] = '⬜️'
+            else:
+                filenames.append(dn_name)
+                df[evt.index[0]][0] = '✅'
+        else:
+            filenames = [dn_name]    
+            df[evt.index[0]][0] = '✅'
+
+    return df, gr.update(value=filenames)
 
 def on_download_images_click(model_id:str, images_url):
     msg = None
@@ -222,6 +335,27 @@ def on_download_images_click(model_id:str, images_url):
             
         downloader.download_image_file(model_info['name'], images_url)
     current_time = datetime.datetime.now() 
+
+def on_download_model_click(version_id, file_name, vs_folder, vs_foldername, cs_foldername=None):
+    msg = None
+    if version_id:    
+        # 프리뷰이미지와 파일 모두를 다운 받는다.
+        if cs_foldername == setting.CREATE_MODEL_FOLDER:
+            msg = civitai_action.download_file_thread(file_name, version_id, True, vs_folder, vs_foldername, None)
+        else:
+            msg = civitai_action.download_file_thread(file_name, version_id, False, False, None , cs_foldername)
+            
+        # 다운 받은 모델 정보를 갱신한다.    
+        model.update_downloaded_model()
+
+        current_time = datetime.datetime.now()    
+        return gr.update(value=current_time),gr.update(value=current_time)    
+    return gr.update(visible=True),gr.update(visible=True)
+
+def on_cs_foldername_select(evt: gr.SelectData):
+    if evt.value == setting.CREATE_MODEL_FOLDER:
+        return gr.update(visible=True,value=False),gr.update(visible=False)
+    return gr.update(visible=False,value=False),gr.update(visible=False)
     
 def on_model_classification_update_btn_click(model_classification, modelid):
     
@@ -240,7 +374,7 @@ def on_open_folder_click(mid,vid):
         util.open_folder(path)
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
-    return evt.index, civitai_images[evt.index]
+    return evt.index, civitai_images[evt.index], gr.update(selected="Image_Information")
 
 def on_civitai_hidden_change(hidden, index, civitai_images_meta):
     info1,info2,info3 = modules.extras.run_pnginfo(hidden)
@@ -277,7 +411,7 @@ def on_file_gallery_loading(image_url):
         
 def load_saved_model(modelid=None, ver_index=None):
     if modelid:
-        model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta = get_model_information(modelid,None,ver_index)    
+        model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,ver_index)    
         if model_info:
             downloaded_info = None
             is_downloaded = False       
@@ -291,31 +425,36 @@ def load_saved_model(modelid=None, ver_index=None):
                         
             if downloaded_info:
                 is_downloaded = True 
-                            
-            file_text = ""
-        
-            if flist:
-                file_text = "\n".join(flist)
-            
+             
             current_time = datetime.datetime.now()
             
             classification_list = classification.get_classification_names_by_modelid(modelid)
-                
+
+            flist = list()
+            downloadable = list()
+            for file in files:            
+                flist.append(f"{file['id']}:{file['name']}")
+                downloadable.append(['✅',file['id'],file['name'],file['type'],round(file['sizeKB']),file['downloadUrl']])
+                                
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
-                gr.update(value=triger),gr.update(value=file_text),gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),\
-                gr.update(choices=classification.get_list(),value=classification_list, interactive=True)
+                gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []), downloadable if len(downloadable) > 0 else None,\
+                gr.update(label=title_name),\
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=False, visible=True),gr.update(value=vs_foldername, visible=False),\
+                gr.update(choices=classification.get_list(),value=classification_list, interactive=True),\
+                gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
     return gr.update(value=None),gr.update(value=None),\
         gr.update(visible=False),gr.update(value=None),\
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
-        gr.update(value=None),gr.update(value=None),gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),\
-        gr.update(choices=classification.get_list(),value=[], interactive=True) 
+        gr.update(value=None),gr.update(value=None),None,\
+        gr.update(label="#"),\
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=False, visible=True),gr.update(value="",visible=False),\
+        gr.update(choices=classification.get_list(),value=[], interactive=True),\
+        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
@@ -353,12 +492,14 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
             versions_list.append(ver['name'])
         
         model_url = civitai.Url_Page() + str(modelid)        
-        dhtml, triger, flist = get_version_description(version_info,model_info)
+        dhtml, triger, files = get_version_description(version_info,model_info)
         title_name = f"# {model_info['name']} : {version_info['name']}"
         images_url, images_meta = get_version_description_gallery(version_info)
-                
-        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,flist,title_name,images_url,images_meta
-    return None, None,None,None,None,None,None,None,None,None,None,None,None     
+        
+        vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)
+                        
+        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta, vs_foldername
+    return None, None,None,None,None,None,None,None,None,None,None,None,None,None     
     
 def get_version_description_gallery(version_info):
     modelid = None
@@ -367,7 +508,7 @@ def get_version_description_gallery(version_info):
     
             
     if not version_info:
-        return None,None
+        return None, None
 
     if "modelId" in version_info.keys():
         modelid = str(version_info['modelId'])   
@@ -390,15 +531,15 @@ def get_version_description_gallery(version_info):
                 images_url.append(description_img)
                 images_meta.append(meta_string)                    
     except:
-        return None,None
+        return None, None
                 
-    return images_url,images_meta                  
+    return images_url, images_meta                  
     
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
     output_training = ""
 
-    files_name = []
+    files = []
     
     html_typepart = ""
     html_creatorpart = ""
@@ -456,27 +597,42 @@ def get_version_description(version_info:dict,model_info:dict=None):
 
         if 'files' in version_info:                                
             for file in version_info['files']:
-                files_name.append(file['name'])
+                files.append(file)
                 html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
                             
         output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_model_tags + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
         
-        return output_html, output_training, files_name             
+        return output_html, output_training, files            
     
-    return "",None,None    
+    return "", None, None    
     
 def upload_shortcut_by_files(files, register_information_only, progress):
     modelids = list()
     if files:
-        shortcut = None
+        shortcuts = []
         add_ISC = dict()
-        for file in progress.tqdm(files, desc=f"Civitai Shortcut"):                        
-            shortcut = util.load_InternetShortcut(file.name)            
-            if shortcut:                                  
-                model_id = util.get_model_id_from_url(shortcut)                
-                if model_id:                    
-                    add_ISC = ishortcut.add(add_ISC, model_id, register_information_only, progress)
-                    modelids.append(model_id)
+        ######
+        for file in files:
+            shortcuts = util.load_InternetShortcut(file.name)
+            if shortcuts:
+                for shortcut in shortcuts:
+                    model_id = util.get_model_id_from_url(shortcut)
+                    if model_id:                    
+                        modelids.append(model_id)                    
+        
+        for model_id in progress.tqdm(modelids, desc=f"Civitai Shortcut"): 
+            if model_id:                    
+                add_ISC = ishortcut.add(add_ISC, model_id, register_information_only, progress)
+
+        # util.printD(modelids)
+        
+        # for file in progress.tqdm(files, desc=f"Civitai Shortcut"):                        
+        #     shortcut = util.load_InternetShortcut(file.name)            
+        #     if shortcut:
+        #         model_id = util.get_model_id_from_url(shortcut)                
+        #         if model_id:                    
+        #             add_ISC = ishortcut.add(add_ISC, model_id, register_information_only, progress)
+        #             modelids.append(model_id)
                       
         ISC = ishortcut.load()
         if ISC:

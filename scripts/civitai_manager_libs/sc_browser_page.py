@@ -6,7 +6,7 @@ from . import setting
 from . import model
 from . import classification
 from . import ishortcut
-from PIL import Image
+
 
 def get_thumbnail_list(shortcut_types=None, only_downloaded=False, search=None, page = 0):
     
@@ -102,7 +102,7 @@ def on_ui():
         sc_classification_list = gr.Dropdown(label='Classification', multiselect=None, value=setting.PLACEHOLDER, choices=[setting.PLACEHOLDER] + classification.get_list(), interactive=True)
         show_only_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
     sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if setting.shortcut_count_per_page > 0 else False)
-    sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)    
+    sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height=["fit" if setting.shortcut_count_per_page != 0 else "auto"], object_fit=setting.gallery_thumbnail_image_style)    
 
     with gr.Row(visible=False):
         refresh_sc_list = gr.Textbox()

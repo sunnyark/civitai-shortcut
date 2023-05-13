@@ -11,7 +11,9 @@ from . import setting
 from . import civitai
 
 from . import ishortcut_action
-import modules.scripts as scripts   
+
+# import modules.scripts as scripts   
+from modules import scripts, script_callbacks, shared
     
 def create_models_information(files, mfolder, vs_folder, register_shortcut, progress=gr.Progress()):
     
@@ -282,12 +284,15 @@ def on_scan_ui():
         outputs=[scan_progress]
     ) 
     
-def on_save_btn_click(shortcut_column, shortcut_count_per_page,
+def on_save_btn_click(scbrowser_screen_split_ratio, info_gallery_height, 
+                      shortcut_column, shortcut_count_per_page,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
-                      wildcards,controlnet,aestheticgradient,poses,other,download_images_folder):    
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder):    
     environment = dict()
+    environment['shortcut_browser_screen_split_ratio'] = scbrowser_screen_split_ratio
+    environment['information_gallery_height'] = info_gallery_height
     environment['shortcut_column'] = shortcut_column
     environment['shortcut_count_per_page'] = shortcut_count_per_page
     environment['gallery_column'] = gallery_column
@@ -298,6 +303,8 @@ def on_save_btn_click(shortcut_column, shortcut_count_per_page,
     environment['gallery_thumbnail_image_style'] = gallery_thumbnail_image_style
     
     model_folders = dict()
+    if locon:
+        model_folders['LoCon'] = locon    
     if wildcards:
         model_folders['Wildcards'] = wildcards
     if controlnet:
@@ -328,10 +335,34 @@ def on_usergallery_openfolder_btn_click():
 def on_usergallery_cleangallery_btn_click():
     if os.path.exists(setting.shortcut_gallery_folder):
         shutil.rmtree(setting.shortcut_gallery_folder)
-        
+
+def on_reload_btn_click():
+    request_restart()
+
+def request_restart():
+    shared.state.interrupt()
+    shared.state.need_restart = True            
+
+# def on_update_btn_click():
+#     git = os.environ.get('GIT', "git")
+
+#     subdir = os.path.dirname(os.path.abspath(__file__))
+
+#     # perform git pull in the extension folder
+#     output = subprocess.check_output([git, '-C', subdir, 'pull', '--autostash'])
+#     print(output.decode('utf-8'))
+            
 def on_setting_ui():
             
-    with gr.Column():       
+    with gr.Column(): 
+        with gr.Row():
+            with gr.Accordion("Screen Style", open=True):    
+                with gr.Row():
+                    scbrowser_screen_split_ratio = gr.Slider(minimum=0, maximum=setting.shortcut_browser_screen_split_ratio_max, value=setting.shortcut_browser_screen_split_ratio, step=1, info="You can specify the size ratio between the shortcut browser and the information screen.", label='Shortcut Browser screen ratio', interactive=True)              
+                with gr.Row():                                                
+                    info_gallery_height = gr.Dropdown(choices=["auto","fit"], value=setting.information_gallery_height, allow_custom_value=True, interactive=True, info="You can also specify a specific size other than 'auto' or 'fit'" , label="Information Gallery Height")                    
+                    gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, interactive=True, info="This specifies the shape of the displayed thumbnail." , label="Gallery Thumbnail Image Style")
+                                        
         with gr.Row():
             with gr.Accordion("Shortcut Browser and Information Images", open=True):    
                 with gr.Row():
@@ -341,10 +372,8 @@ def on_setting_ui():
                     gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
                     classification_gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
                 with gr.Row():                        
-                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1, label='Maximum number of download images per version', interactive=True)
+                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
                     gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
-                with gr.Row():                                                
-                    gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, label="Gallery Thumbnail Image Style")
                                                                 
         with gr.Row():
             with gr.Accordion("User Gallery Images", open=True):    
@@ -359,6 +388,7 @@ def on_setting_ui():
         with gr.Row():
             with gr.Accordion("Download Folder for Extensions", open=True):
                 with gr.Column():
+                    extension_locon_folder = gr.Textbox(value=setting.model_folders['LoCon'], label="LyCORIS", interactive=True)
                     extension_wildcards_folder = gr.Textbox(value=setting.model_folders['Wildcards'], label="Wildcards", interactive=True)
                     extension_controlnet_folder = gr.Textbox(value=setting.model_folders['Controlnet'], label="Controlnet", interactive=True)
                     extension_aestheticgradient_folder = gr.Textbox(value=setting.model_folders['AestheticGradient'], label="Aesthetic Gradient", interactive=True)
@@ -368,7 +398,15 @@ def on_setting_ui():
                     
         with gr.Row():
             save_btn = gr.Button(value="Save Setting", variant="primary")
-
+            reload_btn = gr.Button(value="Reload UI")        
+            # update_btn = gr.Button(value="Update", visible=False)
+    
+    
+    # update_btn.click(fn=on_update_btn_click,inputs=None,outputs=None)
+                        
+    # reload the page
+    reload_btn.click(fn=on_reload_btn_click, _js='restart_reload', inputs=None, outputs=None)
+                            
     usergallery_openfolder_btn.click(
         fn=on_usergallery_openfolder_btn_click,
         inputs=None,
@@ -384,6 +422,8 @@ def on_setting_ui():
     save_btn.click(
         fn=on_save_btn_click,
         inputs=[
+            scbrowser_screen_split_ratio,
+            info_gallery_height,
             shortcut_column,
             shortcut_count_per_page,
             gallery_column,
@@ -392,6 +432,7 @@ def on_setting_ui():
             usergallery_images_page_limit,            
             shortcut_max_download_image_per_version,
             gallery_thumbnail_image_style,
+            extension_locon_folder,
             extension_wildcards_folder,
             extension_controlnet_folder,
             extension_aestheticgradient_folder,

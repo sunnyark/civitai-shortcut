@@ -48,6 +48,26 @@ def update_classification_shortcut(s_name, shortcuts):
 
     return True
 
+def update_classification(s_name, name, info):
+    if not s_name:
+        return
+
+    if not name:
+        return
+    
+    name = name.strip()
+        
+    CISC = load()
+    CISC = update(CISC, s_name, name, info)    
+    
+    save(CISC)
+    
+    if CISC:
+        if name in CISC:
+            return True
+        
+    return False
+
 def get_classification_shortcuts(s_name):
     if not s_name:
         return None
@@ -82,26 +102,6 @@ def delete_classification(s_name):
     CISC = delete(CISC,s_name)
     save(CISC)
                     
-def update_classification(s_name, name, info, shortcuts):
-    if not s_name:
-        return
-
-    if not name:
-        return
-    
-    name = name.strip()
-        
-    CISC = load()
-    CISC = update_shortcut(CISC,s_name, shortcuts)
-    CISC = update(CISC, s_name, name, info)    
-    
-    save(CISC)
-    
-    if CISC:
-        if name in CISC:
-            return True
-        
-    return False
     
 def get_classification(s_name):
     if not s_name:
