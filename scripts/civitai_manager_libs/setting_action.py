@@ -80,7 +80,10 @@ def create_models_information(files, mfolder, vs_folder, register_shortcut, prog
             if mfolder:
                 destination = os.path.join(model_folder, vfile)
                 if file_path != destination:
-                    os.rename(file_path, destination)
+                    if not os.path.exists(destination):
+                        os.rename(file_path, destination)
+                    else:
+                        util.printD(f"The target file already exists : target {destination}")
             
             # 숏컷 추가
             if register_shortcut:

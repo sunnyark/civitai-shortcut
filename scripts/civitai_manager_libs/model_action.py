@@ -151,7 +151,7 @@ def on_downloaded_information_select(evt: gr.SelectData, df):
             file_list = list()
             if "files" in contents:
                 for file in contents['files']:
-                    file_list.append([file['id'],file['name'],file['type'],"Downloaded" if os.path.isfile(os.path.join(base_folder,file['name'])) else ""])
+                    file_list.append([file['id'],file['name'],file['type'],"Downloaded" if os.path.exists(os.path.join(base_folder,file['name'])) else ""])
                     
     if vlocation:
         return gr.update(label=vname, visible=True), vlocation, file_list if len(file_list) > 0 else None, contents
