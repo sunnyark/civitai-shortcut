@@ -17,6 +17,11 @@ def on_ui(refresh_sc_list:gr.Textbox()):
     with gr.Column(scale=3):    
         with gr.Accordion("#", open=True) as model_title_name:               
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)             
+            with gr.Row():
+                update_information_btn = gr.Button(value="Update Model Information")       
+                with gr.Accordion("Delete Civitai Shortcut", open=False):
+                    shortcut_del_btn = gr.Button(value="Delete Shortcut")      
+                                        
         with gr.Tabs():    
             with gr.TabItem("Images" , id="Model_Images"):                                 
                 saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
@@ -60,10 +65,7 @@ def on_ui(refresh_sc_list:gr.Textbox()):
                             saved_openfolder = gr.Button(value="Open Download Folder",variant="primary", visible=False)
                 with gr.Row():
                     with gr.Column():                                                    
-                        refresh_btn = gr.Button(value="Refresh")                          
-                        update_information_btn = gr.Button(value="Update Model Information")       
-                        with gr.Accordion("Delete Civitai Shortcut", open=False):
-                            shortcut_del_btn = gr.Button(value="Delete Shortcut")                                                                        
+                        refresh_btn = gr.Button(value="Refresh")                                                                                            
 
             with gr.TabItem("Image Information" , id="Image_Information"):      
                 with gr.Column():            
@@ -391,7 +393,7 @@ def on_shortcut_del_btn_click(model_id):
 def on_update_information_btn_click(modelid, progress=gr.Progress()):
     if modelid:
         update_shortcut_models([modelid],progress)  
-    
+                
         current_time = datetime.datetime.now()
         return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time)
     return gr.update(value=modelid),gr.update(visible=True),gr.update(value=None),gr.update(visible=True)
@@ -663,34 +665,34 @@ def upload_shortcut_by_urls(urls, register_information_only, progress):
         
     return modelids
 
-def update_shortcut_model(modelid):
+
+def update_shortcut_model(modelid, progress = None):
     if modelid:
-        add_ISC = dict()                
-        add_ISC = ishortcut.add(add_ISC, modelid)           
-        
+        add_ISC = ishortcut.add(None, str(modelid), False, progress)
         ISC = ishortcut.load()
         if ISC:
             ISC.update(add_ISC)
         else:
             ISC = add_ISC            
         ishortcut.save(ISC)
-
+        
 def update_shortcut_models(modelid_list, progress):
     if not modelid_list:       
         return
     
-    add_ISC = dict()                
+    # add_ISC = dict()                
     for k in progress.tqdm(modelid_list,desc="Updating Models Information"):        
         if k:
             # ishortcut.delete_model_information(str(k))
-            add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
+            # add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
+            add_ISC = ishortcut.add(None,str(k),False,progress)
                     
-        ISC = ishortcut.load()
-        if ISC:
-            ISC.update(add_ISC)
-        else:
-            ISC = add_ISC            
-        ishortcut.save(ISC)
+            ISC = ishortcut.load()
+            if ISC:
+                ISC.update(add_ISC)
+            else:
+                ISC = add_ISC            
+            ishortcut.save(ISC)
 
 def update_all_shortcut_model(progress):
     preISC = ishortcut.load()                           
@@ -707,33 +709,36 @@ def delete_shortcut_model(modelid):
         ishortcut.save(ISC) 
             
 def scan_downloadedmodel_to_shortcut(progress):        
-    add_ISC = dict()
-
     # util.printD(len(model.Downloaded_Models))
     if model.Downloaded_Models:
         modelid_list = [k for k in model.Downloaded_Models]
-        for modelid in progress.tqdm(modelid_list, desc=f"Scanning Models"):        
-            if modelid:
-                # ishortcut.delete_model_information(str(modelid))
-                add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
-            
-    ISC = ishortcut.load()
-    if ISC:
-        ISC.update(add_ISC)
-    else:
-        ISC = add_ISC            
-    ishortcut.save(ISC) 
+        update_shortcut_models(modelid_list,progress)
         
-def add_shortcut(modelid, progress):        
-    add_ISC = dict()
+# def add_shortcut(modelid, progress):
+#     if modelid:
+#         add_ISC = ishortcut.add(None, str(modelid),False,progress)            
+#         ISC = ishortcut.load()
+#         if ISC:
+#             ISC.update(add_ISC)
+#         else:
+#             ISC = add_ISC            
+#         ishortcut.save(ISC) 
+    
+def is_new_version(modelid):
+    if not modelid:    
+        return False
+    
+    try:
+        civitai_verinfo = civitai.get_latest_version_info_by_model_id(modelid)   
+        saved_verinfo = ishortcut.get_latest_version_info_by_model_id(modelid)        
+        # util.printD(civitai_verinfo['id'])
+        # util.printD(saved_verinfo['id'])    
+        if int(civitai_verinfo['id']) > int(saved_verinfo['id']):
+            return True                    
+    except:
+        return False
+    
+    return False
 
-    if modelid:
-        add_ISC = ishortcut.add(add_ISC, str(modelid),False,progress)
-            
-    ISC = ishortcut.load()
-    if ISC:
-        ISC.update(add_ISC)
-    else:
-        ISC = add_ISC            
-    ishortcut.save(ISC) 
+    
             

@@ -126,6 +126,7 @@ def get_latest_version_info_by_model_id(id:str) -> dict:
     
     version_id = def_version["id"]
 
+    # 모델에서 얻는 버전 인포는 모델 정보가 없으므로 새로 받아오자
     version_info = get_version_info_by_version_id(str(version_id))
 
     return version_info

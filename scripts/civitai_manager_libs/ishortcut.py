@@ -33,6 +33,24 @@ def get_tags():
     # util.printD(f"{len(result)}:{result}")
     return result
 
+# 현재 소유한 버전에서 최신 버전을 얻는다.
+def get_latest_version_info_by_model_id(id:str) -> dict:
+
+    model_info = get_model_info(id)
+    if not model_info:
+        return
+
+    if "modelVersions" not in model_info.keys():
+        return
+            
+    def_version = model_info["modelVersions"][0]
+    if not def_version:
+        return
+    
+    if "id" not in def_version.keys():
+        return
+    
+    return def_version
 
 def get_model_info(modelid:str):
     if not modelid:
@@ -216,6 +234,7 @@ def update_thumbnail_images(progress):
     
     for k, v in progress.tqdm(preISC.items(),desc="Update Shortcut's Thumbnails"):
         if v:
+            # 사이트에서 최신 정보를 가져온다.
             version_info = civitai.get_latest_version_info_by_model_id(v['id'])
             if not version_info:
                 continue

@@ -38,6 +38,8 @@ def create_models_information(files, mfolder, vs_folder, register_shortcut, prog
             # 저장할 폴더 생성
             if mfolder:
                 model_folder = util.make_download_model_folder(version_info, True, vs_folder)
+                # 다정하면 임의의 분류뒤에 모델폴더를 생성하고 그뒤에 버전까지 생성가능
+                # model_folder = make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None):
                 # model_folder = util.make_version_folder(version_info, vs_folder)
             else:
                 model_folder = vfolder
@@ -80,7 +82,7 @@ def create_models_information(files, mfolder, vs_folder, register_shortcut, prog
             if mfolder:
                 destination = os.path.join(model_folder, vfile)
                 if file_path != destination:
-                    if not os.path.exists(destination):
+                    if not os.path.isfile(destination):
                         os.rename(file_path, destination)
                     else:
                         util.printD(f"The target file already exists : target {destination}")
@@ -88,7 +90,9 @@ def create_models_information(files, mfolder, vs_folder, register_shortcut, prog
             # 숏컷 추가
             if register_shortcut:
                 if version_info['modelId']:
-                    ishortcut_action.add_shortcut(version_info['modelId'],progress)
+                    # ishortcut_action.add_shortcut(version_info['modelId'],progress)
+                    ishortcut_action.update_shortcut_model(version_info['modelId'],progress)
+                    
                     model.update_downloaded_model()
                 
     return non_list

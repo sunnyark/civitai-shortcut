@@ -15,6 +15,48 @@ from modules import scripts, script_callbacks, shared
 from . import setting
 from tqdm import tqdm
 
+# from modules import images
+# def run_pnginfo(image, image_path, image_file_name):
+#     if image is None:
+#         return '', '', '', '', ''
+#     try:
+#         geninfo, items = images.read_info_from_image(image)
+#         items = {**{'parameters': geninfo}, **items}
+
+#         info = ''
+#         for key, text in items.items():
+#             info += f"""
+#                 <div>
+#                 <p><b>{plaintext_to_html(str(key))}</b></p>
+#                 <p>{plaintext_to_html(str(text))}</p>
+#                 </div>
+#                 """.strip()+"\n"
+#     except UnidentifiedImageError as e:
+#         geninfo = None
+#         info = ""
+    
+#     if geninfo is None:
+#         try:
+#             filename = os.path.splitext(image_file_name)[0] + ".txt"
+#             geninfo = ""
+#             with open(filename) as f:
+#                 for line in f:
+#                     geninfo += line
+#         except Exception:
+#             logger.warning(f"run_pnginfo: No EXIF in image or txt file")
+
+#     if openoutpaint:
+#         prompt, neg_prompt = wib_db.select_prompts(image_file_name)
+#         if prompt == "0":
+#             prompt = ""
+#         if neg_prompt == "0":
+#             neg_prompt = ""
+#     else:
+#         prompt = ""
+#         neg_prompt = ""
+
+#     return '', geninfo, info, prompt, neg_prompt
+
 def printD(msg):    
     print(f"{setting.Extensions_Name}: {msg}") 
 
@@ -257,6 +299,7 @@ def make_download_image_folder(ms_foldername):
                 
     return model_folder  
 
+# 다정하면 임의의 분류뒤에 모델폴더를 생성하고 그뒤에 버전까지 생성가능
 def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None):
     
     if not version_info:

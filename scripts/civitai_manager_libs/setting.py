@@ -3,14 +3,11 @@ import json
 import shutil
 
 from modules import scripts, script_callbacks, shared
-
-# from modules import shared
-# import modules.scripts as scripts
-
 from . import util
 
 root_path = os.getcwd()
 extension_base = scripts.basedir()
+# extension_base = os.path.join("extensions","civitai-shortcut")
 
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
@@ -123,7 +120,6 @@ shortcut_gallery_folder =  "sc_gallery"
 
 no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
 
-
 shortcut_env = dict()
 
 def init():
@@ -151,8 +147,8 @@ def init():
     global download_images_folder
     global shortcut_browser_screen_split_ratio
     global information_gallery_height
-                        
-    root_path = os.getcwd()
+                            
+    # root_path = os.getcwd()
        
     # util.printD(os.path.abspath(__file__))
     # util.printD(os.path.abspath(root_path))
@@ -229,7 +225,7 @@ def init():
             download_folders = environment['download_folders']
             if 'download_images' in download_folders.keys():
                 download_images_folder = download_folders['download_images']            
-
+    
 def generate_type_basefolder(content_type):
     
     if content_type in model_folders.keys():

@@ -34,7 +34,7 @@ def on_ui():
 
     with gr.Column(scale=1):     
         with gr.Tabs() as info_tabs:
-            with gr.TabItem("Image" , id="Image_Information"):   
+            with gr.TabItem("Image Information" , id="Image_Information"):   
                 with gr.Column():
                     img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
                     try:

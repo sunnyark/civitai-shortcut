@@ -8,7 +8,7 @@ from . import classification
 from . import util
 from . import sc_browser_page
 
-def on_ui():
+def on_ui():   
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs():
             with gr.TabItem("Classification"):

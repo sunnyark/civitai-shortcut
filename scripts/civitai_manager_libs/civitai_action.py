@@ -12,6 +12,7 @@ from . import civitai
 from . import setting
 from . import downloader
 from . import classification
+from . import ishortcut_action 
 
 from PIL import Image
 
@@ -20,6 +21,10 @@ def on_ui(refresh_sc_list:gr.Textbox()):
     with gr.Column(scale=3):
         with gr.Accordion("#", open=True) as model_title_name:            
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)
+            with gr.Row():
+                update_information_btn = gr.Button(value="Update Model Information")
+                with gr.Accordion("Delete Civitai Shortcut", open=False):
+                    shortcut_del_btn = gr.Button(value="Delete Shortcut")
         with gr.Tabs():    
             with gr.TabItem("Images" , id="Model_Images"): 
                 civitai_gallery = gr.Gallery(show_label=False, elem_id="civitai_gallery").style(grid=[setting.gallery_column], height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)        
@@ -63,9 +68,8 @@ def on_ui(refresh_sc_list:gr.Textbox()):
                             civitai_openfolder = gr.Button(value="Open Download Folder",variant="primary" , visible=False)
                 with gr.Row():
                     with gr.Column():   
+                        refresh_btn = gr.Button(value="Refresh")
                         
-                        
-                        refresh_btn = gr.Button(value="Refresh")                  
             with gr.TabItem("Image Information" , id="Image_Information"):  
                 with gr.Column():
                     img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
@@ -117,7 +121,31 @@ def on_ui(refresh_sc_list:gr.Textbox()):
             civitai_images,
         ]     
     )
+
+    # civitai saved model information start
+    shortcut_del_btn.click(
+        fn=on_shortcut_del_btn_click,
+        inputs=[
+            selected_model_id,
+        ],
+        outputs=[
+            refresh_sc_list
+        ]
+    )
     
+    update_information_btn.click(
+        fn=on_update_information_btn_click,
+        inputs=[
+            selected_model_id,
+        ],
+        outputs=[
+            selected_model_id,
+            refresh_sc_list,
+            civitai_gallery,
+            refresh_information #information update 용
+        ]
+    )
+        
     model_classification_update_btn.click(
         fn=on_model_classification_update_btn_click,
         inputs=[
@@ -380,6 +408,20 @@ def on_open_folder_click(mid,vid):
     path = model.get_default_version_folder(vid)
     if path:
         util.open_folder(path)
+
+def on_shortcut_del_btn_click(model_id):
+    if model_id:
+        ishortcut_action.delete_shortcut_model(model_id)            
+    current_time = datetime.datetime.now()
+    return current_time
+
+def on_update_information_btn_click(modelid, progress=gr.Progress()):
+    if modelid:
+        ishortcut_action.update_shortcut_models([modelid],progress)  
+    
+        current_time = datetime.datetime.now()
+        return gr.update(value=modelid),gr.update(value=current_time),gr.update(value=None),gr.update(value=current_time)
+    return gr.update(value=modelid),gr.update(visible=True),gr.update(value=None),gr.update(visible=True)
 
 def on_civitai_hidden_change(hidden, index, civitai_images_meta):    
     info1,info2,info3 = modules.extras.run_pnginfo(hidden)
