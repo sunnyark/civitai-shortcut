@@ -613,12 +613,19 @@ def get_version_description(version_info:dict,model_info:dict=None):
                 html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
 
         if 'tags' in model_info:  
-            if model_info['tags']:
-                model_tags = [tag["name"] for tag in model_info["tags"]]
-                if len(model_tags) > 0:
-                    html_model_tags = "<br><b>Model Tags:</b>"
-                    for tag in model_tags:
-                        html_model_tags = html_model_tags + f"<b> [{tag}] </b>"
+            model_tags = model_info["tags"]
+            if len(model_tags) > 0:
+                html_model_tags = "<br><b>Model Tags:</b>"
+                for tag in model_tags:
+                    html_model_tags = html_model_tags + f"<b> [{tag}]</b>"
+                    
+        # if 'tags' in model_info:  
+        #     if model_info['tags']:
+        #         model_tags = [tag["name"] for tag in model_info["tags"]]
+        #         if len(model_tags) > 0:
+        #             html_model_tags = "<br><b>Model Tags:</b>"
+        #             for tag in model_tags:
+        #                 html_model_tags = html_model_tags + f"<b> [{tag}] </b>"
                                         
         if 'description' in model_info:  
             if model_info['description']:

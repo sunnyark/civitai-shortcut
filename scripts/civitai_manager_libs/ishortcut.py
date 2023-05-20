@@ -342,7 +342,8 @@ def get_image_list(shortcut_types=None, search=None)->str:
             if v:
                 if "tags" not in v.keys():
                     continue                                 
-                v_tags = [tag["name"].lower() for tag in v["tags"]]
+                # v_tags = [tag["name"].lower() for tag in v["tags"]]
+                v_tags = [tag.lower() for tag in v["tags"]]
                 common_tags = set(v_tags) & set(tags)
                 if common_tags:
                     tags_list.append(v)
