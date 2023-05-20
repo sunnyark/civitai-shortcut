@@ -689,14 +689,17 @@ def update_shortcut_models(modelid_list, progress):
     
     # add_ISC = dict()                
     for k in progress.tqdm(modelid_list,desc="Updating Models Information"):        
-        if k:
-            # ishortcut.delete_model_information(str(k))
-            # add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
-            # add_ISC = ishortcut.add(None,str(k),False,progress)
-                    
-            ISC = ishortcut.load()
-            add_ISC = ishortcut.add(ISC,str(k),False,progress)
+        if k:                   
+            add_ISC = ishortcut.add(None,str(k),False,progress)
             
+            ISC = ishortcut.load()
+            # hot fix and delete model
+            # civitiai 에서 제거된 모델때문임
+            # tags 를 변경해줘야함
+            # 이슈가 해결되면 제거할코드
+            if str(k) in ISC:
+                ISC[str(k)]["tags"]=[]
+                            
             if ISC:
                 ISC.update(add_ISC)
             else:
