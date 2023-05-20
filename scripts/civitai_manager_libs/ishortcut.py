@@ -414,6 +414,9 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
     def_id = None
     def_image = None
     
+    if str(model_id) in ISC:
+        ISC[str(model_id)]["tags"]=[]
+        
     if model_info:        
         if "modelVersions" in model_info.keys():            
             def_version = model_info["modelVersions"][0]

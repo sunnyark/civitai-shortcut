@@ -692,9 +692,11 @@ def update_shortcut_models(modelid_list, progress):
         if k:
             # ishortcut.delete_model_information(str(k))
             # add_ISC = ishortcut.add(add_ISC,str(k),False,progress)
-            add_ISC = ishortcut.add(None,str(k),False,progress)
+            # add_ISC = ishortcut.add(None,str(k),False,progress)
                     
             ISC = ishortcut.load()
+            add_ISC = ishortcut.add(ISC,str(k),False,progress)
+            
             if ISC:
                 ISC.update(add_ISC)
             else:
