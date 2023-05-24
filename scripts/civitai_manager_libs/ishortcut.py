@@ -481,7 +481,7 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
     # # hot fix and delete model
     # if str(model_id) in ISC:
     #     ISC[str(model_id)]["tags"]=[]
-        
+            
     if model_info:        
         if "modelVersions" in model_info.keys():            
             def_version = model_info["modelVersions"][0]
@@ -490,13 +490,17 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
             if 'images' in def_version.keys():
                 if len(def_version["images"]) > 0:
                     img_dict = def_version["images"][0]
-                    def_image = img_dict["url"]                
-                        
+                    def_image = img_dict["url"]      
+                    
+        tags = list()
+        if model_info['tags']:           
+            tags = [tag for tag in model_info['tags']]
+            
         ISC[str(model_id)] = {
                 "id" : model_info['id'],
                 "type" : model_info['type'],
                 "name": model_info['name'],
-                "tags" : model_info['tags'],
+                "tags" : tags,
                 "nsfw" : model_info['nsfw'],
                 "url": f"{civitai.Url_ModelId()}{model_id}",
                 "versionid" : def_id,
