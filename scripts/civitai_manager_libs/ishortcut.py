@@ -594,7 +594,7 @@ def load()->dict:
 
     # check error
     if not json_data:
-        util.printD("The loading of the shortcut file has failed or it is empty.")
+        util.printD("There are no registered shortcuts.")
         return None
 
     # check for new key
