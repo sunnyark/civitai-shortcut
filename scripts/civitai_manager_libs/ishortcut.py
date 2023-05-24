@@ -491,7 +491,8 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                 if len(def_version["images"]) > 0:
                     img_dict = def_version["images"][0]
                     def_image = img_dict["url"]      
-                    
+        
+        # 모델정보가 바뀌어도 피해를 줄이기 위함
         tags = list()
         if model_info['tags']:           
             tags = [tag for tag in model_info['tags']]
