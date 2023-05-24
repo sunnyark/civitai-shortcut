@@ -494,8 +494,11 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
         
         # 모델정보가 바뀌어도 피해를 줄이기 위함
         tags = list()
-        if model_info['tags']:           
-            tags = [tag for tag in model_info['tags']]
+        try:
+            if model_info['tags']:           
+                tags = [tag for tag in model_info['tags']]
+        except:
+            pass
             
         ISC[str(model_id)] = {
                 "id" : model_info['id'],
