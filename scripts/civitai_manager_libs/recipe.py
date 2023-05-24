@@ -6,17 +6,17 @@ from . import setting
 
 def get_classifications():    
     RecipeCollection = load()
-    
-    if not RecipeCollection:
-        return
-    
     classifications = list()
+    
+    if not RecipeCollection:        
+        return classifications
+    
     for v in RecipeCollection.values():
         if v['classification']:
             classifications.append(v['classification'])
-    
+                
     classifications = list(set(classifications))
-    
+        
     return classifications
 
 def update_recipe_image(recipe, image):
