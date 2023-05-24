@@ -2,12 +2,15 @@ import os
 import json
 import shutil
 import requests
+import gradio as gr
+
+from tqdm import tqdm
 
 from . import util
 from . import setting
 from . import civitai
 from . import classification
-
+   
 def sort_shortcut_by_value(ISC, key, reverse=False):
     sorted_data = sorted(ISC.items(), key=lambda x: x[1][key], reverse=reverse)
     return dict(sorted_data)
@@ -114,7 +117,67 @@ def get_images_meta(images:dict, imageid):
             return img['meta']
     
     return None
+
+# 모델에 해당하는 shortcut 을 지운다
+def delete_shortcut_model(modelid):
+    if modelid:
+        ISC = load()                           
+        ISC = delete(ISC, modelid)
+        save(ISC) 
+        
+# 이중으로 하지 않으면 gr.Progress 오류가 난다 아마도 중첩에서 에러가 나는것 같다. progress.tqdm
+# 솟컷을 업데이트하며 없으면 해당 아이디의 모델을 새로 생성한다.
+def update_shortcut(modelid, progress = None):
+    if modelid:
+        add_ISC = add(None, str(modelid), False, progress)
+        ISC = load()
+        if ISC:
+            ISC.update(add_ISC)
+        else:
+            ISC = add_ISC
+        save(ISC)
+        
+def update_shortcut_models(modelid_list:list, progress):
+    if not modelid_list:       
+        return
+      
+    for k in progress.tqdm(modelid_list, desc="Updating Shortcut"):        
+        update_shortcut(k, progress)
     
+def update_shortcut_informations(modelid_list:list, progress):
+    if not modelid_list:
+        return 
+    
+    # shortcut 의 데이터만 새로 갱신한다.    
+    # for modelid in progress.tqdm(modelid_list, desc="Updating Shortcut Information"):
+    #     write_model_information(modelid, False, progress) 
+
+    for modelid in progress.tqdm(modelid_list,desc="Updating Models Information"):        
+        if modelid:                
+            add_ISC = add(None,str(modelid),False,progress)
+
+            ISC = load()
+            # hot fix and delete model
+            # civitiai 에서 제거된 모델때문임
+            # tags 를 변경해줘야함
+            # 이슈가 해결되면 제거할코드
+            if str(modelid) in ISC:
+                ISC[str(modelid)]["tags"]=[]
+
+            if ISC:
+                ISC.update(add_ISC)
+            else:
+                ISC = add_ISC
+            save(ISC)
+                            
+def update_all_shortcut_informations(progress):
+    preISC = load()                           
+    if not preISC:
+        return
+    
+    modelid_list = [k for k in preISC]
+    update_shortcut_informations(modelid_list, progress)
+            
 def write_model_information(modelid:str, register_only_information=False, progress=None):    
     if not modelid:
         return     
@@ -158,7 +221,7 @@ def write_model_information(modelid:str, register_only_information=False, progre
         # 이미지 다운로드    
         if not register_only_information and len(version_list) > 0:
             if progress:
-                for image_list in progress.tqdm(version_list,desc="downloading model images"):
+                for image_list in progress.tqdm(version_list, desc="downloading model images"):
                     dn_count = 0 # 진짜로 다운 받은 이미지를 뜻한다.
                     for image_count, (vid, url) in enumerate(progress.tqdm(image_list),start=0):
                         
@@ -189,6 +252,7 @@ def write_model_information(modelid:str, register_only_information=False, progre
             else:
                 for image_list in version_list:
                     dn_count = 0 # 진짜로 다운 받은 이미지를 뜻한다.
+                    
                     for image_count, (vid, url) in enumerate(image_list,start=0):
                         
                         # 0이면 전체를 지정수를 넘어가면 스킵한다.
@@ -341,7 +405,7 @@ def get_image_list(shortcut_types=None, search=None)->str:
         for v in result_list:
             if v:
                 if "tags" not in v.keys():
-                    continue                                 
+                    continue                     
                 # v_tags = [tag["name"].lower() for tag in v["tags"]]
                 v_tags = [tag.lower() for tag in v["tags"]]
                 common_tags = set(v_tags) & set(tags)
@@ -413,6 +477,10 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
     
     def_id = None
     def_image = None
+    
+    # # hot fix and delete model
+    # if str(model_id) in ISC:
+    #     ISC[str(model_id)]["tags"]=[]
         
     if model_info:        
         if "modelVersions" in model_info.keys():            
@@ -465,10 +533,32 @@ def cis_to_file(cis):
         return 
     
     if "name" in cis.keys() and 'id' in cis.keys():
-        if not os.path.exists(setting.shortcut_save_folder):
-            os.makedirs(setting.shortcut_save_folder)              
-        util.write_InternetShortcut(os.path.join(setting.shortcut_save_folder,f"{util.replace_filename(cis['name'])}.url"),f"{civitai.Url_Page()}{cis['id']}")
+        backup_cis(cis['name'], f"{civitai.Url_Page()}{cis['id']}")
+        # if not os.path.exists(setting.shortcut_save_folder):
+        #     os.makedirs(setting.shortcut_save_folder)              
+        # util.write_InternetShortcut(os.path.join(setting.shortcut_save_folder,f"{util.replace_filename(cis['name'])}.url"),f"{civitai.Url_Page()}{cis['id']}")
+        
+def backup_cis(name, url):
     
+    if not name or not url:
+        return
+
+    backup_dict = None
+    try:
+        with open(setting.shortcut_civitai_internet_shortcut_url, 'r') as f:
+            backup_dict = json.load(f)            
+    except:
+        backup_dict = dict()
+    
+    backup_dict[f"url={url}"] = name
+            
+    try:        
+        with open(setting.shortcut_civitai_internet_shortcut_url, 'w') as f:
+            json.dump(backup_dict, f, indent=4)
+    except Exception as e:
+        util.printD("Error when writing file:" + setting.shortcut_civitai_internet_shortcut_url)
+        pass
+ 
 def save(ISC:dict):
     #print("Saving Civitai Internet Shortcut to: " + setting.shortcut)
 

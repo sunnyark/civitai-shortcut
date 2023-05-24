@@ -1,9 +1,6 @@
 import os
 import datetime
 import gradio as gr
-# import modules.scripts as scripts
-# from modules import shared
-# from modules import script_callbacks
 
 from modules import script_callbacks
 
@@ -14,16 +11,22 @@ from scripts.civitai_manager_libs import civitai_shortcut_action
 from scripts.civitai_manager_libs import setting_action
 from scripts.civitai_manager_libs import util
 
+import threading
+from scripts.civitai_manager_libs import ishortcut
+
+from scripts.civitai_manager_libs import recipe_action
+
 def on_civitai_tabs_select(evt: gr.SelectData):
     if evt.index == 0:
         current_time = datetime.datetime.now() 
-        return current_time,gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
-        # return current_time,current_time,current_time,gr.update(visible=False)
+        return current_time,gr.update(visible=False),gr.update(visible=False)
     elif evt.index == 1:
         current_time = datetime.datetime.now() 
-        return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),current_time
-            
-    return gr.update(visible=False),gr.update(visible=False)
+        return gr.update(visible=False),gr.update(visible=False),current_time
+    elif evt.index == 2:            
+        gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
+        
+    return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
 
 def on_civitai_manage_tabs_select(evt: gr.SelectData):
     if evt.index == 0:
@@ -46,17 +49,28 @@ def on_civitai_manage_tabs_select(evt: gr.SelectData):
             
 #     return markdown_text
                    
-def civitai_shortcut_ui():    
+def civitai_shortcut_ui():
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tabs:
+        with gr.Row(visible=False):
+            recipe_input = gr.Textbox()
         with gr.TabItem("Civitai Shortcut" , id="Shortcut"):                          
             with gr.Row():
-                refresh_shortcut , refresh_information , refresh_saved_information = civitai_shortcut_action.on_ui()
+                refresh_shortcut , refresh_information  = civitai_shortcut_action.on_ui(recipe_input)
+
+        with gr.TabItem("Assistance" , id="Assistance"):
+            with gr.Tabs() as civitai_assistance_tabs:        
+                with gr.TabItem("Classification"):
+                    with gr.Row():
+                        refresh_classification = classification_action.on_ui()                
+                with gr.TabItem("Prompt Recipe" , id="Recipe"):
+                    with gr.Row():
+                        refresh_recipe = recipe_action.on_ui(recipe_input, civitai_tabs, civitai_assistance_tabs)
      
         with gr.TabItem("Manage" , id="Manage"):
             with gr.Tabs() as civitai_manage_tabs:        
-                with gr.TabItem("Classification"):
-                    with gr.Row():
-                        refresh_classification = classification_action.on_ui()
+                # with gr.TabItem("Classification"):
+                #     with gr.Row():
+                #         refresh_classification = classification_action.on_ui()
                 with gr.TabItem("Scan and Update Models"):
                     with gr.Row():
                         setting_action.on_scan_ui()
@@ -66,11 +80,12 @@ def civitai_shortcut_ui():
                 # with gr.TabItem("ReadMe"):
                 #     with gr.Row():  
                 #         gr.Markdown(value=readmarkdown())
+    
     # civitai tab start
     civitai_tabs.select(
         fn=on_civitai_tabs_select,
-        inputs=None,
-        outputs=[refresh_shortcut, refresh_information , refresh_saved_information, refresh_classification]
+        inputs=None,        
+        outputs=[refresh_shortcut, refresh_information , refresh_classification]        
     )
     
     civitai_manage_tabs.select(
@@ -78,14 +93,35 @@ def civitai_shortcut_ui():
         inputs=None,
         outputs=[refresh_classification]        
     )
+        
+def update_all_shortcut_informations():
+    preISC = ishortcut.load()                           
+    if not preISC:
+        return
+   
+    modelid_list = [k for k in preISC]
+    util.printD("shortcut update start")
+    for modelid in modelid_list:
+        ishortcut.write_model_information(modelid, False, None)     
+    util.printD("shortcut update end")
+
+def update_all_shortcut_informations_thread():
+    try:
+        thread = threading.Thread(target=update_all_shortcut_informations)
+        thread.start()                
+    except Exception as e:
+        util.printD(e)
+        pass
     
 def init_civitai_shortcut():
     setting.init()
     model.update_downloaded_model()
 
-#    util.printD(os.path.abspath(__file__))
-#    util.printD(os.path.abspath(root_path))
-               
+    util.printD(setting.Extensions_Version)
+
+    if setting.shortcut_update_when_start:        
+        update_all_shortcut_informations_thread()
+                      
 # init
 init_civitai_shortcut()
 

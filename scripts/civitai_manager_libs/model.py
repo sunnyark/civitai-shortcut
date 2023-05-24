@@ -51,7 +51,7 @@ def get_model_downloaded_versions(modelid:str):
         for vid, version_paths in Downloaded_Models[str(modelid)]:
             vinfo = util.read_json(version_paths)
             if vinfo:                      
-                downloaded_version[vinfo['id']] = vinfo['name']
+                downloaded_version[str(vinfo['id'])] = vinfo['name']
                         
     return downloaded_version if len(downloaded_version) > 0 else None
 

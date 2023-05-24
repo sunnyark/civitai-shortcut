@@ -10,38 +10,41 @@ Stable Diffusion Webui's Extension tab, go to Install from url sub-tab. Copy thi
 
 # Usage instructions
 
-![shot 2023-05-01 011915](https://user-images.githubusercontent.com/40237431/235365101-a5754678-8318-446e-85e2-2243fa892400.png)
-
-1. The information in the Civitai model information tab is obtained in real-time from the Civitai website.
-   Download : downloads the model for the selected version. You can choose to create specific folders for each version. The downloaded model will be automatically saved in the appropriate location, and a preview image and info will be generated together with it.
-2. The information in the Saved model information tab are composed of the information saved on the Civitai website when creating the shortcut.
-   Update Model Information : updates the information of an individual shortcut to the latest information. This function only works when the site is functioning normally.
-   Delete Shortcut : deletes the information of a registered shortcut.
-3. Civitai User Gallery : The Civitai User Gallery allows users to view uploaded images.
-
-![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503898-53fd19d2-13bf-4b05-801e-265472bac1b5.gif)
-![filetobrowser](https://user-images.githubusercontent.com/40237431/233503915-0ebc4c6e-2218-4722-a83e-7d83d5580571.gif)
-![multifilestobrowser](https://user-images.githubusercontent.com/40237431/233578034-d8920f29-a66e-4939-b6c1-cb760d809c13.gif)
+![screenshot 2023-05-24 132752](https://github.com/sunnyark/civitai-shortcut/assets/40237431/17f28498-43a6-4be3-83cb-b7d8602e3b00)
 
 * Upload : This function creates a shortcut that can be used by the extension when you enter the Civitai site's model URL. It only works when the site is functioning properly. You can either click and drag the URL from the address bar or drag and drop saved internet shortcuts. You can also select multiple internet shortcuts and drop them at once.
 * Browsing : This function displays the registered shortcuts in thumbnail format, and when selected, displays their details on the right-hand side of the window. This function works independently of the Civitai site.
 * Scan New Version : This is a function that searches for the latest version of downloaded models on the Civitai site. It retrieves information from the site and only functions properly when the site is operational.
 
-![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
+![drag_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4f0bd60-0c81-45fe-aa60-652027579247)
+
+![file_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/efdee43a-795e-4cb9-8c5e-322b5824bb8f)
+
+![file_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dbcbc789-89a9-45fd-b8a9-388ba33c916f)
 
 * Classification : Function for managing shortcuts by classification.
 
-![shot 2023-05-01 011850](https://user-images.githubusercontent.com/40237431/235365080-047f20a9-1a66-4a0d-9592-2fb63f67dcab.png)
+![classification_action](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ec0ddb51-6b8b-485a-a560-9c174a962001)
+
+* Prompt Recipe : The Prompt Recipe feature allows you to register and manage frequently used prompts.
+
+![prompt_recipe_create01](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f8db7b5-f3d0-45bc-a8b9-181f3befe4ef)
+
+![prompt_recipe_create02](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9218f2bd-9bf9-47ee-b61f-80cc1816da1e)
+
+![prompt_recipe_send_txt2image](https://github.com/sunnyark/civitai-shortcut/assets/40237431/abeb0af6-fe97-4cef-b4b5-92110237c6b2)
 
 * Scan and Update Models
-  Scan Models for Civitai - Scan and register shortcut for models without model information that are currently held.
+  Scan Models - Scan and register shortcut for models without model information that are currently held.
   Update Shortcut - Move the shortcut update function from the Upload tab.
   Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
   Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
 
-![shot 2023-05-01 011859](https://user-images.githubusercontent.com/40237431/235365087-7357c1ea-754e-42cc-8ee7-7c0feb89bbbf.png)
+![screenshot 2023-05-24 134729](https://github.com/sunnyark/civitai-shortcut/assets/40237431/812457f2-5ea1-460e-b023-c9b50c664227)
 
 * Setting tab - Set the number of columns in the image gallery.
+
+![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
 
 # Features
 
@@ -51,17 +54,34 @@ The downloaded models are saved to the designated storage location.
 
 # Notice
 
-When using Civitai Shortcut, five items will be created:
+Four folders and five JSON files will be created, each serving the following roles.
 
-* sc_saves: a folder where registered model URLs are backed up and stored.
-* sc_thumb_images: a folder where thumbnails of registered URLs are stored.
-* sc_infos: a folder where model info and images are saved when registering a shortcut.
-* CivitaiShortCut.json: a JSON file that records and manages registered model URLs.
-* CivitaiShortCutClassification.json: a JSON file that records and manages registered classification.
-* CivitaiShortCutSetting.json: a JSON file that records setting.
+* sc_recipes : Folder where Prompt Recipe images are saved.
+* sc_gallery : Folder for caching images in the User Gallery.
+* sc_thumb_images : Folder where thumbnails are saved.
+* sc_infos : Folder where model information and images are saved upon registration.
+* CivitaiShortCut.json : JSON file for recording and managing registered model URLs.
+* CivitaiShortCutClassification.json: JSON file for managing classification categories.
+* CivitaiShortCutSetting.json: JSON file for storing configuration settings.
+* CivitaiShortCutRecipeCollection.json : JSON file for managing data related to Prompt Recipes.
+* CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+
+v 1.5
+
+* The information tab and the saved model information tab in the Civitai model have been merged. The Civitai model information, which used to fetch real-time information from the Civitai site, has been removed. Instead, the shortcut information registered during Stable Diffusion startup will be updated. You can enable or disable this feature in manage->setting->option.
+* The Assistance tab has been added. Furthermore, the classification feature has been moved to the Assistance tab. Additionally, a new feature called Prompt Recipe has been added.
+* The Prompt Recipe is a feature that allows you to register and manage frequently used prompts. You can register a prompt by directly writing it, uploading an image file, or using the 'Send to Recipe' button in the Image Information section of Model Information or User Gallery.
+* In the Classification and Prompt Recipe sections, the 'Create' button now appears only when [New Classification] or [New Prompt Recipe] is selected, clearly distinguishing between the Create and Update states.
+* The 'sc_saved' folder, which was used to backup the registration URLs for shortcuts, is no longer in use and can be deleted. Instead, the registration URLs are now stored in the CivitaiShortCutBackupUrl.json file in the format {url: name}. You can re-register the shortcuts by uploading this file in the Upload section.
+  This file is automatically generated and updated when performing 'Update the model information for the shortcut' in Manage->Scan and Update Models or when the automatic update feature is enabled.
+* A folder named 'sc_recipe' is created to store the images for the Prompt Recipe.
+* Bug: There is an issue in the prompt recipe where the saved image loses the generated image information. It appears to be a problem with the Gradio Image component.
+* A new option 'Disable Classification Gallery Preview Mode' has been added under 'Manage -> Settings -> Options'. This is an experimental feature and will be removed once it becomes an official functionality in Gradio
+
 v 1.4a
+
 * The interface design has been changed.
 * More detailed information about the file to be downloaded is provided.
 * A version information file and preview image will be generated even if a file is not selected for download.
@@ -70,30 +90,25 @@ v 1.4a
 * The "open folder" function provided in the information tab may be inaccurate if the same file is downloaded multiple times from different locations.
   Please use the "Downloaded Model Information Tab" for accurate information.
 * There is an error in the "Downloaded Model Information Tab" where downloading files with the same filename will be recognized as all downloaded.
-
 * There have been some design and functionality changes to the Manage -> Classification section.
 * The create, modify, delete, and update functions for classification have been integrated with the "Shortcut Item" section on the left.
+
   - The update function only updates the name and description of the classification.
   - Saving shortcut items registered to the classification should be done using "Save Classification Shortcuts".
-
 * The "Screen Style" option has been added to Manage -> Setting.
   You can adjust the ratio between Shortcut Browser and Information Tab according to your monitor or work preference, and apply it.
   I recommend combining this feature with the Shortcut Browser and Information Images options to find a suitable combination.
-
-* A new option has been added to set the download folder location for LyCORIS in "Download Folder for Extensions" settings. 
+* A new option has been added to set the download folder location for LyCORIS in "Download Folder for Extensions" settings.
   Previously, LoRA folder was used together, but now it has been added to allow appropriate modifications since LyCORIS extension can also be recognized in extra networks. (Thank you for letting me know.)
-
 * A "Reload UI" button has been added. It reloads the SDUI.
- However, please note that it does not include a feature to save settings. Please use the "Save Setting" button next to it for that purpose. :)
-
+  However, please note that it does not include a feature to save settings. Please use the "Save Setting" button next to it for that purpose. :)
 * The internal format of the uploaded files in the Upload section has been slightly modified.
   The format of "url=civitai model url" has been modified to be recognized.
-	e.g.)
-		sample.txt:
-			url=https://civitai.com/models/64863/cute-oil-impasto-chibi
-			url=https://civitai.com/models/64850/koga-tomoe-from-bunny-girl-senpai
-			url=https://civitai.com/models/64849/blackwhite
-
+  e.g.)
+  sample.txt:
+  url=https://civitai.com/models/64863/cute-oil-impasto-chibi
+  url=https://civitai.com/models/64850/koga-tomoe-from-bunny-girl-senpai
+  url=https://civitai.com/models/64849/blackwhite
 * Drag & drop feature in Upload does not work properly in Linux environment.
   I apologize for the inconvenience, but please use the textbox above for the time being.
 
@@ -106,14 +121,11 @@ v 1.4
 
   - The "Open Download Image Folder" function opens the folder containing the downloaded images.
   - The "Open Saved Information Folder" function opens the folder where the model's information files and images are downloaded when the shortcut is registered. If the folder is deleted, it can be restored using the "Update Model Information" function under "Civitai Shortcut -> Saved Model Information" or "Manage -> Scan and Update Models -> Update Shortcuts: Update the model information for the shortcut".
-
 * You can set the display style of the Shortcut Browser on the left side. This can be done in "Manage->Setting->Shortcut Browser and Information Images: Shortcut Browser Thumbnail Count per Page". If you set it to 0, the entire list will be displayed as before.
-
 * Additional feature description 1 (Update the model information for the shortcut):
   "Manage->Scan and Update Models->Update Shortcuts" is a function that updates the information of already registered shortcuts to the latest information. This applies to all registered shortcuts. Individual updates for shortcuts can be done in "Civitai Shortcut->Saved Model Information: Update Model Information".
-
 * Additional feature description 2 (Scan new version model):
-The "Civitai Shortcut->Scan New Version: Scan new version model" function scans for new versions of downloaded model version files. It does not search for models that have not been downloaded.
+  The "Civitai Shortcut->Scan New Version: Scan new version model" function scans for new versions of downloaded model version files. It does not search for models that have not been downloaded.
 
 v 1.3ss
 
@@ -187,30 +199,29 @@ v 1.1
 * "Update Model Information" button is added to "Saved Model Information" Tab for individual updating of model information, in addition to "Update Shortcut's Model Information" that updates all model information.
 
 # Screenshot
-![screenshot 2023-05-13 183202](https://github.com/sunnyark/civitai-shortcut/assets/40237431/52943efb-6e7e-4cc9-bbac-a6717bfcee72)
 
-![screenshot 2023-05-13 183214](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3867dcf2-bc6e-4fd3-85e5-05f4fba0ff8a)
+![screenshot 2023-05-24 132752](https://github.com/sunnyark/civitai-shortcut/assets/40237431/17f28498-43a6-4be3-83cb-b7d8602e3b00)
 
-![screenshot 2023-05-13 183245](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a9e9e1a6-6fe9-4beb-b54c-f092d785c9ea)
+![screenshot 2023-05-24 133740](https://github.com/sunnyark/civitai-shortcut/assets/40237431/14cba843-33f4-4100-80e9-ed17662a8fb9)
 
-![screenshot 2023-05-13 183323](https://github.com/sunnyark/civitai-shortcut/assets/40237431/28dc11b9-1b6e-4690-a506-9775eea61647)
+![screenshot 2023-05-24 134646](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a38fe1d8-4f00-47e8-826a-3f8f8dee61f6)
 
-![screenshot 2023-05-11 114638](https://github.com/sunnyark/civitai-shortcut/assets/40237431/44bd5e89-b467-4cc5-9dfc-9f759ac9e483)
+![screenshot 2023-05-24 134708](https://github.com/sunnyark/civitai-shortcut/assets/40237431/52cc44c3-20cd-4177-b848-274374acaab6)
 
-![screenshot 2023-05-11 113805](https://github.com/sunnyark/civitai-shortcut/assets/40237431/f863236e-618f-46cd-952e-afc4bdac3208)
+![screenshot 2023-05-24 134729](https://github.com/sunnyark/civitai-shortcut/assets/40237431/812457f2-5ea1-460e-b023-c9b50c664227)
 
-![screenshot 2023-05-11 113816](https://github.com/sunnyark/civitai-shortcut/assets/40237431/51df48ea-c849-4704-89bd-595f8bff3906)
+![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
 
-![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
+![drag_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4f0bd60-0c81-45fe-aa60-652027579247)
 
-![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503936-cdf04502-04ee-41f3-8bd0-20349bc09f4a.gif)
+![file_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/efdee43a-795e-4cb9-8c5e-322b5824bb8f)
 
-![filetobrowser](https://user-images.githubusercontent.com/40237431/233503941-1e3ede4e-07e8-4b6e-9708-ab42a9cab566.gif)
+![file_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dbcbc789-89a9-45fd-b8a9-388ba33c916f)
 
-![screenshot 2023-04-13 200422](https://user-images.githubusercontent.com/40237431/231810541-c91471e5-e7ae-4d3c-a825-2bfed6746b73.png)
+![classification_action](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ec0ddb51-6b8b-485a-a560-9c174a962001)
 
-![screenshot 2023-04-13 200432](https://user-images.githubusercontent.com/40237431/231810585-63f6bffd-defa-4582-a7da-750dae29f589.png)
+![prompt_recipe_create01](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f8db7b5-f3d0-45bc-a8b9-181f3befe4ef)
 
-![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231810628-c962429a-5b0b-46a9-9cb4-fe52a9e4d998.png)
+![prompt_recipe_create02](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9218f2bd-9bf9-47ee-b61f-80cc1816da1e)
 
-![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231810678-19876694-d023-4f62-960d-9ce774cccf67.png)
+![prompt_recipe_send_txt2image](https://github.com/sunnyark/civitai-shortcut/assets/40237431/abeb0af6-fe97-4cef-b4b5-92110237c6b2)

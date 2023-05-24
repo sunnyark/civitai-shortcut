@@ -12,9 +12,12 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
+Extensions_Version = "V1.5"
 
-PLACEHOLDER = "<no select>"
-NORESULT = "<no result>"  
+PLACEHOLDER = "[No Select]"
+NORESULT = "[No Result]"  
+NEWRECIPE = "[New Prompt Recipe]"
+NEWCLASSIFICATION = "[New Classification]"
 
 CREATE_MODEL_FOLDER = "Create Model Name Folder"    
 
@@ -72,9 +75,9 @@ ui_typenames = {
 
 #information tab 
 civitai_information_tab = 0
-saved_information_tab = 1
-usergal_information_tab = 2
-download_information_tab = 3
+usergal_information_tab = 1
+download_information_tab = 2
+
 
 # civitai helper 호환성
 info_ext = ".info"
@@ -86,6 +89,8 @@ triger_suffix = ".triger"
 preview_image_ext = ".png"
 preview_image_suffix = ".preview"
 
+# 임시설정
+classification_preview_mode_disable = False
 
 # 갤러리 height 설정
 information_gallery_height = "auto" # auto , fit
@@ -109,12 +114,22 @@ gallery_thumbnail_image_style = "scale-down"
 # 다운로드 설정
 download_images_folder = os.path.join("outputs","download-images")
 
+# background thread 설정
+# shortcut_auto_update = True
+shortcut_update_when_start = True
+usergallery_preloading = True
+
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
 shortcut_setting = "CivitaiShortCutSetting.json"
 shortcut_classification = "CivitaiShortCutClassification.json"
+shortcut_civitai_internet_shortcut_url = "CivitaiShortCutBackupUrl.json"
+
+shortcut_recipe = "CivitaiShortCutRecipeCollection.json"
+
+# shortcut_thumbnail_folder =  "sc_thumb"
 shortcut_thumbnail_folder =  "sc_thumb_images"
-shortcut_save_folder =  "sc_saves"
+shortcut_recipe_folder =  "sc_recipes"
 shortcut_info_folder =  "sc_infos"
 shortcut_gallery_folder =  "sc_gallery"
 
@@ -130,8 +145,11 @@ def init():
     global shortcut
     global shortcut_setting
     global shortcut_classification
+    global shortcut_civitai_internet_shortcut_url
+    global shortcut_recipe
+    
     global shortcut_thumbnail_folder
-    global shortcut_save_folder
+    global shortcut_recipe_folder
     global shortcut_info_folder
     global shortcut_gallery_folder
     
@@ -147,17 +165,18 @@ def init():
     global download_images_folder
     global shortcut_browser_screen_split_ratio
     global information_gallery_height
-                            
-    # root_path = os.getcwd()
-       
-    # util.printD(os.path.abspath(__file__))
-    # util.printD(os.path.abspath(root_path))
+
+    global shortcut_update_when_start
+    global classification_preview_mode_disable
     
     shortcut = os.path.join(extension_base,shortcut)
     shortcut_setting = os.path.join(extension_base,shortcut_setting)
     shortcut_classification = os.path.join(extension_base,shortcut_classification)
+    shortcut_recipe = os.path.join(extension_base,shortcut_recipe)
+    
+    shortcut_civitai_internet_shortcut_url = os.path.join(extension_base,shortcut_civitai_internet_shortcut_url)
     shortcut_thumbnail_folder = os.path.join(extension_base,shortcut_thumbnail_folder)
-    shortcut_save_folder = os.path.join(extension_base,shortcut_save_folder)
+    shortcut_recipe_folder = os.path.join(extension_base,shortcut_recipe_folder)
     shortcut_info_folder = os.path.join(extension_base,shortcut_info_folder)
     shortcut_gallery_folder = os.path.join(extension_base,shortcut_gallery_folder)
         
@@ -175,28 +194,43 @@ def init():
     
     environment = load()
     if environment:
-        if "shortcut_browser_screen_split_ratio" in environment.keys():
-            shortcut_browser_screen_split_ratio = int(environment['shortcut_browser_screen_split_ratio'])       
-        if "information_gallery_height" in environment.keys():
-            if environment['information_gallery_height'].strip():
-                information_gallery_height = environment['information_gallery_height']
+                
+        if "application_allow" in environment.keys():
+            application_allow = environment['application_allow']
 
-        if "shortcut_column" in environment.keys():
-            shortcut_column = int(environment['shortcut_column'])
-        if "shortcut_count_per_page" in environment.keys():
-            shortcut_count_per_page = int(environment['shortcut_count_per_page'])
-        if "gallery_column" in environment.keys():            
-            gallery_column = int(environment['gallery_column'])
-        if "classification_gallery_column" in environment.keys():
-            classification_gallery_column = int(environment['classification_gallery_column'])
-        if "usergallery_images_column" in environment.keys():
-            usergallery_images_column = int(environment['usergallery_images_column'])
-        if "usergallery_images_page_limit" in environment.keys():
-            usergallery_images_page_limit = int(environment['usergallery_images_page_limit'])
-        if "shortcut_max_download_image_per_version" in environment.keys():
-            shortcut_max_download_image_per_version = int(environment['shortcut_max_download_image_per_version'])
-        if "gallery_thumbnail_image_style" in environment.keys():
-            gallery_thumbnail_image_style = environment['gallery_thumbnail_image_style']
+            if "shortcut_update_when_start" in application_allow.keys():
+                shortcut_update_when_start = bool(application_allow['shortcut_update_when_start'])       
+            if "shortcut_max_download_image_per_version" in application_allow.keys():
+                shortcut_max_download_image_per_version = int(application_allow['shortcut_max_download_image_per_version'])
+                    
+        if "screen_style" in environment.keys():
+            screen_style = environment['screen_style']
+
+            if "shortcut_browser_screen_split_ratio" in screen_style.keys():
+                shortcut_browser_screen_split_ratio = int(screen_style['shortcut_browser_screen_split_ratio'])       
+            if "information_gallery_height" in screen_style.keys():
+                if screen_style['information_gallery_height'].strip():
+                    information_gallery_height = screen_style['information_gallery_height']
+            if "gallery_thumbnail_image_style" in screen_style.keys():
+                gallery_thumbnail_image_style = screen_style['gallery_thumbnail_image_style']
+                        
+        if "image_style" in environment.keys():
+            image_style = environment['image_style']
+
+            if "shortcut_column" in image_style.keys():
+                shortcut_column = int(image_style['shortcut_column'])
+            if "shortcut_count_per_page" in image_style.keys():
+                shortcut_count_per_page = int(image_style['shortcut_count_per_page'])
+
+            if "gallery_column" in image_style.keys():            
+                gallery_column = int(image_style['gallery_column'])
+            if "classification_gallery_column" in image_style.keys():
+                classification_gallery_column = int(image_style['classification_gallery_column'])
+
+            if "usergallery_images_column" in image_style.keys():
+                usergallery_images_column = int(image_style['usergallery_images_column'])
+            if "usergallery_images_page_limit" in image_style.keys():
+                usergallery_images_page_limit = int(image_style['usergallery_images_page_limit'])
             
         if "model_folders" in environment.keys():
                 
@@ -225,6 +259,12 @@ def init():
             download_folders = environment['download_folders']
             if 'download_images' in download_folders.keys():
                 download_images_folder = download_folders['download_images']            
+
+        if "temporary" in environment.keys():
+            temporary = environment['temporary']
+
+            if "classification_preview_mode_disable" in temporary.keys():
+                classification_preview_mode_disable = bool(temporary['classification_preview_mode_disable']) 
     
 def generate_type_basefolder(content_type):
     
@@ -238,7 +278,6 @@ def generate_type_basefolder(content_type):
     return model_folder
                 
 def generate_version_foldername(model_name,ver_name,ver_id):      
-    # return f"{model_name}-{ver_name}-{ver_id}"
     return f"{model_name}-{ver_name}"
 
 def get_model_folders():
@@ -296,10 +335,3 @@ def load():
         pass
 
     return json_data
-    
-# def add_custom_type(custom_types):
-    
-#     global model_folders,ui_typenames        
-    
-#     model_folders[custom_types['model_type']] = custom_types['model_folder']
-#     ui_typenames[custom_types['ui_typename']] = custom_types['model_type']

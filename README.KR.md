@@ -7,41 +7,46 @@ Stable Diffusion Webui Extension for Civitai, to download civitai shortcut and m
 Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으로 이동하세요. 해당 프로젝트의 URL을 복사하여 붙여넣고 '설치'를 클릭하세요.
 
     git clone https://github.com/sunnyark/civitai-shortcut
+    URL : https://github.com/sunnyark/civitai-shortcut
 
 # Usage instructions
 
-![shot 2023-05-01 011915](https://user-images.githubusercontent.com/40237431/235365101-a5754678-8318-446e-85e2-2243fa892400.png)
+![screenshot 2023-05-24 132752](https://github.com/sunnyark/civitai-shortcut/assets/40237431/17f28498-43a6-4be3-83cb-b7d8602e3b00)
 
-1. The information in the Civitai model information tab is obtained in real-time from the Civitai website.
-   Download : downloads the model for the selected version. You can choose to create specific folders for each version. The downloaded model will be automatically saved in the appropriate location, and a preview image and info will be generated together with it.
-2. The information in the Saved model information tab are composed of the information saved on the Civitai website when creating the shortcut.
-   Update Model Information : updates the information of an individual shortcut to the latest information. This function only works when the site is functioning normally.
-   Delete Shortcut : deletes the information of a registered shortcut.
-3. Civitai User Gallery : The Civitai User Gallery allows users to view uploaded images.
+* Upload : 이 기능은 Civitai 사이트의 모델 URL을 이용하여 확장 프로그램에서 사용할 수 있는 바로 가기를 생성합니다. 주소 창에서 URL을 클릭하고 드래그하거나 저장된 인터넷 바로 가기를 드래그앤드롭할 수 있습니다. 또한 여러 개의 인터넷 바로 가기를 선택하고 한 번에 드롭할 수도 있습니다.
+* Browsing : 이 기능은 등록된 바로 가기를 섬네일 형식으로 표시하며, 선택 시 창의 오른쪽에 해당 바로 가기의 세부 정보를 표시합니다.
+* Scan New Version : 이 기능은 Civitai 사이트에서 다운로드한 모델의 최신 버전을 검색하는 기능입니다. 사이트에서 정보를 가져오며, 사이트가 정상 작동할 때에만 정상적으로 작동합니다.
+* Model Information 의 정보를 최신 상태로 유지하기 위해서는 주기적인 데이터 업데이트가 필요합니다.
+  방법에는 model information 하면에서 Update Shortcut 기능을 이용해서 개별적으로 업데이트 하거나, manage->setting->option 의 자동 업데이트를 활성화 , Manage->Scan and Update Models->Update the model information for the shortcut 기능을 이용하는 방법이 있습니다.
 
-![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503898-53fd19d2-13bf-4b05-801e-265472bac1b5.gif)
-![filetobrowser](https://user-images.githubusercontent.com/40237431/233503915-0ebc4c6e-2218-4722-a83e-7d83d5580571.gif)
-![multifilestobrowser](https://user-images.githubusercontent.com/40237431/233578034-d8920f29-a66e-4939-b6c1-cb760d809c13.gif)
+![drag_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4f0bd60-0c81-45fe-aa60-652027579247)
 
-* Upload : This function creates a shortcut that can be used by the extension when you enter the Civitai site's model URL. It only works when the site is functioning properly. You can either click and drag the URL from the address bar or drag and drop saved internet shortcuts. You can also select multiple internet shortcuts and drop them at once.
-* Browsing : This function displays the registered shortcuts in thumbnail format, and when selected, displays their details on the right-hand side of the window. This function works independently of the Civitai site.
-* Scan New Version : This is a function that searches for the latest version of downloaded models on the Civitai site. It retrieves information from the site and only functions properly when the site is operational.
+![file_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/efdee43a-795e-4cb9-8c5e-322b5824bb8f)
 
-![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
+![file_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dbcbc789-89a9-45fd-b8a9-388ba33c916f)
 
-* Classification : Function for managing shortcuts by classification.
+* Classification : Shortcut에서 사용하는 분류항목을 관리하는 기능입니다.
 
-![shot 2023-05-01 011850](https://user-images.githubusercontent.com/40237431/235365080-047f20a9-1a66-4a0d-9592-2fb63f67dcab.png)
+![classification_action](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ec0ddb51-6b8b-485a-a560-9c174a962001)
+
+* Prompt Recipe : Prompt recipe는 자주 사용하는 Prompt를 등록하고 관리 할수 있는 기능입니다.
+
+![prompt_recipe_create01](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f8db7b5-f3d0-45bc-a8b9-181f3befe4ef)
+
+![prompt_recipe_create02](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9218f2bd-9bf9-47ee-b61f-80cc1816da1e)
+
+![prompt_recipe_send_txt2image](https://github.com/sunnyark/civitai-shortcut/assets/40237431/abeb0af6-fe97-4cef-b4b5-92110237c6b2)
 
 * Scan and Update Models
-  Scan Models for Civitai - Scan and register shortcut for models without model information that are currently held.
-  Update Shortcut - Move the shortcut update function from the Upload tab.
-  Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
-  Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
+  Scan Models : 현재 보유 중인 모델 정보가 없는 모델에 대해 스캔하여 바로 가기를 등록하는 기능입니다.
+  Update the model information for the shortcut : 등록된 바로 가기의 정보를 최신 정보로 업데이트합니다.
+  Scan downloaded models for shortcut registration : 삭제되거나 모델 정보가 누락된 다운로드된 모델에 대해 새로운 바로 가기를 등록합니다.
 
-![shot 2023-05-01 011859](https://user-images.githubusercontent.com/40237431/235365087-7357c1ea-754e-42cc-8ee7-7c0feb89bbbf.png)
+![screenshot 2023-05-24 134729](https://github.com/sunnyark/civitai-shortcut/assets/40237431/812457f2-5ea1-460e-b023-c9b50c664227)
 
-* Setting tab - Set the number of columns in the image gallery.
+* Setting : 확장프로그램의 다양한 설정값을 관리합니다.
+
+![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
 
 # Features
 
@@ -52,94 +57,106 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 
 # Notice
 
-세개의 폴더와 두개의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
+4개의 폴더와 5개의 json 파일이 생성되며 각각의 역할은 다음과 같습니다.
 
-* sc_saves : 등록된 model url이 백업되는 폴더, 등록된 모든 url이 저장되는 폴더
+* sc_recipes : Prompt Recipe이미지가 저장되는 폴더
+* sc_gallery : 유저갤러리의 이미지 캐싱을 위한폴더
 * sc_thumb_images : 등록된 url의 thumbnail이 저장되는 폴더
 * sc_infos : 등록시 모델정보와 이미지가 저장되는 폴더
 * CivitaiShortCut.json : 등록된 model url 을 기록 관리 하는  json 파일
 * CivitaiShortCutClassification.json: 분류항목을 관리하는 파일
-* CivitaiShortCutSetting.json: a JSON file that records setting.
+* CivitaiShortCutSetting.json: 설정값을 저장하는 파일
+* CivitaiShortCutRecipeCollection.json : Prompt Recipe 의 데이터를 관리하는 파일
+* CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+
+v 1.5
+
+* information tab의 civitai model information 과 saved model information tab이 통합되었습니다.
+  civitai 싸이트의 실시간 정보를 가져오던 civitai model information이 제거된대신 stable diffusion 시작시 등록된 솟컷의 정보를 자동으로 업데이트 하는 기능이 추가되었습니다.
+  manage->setting->option 에서 기능을 끄고 켤수 있습니다.
+* Assistance tab이 추가되고 classification이 Assistance tab으로 이동 하였습니다.
+* Assistance tab에 새로운 기능인 Prompt recipe 기능이 추가 되었습니다.
+* Prompt recipe는 자주 사용하는 Prompt를 등록하고 관리 할수 있는 기능입니다.
+  프롬프트의 등록은 직접 작성하거나 , 이미지 파일일을 업로드 또는 Model Information 또는 User Gallery 의 Image Information 의 send to recipe 버튼으로 등록 할수 있습니다.
+* classification 과 prompt recipe에서 목록의 [New Classification] ,[New Prompt Recipe] 상태에서만 Create 버튼이 나타나도록 변경하여 Create 상태와 Update 상태를 명확히 하였습니다.
+* bug : prompt recipe 에서 저장되는 이미지는 이미지 생성정보가 사라지는 버그가 있습니다. gradio Image 컴포넌트 문제인것 같습니다.
+* 숏컷의 등록 URL을 백업하던 sc_saved 폴더가 더이상 사용되지 않습니다. (삭제 가능)
+  대신 CivitaiShortCutBackupUrl.json 파일에 {url : 이름} 형태로 저장됩니다.
+  Upload항목에 이 파일을 upload 하면 숏컷을 다시 등록 할 수 있습니다.
+  이 파일은 Manage->Scan and Update Models ->Update Shorts -> "Update the model information for the shortcut" 을 수행하거나 자동 업데이트 기능을 켜놓으면 자동으로 생성, 업데이트 됩니다.
+* prompt recipe 의 이미지를 저장하는 sc_recipe 폴더 생성됩니다.
+* manage->setting->option 에 classification gallery preview mode disable 이 생겼습니다. 이는 실험적인것입니다.
+  gradio 에 정식으로 기능이 생기면 제거될것입니다.
+
 v 1.4a
+
 * 인터페이스 디자인 인이 변경되었습니다.
 * 다운 받을 파일에 대한 좀더 자세한 정보를 제공하도록 변경되었습니다.
-* 파일을 선택하지 않고 다운로드 시에도 version information 파일과 preview 이미지를 생성 하도록 변경하였습니다. 
-*  실제 파일을 다운 로드 하지 않고도 Downloaded Model Information을 이용하실수 있습니다.
-* 파일을 다운 받지 않았어도 다운 받은걸로 인식되므로 참고 부탁드립니다. 
-* 인포메이션탭에서 제공하는 open folder 기능은 여러곳에 중복 다운로드했을시 부정확할수 있습니다. 
+* 파일을 선택하지 않고 다운로드 시에도 version information 파일과 preview 이미지를 생성 하도록 변경하였습니다.
+* 실제 파일을 다운 로드 하지 않고도 Downloaded Model Information을 이용하실수 있습니다.
+* 파일을 다운 받지 않았어도 다운 받은걸로 인식되므로 참고 부탁드립니다.
+* 인포메이션탭에서 제공하는 open folder 기능은 여러곳에 중복 다운로드했을시 부정확할수 있습니다.
   정확한 내용을 알고 싶으시면 Downloaded Model Information tab 을 활용해주세요.
 * Downloaded Model Information tab 에서 파일명이 동일한 파일을 다운 받을 경우 모두 다은받은걸로 인식되는 오류가 있습니다.
-
 * Manage -> Classification 디자인 과 기능에 일부 변경이 있습니다.
-* Classification 의 생성 수정 삭제 업데이트 기능이 좌측의 Shortcut Item 항목과 통합되었습니다. 
-   - Update 기능은 classification 의 이름과 설명의 Update만 합니다. 
-   - classification에 등록되는 shortcut Item 의 저장은 Save Classification Shortcuts 을 이용하셔야 합니다.
+* Classification 의 생성 수정 삭제 업데이트 기능이 좌측의 Shortcut Item 항목과 통합되었습니다.
 
-* Manage -> Setting 에 Screen Style 항목이 추가되었습니다. 
-  Shortcut Brower 와 Information Tab 간의 비율을 설정할수있습니다. 
- 자신의 모니터나 작업취향에 따라 적절한 비율을 선택하시고 적용할수 있습니다. 
- Shortcut Browser and Information Images 항목과 적절히 조합하시길 추천드립니다.
-
+  - Update 기능은 classification 의 이름과 설명의 Update만 합니다.
+  - classification에 등록되는 shortcut Item 의 저장은 Save Classification Shortcuts 을 이용하셔야 합니다.
+* Manage -> Setting 에 Screen Style 항목이 추가되었습니다.
+  Shortcut Brower 와 Information Tab 간의 비율을 설정할수있습니다.
+  자신의 모니터나 작업취향에 따라 적절한 비율을 선택하시고 적용할수 있습니다.
+  Shortcut Browser and Information Images 항목과 적절히 조합하시길 추천드립니다.
 * Download Folder for Extensions 에 LyCORIS의 다운로드 위치를 설정할수 있는 항목이 추가 되었습니다.
   기존에 는 LoRA 폴더를 같이 이용했지만 LyCORIS확장을 사용하시면 extra networks 에서도 인식되는것을 알게되어 적절히 수정 하실수 있게 추가 하였습니다.
   (알려주시어 감사합니다.)
-
-* Reload UI 버튼이 추가 되었습니다. SDUI 를 리로드 시킵니다. 
+* Reload UI 버튼이 추가 되었습니다. SDUI 를 리로드 시킵니다.
   단 setting을 저장하는 기능은 넣지 않았습니다. 저장은 옆의 Save Setting 버튼을 이용해주세요. :)
+* Upload 항목에 업로드 되는 파일의 내부 형식을 조금 변경하였습니다.
 
-* Upload 항목에 업로드 되는 파일의 내부 형식을 조금 변경하였습니다. 
-   - url=civitai model url 의 구성을하면 인식되도록 수정하였습니다. 
-   - e.g.) 
-  sample.txt :
-	url=https://civitai.com/models/64863/cute-oil-impasto-chibi
-	url=https://civitai.com/models/64850/koga-tomoe-from-bunny-girl-senpai
-	url=https://civitai.com/models/64849/blackwhite
-
-* Upload 의 드래그 & 드롭이 리눅스 환경에서 제대로 작동 되지 않습니다. 
-   불편하시겠지만 당분간 윗쪽의 Textbox 를 활용해주세요.  
+  - url=civitai model url 의 구성을하면 인식되도록 수정하였습니다.
+  - e.g.)
+    sample.txt :
+    url=https://civitai.com/models/64863/cute-oil-impasto-chibi
+    url=https://civitai.com/models/64850/koga-tomoe-from-bunny-girl-senpai
+    url=https://civitai.com/models/64849/blackwhite
+* Upload 의 드래그 & 드롭이 리눅스 환경에서 제대로 작동 되지 않습니다.
+  불편하시겠지만 당분간 윗쪽의 Textbox 를 활용해주세요.
 
 v 1.4
+
 * 인포메이션 탭에 Downloaded Model Information 탭이 추가 되었습니다.
-  현재 다운로드한 파일의 정보를 확인 할 수 있는 탭입니다. 다운로드한 모델의 버전 리스트가 나타나며 선택시 하단에 세부 정보가 나타납니다. 세부표시 항목에서는 실제 다운 로드한 파일의 정보를 확인할수 있으며 다운로드된 폴더에 접근할수 있습니다. 파일 중복등의 사유로 다소 부정확할수 있습니다. 또한 해당버전의 Civitai 제공 정보를 json형태로 확인 하실수 있습니다. 
+  현재 다운로드한 파일의 정보를 확인 할 수 있는 탭입니다. 다운로드한 모델의 버전 리스트가 나타나며 선택시 하단에 세부 정보가 나타납니다. 세부표시 항목에서는 실제 다운 로드한 파일의 정보를 확인할수 있으며 다운로드된 폴더에 접근할수 있습니다. 파일 중복등의 사유로 다소 부정확할수 있습니다. 또한 해당버전의 Civitai 제공 정보를 json형태로 확인 하실수 있습니다.
   모든 Open Folder 기능은 해당 폴더가 존재 할때만 작동됩니다.
+
   - Open Download Image Folder : 다운로드한 이미지들이 포함되어 있는 폴더를 열어줍니다.
   - Open Saved Information Folder : Shortcut 등록시 모델의 정보파일과 이미지들이 다운로드 되는 폴더를 열어줍니다.
-                                    삭제시 되었을시 Civitai Shortcut->Saved Model Inforamtion : Update Model Information 이나 Manage->Scan and Update Models->Update Shortcuts : Update the model information for the shortcut 으로 복구할 수 있습니다.
-
-* 좌측의 shortcut browser의 표시 방식을 설정할 수 있습니다. 
-  Manage->Setting->Shortcut Browser and Information Images : Shortcut Browser Thumbnail Count per Page 
+    삭제시 되었을시 Civitai Shortcut->Saved Model Inforamtion : Update Model Information 이나 Manage->Scan and Update Models->Update Shortcuts : Update the model information for the shortcut 으로 복구할 수 있습니다.
+* 좌측의 shortcut browser의 표시 방식을 설정할 수 있습니다.
+  Manage->Setting->Shortcut Browser and Information Images : Shortcut Browser Thumbnail Count per Page
   항목에서 설정할 수 있으며 0으로 설정시 기존의 방식처럼 전체 리스트가 출력됩니다.
-
 * 추가 기능 설명 1 (Update the model information for the shortcut)
   Manage->Scan and Update Models->Update Shortcuts : Update the model information for the shortcut
   기능은 이미등록된 shortcut 의 정보를 최신 정보로 업데이트 하는 기능입니다. 이는 등록된 모든 숏컷을 대상으로 합니다.
   숏컷의 개별적인 업데이트는 Civitai Shortcut->Saved Model Inforamtion : Update Model Information 에서 할수 있습니다.
-
 * 추가 기능 설명 2 (Scan new version model)
   Civitai Shortcut->Scan New Version : Scan new version model: 의 기능은 다운 로드된 모델 버전파일의 새로운 버전이 있는지 스캔하는 기능입니다. 다운로드하지 않은 모델은 검색하지 않습니다.
 
 v 1.3ss
 
 * 모델의 다운로드 규칙, 방법에 변경이 있습니다.
-  다운로드시 폴더를 지정할수 있습니다. 사용자 분류 항목을 모델의 다운로드 항목으로 설정할수있습니다. 
-
-* 사용자가 등록한 분류 항목으로 설정하면 하위폴더는 작성할 수 없으며 사용자가 지정한 분류항목의 폴더가 model type base folder(e.g. model/lora) 에 만들어지고 다운로드 됩니다. 
-
+  다운로드시 폴더를 지정할수 있습니다. 사용자 분류 항목을 모델의 다운로드 항목으로 설정할수있습니다.
+* 사용자가 등록한 분류 항목으로 설정하면 하위폴더는 작성할 수 없으며 사용자가 지정한 분류항목의 폴더가 model type base folder(e.g. model/lora) 에 만들어지고 다운로드 됩니다.
 * "Create Model Name Folder" 선택하면 model type base folder(e.g. model/lora) 에 모델명을 베이스로 폴더가 만들어지며 버전에 따라 서브폴더를 원하는 이름으로 만들수 있습니다.
-
-* 다운로드된 모델파일은 원하는 폴더로 자유롭게 이동하셔도 됩니다. 
-본 확장프로그램은 파일의 다운로드의 편의를 돕기만할뿐 다운로드된 파일을 관리 하지는 않습니다. 
-편하게 이동 하셔도 문제 없습니다.
-
+* 다운로드된 모델파일은 원하는 폴더로 자유롭게 이동하셔도 됩니다.
+  본 확장프로그램은 파일의 다운로드의 편의를 돕기만할뿐 다운로드된 파일을 관리 하지는 않습니다.
+  편하게 이동 하셔도 문제 없습니다.
 * 이미지 다운로드는 기본으로 outputs/download-images 에 다운 로드되며 setting->download for extension->Download Images Folder 에서 설정할수 있습니다. 시스템에따라 접근권한의 설정이 필요할수 있습니다.
-
 * 사용자 정의 분류항목이 폴더명으로 사용되어지므로 폴더생성에 사용하기 어려운 문자는 변경을 권장드립니다.
-폴더 생성시 "-" 문자로 대체됩니다.
-
+  폴더 생성시 "-" 문자로 대체됩니다.
 * thumbnail 이미지의 display type 을 변경할수 있습니다. setting->Shortcut Browser and Information Images->Gallery Thumbnail Image Style 에서 설정할수 있습니다.
-
 * 쇼컷 등록시 다운로드 되는 이미지의 수를 설정할수 있습니다. setting->Shortcut Browser and Information Images->Maximum number of download images per version 에서 절정하룻 있으며 0일때는 모두 다운로드 됩니다.
 
 v 1.3c
@@ -216,30 +233,29 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
-![screenshot 2023-05-13 183202](https://github.com/sunnyark/civitai-shortcut/assets/40237431/52943efb-6e7e-4cc9-bbac-a6717bfcee72)
 
-![screenshot 2023-05-13 183214](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3867dcf2-bc6e-4fd3-85e5-05f4fba0ff8a)
+![screenshot 2023-05-24 132752](https://github.com/sunnyark/civitai-shortcut/assets/40237431/17f28498-43a6-4be3-83cb-b7d8602e3b00)
 
-![screenshot 2023-05-13 183245](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a9e9e1a6-6fe9-4beb-b54c-f092d785c9ea)
+![screenshot 2023-05-24 133740](https://github.com/sunnyark/civitai-shortcut/assets/40237431/14cba843-33f4-4100-80e9-ed17662a8fb9)
 
-![screenshot 2023-05-13 183323](https://github.com/sunnyark/civitai-shortcut/assets/40237431/28dc11b9-1b6e-4690-a506-9775eea61647)
+![screenshot 2023-05-24 134646](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a38fe1d8-4f00-47e8-826a-3f8f8dee61f6)
 
-![screenshot 2023-05-11 114638](https://github.com/sunnyark/civitai-shortcut/assets/40237431/44bd5e89-b467-4cc5-9dfc-9f759ac9e483)
+![screenshot 2023-05-24 134708](https://github.com/sunnyark/civitai-shortcut/assets/40237431/52cc44c3-20cd-4177-b848-274374acaab6)
 
-![screenshot 2023-05-11 113805](https://github.com/sunnyark/civitai-shortcut/assets/40237431/f863236e-618f-46cd-952e-afc4bdac3208)
+![screenshot 2023-05-24 134729](https://github.com/sunnyark/civitai-shortcut/assets/40237431/812457f2-5ea1-460e-b023-c9b50c664227)
 
-![screenshot 2023-05-11 113816](https://github.com/sunnyark/civitai-shortcut/assets/40237431/51df48ea-c849-4704-89bd-595f8bff3906)
+![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
 
-![classification](https://user-images.githubusercontent.com/40237431/235164869-602163e8-9531-46ef-a0bb-49bc12456a06.gif)
+![drag_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4f0bd60-0c81-45fe-aa60-652027579247)
 
-![browsertobrowser](https://user-images.githubusercontent.com/40237431/233503936-cdf04502-04ee-41f3-8bd0-20349bc09f4a.gif)
+![file_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/efdee43a-795e-4cb9-8c5e-322b5824bb8f)
 
-![filetobrowser](https://user-images.githubusercontent.com/40237431/233503941-1e3ede4e-07e8-4b6e-9708-ab42a9cab566.gif)
+![file_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dbcbc789-89a9-45fd-b8a9-388ba33c916f)
 
-![screenshot 2023-04-13 200422](https://user-images.githubusercontent.com/40237431/231810541-c91471e5-e7ae-4d3c-a825-2bfed6746b73.png)
+![classification_action](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ec0ddb51-6b8b-485a-a560-9c174a962001)
 
-![screenshot 2023-04-13 200432](https://user-images.githubusercontent.com/40237431/231810585-63f6bffd-defa-4582-a7da-750dae29f589.png)
+![prompt_recipe_create01](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f8db7b5-f3d0-45bc-a8b9-181f3befe4ef)
 
-![screenshot 2023-04-12 101437-1](https://user-images.githubusercontent.com/40237431/231810628-c962429a-5b0b-46a9-9cb4-fe52a9e4d998.png)
+![prompt_recipe_create02](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9218f2bd-9bf9-47ee-b61f-80cc1816da1e)
 
-![screenshot 2023-04-12 152645-1](https://user-images.githubusercontent.com/40237431/231810678-19876694-d023-4f62-960d-9ce774cccf67.png)
+![prompt_recipe_send_txt2image](https://github.com/sunnyark/civitai-shortcut/assets/40237431/abeb0af6-fe97-4cef-b4b5-92110237c6b2)

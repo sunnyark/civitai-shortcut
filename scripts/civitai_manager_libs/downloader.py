@@ -2,12 +2,124 @@ import os
 import re
 import time
 import requests
-from tqdm import tqdm
-
-
+import threading
 import shutil
+
 from . import util
 from . import setting
+from . import civitai
+
+from tqdm import tqdm
+
+def add_number_to_duplicate_files(filenames)->dict:    
+    counts = {}
+    dup_file = {}
+    
+    for file in filenames:     
+        file_info = file.split(":", 1)
+        if len(file_info) > 1:
+            if file_info[1] in counts:
+                name, ext = os.path.splitext(file_info[1])
+                counts[file_info[1]] += 1
+                file_info[1] = f"{name} ({counts[file_info[1]]}){ext}"
+            else:
+                counts[file_info[1]] = 0        
+            dup_file[file_info[0]] = file_info[1]
+    return dup_file
+
+def get_save_base_name(version_info):
+    # 이미지 파일명도 primary 이름으로 저장한다.
+           
+    base = None    
+    primary_file = civitai.get_primary_file_by_version_info(version_info)
+    if not primary_file:
+        base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
+    else:
+        base, ext = os.path.splitext(primary_file['name'])   
+    return base
+    
+def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername):               
+    # if not file_name:
+    #     return
+
+    if not version_id:
+        return
+    
+    version_info = civitai.get_version_info_by_version_id(version_id)
+    
+    if not version_info:
+        return 
+       
+    download_files = civitai.get_files_by_version_info(version_info)
+    
+    if not download_files:
+        return
+
+    # model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername, ms_foldername)
+    model_folder = util.make_download_model_folder(version_info, ms_folder, vs_folder, vs_foldername, cs_foldername)
+    
+    if not model_folder:
+        return
+
+    if file_name:
+        dup_names = add_number_to_duplicate_files(file_name)
+        
+        for fid, file in dup_names.items():                    
+            try:
+                #모델 파일 저장
+                path_dl_file = os.path.join(model_folder, file)            
+                thread = threading.Thread(target=download_file,args=(download_files[str(fid)]['downloadUrl'], path_dl_file))
+                # Start the thread
+                thread.start()                
+            except Exception as e:
+                util.printD(e)
+                pass
+            
+    # 저장할 파일명을 생성한다.
+    savefile_base = get_save_base_name(version_info)
+                                
+    path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
+    info_file = civitai.write_version_info(path_file, version_info)
+    if info_file:
+        util.printD(f"Wrote version info : {path_file}")
+
+    path_img = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
+    preview_file = download_preview_image(path_img, version_info)
+    if preview_file:
+         util.printD(f"Wrote preview image : {path_img}")
+        
+    # path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.triger_suffix}{setting.triger_ext}")
+    # triger_file = civitai.write_triger_words_by_version_info(path_file, version_info)
+    # if triger_file:
+    #      util.printD(f"Wrote triger words : {path_file}")
+
+    return f"Download started"
+
+def download_preview_image(filepath, version_info):
+    if not version_info:
+        return False
+    # save preview            
+    if "images" in version_info.keys():
+        try:            
+            img_dict = version_info["images"][0] 
+            if "url" in img_dict:
+                img_url = img_dict["url"]
+                if "width" in img_dict:
+                    if img_dict["width"]:
+                        img_url =  util.change_width_from_image_url(img_url, img_dict["width"])
+                # get image
+                with requests.get(img_url, stream=True) as img_r:
+                    if not img_r.ok:
+                        util.printD("Get error code: " + str(img_r.status_code))
+                        return False
+
+                    with open(filepath, 'wb') as f:
+                        img_r.raw.decode_content = True
+                        shutil.copyfileobj(img_r.raw, f)                                                    
+        except Exception as e:
+            pass
+                    
+    return True      
 
 def download_image_file(model_name, image_urls):    
     if not model_name:                

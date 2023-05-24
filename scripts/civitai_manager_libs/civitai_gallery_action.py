@@ -7,11 +7,13 @@ import modules
 import re
 import threading
 
+from tqdm import tqdm
+
 from . import util
 from . import civitai
 from . import setting
 
-def on_ui():
+def on_ui(selected_model_id:gr.Textbox, recipe_input):
            
     with gr.Column(scale=3):                                                   
         with gr.Accordion("#", open=True) as model_title_name:            
@@ -41,10 +43,11 @@ def on_ui():
                         send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                     except:
                         pass
+                    send_to_recipe = gr.Button(value="Send To Recipe", variant="primary", visible=True)
                         
     with gr.Row(visible=False):                                                           
         
-        selected_model_id = gr.Textbox()
+        # selected_model_id = gr.Textbox()
         
         # user gallery information  
         img_index = gr.Number(show_label=False)
@@ -67,15 +70,23 @@ def on_ui():
         refresh_gallery = gr.Textbox()
         
         # 미리 다음페이지를 로딩한다.
-        pre_loading = gr.Textbox()
-        
-        
+        pre_loading = gr.Textbox()        
                 
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden,img_file_info)
     except:
         pass            
-
+    
+    send_to_recipe.click(
+        fn=on_send_to_recipe_click,
+        inputs=[
+            img_file_info,
+            img_index,
+            usergal_images
+        ],
+        outputs=[recipe_input]
+    )
+        
     download_images.click(
         fn=on_download_images_click,
         inputs=[
@@ -231,9 +242,14 @@ def on_ui():
     hidden.change(on_civitai_hidden_change,[hidden,img_index,usergal_images_meta],[img_file_info])
 
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
-        
-    return selected_model_id
 
+def on_send_to_recipe_click(img_file_info, img_index, usergal_images):
+    # return img_file_info
+    try:
+        return usergal_images[int(img_index)]
+    except:
+        return gr.update(visible=False)
+    
 def on_open_image_folder_click(modelid):
     if modelid:                
         model_info = civitai.get_model_info(modelid)
@@ -340,7 +356,8 @@ def on_refresh_gallery_change(images_url, progress=gr.Progress()):
     return gallery_loading(images_url, progress)
 
 def on_pre_loading_change(usergal_page_url, page_info):
-    pre_loading(usergal_page_url, page_info)
+    if setting.usergallery_preloading:
+        pre_loading(usergal_page_url, page_info)
    
 def pre_loading(usergal_page_url, page_info):
     page_url = usergal_page_url
@@ -375,8 +392,6 @@ def pre_loading(usergal_page_url, page_info):
                 util.printD(e)
                 pass
     return
-
-from tqdm import tqdm
 
 def download_images(dn_image_list:list):        
     if dn_image_list:

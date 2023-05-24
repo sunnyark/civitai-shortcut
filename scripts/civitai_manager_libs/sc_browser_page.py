@@ -58,11 +58,11 @@ def on_refresh_sc_list_change(sc_types,sc_search,show_only_downloaded_sc,sc_page
         sc_page = thumb_max_page
         thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search, sc_page)
         
-    return gr.update(value=thumb_list),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages")
+    return gr.update(value=thumb_list),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
 
 def on_shortcut_gallery_refresh(sc_types, sc_search, show_only_downloaded_sc):
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,1)
-    return gr.update(value=thumb_list),gr.update(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages")
+    return gr.update(value=thumb_list),gr.update(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
 
 def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search, show_only_downloaded_sc):
     keys, tags, clfs = util.get_search_keyword(sc_search)
@@ -86,11 +86,11 @@ def on_sc_classification_list_select(evt: gr.SelectData,sc_types, sc_search, sho
         search = ", ".join(new_search)
             
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,search,1)
-    return gr.update(value=search),gr.update(value=thumb_list),gr.update(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages")
+    return gr.update(value=search),gr.update(value=thumb_list),gr.update(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
 
 def on_sc_gallery_page(sc_types,sc_search,show_only_downloaded_sc,sc_page):
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_page)
-    return gr.update(value=thumb_list)
+    return gr.update(value=thumb_list),thumb_list
 
 def on_ui():
     
@@ -105,8 +105,12 @@ def on_ui():
     sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height=["fit" if setting.shortcut_count_per_page != 0 else "auto"], object_fit=setting.gallery_thumbnail_image_style)    
 
     with gr.Row(visible=False):
-        refresh_sc_list = gr.Textbox()
+        refresh_sc_browser = gr.Textbox()
+        refresh_sc_gallery = gr.Textbox()
+        sc_gallery_result = gr.State(thumb_list)
     
+    refresh_sc_gallery.change(lambda x:x, sc_gallery_result, sc_gallery)
+
     sc_gallery_page.release(
         fn = on_sc_gallery_page,
         inputs = [            
@@ -116,11 +120,12 @@ def on_ui():
             sc_gallery_page
         ],
         outputs=[
-            sc_gallery
+            sc_gallery,
+            sc_gallery_result
         ]                    
     )
     
-    refresh_sc_list.change(
+    refresh_sc_browser.change(
         fn=on_refresh_sc_list_change,
         inputs= [
             shortcut_type,
@@ -131,7 +136,8 @@ def on_ui():
         outputs=[
             sc_gallery,
             sc_classification_list,
-            sc_gallery_page
+            sc_gallery_page,
+            sc_gallery_result
         ]
     )
     
@@ -144,7 +150,8 @@ def on_ui():
         ],
         outputs=[
             sc_gallery,
-            sc_gallery_page
+            sc_gallery_page,
+            sc_gallery_result
         ]
     ) 
         
@@ -157,7 +164,8 @@ def on_ui():
         ],
         outputs=[
             sc_gallery,
-            sc_gallery_page
+            sc_gallery_page,
+            sc_gallery_result
         ]        
     )
        
@@ -170,7 +178,8 @@ def on_ui():
         ],
         outputs=[
             sc_gallery,
-            sc_gallery_page
+            sc_gallery_page,
+            sc_gallery_result
         ]
     )    
     
@@ -184,8 +193,9 @@ def on_ui():
         outputs=[
             sc_search,
             sc_gallery,
-            sc_gallery_page
+            sc_gallery_page,
+            sc_gallery_result
         ]        
     )
     
-    return sc_gallery, refresh_sc_list
+    return sc_gallery, refresh_sc_browser, refresh_sc_gallery

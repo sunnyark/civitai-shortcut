@@ -10,6 +10,7 @@ from . import model
 from . import setting
 from . import civitai
 
+from . import ishortcut
 from . import ishortcut_action
 
 # import modules.scripts as scripts   
@@ -90,9 +91,7 @@ def create_models_information(files, mfolder, vs_folder, register_shortcut, prog
             # 숏컷 추가
             if register_shortcut:
                 if version_info['modelId']:
-                    # ishortcut_action.add_shortcut(version_info['modelId'],progress)
-                    ishortcut_action.update_shortcut_model(version_info['modelId'],progress)
-                    
+                    ishortcut.update_shortcut(version_info['modelId'], progress)                    
                     model.update_downloaded_model()
                 
     return non_list
@@ -175,7 +174,7 @@ def on_scan_progress_change():
 
 def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
     files = scan_models(fix_information_filename, progress)
-    return gr.update(choices=files,value=files,interactive=True,label="Scanned Model List"),gr.update(visible=True),gr.update(visible=True),gr.update(value=False, interactive=True),gr.update(value=False, interactive=True)
+    return gr.update(choices=files,value=files,interactive=True,label="Scanned Model List"),gr.update(visible=True),gr.update(visible=True),gr.update(value=False, interactive=True),gr.update(value=False, interactive=False)
     
 def on_scan_to_shortcut_click(progress=gr.Progress()):
     model.update_downloaded_model()
@@ -183,7 +182,7 @@ def on_scan_to_shortcut_click(progress=gr.Progress()):
     return gr.update(value="This feature scans for models that have information files available and registers a shortcut for them, downloading any necessary images in the process. If there is no information available for a particular model, please use the 'Scan Models' feature.")
 
 def on_update_all_shortcuts_btn(progress=gr.Progress()):
-    ishortcut_action.update_all_shortcut_model(progress)
+    ishortcut.update_all_shortcut_informations(progress)
     return gr.update(value="This feature updates registered shortcuts with the latest information and downloads any new images if available.")
 
 def on_scan_save_modelfolder_change(scan_save_modelfolder):
@@ -210,7 +209,7 @@ def on_scan_ui():
                             with gr.Column(scale=1):
                                 with gr.Row():
                                     scan_save_modelfolder = gr.Checkbox(label="Create a model folder corresponding to the model type.", value=False)
-                                    scan_save_vsfolder = gr.Checkbox(label="Create individual model version folder.", value=False) 
+                                    scan_save_vsfolder = gr.Checkbox(label="Create individual model version folder.", value=False, interactive=False) 
                         with gr.Row():
                             with gr.Column():
                                 create_models_info_btn = gr.Button(value="Create Model Information",variant="primary")                                                       
@@ -260,9 +259,7 @@ def on_scan_ui():
             scan_save_vsfolder
         ]                
     )
-                 
-
-    
+                  
     update_all_shortcuts_btn.click(
         fn=on_update_all_shortcuts_btn,
         inputs=None,
@@ -291,23 +288,39 @@ def on_scan_ui():
         outputs=[scan_progress]
     ) 
     
-def on_save_btn_click(scbrowser_screen_split_ratio, info_gallery_height, 
+def on_save_btn_click(shortcut_update_when_start,
+                      scbrowser_screen_split_ratio, info_gallery_height, 
                       shortcut_column, shortcut_count_per_page,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
-                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder):    
-    environment = dict()
-    environment['shortcut_browser_screen_split_ratio'] = scbrowser_screen_split_ratio
-    environment['information_gallery_height'] = info_gallery_height
-    environment['shortcut_column'] = shortcut_column
-    environment['shortcut_count_per_page'] = shortcut_count_per_page
-    environment['gallery_column'] = gallery_column
-    environment['classification_gallery_column'] = classification_gallery_column
-    environment['usergallery_images_column'] = usergallery_images_column
-    environment['usergallery_images_page_limit'] = usergallery_images_page_limit
-    environment['shortcut_max_download_image_per_version'] = shortcut_max_download_image_per_version
-    environment['gallery_thumbnail_image_style'] = gallery_thumbnail_image_style
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
+                      classification_preview_mode_disable
+                      ):    
+    
+    environment = dict()    
+    
+    application_allow = dict()    
+    application_allow['shortcut_update_when_start'] = shortcut_update_when_start
+    application_allow['shortcut_max_download_image_per_version'] = shortcut_max_download_image_per_version
+    environment['application_allow'] = application_allow
+                
+    screen_style = dict()
+    screen_style['shortcut_browser_screen_split_ratio'] = scbrowser_screen_split_ratio
+    screen_style['information_gallery_height'] = info_gallery_height
+    screen_style['gallery_thumbnail_image_style'] = gallery_thumbnail_image_style
+    environment['screen_style'] = screen_style
+    
+    image_style = dict()
+    image_style['shortcut_column'] = shortcut_column
+    image_style['shortcut_count_per_page'] = shortcut_count_per_page
+
+    image_style['gallery_column'] = gallery_column
+    image_style['classification_gallery_column'] = classification_gallery_column
+        
+    image_style['usergallery_images_column'] = usergallery_images_column
+    image_style['usergallery_images_page_limit'] = usergallery_images_page_limit           
+    environment['image_style'] = image_style
     
     model_folders = dict()
     if locon:
@@ -328,8 +341,13 @@ def on_save_btn_click(scbrowser_screen_split_ratio, info_gallery_height,
     download_folders = dict()
     if download_images_folder:
         download_folders['download_images'] = download_images_folder        
-            
+                
     environment['download_folders'] = download_folders
+    
+    temporary = dict()
+    temporary['classification_preview_mode_disable'] = classification_preview_mode_disable  
+    
+    environment['temporary'] = temporary
     
     setting.save(environment)
     
@@ -341,7 +359,7 @@ def on_usergallery_openfolder_btn_click():
 
 def on_usergallery_cleangallery_btn_click():
     if os.path.exists(setting.shortcut_gallery_folder):
-        shutil.rmtree(setting.shortcut_gallery_folder)
+        shutil.rmtree(setting.shortcut_gallery_folder)        
 
 def on_reload_btn_click():
     request_restart()
@@ -363,7 +381,14 @@ def on_setting_ui():
             
     with gr.Column(): 
         with gr.Row():
-            with gr.Accordion("Screen Style", open=True):    
+            with gr.Accordion("Option", open=False):    
+                with gr.Row():
+                    shortcut_update_when_start = gr.Checkbox(value=setting.shortcut_update_when_start, label="Startup : The program performs 'Update the model information for the shortcut' when it starts.",info="At program startup, the registered shortcuts are updated with the latest data. This process operates in the background. To update manually, you can uncheck that option and use the 'Scans and Model Updates -> Update the model information for the shortcut' feature.", interactive=True)
+                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
+                with gr.Row():
+                    classification_preview_mode_disable = gr.Checkbox(value=setting.classification_preview_mode_disable, label="Deactivate the preview mode of the classification gallery." , info="Deactivate the preview mode of the classification gallery. It is a temporary feature implemented using a expedient. Please use it only if necessary." , interactive=True)
+        with gr.Row():
+            with gr.Accordion("Screen Style", open=False):    
                 with gr.Row():
                     scbrowser_screen_split_ratio = gr.Slider(minimum=0, maximum=setting.shortcut_browser_screen_split_ratio_max, value=setting.shortcut_browser_screen_split_ratio, step=1, info="You can specify the size ratio between the shortcut browser and the information screen.", label='Shortcut Browser screen ratio', interactive=True)              
                 with gr.Row():                                                
@@ -371,29 +396,29 @@ def on_setting_ui():
                     gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, interactive=True, info="This specifies the shape of the displayed thumbnail." , label="Gallery Thumbnail Image Style")
                                         
         with gr.Row():
-            with gr.Accordion("Shortcut Browser and Information Images", open=True):    
+            with gr.Accordion("Shortcut Browser and Information Images", open=False):    
                 with gr.Row():
-                    shortcut_column = gr.Slider(minimum=1, maximum=6, value=setting.shortcut_column, step=1, label='Shortcut Browser Column Count', interactive=True)
+                    shortcut_column = gr.Slider(minimum=1, maximum=12, value=setting.shortcut_column, step=1, label='Shortcut Browser Column Count', interactive=True)
                     shortcut_count_per_page = gr.Slider(minimum=0, maximum=100, value=setting.shortcut_count_per_page, step=1, label='Shortcut Browser Thumbnail Count per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
                 with gr.Row():                    
-                    gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
-                    classification_gallery_column = gr.Slider(minimum=1, maximum=12, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
-                with gr.Row():                        
-                    shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
-                    gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
+                    gallery_column = gr.Slider(minimum=1, maximum=24, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
+                    classification_gallery_column = gr.Slider(minimum=1, maximum=24, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
+                # with gr.Row():                        
+                #     shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
+                #     gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
                                                                 
         with gr.Row():
-            with gr.Accordion("User Gallery Images", open=True):    
+            with gr.Accordion("User Gallery Images", open=False):    
                 with gr.Row():
-                    usergallery_images_column = gr.Slider(minimum=1, maximum=10, value=setting.usergallery_images_column, step=1, label='User Gallery Column Count', interactive=True)
-                    usergallery_images_page_limit = gr.Slider(minimum=1, maximum=24, value=setting.usergallery_images_page_limit, step=1, label='User Gallery Images Count Per Page', interactive=True)
+                    usergallery_images_column = gr.Slider(minimum=1, maximum=20, value=setting.usergallery_images_column, step=1, label='User Gallery Column Count', interactive=True)
+                    usergallery_images_page_limit = gr.Slider(minimum=1, maximum=48, value=setting.usergallery_images_page_limit, step=1, label='User Gallery Images Count Per Page', interactive=True)
                 with gr.Row():                    
                     usergallery_openfolder_btn = gr.Button(value="Open User Gallery Cache Folder", variant="primary")
                     with gr.Accordion("Clean User Gallery Cache", open=False):
                         usergallery_cleangallery_btn = gr.Button(value="Clean User Gallery Cache", variant="primary")
 
         with gr.Row():
-            with gr.Accordion("Download Folder for Extensions", open=True):
+            with gr.Accordion("Download Folder for Extensions", open=False):
                 with gr.Column():
                     extension_locon_folder = gr.Textbox(value=setting.model_folders['LoCon'], label="LyCORIS", interactive=True)
                     extension_wildcards_folder = gr.Textbox(value=setting.model_folders['Wildcards'], label="Wildcards", interactive=True)
@@ -406,11 +431,7 @@ def on_setting_ui():
         with gr.Row():
             save_btn = gr.Button(value="Save Setting", variant="primary")
             reload_btn = gr.Button(value="Reload UI")        
-            # update_btn = gr.Button(value="Update", visible=False)
-    
-    
-    # update_btn.click(fn=on_update_btn_click,inputs=None,outputs=None)
-                        
+                       
     # reload the page
     reload_btn.click(fn=on_reload_btn_click, _js='restart_reload', inputs=None, outputs=None)
                             
@@ -429,6 +450,7 @@ def on_setting_ui():
     save_btn.click(
         fn=on_save_btn_click,
         inputs=[
+            shortcut_update_when_start,
             scbrowser_screen_split_ratio,
             info_gallery_height,
             shortcut_column,
@@ -445,7 +467,8 @@ def on_setting_ui():
             extension_aestheticgradient_folder,
             extension_poses_folder,
             extension_other_folder,
-            download_images_folder
+            download_images_folder,
+            classification_preview_mode_disable            
         ],
         outputs=None    
     )   

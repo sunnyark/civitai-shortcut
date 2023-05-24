@@ -9,7 +9,7 @@ from . import setting
 from . import ishortcut
 # from . import civitai
 
-def on_ui():
+def on_ui(selected_model_id:gr.Textbox):
             
     with gr.Column(scale=1):
         with gr.Accordion("", open=True) as model_title_name:  
@@ -39,7 +39,7 @@ def on_ui():
             version_info = gr.JSON(label="Version information")
                 
     with gr.Row(visible=False): 
-        selected_model_id = gr.Textbox()        
+        # selected_model_id = gr.Textbox()        
         refresh_information = gr.Textbox()
 
     update_modelfolder_btn.click(
@@ -95,7 +95,7 @@ def on_ui():
     download_imagefolder.click(on_download_imagefolder_click,[selected_model_id],None)
     saved_infofolder.click(on_saved_infofolder_click,[selected_model_id],None)
     
-    return selected_model_id, refresh_information
+    return refresh_information
 
 
 def on_update_modelfolder_btn_click():
