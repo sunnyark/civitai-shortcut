@@ -297,7 +297,45 @@ def make_download_image_folder(ms_foldername):
     return model_folder  
 
 # 다정하면 임의의 분류뒤에 모델폴더를 생성하고 그뒤에 버전까지 생성가능
-def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None):
+# def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None):
+    
+#     if not version_info:
+#         return
+                
+#     if "model" not in version_info.keys():
+#         return
+                       
+#     content_type = version_info['model']['type']
+#     ms_foldername = version_info['model']['name']
+               
+#     model_folder = setting.generate_type_basefolder(content_type)
+    
+#     if not model_folder:
+#         return
+    
+#     if not cs_foldername and not ms_folder:
+#         return
+    
+#     if cs_foldername:
+#         model_folder = os.path.join(model_folder, replace_dirname(cs_foldername.strip()))
+                
+#     if ms_folder:
+#         model_folder = os.path.join(model_folder, replace_dirname(ms_foldername.strip()))
+        
+#     if vs_folder:        
+#         if not vs_foldername:
+#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
+#         elif len(vs_foldername.strip()) <= 0:
+#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
+
+#         model_folder = os.path.join(model_folder, replace_dirname(vs_foldername.strip()))
+                
+#     if not os.path.exists(model_folder):
+#         os.makedirs(model_folder)
+                
+#     return model_folder  
+
+def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None, ms_foldername=None):
     
     if not version_info:
         return
@@ -305,9 +343,7 @@ def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_
     if "model" not in version_info.keys():
         return
                        
-    content_type = version_info['model']['type']
-    ms_foldername = version_info['model']['name']
-               
+    content_type = version_info['model']['type']                   
     model_folder = setting.generate_type_basefolder(content_type)
     
     if not model_folder:
@@ -320,13 +356,14 @@ def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_
         model_folder = os.path.join(model_folder, replace_dirname(cs_foldername.strip()))
                 
     if ms_folder:
+        if not ms_foldername or len(ms_foldername.strip()) <= 0:
+            ms_foldername = version_info['model']['name']
+        
         model_folder = os.path.join(model_folder, replace_dirname(ms_foldername.strip()))
         
     if vs_folder:        
-        if not vs_foldername:
-            vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
-        elif len(vs_foldername.strip()) <= 0:
-            vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
+        if not vs_foldername or len(vs_foldername.strip()) <= 0:
+            vs_foldername = setting.generate_version_foldername(ms_foldername, version_info['name'], version_info['id'])
 
         model_folder = os.path.join(model_folder, replace_dirname(vs_foldername.strip()))
                 

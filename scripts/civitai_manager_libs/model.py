@@ -58,7 +58,7 @@ def get_model_downloaded_versions(modelid:str):
 def get_infopaths( versionid ):
     if not Downloaded_InfoPath:
         return    
-    result = {path : vid for path, vid in Downloaded_InfoPath.items() if vid == versionid}
+    result = {path : vid for path, vid in Downloaded_InfoPath.items() if str(vid) == str(versionid)}
     return result if len(result) > 0 else None  
 
 # modelid를 키로 modelid가 같은 version_info의 File Path를 list로 묶어 반환한다.

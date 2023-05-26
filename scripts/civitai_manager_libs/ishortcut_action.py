@@ -3,6 +3,7 @@ import json
 import gradio as gr
 import datetime
 import modules
+import shutil
 
 from . import util
 from . import model
@@ -22,7 +23,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                 saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
-                    open_image_folder = gr.Button(value="Open Download Image Folder")                 
+                    open_image_folder = gr.Button(value="Open Download Image Folder") 
+                    change_preview_image = gr.Button(value="Change Preview Image", variant="primary", visible=False)                
             with gr.TabItem("Description" , id="Model_Description"):                             
                 description_html = gr.HTML()       
             with gr.TabItem("Download" , id="Model_Download"): 
@@ -35,10 +37,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         type="array",
                     )
                 filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
-
-                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                with gr.Row():
+                    cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                    ms_foldername = gr.Textbox(label="Model Folder Name to Create", value="", interactive=True, lines=1, visible=True).style(container=True)
+                    
                 vs_folder = gr.Checkbox(label="Create individual version folder", value=False, visible=True , interactive=True)               
-                vs_folder_name = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+                vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
                 download_model = gr.Button(value="Download", variant="primary")
                 gr.Markdown("Downloading may take some time. Check console log for detail")     
                             
@@ -57,6 +61,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         with gr.Accordion("Downloaded Version", open=True, visible=False) as downloaded_tab:                             
                             downloaded_info = gr.Textbox(interactive=False,show_label=False)
                             saved_openfolder = gr.Button(value="Open Download Folder", variant="primary", visible=False)
+                            # change_preview_image = gr.Button(value="Change Preview Image", variant="primary", visible=True)
 
             with gr.TabItem("Image Information" , id="Image_Information"):      
                 with gr.Column():            
@@ -119,10 +124,11 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
 
     cs_foldername.select(    
         fn=on_cs_foldername_select,
-        inputs=None,
+        inputs=[vs_folder],
         outputs=[
             vs_folder,
-            vs_folder_name
+            vs_foldername,
+            ms_foldername
         ]          
     )
     
@@ -133,14 +139,16 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             selected_version_id,
             filename_list,            
             vs_folder,
-            vs_folder_name,
+            vs_foldername,
             cs_foldername,
+            ms_foldername
         ],
         outputs=[
             refresh_sc_list,
             downloaded_tab,
             downloaded_info,
-            saved_openfolder
+            saved_openfolder,
+            change_preview_image
             # refresh_information
         ]
     )  
@@ -223,10 +231,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            vs_folder,
-            vs_folder_name,
+            change_preview_image,
             model_classification,
-            cs_foldername
+            vs_folder,
+            vs_foldername,            
+            cs_foldername,
+            ms_foldername
         ],
         cancels=gallery 
     )
@@ -253,10 +263,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            vs_folder,
-            vs_folder_name,
+            change_preview_image,
             model_classification,
-            cs_foldername
+            vs_folder,
+            vs_foldername,            
+            cs_foldername,
+            ms_foldername
         ],
         cancels=gallery
     )    
@@ -284,10 +296,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            vs_folder,
-            vs_folder_name,
+            change_preview_image,
             model_classification,
-            cs_foldername
+            vs_folder,
+            vs_foldername,            
+            cs_foldername,
+            ms_foldername
         ],
         cancels=gallery
     )
@@ -296,8 +310,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
     saved_gallery.select(on_gallery_select, saved_images, [img_index, hidden, info_tabs])
     hidden.change(on_civitai_hidden_change,[hidden,img_index,saved_images_meta],[img_file_info])
     saved_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)  
-    vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_folder_name)
-    
+    vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_foldername)
+    change_preview_image.click(on_change_preview_image_click,[selected_model_id,selected_version_id,img_index,saved_images],None)
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
     
     return refresh_information
@@ -357,14 +371,14 @@ def on_download_images_click(model_id:str, images_url):
         downloader.download_image_file(model_info['name'], images_url)
     current_time = datetime.datetime.now() 
 
-def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_foldername, cs_foldername=None):
+def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_foldername, cs_foldername=None, ms_foldername=None):
     msg = None
     if version_id and model_id:    
         # 프리뷰이미지와 파일 모두를 다운 받는다.
         if cs_foldername == setting.CREATE_MODEL_FOLDER:
-            msg = downloader.download_file_thread(file_name, version_id, True, vs_folder, vs_foldername, None)
+            msg = downloader.download_file_thread(file_name, version_id, True, vs_folder, vs_foldername, None, ms_foldername)
         else:
-            msg = downloader.download_file_thread(file_name, version_id, False, False, None , cs_foldername)
+            msg = downloader.download_file_thread(file_name, version_id, False, False, None , cs_foldername, ms_foldername)
             
         # 다운 받은 모델 정보를 갱신한다.    
         model.update_downloaded_model()
@@ -372,29 +386,31 @@ def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_folde
         downloaded_info = None
         is_downloaded = False       
         is_visible_openfolder = False
+        is_visible_changepreview = False
         downloaded_versions = model.get_model_downloaded_versions(model_id)
         if downloaded_versions:
                 
             downloaded_info = "\n".join(downloaded_versions.values())
 
             if str(version_id) in downloaded_versions:
-                is_visible_openfolder=True       
+                is_visible_openfolder=True
+                is_visible_changepreview = True
 
         if downloaded_info:
             is_downloaded = True 
                                             
         current_time = datetime.datetime.now()
         
-        return gr.update(value=current_time),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_visible_openfolder)
-    return gr.update(visible=True),gr.update(visible=False),gr.update(value=None),gr.update(visible=False)
+        return gr.update(value=current_time),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview)
+    return gr.update(visible=True),gr.update(visible=False),gr.update(value=None),gr.update(visible=False),gr.update(visible=False)
             
     #     return gr.update(value=current_time),gr.update(value=current_time)    
     # return gr.update(visible=True),gr.update(visible=True)
 
-def on_cs_foldername_select(evt: gr.SelectData):
+def on_cs_foldername_select(evt: gr.SelectData, is_vsfolder):
     if evt.value == setting.CREATE_MODEL_FOLDER:
-        return gr.update(visible=True,value=False),gr.update(visible=False)
-    return gr.update(visible=False,value=False),gr.update(visible=False)
+        return gr.update(visible=True), gr.update(visible=is_vsfolder), gr.update(visible=True)
+    return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
     
 def on_model_classification_update_btn_click(model_classification, modelid):
     
@@ -411,6 +427,32 @@ def on_open_folder_click(mid,vid):
     path = model.get_default_version_folder(vid)
     if path:
         util.open_folder(path)
+
+def on_change_preview_image_click(mid,vid,img_idx:int,civitai_images):
+    if civitai_images and vid and mid:
+        if len(civitai_images) > int(img_idx):
+            selected_image_filepath = civitai_images[int(img_idx)]
+            if not os.path.isfile(selected_image_filepath):
+                return
+            
+            path = model.get_default_version_folder(vid)
+            if not path:
+                util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
+                return
+            
+            if not os.path.isdir(path):
+                util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
+                return
+            
+            version_info = ishortcut.get_version_info(mid,vid)
+            if not version_info:
+                util.printD("The model information does not exist.")
+                return
+            
+            savefile_base = downloader.get_save_base_name(version_info)
+            preview_img_filepath = os.path.join(path, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
+            
+            shutil.copy(selected_image_filepath, preview_img_filepath)
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index], gr.update(selected="Image_Information")
@@ -455,22 +497,68 @@ def load_saved_model(modelid=None, ver_index=None):
             downloaded_info = None
             is_downloaded = False       
             is_visible_openfolder = False
-                 
+            is_visible_changepreview = False
+            flist = list()
+            downloadable = list()
+            current_time = datetime.datetime.now()
+            
+            classification_list = classification.get_classification_names_by_modelid(modelid)
+            ms_foldername = model_info['name']
+            cs_foldername = setting.CREATE_MODEL_FOLDER
+            is_vsfolder = False
+            
+            try:
+                # 현재 다운로드된 폴더를 찾고 그 형식을 찾는다.
+                # 문제가 발생한다면 그냥 기본으로 내보낸다.
+                if versionid:
+                    version_path = model.get_default_version_folder(str(versionid))                    
+                    if version_path:
+                        download_classification = None
+                        version_parent_path = os.path.dirname(version_path)
+                        model_base_folder = os.path.abspath(setting.generate_type_basefolder(model_type))
+                        download_foldername = os.path.basename(version_path)
+                        download_parent_foldername = os.path.basename(version_parent_path)
+                                   
+                        if model_base_folder in version_path:
+                            # util.printD(f"{model_base_folder}:{version_path}")                            
+                            if version_path == model_base_folder:
+                                # 현재 다운로드 폴더가 type 베이스 폴더이다.
+                                pass
+                            elif model_base_folder == version_parent_path:
+                                # 현재 다운로드된 폴더가 모델명 폴더거나 classification 폴더이다.
+                                
+                                for v in classification_list:
+                                    if download_foldername == util.replace_dirname(v.strip()):
+                                        download_classification = v
+                                        break
+                                    
+                                if download_classification:
+                                    cs_foldername = download_classification
+                                    # util.printD(f"classification type folder:[{download_classification}]:{download_foldername}")
+                                else:
+                                    ms_foldername = download_foldername
+                                    # util.printD(f"model name type folder:{download_foldername}")
+                            else:
+                                # 현재 다운로드된 폴더가 개별 버전폴더이다.
+                                # util.printD(f"individual version folder: {download_parent_foldername}:{download_foldername}")     
+                                ms_foldername = download_parent_foldername
+                                vs_foldername = download_foldername
+                                is_vsfolder = True
+            except:
+                ms_foldername = model_info['name']
+                cs_foldername = setting.CREATE_MODEL_FOLDER
+                is_vsfolder = False
+
             if downloaded_versions:
                 downloaded_info = "\n".join(downloaded_versions.values())
                 
                 if str(versionid) in downloaded_versions:
-                    is_visible_openfolder=True                
+                    is_visible_openfolder=True     
+                    is_visible_changepreview = True           
                         
             if downloaded_info:
                 is_downloaded = True 
-             
-            current_time = datetime.datetime.now()
             
-            classification_list = classification.get_classification_names_by_modelid(modelid)
-
-            flist = list()
-            downloadable = list()
             for file in files:            
                 flist.append(f"{file['id']}:{file['name']}")
                 downloadable.append(['✅',file['id'],file['name'],file['type'],round(file['sizeKB']),file['downloadUrl']])
@@ -480,9 +568,11 @@ def load_saved_model(modelid=None, ver_index=None):
                 gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []), downloadable if len(downloadable) > 0 else None,\
                 gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(value=False, visible=True),gr.update(value=vs_foldername, visible=False),\
-                gr.update(choices=classification.get_list(),value=classification_list, interactive=True),\
-                gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview),\
+                gr.update(choices=classification.get_list(), value=classification_list, interactive=True),\
+                gr.update(value=is_vsfolder, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False), gr.update(value=vs_foldername, visible=is_vsfolder),\
+                gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=cs_foldername),\
+                gr.update(value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
@@ -491,9 +581,11 @@ def load_saved_model(modelid=None, ver_index=None):
         gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(value=None),None,\
         gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(value=False, visible=True),gr.update(value="",visible=False),\
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(visible=False),\
         gr.update(choices=classification.get_list(),value=[], interactive=True),\
-        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER)
+        gr.update(value=False, visible=True),gr.update(value="",visible=False),\
+        gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER),\
+        gr.update(value="")
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.

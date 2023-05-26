@@ -67,6 +67,13 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.5.1
+* Add the feature to change the preview image in the model information tab -> images: Change Preview Image button.
+  The button will only appear if the model has been downloaded.
+
+* For downloaded models, update the default folder name displayed to be the downloaded folder information.
+  There may be inaccuracies if the model is downloaded in more than one location.
+  In the Downloaded Model Information Tab, you can view the downloaded location and files.
 
 v 1.5
 

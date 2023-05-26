@@ -71,19 +71,19 @@ def get_model_info(modelid:str):
     
     return contents
 
-def get_version_info(modelid, versionid):
+def get_version_info(modelid:str, versionid:str):
     
-    model_info = get_model_info(modelid)
+    model_info = get_model_info(modelid)    
     if not model_info:
         return None
-    
+        
     if "modelVersions" in model_info.keys():
-        for ver in model_info["modelVersions"]:                        
-            if versionid == ver["id"]:
+        for ver in model_info["modelVersions"]:
+            if str(versionid) == str(ver["id"]):
                 return ver
     return None
 
-def get_version_images(modelid, versionid):
+def get_version_images(modelid:str, versionid:str):
     
     version_info = get_version_info(modelid, versionid)
     if not version_info:

@@ -38,7 +38,7 @@ def get_save_base_name(version_info):
         base, ext = os.path.splitext(primary_file['name'])   
     return base
     
-def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername):               
+def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername, ms_foldername):               
     # if not file_name:
     #     return
 
@@ -56,7 +56,7 @@ def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldern
         return
 
     # model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername, ms_foldername)
-    model_folder = util.make_download_model_folder(version_info, ms_folder, vs_folder, vs_foldername, cs_foldername)
+    model_folder = util.make_download_model_folder(version_info, ms_folder, vs_folder, vs_foldername, cs_foldername, ms_foldername)
     
     if not model_folder:
         return
