@@ -511,7 +511,15 @@ def load_saved_model(modelid=None, ver_index=None):
                 # 현재 다운로드된 폴더를 찾고 그 형식을 찾는다.
                 # 문제가 발생한다면 그냥 기본으로 내보낸다.
                 if versionid:
-                    version_path = model.get_default_version_folder(str(versionid))                    
+                    version_path = model.get_default_version_folder(str(versionid))
+
+                    # 다운로드한 이력이 있는 모델의 경우 다운 로드도니 버전에서 폴더 경로 정보를 가져온다.
+                    model_path = model.get_default_model_folder(modelid)
+                    use_default_folder = False                    
+                    if not version_path and model_path:
+                        version_path = model_path
+                        use_default_folder = True
+                    
                     if version_path:
                         download_classification = None
                         version_parent_path = os.path.dirname(version_path)
@@ -520,13 +528,11 @@ def load_saved_model(modelid=None, ver_index=None):
                         download_parent_foldername = os.path.basename(version_parent_path)
                                    
                         if model_base_folder in version_path:
-                            # util.printD(f"{model_base_folder}:{version_path}")                            
                             if version_path == model_base_folder:
                                 # 현재 다운로드 폴더가 type 베이스 폴더이다.
                                 pass
                             elif model_base_folder == version_parent_path:
-                                # 현재 다운로드된 폴더가 모델명 폴더거나 classification 폴더이다.
-                                
+                                # 현재 다운로드된 폴더가 모델명 폴더거나 classification 폴더이다.                                
                                 for v in classification_list:
                                     if download_foldername == util.replace_dirname(v.strip()):
                                         download_classification = v
@@ -534,15 +540,18 @@ def load_saved_model(modelid=None, ver_index=None):
                                     
                                 if download_classification:
                                     cs_foldername = download_classification
-                                    # util.printD(f"classification type folder:[{download_classification}]:{download_foldername}")
                                 else:
                                     ms_foldername = download_foldername
-                                    # util.printD(f"model name type folder:{download_foldername}")
                             else:
-                                # 현재 다운로드된 폴더가 개별 버전폴더이다.
-                                # util.printD(f"individual version folder: {download_parent_foldername}:{download_foldername}")     
+                                # 현재 다운로드된 폴더가 개별 버전폴더이다.                               
                                 ms_foldername = download_parent_foldername
-                                vs_foldername = download_foldername
+                                
+                                # 개별폴더를 선택한경우에는 개별 폴더를 생성할수 있도록 해준다.
+                                # 개별폴더이므로 이름이 같아서는 안된다.
+                                if not use_default_folder:
+                                    vs_foldername = download_foldername 
+                                    
+                                # vs_foldername = download_foldername
                                 is_vsfolder = True
             except:
                 ms_foldername = model_info['name']

@@ -23,6 +23,20 @@ def update_downloaded_model():
     
     Downloaded_Models, Downloaded_InfoPath = get_model_path()
 
+def get_default_model_folder(mid):
+    if mid:
+        path = None
+        if str(mid) in Downloaded_Models.keys():       
+            for vid, version_paths in Downloaded_Models[str(mid)]:
+               path = version_paths
+               break
+            
+        if path:
+            vfolder , vfile = os.path.split(path)
+            return vfolder
+            
+    return None
+
 def get_default_version_folder(vid):
     if vid:
         
