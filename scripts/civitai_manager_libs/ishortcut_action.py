@@ -37,12 +37,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         type="array",
                     )
                 filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
-                with gr.Row():
-                    cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
-                    ms_foldername = gr.Textbox(label="Model Folder Name to Create", value="", interactive=True, lines=1, visible=True).style(container=True)
+                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                ms_foldername = gr.Textbox(label="Model Folder Name to Create", value="", interactive=True, lines=1, visible=True).style(container=True)
                     
                 vs_folder = gr.Checkbox(label="Create individual version folders under the model folder.", value=False, visible=True , interactive=True)
                 vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+
                 download_model = gr.Button(value="Download", variant="primary")
                 gr.Markdown("Downloading may take some time. Check console log for detail")     
                             
