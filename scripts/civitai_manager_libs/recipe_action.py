@@ -74,7 +74,7 @@ def get_recipe_information(select_name):
                                                         
     return description, Prompt, negativePrompt, options, gen_string, classification, imagefile
     
-def on_ui(recipe_input, civitai_tabs, civitai_recipe_tabs):   
+def on_ui(recipe_input, civitai_tabs):   
 
     # data = '''Best quality, masterpiece, ultra high res, (photorealistic:1.4),girl, beautiful_face, detailed skin,upper body, <lora:caise2-000022:0.6>
     # Negative prompt: ng_deepnegative_v1_75t, badhandv4 (worst quality:2), (low quality:2), (normal quality:2), lowres, bad anatomy, bad hands, normal quality, ((monochrome)), ((grayscale)), ng_deepnegative_v1_75t, badhandv4 (worst quality:2), (low quality:2), (normal quality:2), lowres, bad anatomy, bad hands, normal quality, ((monochrome)), ((grayscale)),
@@ -146,8 +146,7 @@ def on_ui(recipe_input, civitai_tabs, civitai_recipe_tabs):
         outputs=[
             recipe_drop_image,
             recipe_input,
-            civitai_tabs,
-            civitai_recipe_tabs,            
+            civitai_tabs      
         ]
     )  
         
@@ -271,8 +270,8 @@ def on_ui(recipe_input, civitai_tabs, civitai_recipe_tabs):
 
 def on_recipe_input_change(recipe_input):
     if recipe_input:
-        return recipe_input,None,gr.update(selected="Assistance"),gr.update(selected="Recipe")
-    return gr.update(visible=True),gr.update(visible=False),gr.update(selected="Assistance"),gr.update(selected="Recipe")
+        return recipe_input,None,gr.update(selected="Recipe")
+    return gr.update(visible=True),gr.update(visible=False),gr.update(selected="Recipe")
     
 def on_recipe_drop_image_change(recipe_img):
     if recipe_img:

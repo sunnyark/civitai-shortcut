@@ -298,6 +298,26 @@ def on_save_btn_click(shortcut_update_when_start,
                       classification_preview_mode_disable
                       ):    
     
+    save_setting(shortcut_update_when_start,
+                      scbrowser_screen_split_ratio, info_gallery_height, 
+                      shortcut_column, shortcut_count_per_page,
+                      gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
+                      shortcut_max_download_image_per_version,
+                      gallery_thumbnail_image_style,
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
+                      classification_preview_mode_disable
+                      )    
+
+def save_setting(shortcut_update_when_start,
+                      scbrowser_screen_split_ratio, info_gallery_height, 
+                      shortcut_column, shortcut_count_per_page,
+                      gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
+                      shortcut_max_download_image_per_version,
+                      gallery_thumbnail_image_style,
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
+                      classification_preview_mode_disable
+                      ):    
+    
     environment = dict()    
     
     application_allow = dict()    
@@ -352,7 +372,7 @@ def on_save_btn_click(shortcut_update_when_start,
     setting.save(environment)
     
     util.printD("Save setting. Reload UI is needed")
-               
+                   
 def on_usergallery_openfolder_btn_click():
     if os.path.exists(setting.shortcut_gallery_folder):
         util.open_folder(setting.shortcut_gallery_folder)   

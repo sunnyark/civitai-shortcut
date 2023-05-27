@@ -70,6 +70,12 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+
+v 1.5.2
+* model download시 생성되는 폴더생성에 대한 설명추가/문구 변경.
+* Prompt Recipe 의 위치 변경 (Assistance -> Top level)
+* Scan and Update Models 의 위치변경 (Manage -> Assictance)
+
 v 1.5.1
 * preview 이미지의 변경 기능 추가 model imformation tab -> images : change preview image 버튼
   모델을 다운로드한 경우에만 버튼이 나타납니다.

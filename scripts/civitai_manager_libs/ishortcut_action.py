@@ -24,7 +24,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
                     open_image_folder = gr.Button(value="Open Download Image Folder") 
-                    change_preview_image = gr.Button(value="Change Preview Image", variant="primary", visible=False)                
+                    change_preview_image = gr.Button(value="Change preview to selected image", variant="primary", visible=False)                
             with gr.TabItem("Description" , id="Model_Description"):                             
                 description_html = gr.HTML()       
             with gr.TabItem("Download" , id="Model_Download"): 

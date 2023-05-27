@@ -20,10 +20,12 @@ def on_civitai_tabs_select(evt: gr.SelectData):
     if evt.index == 0:
         current_time = datetime.datetime.now() 
         return current_time,gr.update(visible=False),gr.update(visible=False)
-    elif evt.index == 1:
+    elif evt.index == 1:            
+        gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)    
+    elif evt.index == 2:
         current_time = datetime.datetime.now() 
         return gr.update(visible=False),gr.update(visible=False),current_time
-    elif evt.index == 2:            
+    elif evt.index == 3:            
         gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
         
     return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
@@ -57,23 +59,31 @@ def civitai_shortcut_ui():
             with gr.Row():
                 refresh_shortcut , refresh_information  = civitai_shortcut_action.on_ui(recipe_input)
 
+        with gr.TabItem("Prompt Recipe" , id="Recipe"):
+            with gr.Row():
+                refresh_recipe = recipe_action.on_ui(recipe_input, civitai_tabs)
+                        
         with gr.TabItem("Assistance" , id="Assistance"):
             with gr.Tabs() as civitai_assistance_tabs:        
                 with gr.TabItem("Classification"):
                     with gr.Row():
-                        refresh_classification = classification_action.on_ui()                
-                with gr.TabItem("Prompt Recipe" , id="Recipe"):
+                        refresh_classification = classification_action.on_ui()     
+                with gr.TabItem("Scan and Update Models"):
                     with gr.Row():
-                        refresh_recipe = recipe_action.on_ui(recipe_input, civitai_tabs, civitai_assistance_tabs)
+                        setting_action.on_scan_ui()
+                                                           
+                # with gr.TabItem("Prompt Recipe" , id="Recipe"):
+                #     with gr.Row():
+                #         refresh_recipe = recipe_action.on_ui(recipe_input, civitai_tabs, civitai_assistance_tabs)
      
         with gr.TabItem("Manage" , id="Manage"):
             with gr.Tabs() as civitai_manage_tabs:        
                 # with gr.TabItem("Classification"):
                 #     with gr.Row():
                 #         refresh_classification = classification_action.on_ui()
-                with gr.TabItem("Scan and Update Models"):
-                    with gr.Row():
-                        setting_action.on_scan_ui()
+                # with gr.TabItem("Scan and Update Models"):
+                #     with gr.Row():
+                #         setting_action.on_scan_ui()
                 with gr.TabItem("Setting"):
                     with gr.Row():
                         setting_action.on_setting_ui()
