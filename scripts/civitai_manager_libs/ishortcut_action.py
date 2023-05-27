@@ -37,10 +37,10 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         type="array",
                     )
                 filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
-                cs_foldername = gr.Dropdown(label='Download Folder Select', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
-                ms_foldername = gr.Textbox(label="Model Folder Name to Create", value="", interactive=True, lines=1, visible=True).style(container=True)
+                cs_foldername = gr.Dropdown(label='Select the Folder to download the model.',  info="Can select a classification defined by the user or create a new one as the folder to download the model." , multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                ms_foldername = gr.Textbox(label="Model Folder Name to Create", info="Create a folder with the model name or the desired name specified by the user." , value="", interactive=True, lines=1, visible=True).style(container=True)
                     
-                vs_folder = gr.Checkbox(label="Create individual version folders under the model folder.", value=False, visible=True , interactive=True)
+                vs_folder = gr.Checkbox(label="Create separate independent folders for each version under the generated model folder.", value=False, visible=True , interactive=True)
                 vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
 
                 download_model = gr.Button(value="Download", variant="primary")

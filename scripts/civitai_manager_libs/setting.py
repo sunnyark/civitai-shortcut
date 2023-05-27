@@ -19,7 +19,7 @@ NORESULT = "[No Result]"
 NEWRECIPE = "[New Prompt Recipe]"
 NEWCLASSIFICATION = "[New Classification]"
 
-CREATE_MODEL_FOLDER = "Create Model Name Folder"    
+CREATE_MODEL_FOLDER = "Create a folder with the model name"    
 
 model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 
