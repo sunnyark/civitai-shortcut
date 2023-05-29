@@ -24,7 +24,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
                     open_image_folder = gr.Button(value="Open Download Image Folder") 
-                    change_preview_image = gr.Button(value="Change preview to selected image", variant="primary", visible=False)                
+                    change_preview_image = gr.Button(value="Change preview to selected image", variant="primary", visible=False)
+                    change_thumbnail_image = gr.Button(value="Change thumbnail to selected image", variant="primary", visible=True)
             with gr.TabItem("Description" , id="Model_Description"):                             
                 description_html = gr.HTML()       
             with gr.TabItem("Download" , id="Model_Download"): 
@@ -61,7 +62,6 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         with gr.Accordion("Downloaded Version", open=True, visible=False) as downloaded_tab:                             
                             downloaded_info = gr.Textbox(interactive=False,show_label=False)
                             saved_openfolder = gr.Button(value="Open Download Folder", variant="primary", visible=False)
-                            # change_preview_image = gr.Button(value="Change Preview Image", variant="primary", visible=True)
 
             with gr.TabItem("Image Information" , id="Image_Information"):      
                 with gr.Column():            
@@ -312,6 +312,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
     saved_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)  
     vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_foldername)
     change_preview_image.click(on_change_preview_image_click,[selected_model_id,selected_version_id,img_index,saved_images],None)
+    change_thumbnail_image.click(on_change_thumbnail_image_click,[selected_model_id,img_index,saved_images],[refresh_sc_list])
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
     
     return refresh_information
@@ -428,10 +429,26 @@ def on_open_folder_click(mid,vid):
     if path:
         util.open_folder(path)
 
+def on_change_thumbnail_image_click(mid, img_idx:int, civitai_images):
+    if civitai_images and mid:
+        if len(civitai_images) > int(img_idx):
+            selected_image_filepath = civitai_images[int(img_idx)]
+            
+            if not os.path.isfile(selected_image_filepath):
+                return gr.update(visible=False)
+            
+            ishortcut.create_thumbnail(mid, selected_image_filepath)
+            
+            current_time = datetime.datetime.now()
+            return current_time
+        
+    return gr.update(visible=False)
+
 def on_change_preview_image_click(mid,vid,img_idx:int,civitai_images):
     if civitai_images and vid and mid:
         if len(civitai_images) > int(img_idx):
             selected_image_filepath = civitai_images[int(img_idx)]
+            
             if not os.path.isfile(selected_image_filepath):
                 return
             

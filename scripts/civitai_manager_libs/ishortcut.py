@@ -10,6 +10,10 @@ from . import util
 from . import setting
 from . import civitai
 from . import classification
+
+from PIL import Image
+
+thumbnail_max_size = (400, 400)
    
 def sort_shortcut_by_value(ISC, key, reverse=False):
     sorted_data = sorted(ISC.items(), key=lambda x: x[1][key], reverse=reverse)
@@ -424,6 +428,22 @@ def get_image_list(shortcut_types=None, search=None)->str:
 
     return shotcutlist                
 
+def create_thumbnail(model_id, input_image_path):
+    global thumbnail_max_size
+
+    if not model_id:
+        return False    
+    
+    thumbnail_path = os.path.join(setting.shortcut_thumbnail_folder, f"{model_id}{setting.preview_image_ext}")
+    try:
+        with Image.open(input_image_path) as image:
+            image.thumbnail(thumbnail_max_size)
+            image.save(thumbnail_path)
+    except Exception as e:
+        return False
+        
+    return True
+        
 def delete_thumbnail_image(model_id):
     if is_sc_image(model_id):
         try:
@@ -431,11 +451,8 @@ def delete_thumbnail_image(model_id):
         except:
             return 
         
-def download_thumbnail_image(model_id, url):
-    if not model_id:    
-        return False
-
-    if not url:    
+def download_thumbnail_image_old(model_id, url):   
+    if not model_id or not url:
         return False
     
     if not os.path.exists(setting.shortcut_thumbnail_folder):
@@ -450,12 +467,40 @@ def download_thumbnail_image(model_id, url):
             shotcut_img = os.path.join(setting.shortcut_thumbnail_folder,f"{model_id}{setting.preview_image_ext}")                                                                   
             with open(shotcut_img, 'wb') as f:
                 img_r.raw.decode_content = True
-                shutil.copyfileobj(img_r.raw, f)                            
+                shutil.copyfileobj(img_r.raw, f)
+            
     except Exception as e:
         return False
     
     return True                    
 
+def download_thumbnail_image(model_id, url):   
+    global thumbnail_max_size
+    
+    if not model_id or not url:
+        return False
+    
+    if not os.path.exists(setting.shortcut_thumbnail_folder):
+        os.makedirs(setting.shortcut_thumbnail_folder)    
+    
+    try:
+        # Get image
+        with requests.get(url, stream=True) as img_r:
+            if not img_r.ok:
+                return False
+
+            # Create thumbnail
+            with Image.open(img_r.raw) as image:
+                image.thumbnail(thumbnail_max_size)
+                thumbnail_path = os.path.join(setting.shortcut_thumbnail_folder, f"{model_id}{setting.preview_image_ext}")
+                image.save(thumbnail_path)
+            
+    except Exception as e:
+        return False
+    
+    return True   
+
+# 섬네일이 있는지 체크한다.
 def is_sc_image(model_id):
     if not model_id:    
         return False
@@ -478,10 +523,6 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
     def_id = None
     def_image = None
     
-    # # hot fix and delete model
-    # if str(model_id) in ISC:
-    #     ISC[str(model_id)]["tags"]=[]
-            
     if model_info:        
         if "modelVersions" in model_info.keys():            
             def_version = model_info["modelVersions"][0]
@@ -515,8 +556,12 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
         
         cis_to_file(ISC[str(model_id)])
         
-        download_thumbnail_image(model_id, def_image)
-
+        # 섬네일이 없을때만 새로 다운받는다.
+        if not is_sc_image(model_id):            
+            download_thumbnail_image(model_id, def_image)
+        
+        # download_thumbnail_image(model_id, def_image)
+            
     return ISC
 
 def delete(ISC:dict, model_id)->dict:
