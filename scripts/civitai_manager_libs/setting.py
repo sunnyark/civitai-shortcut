@@ -179,7 +179,127 @@ def init():
     shortcut_recipe_folder = os.path.join(extension_base,shortcut_recipe_folder)
     shortcut_info_folder = os.path.join(extension_base,shortcut_info_folder)
     shortcut_gallery_folder = os.path.join(extension_base,shortcut_gallery_folder)
-        
+
+    load_data()
+            
+    # if shared.cmd_opts.embeddings_dir:
+    #     model_folders['TextualInversion'] = shared.cmd_opts.embeddings_dir
+
+    # if shared.cmd_opts.hypernetwork_dir :
+    #     model_folders['Hypernetwork'] = shared.cmd_opts.hypernetwork_dir
+
+    # if shared.cmd_opts.ckpt_dir:
+    #     model_folders['Checkpoint'] = shared.cmd_opts.ckpt_dir
+
+    # if shared.cmd_opts.lora_dir:
+    #     model_folders['LORA'] = shared.cmd_opts.lora_dir        
+    
+    # environment = load()
+    # if environment:
+                
+    #     if "application_allow" in environment.keys():
+    #         application_allow = environment['application_allow']
+
+    #         if "shortcut_update_when_start" in application_allow.keys():
+    #             shortcut_update_when_start = bool(application_allow['shortcut_update_when_start'])       
+    #         if "shortcut_max_download_image_per_version" in application_allow.keys():
+    #             shortcut_max_download_image_per_version = int(application_allow['shortcut_max_download_image_per_version'])
+                    
+    #     if "screen_style" in environment.keys():
+    #         screen_style = environment['screen_style']
+
+    #         if "shortcut_browser_screen_split_ratio" in screen_style.keys():
+    #             shortcut_browser_screen_split_ratio = int(screen_style['shortcut_browser_screen_split_ratio'])       
+    #         if "information_gallery_height" in screen_style.keys():
+    #             if screen_style['information_gallery_height'].strip():
+    #                 information_gallery_height = screen_style['information_gallery_height']
+    #         if "gallery_thumbnail_image_style" in screen_style.keys():
+    #             gallery_thumbnail_image_style = screen_style['gallery_thumbnail_image_style']
+                        
+    #     if "image_style" in environment.keys():
+    #         image_style = environment['image_style']
+
+    #         if "shortcut_column" in image_style.keys():
+    #             shortcut_column = int(image_style['shortcut_column'])
+    #         if "shortcut_count_per_page" in image_style.keys():
+    #             shortcut_count_per_page = int(image_style['shortcut_count_per_page'])
+
+    #         if "gallery_column" in image_style.keys():            
+    #             gallery_column = int(image_style['gallery_column'])
+    #         if "classification_gallery_column" in image_style.keys():
+    #             classification_gallery_column = int(image_style['classification_gallery_column'])
+
+    #         if "usergallery_images_column" in image_style.keys():
+    #             usergallery_images_column = int(image_style['usergallery_images_column'])
+    #         if "usergallery_images_page_limit" in image_style.keys():
+    #             usergallery_images_page_limit = int(image_style['usergallery_images_page_limit'])
+            
+    #     if "model_folders" in environment.keys():
+                
+    #         user_folders = environment['model_folders']
+            
+    #         if 'LoCon' in user_folders.keys():
+    #             model_folders['LoCon'] = user_folders['LoCon']
+            
+    #         if 'Wildcards' in user_folders.keys():
+    #             model_folders['Wildcards'] = user_folders['Wildcards']
+                
+    #         if 'Controlnet' in user_folders.keys():
+    #             model_folders['Controlnet'] = user_folders['Controlnet']
+
+    #         if 'AestheticGradient' in user_folders.keys():
+    #             model_folders['AestheticGradient'] = user_folders['AestheticGradient']
+
+    #         if 'Poses' in user_folders.keys():
+    #             model_folders['Poses'] = user_folders['Poses']
+
+    #         if 'Other' in user_folders.keys():
+    #             model_folders['Other'] = user_folders['Other']
+
+    #     if "download_folders" in environment.keys():
+                
+    #         download_folders = environment['download_folders']
+    #         if 'download_images' in download_folders.keys():
+    #             download_images_folder = download_folders['download_images']            
+
+    #     if "temporary" in environment.keys():
+    #         temporary = environment['temporary']
+
+    #         if "classification_preview_mode_disable" in temporary.keys():
+    #             classification_preview_mode_disable = bool(temporary['classification_preview_mode_disable']) 
+
+def load_data():
+    global root_path
+    global extension_base
+    global model_folders
+    
+    global shortcut
+    global shortcut_setting
+    global shortcut_classification
+    global shortcut_civitai_internet_shortcut_url
+    global shortcut_recipe
+    
+    global shortcut_thumbnail_folder
+    global shortcut_recipe_folder
+    global shortcut_info_folder
+    global shortcut_gallery_folder
+    
+    global shortcut_column
+    global shortcut_count_per_page
+    global gallery_column
+    global classification_gallery_column
+    global usergallery_images_column
+    global usergallery_images_page_limit
+    global shortcut_max_download_image_per_version
+    global gallery_thumbnail_image_style
+
+    global download_images_folder
+    global shortcut_browser_screen_split_ratio
+    global information_gallery_height
+
+    global shortcut_update_when_start
+    global classification_preview_mode_disable
+
     if shared.cmd_opts.embeddings_dir:
         model_folders['TextualInversion'] = shared.cmd_opts.embeddings_dir
 
@@ -190,8 +310,8 @@ def init():
         model_folders['Checkpoint'] = shared.cmd_opts.ckpt_dir
 
     if shared.cmd_opts.lora_dir:
-        model_folders['LORA'] = shared.cmd_opts.lora_dir        
-    
+        model_folders['LORA'] = shared.cmd_opts.lora_dir     
+                
     environment = load()
     if environment:
                 

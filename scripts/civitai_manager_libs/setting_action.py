@@ -370,6 +370,7 @@ def save_setting(shortcut_update_when_start,
     environment['temporary'] = temporary
     
     setting.save(environment)
+    setting.load_data()
     
     util.printD("Save setting. Reload UI is needed")
                    
@@ -396,6 +397,27 @@ def request_restart():
 #     # perform git pull in the extension folder
 #     output = subprocess.check_output([git, '-C', subdir, 'pull', '--autostash'])
 #     print(output.decode('utf-8'))
+
+def on_refresh_setting_change():
+    return setting.shortcut_update_when_start,\
+            setting.shortcut_browser_screen_split_ratio,\
+            setting.information_gallery_height,\
+            setting.shortcut_column,\
+            setting.shortcut_count_per_page,\
+            setting.gallery_column,\
+            setting.classification_gallery_column,\
+            setting.usergallery_images_column,\
+            setting.usergallery_images_page_limit,\
+            setting.shortcut_max_download_image_per_version,\
+            setting.gallery_thumbnail_image_style,\
+            setting.model_folders['LoCon'],\
+            setting.model_folders['Wildcards'],\
+            setting.model_folders['Controlnet'],\
+            setting.model_folders['AestheticGradient'],\
+            setting.model_folders['Poses'],\
+            setting.model_folders['Other'],\
+            setting.download_images_folder,\
+            setting.classification_preview_mode_disable
             
 def on_setting_ui():
             
@@ -451,7 +473,35 @@ def on_setting_ui():
         with gr.Row():
             save_btn = gr.Button(value="Save Setting", variant="primary")
             reload_btn = gr.Button(value="Reload UI")        
-                       
+            refresh_setting = gr.Textbox(visible=False)        
+
+    refresh_setting.change(
+        fn=on_refresh_setting_change,
+        inputs=None,
+        outputs=[
+            shortcut_update_when_start,
+            scbrowser_screen_split_ratio,
+            info_gallery_height,
+            shortcut_column,
+            shortcut_count_per_page,
+            gallery_column,
+            classification_gallery_column,
+            usergallery_images_column,
+            usergallery_images_page_limit,            
+            shortcut_max_download_image_per_version,
+            gallery_thumbnail_image_style,
+            extension_locon_folder,
+            extension_wildcards_folder,
+            extension_controlnet_folder,
+            extension_aestheticgradient_folder,
+            extension_poses_folder,
+            extension_other_folder,
+            download_images_folder,
+            classification_preview_mode_disable 
+        ],
+        show_progress=False     
+    )
+                           
     # reload the page
     reload_btn.click(fn=on_reload_btn_click, _js='restart_reload', inputs=None, outputs=None)
                             
@@ -491,7 +541,9 @@ def on_setting_ui():
             classification_preview_mode_disable            
         ],
         outputs=None    
-    )   
+    )
+    
+    return refresh_setting
            
 
 

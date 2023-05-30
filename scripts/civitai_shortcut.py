@@ -17,18 +17,17 @@ from scripts.civitai_manager_libs import ishortcut
 from scripts.civitai_manager_libs import recipe_action
 
 def on_civitai_tabs_select(evt: gr.SelectData):
+    current_time = datetime.datetime.now() 
     if evt.index == 0:
-        current_time = datetime.datetime.now() 
-        return current_time,gr.update(visible=False),gr.update(visible=False)
+        return current_time,gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
     elif evt.index == 1:            
-        gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)    
+        gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)    
     elif evt.index == 2:
-        current_time = datetime.datetime.now() 
-        return gr.update(visible=False),gr.update(visible=False),current_time
-    elif evt.index == 3:            
-        gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
+        return gr.update(visible=False),gr.update(visible=False),current_time,gr.update(visible=False)
+    elif evt.index == 3:       
+        return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),current_time
         
-    return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
+    return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
 
 def on_civitai_manage_tabs_select(evt: gr.SelectData):
     if evt.index == 0:
@@ -86,7 +85,7 @@ def civitai_shortcut_ui():
                 #         setting_action.on_scan_ui()
                 with gr.TabItem("Setting"):
                     with gr.Row():
-                        setting_action.on_setting_ui()
+                        refresh_setting = setting_action.on_setting_ui()
                 # with gr.TabItem("ReadMe"):
                 #     with gr.Row():  
                 #         gr.Markdown(value=readmarkdown())
@@ -95,7 +94,7 @@ def civitai_shortcut_ui():
     civitai_tabs.select(
         fn=on_civitai_tabs_select,
         inputs=None,        
-        outputs=[refresh_shortcut, refresh_information , refresh_classification]        
+        outputs=[refresh_shortcut, refresh_information , refresh_classification, refresh_setting]        
     )
     
     civitai_manage_tabs.select(
@@ -132,10 +131,10 @@ def init_civitai_shortcut():
     if setting.shortcut_update_when_start:        
         update_all_shortcut_informations_thread()
                       
-# init
-init_civitai_shortcut()
-
 def on_ui_tabs():
+    # init
+    init_civitai_shortcut()
+    
     # with gr.Blocks(analytics_enabled=False) as civitai_shortcut:
     with gr.Blocks() as civitai_shortcut:
         civitai_shortcut_ui()
