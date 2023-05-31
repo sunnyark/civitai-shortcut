@@ -67,6 +67,16 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.5.3
+* Added the ability to change the file name of the model file to be downloaded.
+* Change to allow selection only through checkboxes when choosing files.
+* When clicking on the file name, an input field appears to allow changing the file name.
+* Changed the behavior during file downloads to prevent the download of info and preview images when there is no download file available. This is done to avoid confusion with the ability to change the file name.
+* Changed the search criteria for Scan Models.
+* Modified the size of the thumbnail image to be smaller.
+Modified the thumbnail image to be changeable.
+* Shortcut Browser screen ratio error fix
+
 v 1.5.2
 * Add description/modify the wording for folder creation during model download.
 * Change the position of Prompt Recipe (Assistance -> Top level)

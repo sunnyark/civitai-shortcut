@@ -50,6 +50,19 @@ def get_default_version_folder(vid):
             return vfolder
             
     return None    
+
+def get_default_version_infopath(vid):
+    if vid:
+        
+        paths = get_infopaths(vid)        
+        
+        if not paths:
+            return None
+        
+        for path in paths.keys():
+            return path
+            
+    return None
     
 def get_model_downloaded_versions(modelid:str):
     
@@ -118,7 +131,7 @@ def get_model_path()->dict:
 #         path = Downloaded_Versions[versionid]
         
 #         vinfo = get_version_info(versionid)
-#         base = get_save_base_name(vinfo)
+#         base = downloader.get_save_base_name(vinfo)
         
 #         try:                
 #             vfolder , vfile = os.path.split(path)            
@@ -128,18 +141,8 @@ def get_model_path()->dict:
 #                 if file.endswith(setting.preview_image_ext) and file.startswith(base):
 #                     file_list.append(os.path.join(vfolder, file))            
 #         except:
-#             return
-        
+#             return        
 #     return file_list if len(file_list) > 0 else None
-
-# def get_save_base_name(version_info):
-#     base = None    
-#     primary_file = get_primary_file_by_version_info(version_info)
-#     if not primary_file:
-#         base = setting.generate_version_foldername(version_info['model']['name'],version_info['name'],version_info['id'])
-#     else:
-#         base, ext = os.path.splitext(primary_file['name'])   
-#     return base
             
 # def get_model_info(modelid):
 #     def_info = None

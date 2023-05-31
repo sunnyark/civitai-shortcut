@@ -14,6 +14,10 @@ from . import model_action
 from . import ishortcut_action
 from . import civitai_gallery_action
 
+def on_civitai_information_tabs_select(evt: gr.SelectData):
+    if evt.index == 2:
+        model.update_downloaded_model()
+
 def on_ui(recipe_input):
     with gr.Row(visible=False):       
         refresh_shortcut = gr.Textbox()
@@ -44,7 +48,7 @@ def on_ui(recipe_input):
                         sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_column], height="fit", object_fit=setting.gallery_thumbnail_image_style)
                         gr.Markdown(value="The feature is to search for new versions of models on Civitai among the downloaded ones.", visible=True)
                 
-    with gr.Column(scale=setting.shortcut_browser_screen_split_ratio_max):
+    with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):
         with gr.Tabs() as civitai_information_tabs:
             with gr.TabItem("Model Information" , id="civitai_info"):
                 with gr.Row():
@@ -63,6 +67,12 @@ def on_ui(recipe_input):
     
     sc_new_version_gallery.select(on_sc_new_version_gallery_select, None,[selected_model_id], show_progress=False)
 
+    civitai_information_tabs.select(
+        fn=on_civitai_information_tabs_select,
+        inputs=None,        
+        outputs=None        
+    )
+    
     refresh_shortcut.change(
         fn=on_refresh_shortcut_change,
         inputs=None,

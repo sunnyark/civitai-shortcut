@@ -177,8 +177,9 @@ def get_primary_file_by_version_info(version_info:dict)->dict:
         return
     
     for file in version_info['files']:
-        if file['primary']:
-            return file        
+        if 'primary' in file.keys():
+            if file['primary']:
+                return file        
     return
         
 def get_primary_file_by_version_id(version_id=None)->dict:   

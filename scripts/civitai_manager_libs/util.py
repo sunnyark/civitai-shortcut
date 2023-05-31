@@ -128,7 +128,7 @@ def update_url(url, param_name, new_value):
 
     return updated_url
 
-def add_number_to_duplicate_files(filenames):    
+def add_number_to_duplicate_files(filenames)->dict:
     counts = {}
     for i, filename in enumerate(filenames):        
         if filename in counts:
@@ -137,6 +137,16 @@ def add_number_to_duplicate_files(filenames):
             filenames[i] = f"{name} ({counts[filename]}){ext}"
         else:
             counts[filename] = 0
+            
+    # 굳이 안해도 dict가 되네???? 
+    # result = dict()
+    # if filenames:
+    #     for filename in filenames:
+    #         file = filename[filename.lfind(':') + 1:]
+    #         id = filename[:filename.lfind(':')]
+    #         result[str(id)] = file
+    #     return result
+            
     return filenames
     
 def open_folder(path):

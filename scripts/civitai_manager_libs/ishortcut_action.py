@@ -24,8 +24,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
                     open_image_folder = gr.Button(value="Open Download Image Folder") 
-                    change_preview_image = gr.Button(value="Change preview to selected image", variant="primary", visible=False)
                     change_thumbnail_image = gr.Button(value="Change thumbnail to selected image", variant="primary", visible=True)
+                    change_preview_image = gr.Button(value="Change preview to selected image", variant="primary", visible=False)                    
             with gr.TabItem("Description" , id="Model_Description"):                             
                 description_html = gr.HTML()       
             with gr.TabItem("Download" , id="Model_Download"): 
@@ -38,11 +38,27 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         type="array",
                     )
                 filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
-                cs_foldername = gr.Dropdown(label='Select the Model folder to download the model.',  info="Can select a classification defined by the user or create a new one as the folder to download the model." , multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
-                ms_foldername = gr.Textbox(label="Model folder name to be created", info="Create a folder with the model name or the desired name specified by the user." , value="", interactive=True, lines=1, visible=True).style(container=True)
-                    
-                vs_folder = gr.Checkbox(label="Create separate independent folders for each version under the generated model folder.", value=False, visible=True , interactive=True)
-                vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+                
+                with gr.Accordion(label='Change File Name', open=True, visible=False) as change_filename:     
+                    with gr.Row():                
+                        with gr.Column(scale=4):
+                            select_filename = gr.Textbox(label='Please enter the file name you want to change.', interactive=True, visible=True)
+                            # select_filename = gr.Textbox(label='Change filename',show_label=False, info="Please enter the file name you want to change, and then press Enter.", interactive=True, visible=True)
+                        with gr.Column(scale=1):
+                            select_fileid = gr.Textbox(label='The ID of the selected file.', interactive=False, visible=True)
+                            # select_fileid = gr.Textbox(label='fileid', show_label=False, info="The ID of the selected file.", interactive=False, visible=True)
+                    with gr.Row():
+                        close_filename_btn = gr.Button(value="Cancel", visible=True)
+                        change_filename_btn = gr.Button(value="Change file name", variant="primary", visible=True)
+                
+                with gr.Accordion(label='Select Download Folder', open=True, visible=True):     
+                    cs_foldername = gr.Dropdown(label='Can select a classification defined by the user or create a new one as the folder to download the model.', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                    ms_foldername = gr.Textbox(label="Model folder name to be created", value="", interactive=True, lines=1, visible=True).style(container=True)
+                    # cs_foldername = gr.Dropdown(label='Select or Create a model folder to download.',  info="Can select a classification defined by the user or create a new one as the folder to download the model." , multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
+                    # ms_foldername = gr.Textbox(label="Model folder name to be created", info="The user can specify the desired name to be used as the folder name for the model that will be created." , value="", interactive=True, lines=1, visible=True).style(container=True)
+                        
+                    vs_folder = gr.Checkbox(label="Create separate independent folders for each version under the generated model folder.", value=False, visible=True , interactive=True)
+                    vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
 
                 download_model = gr.Button(value="Download", variant="primary")
                 gr.Markdown("Downloading may take some time. Check console log for detail")     
@@ -119,7 +135,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
         outputs=[
             downloadable_files,
             filename_list,
-        ]
+            #==============
+            select_fileid,
+            select_filename,
+            change_filename
+        ],
+        show_progress=False
     ) 
 
     cs_foldername.select(    
@@ -236,7 +257,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             vs_folder,
             vs_foldername,            
             cs_foldername,
-            ms_foldername
+            ms_foldername,
+            change_filename
         ],
         cancels=gallery 
     )
@@ -268,7 +290,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             vs_folder,
             vs_foldername,            
             cs_foldername,
-            ms_foldername
+            ms_foldername,
+            change_filename
         ],
         cancels=gallery
     )    
@@ -301,7 +324,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             vs_folder,
             vs_foldername,            
             cs_foldername,
-            ms_foldername
+            ms_foldername,
+            change_filename
         ],
         cancels=gallery
     )
@@ -314,6 +338,43 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
     change_preview_image.click(on_change_preview_image_click,[selected_model_id,selected_version_id,img_index,saved_images],None)
     change_thumbnail_image.click(on_change_thumbnail_image_click,[selected_model_id,img_index,saved_images],[refresh_sc_list])
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
+    
+    
+    select_filename.submit(
+        fn=on_change_filename_submit,
+        inputs=[
+            select_fileid,
+            select_filename,            
+            downloadable_files,
+            filename_list,            
+        ],
+        outputs=[
+            select_filename,
+            downloadable_files,
+            filename_list,
+            change_filename            
+        ],
+        show_progress=False
+    )
+    
+    change_filename_btn.click(
+        fn=on_change_filename_submit,
+        inputs=[
+            select_fileid,
+            select_filename,            
+            downloadable_files,
+            filename_list,            
+        ],
+        outputs=[
+            select_filename,
+            downloadable_files,
+            filename_list,
+            change_filename            
+        ],
+        show_progress=False
+    )
+    
+    close_filename_btn.click(lambda :gr.update(visible=False),None,change_filename,show_progress=False)
     
     return refresh_information
 
@@ -332,7 +393,33 @@ def on_open_image_folder_click(modelid):
             image_folder = util.get_download_image_folder(model_name)
             if image_folder:
                 util.open_folder(image_folder)
+
+def on_change_filename_submit(select_fileid, select_filename, df, filenames):
+    
+    if not select_fileid or not select_filename or len(select_filename.strip()) <= 0:
+        return gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)
+    
+    select_filename = util.replace_filename(select_filename.strip())
+    filelist = []
+    
+    if df:
+        for df_row in df:
+            
+            if str(select_fileid) == str(df_row[1]):
+                df_row[2] = select_filename
                 
+            vid = df_row[1]
+            vname = df_row[2]
+            dn_name = f"{vid}:{vname}"
+            filelist.append(dn_name)
+            
+    if filenames and select_fileid and select_filename:
+        for i, filename in enumerate(filenames): 
+            if filename.startswith(f"{select_fileid}:"):
+                filenames[i] = f"{select_fileid}:{select_filename}"
+        
+    return gr.update(visible=True), df, gr.update(choices=filelist, value=filenames), gr.update(visible=False)
+
 def on_downloadable_files_select(evt: gr.SelectData, df, filenames):
     # util.printD(evt.index)
     # index[0] # 행,열
@@ -340,24 +427,40 @@ def on_downloadable_files_select(evt: gr.SelectData, df, filenames):
     vname = None
     dn_name = None
     
-    if df:
-        vid = df[evt.index[0]][1]
-        vname = df[evt.index[0]][2]
-        dn_name = f"{vid}:{vname}"
+    row = evt.index[0]
+    col = evt.index[1]
+    
+    # util.printD(f"row : {row} ,col : {col}")
+    if col == 0:
+        # 파일 선택    
+        if df:
+            vid = df[row][1]
+            vname = df[row][2]
+            dn_name = f"{vid}:{vname}"
 
-    if vid:        
-        if filenames:
-            if dn_name in filenames:
-                filenames.remove(dn_name)
-                df[evt.index[0]][0] = '⬜️'
+        if vid:        
+            if filenames:
+                if dn_name in filenames:
+                    filenames.remove(dn_name)
+                    df[row][0] = '⬜️'
+                else:
+                    filenames.append(dn_name)
+                    df[row][0] = '✅'
             else:
-                filenames.append(dn_name)
-                df[evt.index[0]][0] = '✅'
-        else:
-            filenames = [dn_name]    
-            df[evt.index[0]][0] = '✅'
-
-    return df, gr.update(value=filenames)
+                filenames = [dn_name]    
+                df[row][0] = '✅'
+        
+        return df, gr.update(value=filenames), gr.update(visible=True), gr.update(visible=True), gr.update(visible=False)   
+    
+    elif col == 2:
+        # 파일 명 변경
+        if df:
+            vid = df[row][1]
+            vname = df[row][2]
+            
+        return gr.update(visible=True), gr.update(visible=False), gr.update(value=vid), gr.update(value=vname), gr.update(visible=True)
+        
+    return df, gr.update(value=filenames), gr.update(visible=True), gr.update(visible=True), gr.update(visible=False)
 
 def on_download_images_click(model_id:str, images_url):
     msg = None
@@ -404,9 +507,6 @@ def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_folde
         
         return gr.update(value=current_time),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview)
     return gr.update(visible=True),gr.update(visible=False),gr.update(value=None),gr.update(visible=False),gr.update(visible=False)
-            
-    #     return gr.update(value=current_time),gr.update(value=current_time)    
-    # return gr.update(visible=True),gr.update(visible=True)
 
 def on_cs_foldername_select(evt: gr.SelectData, is_vsfolder):
     if evt.value == setting.CREATE_MODEL_FOLDER:
@@ -451,25 +551,54 @@ def on_change_preview_image_click(mid,vid,img_idx:int,civitai_images):
             
             if not os.path.isfile(selected_image_filepath):
                 return
+
+            #=====================================================
+            infopath = model.get_default_version_infopath(vid)
+                        
+            if not infopath:
+                util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
+                return 
             
-            path = model.get_default_version_folder(vid)
-            if not path:
+            path , infofile = os.path.split(infopath)
+
+            if not path or not os.path.isdir(path):
+                util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
+                return
+                        
+            if not f"{setting.info_suffix}{setting.info_ext}" in infofile:
                 util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
                 return
             
-            if not os.path.isdir(path):
+            savefile_base = infofile[:infofile.rfind(f"{setting.info_suffix}{setting.info_ext}")]
+            
+            if not savefile_base:
                 util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
                 return
-            
-            version_info = ishortcut.get_version_info(mid,vid)
-            if not version_info:
-                util.printD("The model information does not exist.")
-                return
-            
-            savefile_base = downloader.get_save_base_name(version_info)
+
             preview_img_filepath = os.path.join(path, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
             
             shutil.copy(selected_image_filepath, preview_img_filepath)
+            #========================================================
+            # path = model.get_default_version_folder(vid)
+                
+            # if not path:
+            #     util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
+            #     return
+            
+            # if not os.path.isdir(path):
+            #     util.printD("The selected version of the model has not been downloaded. The model must be downloaded first.")
+            #     return
+            
+            # version_info = ishortcut.get_version_info(mid,vid)
+            # if not version_info:
+            #     util.printD("The model information does not exist.")
+            #     return
+            
+            # savefile_base = downloader.get_save_base_name(version_info)
+            # preview_img_filepath = os.path.join(path, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
+            
+            # shutil.copy(selected_image_filepath, preview_img_filepath)
+            #=========================================================
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index], gr.update(selected="Image_Information")
@@ -598,7 +727,8 @@ def load_saved_model(modelid=None, ver_index=None):
                 gr.update(choices=classification.get_list(), value=classification_list, interactive=True),\
                 gr.update(value=is_vsfolder, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False), gr.update(value=vs_foldername, visible=is_vsfolder),\
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=cs_foldername),\
-                gr.update(value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False)
+                gr.update(value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False),\
+                gr.update(visible=False)
 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
@@ -611,7 +741,8 @@ def load_saved_model(modelid=None, ver_index=None):
         gr.update(choices=classification.get_list(),value=[], interactive=True),\
         gr.update(value=False, visible=True),gr.update(value="",visible=False),\
         gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER),\
-        gr.update(value="")
+        gr.update(value=""),\
+        gr.update(visible=False)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.

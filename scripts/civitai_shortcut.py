@@ -9,6 +9,7 @@ from scripts.civitai_manager_libs import setting
 from scripts.civitai_manager_libs import classification_action
 from scripts.civitai_manager_libs import civitai_shortcut_action
 from scripts.civitai_manager_libs import setting_action
+from scripts.civitai_manager_libs import scan_action
 from scripts.civitai_manager_libs import util
 
 import threading
@@ -29,12 +30,17 @@ def on_civitai_tabs_select(evt: gr.SelectData):
         
     return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
 
-def on_civitai_manage_tabs_select(evt: gr.SelectData):
-    if evt.index == 0:
-        current_time = datetime.datetime.now() 
-        return current_time
+# def on_civitai_assistance_tabs_select(evt: gr.SelectData):
+#     if evt.index == 0:
+#         current_time = datetime.datetime.now() 
+#         return current_time
+#     return gr.update(visible=True)
 
-    return gr.update(visible=True)
+# def on_civitai_manage_tabs_select(evt: gr.SelectData):
+#     if evt.index == 0:
+#         current_time = datetime.datetime.now() 
+#         return current_time
+#     return gr.update(visible=True)
 
 # def readmarkdown():
 
@@ -47,7 +53,6 @@ def on_civitai_manage_tabs_select(evt: gr.SelectData):
 #     except Exception as e:    
 #         util.printD(e)        
 #         return
-            
 #     return markdown_text
                    
 def civitai_shortcut_ui():
@@ -69,20 +74,10 @@ def civitai_shortcut_ui():
                         refresh_classification = classification_action.on_ui()     
                 with gr.TabItem("Scan and Update Models"):
                     with gr.Row():
-                        setting_action.on_scan_ui()
-                                                           
-                # with gr.TabItem("Prompt Recipe" , id="Recipe"):
-                #     with gr.Row():
-                #         refresh_recipe = recipe_action.on_ui(recipe_input, civitai_tabs, civitai_assistance_tabs)
+                        scan_action.on_scan_ui()
      
         with gr.TabItem("Manage" , id="Manage"):
             with gr.Tabs() as civitai_manage_tabs:        
-                # with gr.TabItem("Classification"):
-                #     with gr.Row():
-                #         refresh_classification = classification_action.on_ui()
-                # with gr.TabItem("Scan and Update Models"):
-                #     with gr.Row():
-                #         setting_action.on_scan_ui()
                 with gr.TabItem("Setting"):
                     with gr.Row():
                         refresh_setting = setting_action.on_setting_ui()
@@ -94,14 +89,20 @@ def civitai_shortcut_ui():
     civitai_tabs.select(
         fn=on_civitai_tabs_select,
         inputs=None,        
-        outputs=[refresh_shortcut, refresh_information , refresh_classification, refresh_setting]        
+        outputs=[refresh_shortcut, refresh_information , refresh_classification, refresh_setting]
     )
     
-    civitai_manage_tabs.select(
-        fn=on_civitai_manage_tabs_select,
-        inputs=None,
-        outputs=[refresh_classification]        
-    )
+    # civitai_assistance_tabs.select(
+    #     fn=on_civitai_assistance_tabs_select,
+    #     inputs=None,
+    #     outputs=[refresh_classification]        
+    # )
+    
+    # civitai_manage_tabs.select(
+    #     fn=on_civitai_manage_tabs_select,
+    #     inputs=None,
+    #     outputs=[refresh_setting]        
+    # )    
         
 def update_all_shortcut_informations():
     preISC = ishortcut.load()                           
@@ -130,12 +131,12 @@ def init_civitai_shortcut():
 
     if setting.shortcut_update_when_start:        
         update_all_shortcut_informations_thread()
-                      
+
 def on_ui_tabs():
     # init
     init_civitai_shortcut()
     
-    # with gr.Blocks(analytics_enabled=False) as civitai_shortcut:
+    # with gr.Blocks(analytics_enabled=False) as civitai_shortcut:    
     with gr.Blocks() as civitai_shortcut:
         civitai_shortcut_ui()
         

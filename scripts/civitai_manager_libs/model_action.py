@@ -163,12 +163,12 @@ def on_load_model(modelid=None):
     data_list = list()
     
     if modelid:
+        model.update_downloaded_model()
         title_name, data_list = get_model_information(modelid) 
                
     return gr.update(label=title_name), gr.update(value=data_list), gr.update(label=None, visible=False), None, None, None
         
 def get_model_information(modelid:str=None):
-
     if modelid:        
         # model_info = civitai.get_model_info(modelid)
         model_info = ishortcut.get_model_info(modelid)

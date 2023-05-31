@@ -90,7 +90,7 @@ def on_ui(recipe_input, civitai_tabs):
                 recipe_list = gr.Dropdown(label="Prompt Recipe List", choices=[setting.NEWRECIPE] + recipe.get_list(), value=setting.NEWRECIPE, interactive=True, multiselect=None)
                 recipe_drop_image = gr.Image(type="pil", label="Drop image").style(height='100%')                       
 
-    with gr.Column(scale=setting.shortcut_browser_screen_split_ratio_max):       
+    with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):       
         with gr.Accordion(label=setting.NEWRECIPE, open=True) as recipe_title_name: 
             with gr.Row():
                 with gr.Column(scale=5):

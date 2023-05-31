@@ -24,7 +24,7 @@ def on_ui():
             with gr.TabItem("Shortcut Items"):
                     sc_gallery, refresh_sc_browser, refresh_sc_gallery = sc_browser_page.on_ui()
 
-    with gr.Column(scale=setting.shortcut_browser_screen_split_ratio_max):  
+    with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):  
         with gr.Accordion(label=setting.PLACEHOLDER, open=True) as classification_title_name: 
             classification_save_shortcut_btn = gr.Button(value="Save Classification Shortcuts", variant="primary")
             with gr.Row():
@@ -57,8 +57,10 @@ def on_ui():
             classification_name,
             classification_info,
             refresh_sc_browser,
-            classification_title_name
-        ]
+            classification_title_name,
+            refresh_gallery
+        ],
+        show_progress=False
     )
     
     refresh_gallery.change(
@@ -68,7 +70,8 @@ def on_ui():
         ],
         outputs=[
             classification_gallery
-        ]
+        ],
+        show_progress=False
     )
 
     sc_gallery.select(
@@ -221,8 +224,8 @@ def on_refresh_classification_change(select_name):
     if select_name != setting.NEWCLASSIFICATION:
         info = classification.get_classification_info(select_name)
         
-        return gr.update(value=select_name), gr.update(value=info), current_time, gr.update(label=select_name)
-    return gr.update(value=""), gr.update(value=""), current_time, gr.update(label=setting.NEWCLASSIFICATION)
+        return gr.update(value=select_name), gr.update(value=info), current_time, gr.update(label=select_name), current_time
+    return gr.update(value=""), gr.update(value=""), current_time, gr.update(label=setting.NEWCLASSIFICATION), gr.update(visible=True)
 
 def on_sc_gallery_select(evt: gr.SelectData, Classification_name , shortcuts):
     sc_reload = setting.classification_preview_mode_disable

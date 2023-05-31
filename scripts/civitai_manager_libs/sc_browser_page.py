@@ -110,7 +110,7 @@ def on_ui():
         refresh_sc_gallery = gr.Textbox()
         sc_gallery_result = gr.State(thumb_list)
     
-    refresh_sc_gallery.change(lambda x:x, sc_gallery_result, sc_gallery)
+    refresh_sc_gallery.change(lambda x:x, sc_gallery_result, sc_gallery, show_progress=False)
 
     sc_gallery_page.release(
         fn = on_sc_gallery_page,
@@ -139,7 +139,8 @@ def on_ui():
             sc_classification_list,
             sc_gallery_page,
             sc_gallery_result
-        ]
+        ],
+        show_progress=False
     )
     
     shortcut_type.change(

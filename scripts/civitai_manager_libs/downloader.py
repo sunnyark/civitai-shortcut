@@ -38,11 +38,9 @@ def get_save_base_name(version_info):
         base, ext = os.path.splitext(primary_file['name'])   
     return base
     
-def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername, ms_foldername):               
-    # if not file_name:
-    #     return
-
-    if not version_id:
+def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldername, cs_foldername, ms_foldername):
+                
+    if not file_name or not version_id:
         return
     
     version_info = civitai.get_version_info_by_version_id(version_id)
@@ -55,29 +53,53 @@ def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldern
     if not download_files:
         return
 
-    # model_folder = util.make_version_folder(version_info, vs_folder, vs_foldername, ms_foldername)
     model_folder = util.make_download_model_folder(version_info, ms_folder, vs_folder, vs_foldername, cs_foldername, ms_foldername)
     
     if not model_folder:
         return
 
-    if file_name:
-        dup_names = add_number_to_duplicate_files(file_name)
-        
-        for fid, file in dup_names.items():                    
-            try:
-                #모델 파일 저장
-                path_dl_file = os.path.join(model_folder, file)            
-                thread = threading.Thread(target=download_file,args=(download_files[str(fid)]['downloadUrl'], path_dl_file))
-                # Start the thread
-                thread.start()                
-            except Exception as e:
-                util.printD(e)
-                pass
-            
+    savefile_base = None
+    
+    # version_info 에서 파일부분을 가져온다.
+    # 파일명이 변경되었을때 정보를 수정한다.
+    if "files" in version_info:    
+        info_files = version_info["files"]
+    
+    dup_names = add_number_to_duplicate_files(file_name)
+    
+    for fid, file in dup_names.items():                    
+        try:
+            #모델 파일 저장
+            path_dl_file = os.path.join(model_folder, file)            
+            thread = threading.Thread(target=download_file,args=(download_files[str(fid)]['downloadUrl'], path_dl_file))
+            thread.start()                
+
+            # 파일 아이디에 해당하는 파일명을 변경한다.
+            # 실제 다운 로드 되는 파일명으로 변경한다.
+            # 베이스 파일명도 얻어온다.
+            if not info_files:
+                continue
+
+            for info_file in info_files:
+                if str(info_file['id']) == str(fid):
+                    info_file['name'] = file
+
+                    if savefile_base:
+                        continue
+
+                    if 'primary' in info_file.keys():
+                        if info_file['primary']:
+                            savefile_base , ext = os.path.splitext(file)
+
+        except Exception as e:
+            util.printD(e)
+            pass        
+
     # 저장할 파일명을 생성한다.
-    savefile_base = get_save_base_name(version_info)
-                                
+    # 지정한 파일이 없다면 기본 정보에서 생성한다.
+    if not savefile_base:
+        savefile_base = get_save_base_name(version_info)
+        
     path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
     info_file = civitai.write_version_info(path_file, version_info)
     if info_file:
@@ -87,11 +109,6 @@ def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldern
     preview_file = download_preview_image(path_img, version_info)
     if preview_file:
          util.printD(f"Wrote preview image : {path_img}")
-        
-    # path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.triger_suffix}{setting.triger_ext}")
-    # triger_file = civitai.write_triger_words_by_version_info(path_file, version_info)
-    # if triger_file:
-    #      util.printD(f"Wrote triger words : {path_file}")
 
     return f"Download started"
 

@@ -435,6 +435,7 @@ def create_thumbnail(model_id, input_image_path):
         return False    
     
     thumbnail_path = os.path.join(setting.shortcut_thumbnail_folder, f"{model_id}{setting.preview_image_ext}")
+    # shutil.copy(input_image_path, thumbnail_path)
     try:
         with Image.open(input_image_path) as image:
             image.thumbnail(thumbnail_max_size)
