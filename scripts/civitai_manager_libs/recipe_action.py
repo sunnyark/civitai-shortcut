@@ -53,8 +53,9 @@ def on_ui(recipe_input, civitai_tabs):
                             recipe_delete_btn = gr.Button(value="Delete", variant="primary")                        
                 with gr.Column(scale=2):
                     gr.Markdown("###")
-                    recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image").style(height='100%')        
+                    recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image").style(height='100%')
                     gr.Markdown("This image does not influence the prompt on the left. You can choose any image that matches the created prompt.")
+                    # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
                 
     with gr.Row(visible=False):
         refresh_recipe = gr.Textbox()
@@ -81,8 +82,20 @@ def on_ui(recipe_input, civitai_tabs):
     # drop image -> recipe_drop_image.upload(drop image) : reciep image, call recipe_generate_data(drop image) -> recipe_generate_data: img info 생성 ,분석, 갱신
     # drop image.upload 만쓰이고 change는 안쓰임
     
-    recipe_drop_image_upload = recipe_drop_image.upload(on_recipe_drop_image_upload,[recipe_drop_image],[recipe_generate_data,recipe_image],show_progress=False)
+    # 이미지를 드롭할때는 현재 레시피 상태에서 정보만 갱신한다.
+    recipe_drop_image_upload = recipe_drop_image.upload(
+        fn=on_recipe_drop_image_upload,
+        inputs=[
+            recipe_drop_image
+        ],
+        outputs=[
+            recipe_generate_data,
+            recipe_image,  
+        ],
+        show_progress=False
+    )
     
+    # shortcut information 에서 넘어올때는 새로운 레시피를 만든다.
     recipe_input.change(
         fn=on_recipe_input_change,
         inputs=[
@@ -93,31 +106,53 @@ def on_ui(recipe_input, civitai_tabs):
             recipe_image,
             recipe_generate_data,
             recipe_input,
-            civitai_tabs      
+            civitai_tabs,
+
+            # 새 레시피 상태로 만든다.
+            recipe_list,
+            recipe_name,
+            recipe_desc,
+            recipe_classification,
+            recipe_title_name,
+            recipe_create_btn,
+            recipe_update_btn                    
         ],
         cancels=recipe_drop_image_upload
     )  
    
+    # recipe_generate_data.change(
+    #     fn=on_recipe_generate_data_change,
+    #     inputs=[
+    #         recipe_drop_image
+    #     ],
+    #     outputs=[
+    #         recipe_prompt,
+    #         recipe_negative,                        
+    #         recipe_option,
+    #         recipe_output,        
+    #         recipe_list,
+    #         recipe_name,
+    #         recipe_desc,
+    #         recipe_classification,
+    #         recipe_title_name,
+    #         recipe_create_btn,
+    #         recipe_update_btn
+    #     ]
+    # )   
+
     recipe_generate_data.change(
         fn=on_recipe_generate_data_change,
         inputs=[
             recipe_drop_image
         ],
         outputs=[
-            recipe_list,
-            recipe_name,
-            recipe_desc,
             recipe_prompt,
             recipe_negative,                        
             recipe_option,
             recipe_output,
-            recipe_classification,
-            recipe_title_name,
-            recipe_create_btn,
-            recipe_update_btn
         ]
-    )   
-          
+    ) 
+              
     refresh_recipe.change(
         fn=on_refresh_recipe_change,
         inputs=recipe_list,
@@ -309,14 +344,40 @@ def get_recipe_information(select_name):
 def on_recipe_input_change(recipe_input):
     if recipe_input:
         current_time = datetime.datetime.now()
-        return recipe_input, recipe_input, current_time, None, gr.update(selected="Recipe")
-    return gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),gr.update(selected="Recipe")
+        return recipe_input, recipe_input, current_time, None, gr.update(selected="Recipe"),\
+            gr.update(value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), \
+            gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
+            gr.update(visible=True), gr.update(visible=False)            
+    
+    return gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),gr.update(selected="Recipe"),\
+        gr.update(visible=True), gr.update(value=""), gr.update(value=""), \
+        gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
+        gr.update(visible=True), gr.update(visible=False)
     
 def on_recipe_drop_image_upload(recipe_img):
     if recipe_img:
         current_time = datetime.datetime.now()
         return current_time, recipe_img
     return gr.update(visible=False),gr.update(visible=True)
+        
+# def on_recipe_generate_data_change(recipe_img):  
+#     generate_data = None  
+#     if recipe_img:
+#         info1,generate_data,info3 = modules.extras.run_pnginfo(recipe_img)
+        
+#     if generate_data:
+        
+#         positivePrompt, negativePrompt, options, gen_string = analyze_prompt(generate_data)
+            
+#         return gr.update(value=positivePrompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string),\
+#             gr.update(value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), \
+#             gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
+#             gr.update(visible=True), gr.update(visible=False)
+            
+#     return gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), \
+#         gr.update(visible=True), gr.update(value=""), gr.update(value=""), \
+#         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
+#         gr.update(visible=True), gr.update(visible=False)
 
 def on_recipe_generate_data_change(recipe_img):  
     generate_data = None  
@@ -327,16 +388,9 @@ def on_recipe_generate_data_change(recipe_img):
         
         positivePrompt, negativePrompt, options, gen_string = analyze_prompt(generate_data)
             
-        return gr.update(value=setting.NEWRECIPE), \
-            gr.update(value=""), gr.update(value=""), gr.update(value=positivePrompt), gr.update(value=negativePrompt), gr.update(value=options), \
-            gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
-            gr.update(visible=True), gr.update(visible=False)
-            
-    return gr.update(visible=True), \
-        gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), \
-        gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
-        gr.update(visible=True), gr.update(visible=False)
-
+        return gr.update(value=positivePrompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string)            
+    return gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value="")
+        
 def on_recipe_classification_list_change(recipe_classification):
     if recipe_classification and recipe_classification != setting.PLACEHOLDER:
         return gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(recipe_classification))

@@ -67,6 +67,9 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.5.4
+* The prompt recipe has been modified to update only the current state of the prompt content when dropping an image, without generating a new recipe.
+
 v 1.5.3
 * Added the ability to change the file name of the model file to be downloaded.
 * Change to allow selection only through checkboxes when choosing files.

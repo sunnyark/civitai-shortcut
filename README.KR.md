@@ -70,27 +70,35 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+
+v 1.5.4
+
+* 프롬프트 레시피에서 이미지를 drop할때 새 레시피가 생성되지 않고 현재 상태의 프롬프트 내용만 갱신되도록 변경
+
 v 1.5.3
+
 * 파일명을 변경할수 있게 수정
 * 파일 선택시 체크 박스를 통해서만 선택가능하게 변경
 * 파일명을 클릭하면 파일명을 변경할 수 있는 입력란이 나타납니다.
 * 파일 다운로드시 다운로드 파일이 없어도 인포와 프리뷰 이미지가 다운로드 되던 것을 못하게 변경
   파일명을 변경가능함에따라 혼동을 막기위함
 * Scan Models 의 검색조건을 변경하여 다운로드 파일이 여러개인 경우도 처리 하도록 변경
-* 썸네일의 이미지를 크기를 작게 수정 
+* 썸네일의 이미지를 크기를 작게 수정
   썸네일의 이미지를 변경 가능하게 수정
-* Shortcut Browser screen ratio 오류 수정 
+* Shortcut Browser screen ratio 오류 수정
 
 v 1.5.2
+
 * model download시 생성되는 폴더생성에 대한 설명추가/문구 변경.
 * Prompt Recipe 의 위치 변경 (Assistance -> Top level)
 * Scan and Update Models 의 위치변경 (Manage -> Assictance)
 
 v 1.5.1
+
 * preview 이미지의 변경 기능 추가 model imformation tab -> images : change preview image 버튼
   모델을 다운로드한 경우에만 버튼이 나타납니다.
 * 파일 다운로드시 create model folder 선택시 다운로드할 모델폴더명을 변경가능하게 변경.
-  다운로드된 모델의 경우 기본 표기되는 폴더이름이 다운로드된 폴더정보를 기본 정보로 표기되도록 변경. 모델이 중복 다운로드된 경우 부정확할수 있음. 
+  다운로드된 모델의 경우 기본 표기되는 폴더이름이 다운로드된 폴더정보를 기본 정보로 표기되도록 변경. 모델이 중복 다운로드된 경우 부정확할수 있음.
   Downloaded Model Information Tab에서 다운로드한 파일의 다운로드된 위치, 파일을 확인할수 있습니다.
 
 v 1.5
