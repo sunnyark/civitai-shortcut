@@ -11,68 +11,6 @@ from . import prompt
 # from . import prompt_ui
 
 from PIL import Image
-
-def generate_prompt(prompt, negativePrompt, Options):
-    meta_string = None
-    if prompt and len(prompt.strip()) > 0:
-        meta_string = f"""{prompt.strip()}""" + "\n"
-        
-    if negativePrompt and len(negativePrompt.strip()) > 0:
-        if meta_string:
-            meta_string = meta_string + f"""Negative prompt:{negativePrompt.strip()}""" + "\n"    
-        else:
-            meta_string = f"""Negative prompt:{negativePrompt.strip()}""" + "\n"    
-
-    if Options and len(Options.strip()) > 0:
-        if meta_string:
-            meta_string = meta_string + Options.strip()
-        else:
-            meta_string = Options.strip()
-        
-    return meta_string
-
-def get_recipe_information(select_name):
-    
-    generate = None
-    options = None
-    classification = None
-    gen_string = None
-    Prompt = None
-    negativePrompt = None
-    description = None
-    imagefile = None
-    
-    if select_name:
-        rc = recipe.get_recipe(select_name)
-            
-        if "generate" in rc:
-            generate = rc['generate']
-            if "options" in generate:
-                options = [f"{k}:{v}" for k, v in generate['options'].items()]
-                if options:
-                    options = ", ".join(options)
-            
-            if "prompt" in generate:
-                Prompt = generate['prompt']
-                
-            if "negativePrompt" in generate:
-                negativePrompt = generate['negativePrompt']
-                                
-            gen_string = generate_prompt(Prompt, negativePrompt, options)
-
-        if "image" in rc:
-            if rc['image']:
-                imagefile = os.path.join(setting.shortcut_recipe_folder,rc['image'])  
-            
-        if "description" in rc:
-            description = rc['description'] 
-            
-        if "classification" in rc:
-            classification = rc['classification']
-            if not classification or len(classification.strip()) == 0:
-                classification = setting.PLACEHOLDER      
-                                                        
-    return description, Prompt, negativePrompt, options, gen_string, classification, imagefile
     
 def on_ui(recipe_input, civitai_tabs):   
 
@@ -137,6 +75,13 @@ def on_ui(recipe_input, civitai_tabs):
             recipe_list
         ]
     )
+
+    # 이렇게 합시다.
+    # send to reciepe -> recipe_input : input drop image, reciep image, call recipe_generate_data(drop image) -> recipe_generate_data: img info 생성 ,분석, 갱신
+    # drop image -> recipe_drop_image.upload(drop image) : reciep image, call recipe_generate_data(drop image) -> recipe_generate_data: img info 생성 ,분석, 갱신
+    # drop image.upload 만쓰이고 change는 안쓰임
+    
+    recipe_drop_image_upload = recipe_drop_image.upload(on_recipe_drop_image_upload,[recipe_drop_image],[recipe_generate_data,recipe_image],show_progress=False)
     
     recipe_input.change(
         fn=on_recipe_input_change,
@@ -145,17 +90,18 @@ def on_ui(recipe_input, civitai_tabs):
         ],
         outputs=[
             recipe_drop_image,
+            recipe_image,
+            recipe_generate_data,
             recipe_input,
             civitai_tabs      
-        ]
+        ],
+        cancels=recipe_drop_image_upload
     )  
-        
-    recipe_drop_image.change(on_recipe_drop_image_change,[recipe_drop_image],[recipe_generate_data,recipe_image])
-    
+   
     recipe_generate_data.change(
         fn=on_recipe_generate_data_change,
         inputs=[
-            recipe_generate_data
+            recipe_drop_image
         ],
         outputs=[
             recipe_list,
@@ -169,9 +115,9 @@ def on_ui(recipe_input, civitai_tabs):
             recipe_title_name,
             recipe_create_btn,
             recipe_update_btn
-        ]        
+        ]
     )   
-    
+          
     refresh_recipe.change(
         fn=on_refresh_recipe_change,
         inputs=recipe_list,
@@ -207,7 +153,8 @@ def on_ui(recipe_input, civitai_tabs):
             recipe_drop_image,
             recipe_create_btn,
             recipe_update_btn            
-        ]          
+        ],
+        cancels=recipe_drop_image_upload
     )
 
     recipe_create_btn.click(
@@ -268,25 +215,14 @@ def on_ui(recipe_input, civitai_tabs):
         
     return refresh_recipe, recipe_input
 
-def on_recipe_input_change(recipe_input):
-    if recipe_input:
-        return recipe_input,None,gr.update(selected="Recipe")
-    return gr.update(visible=True),gr.update(visible=False),gr.update(selected="Recipe")
-    
-def on_recipe_drop_image_change(recipe_img):
-    if recipe_img:
-        info1,info2,info3 = modules.extras.run_pnginfo(recipe_img)
-        current_time = datetime.datetime.now()
-        return info2 if info2 else current_time, recipe_img
-    return gr.update(visible=True),gr.update(visible=True)
-
-def on_recipe_generate_data_change(generate_data):
+def analyze_prompt(generate_data):    
+    positivePrompt = None
+    negativePrompt = None
+    options = None
+    gen_string = None
+        
     if generate_data:
         generate = None
-        options = None
-        positivePrompt = None
-        negativePrompt = None
-        gen_string = None
         try:
             generate = prompt.parse_data(generate_data)
         except:
@@ -305,7 +241,92 @@ def on_recipe_generate_data_change(generate_data):
                 negativePrompt = generate['negativePrompt']
             
         gen_string = generate_prompt(positivePrompt,negativePrompt,options)
-                                        
+        
+    return positivePrompt, negativePrompt, options, gen_string
+        
+def generate_prompt(prompt, negativePrompt, Options):
+    meta_string = None
+    if prompt and len(prompt.strip()) > 0:
+        meta_string = f"""{prompt.strip()}""" + "\n"
+        
+    if negativePrompt and len(negativePrompt.strip()) > 0:
+        if meta_string:
+            meta_string = meta_string + f"""Negative prompt:{negativePrompt.strip()}""" + "\n"    
+        else:
+            meta_string = f"""Negative prompt:{negativePrompt.strip()}""" + "\n"    
+
+    if Options and len(Options.strip()) > 0:
+        if meta_string:
+            meta_string = meta_string + Options.strip()
+        else:
+            meta_string = Options.strip()
+        
+    return meta_string
+
+def get_recipe_information(select_name):
+    
+    generate = None
+    options = None
+    classification = None
+    gen_string = None
+    Prompt = None
+    negativePrompt = None
+    description = None
+    imagefile = None
+    
+    if select_name:
+        rc = recipe.get_recipe(select_name)
+            
+        if "generate" in rc:
+            generate = rc['generate']
+            if "options" in generate:
+                options = [f"{k}:{v}" for k, v in generate['options'].items()]
+                if options:
+                    options = ", ".join(options)
+            
+            if "prompt" in generate:
+                Prompt = generate['prompt']
+                
+            if "negativePrompt" in generate:
+                negativePrompt = generate['negativePrompt']
+                                
+            gen_string = generate_prompt(Prompt, negativePrompt, options)
+
+        if "image" in rc:
+            if rc['image']:
+                imagefile = os.path.join(setting.shortcut_recipe_folder,rc['image'])  
+            
+        if "description" in rc:
+            description = rc['description'] 
+            
+        if "classification" in rc:
+            classification = rc['classification']
+            if not classification or len(classification.strip()) == 0:
+                classification = setting.PLACEHOLDER      
+                                                        
+    return description, Prompt, negativePrompt, options, gen_string, classification, imagefile
+
+def on_recipe_input_change(recipe_input):
+    if recipe_input:
+        current_time = datetime.datetime.now()
+        return recipe_input, recipe_input, current_time, None, gr.update(selected="Recipe")
+    return gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),gr.update(selected="Recipe")
+    
+def on_recipe_drop_image_upload(recipe_img):
+    if recipe_img:
+        current_time = datetime.datetime.now()
+        return current_time, recipe_img
+    return gr.update(visible=False),gr.update(visible=True)
+
+def on_recipe_generate_data_change(recipe_img):  
+    generate_data = None  
+    if recipe_img:
+        info1,generate_data,info3 = modules.extras.run_pnginfo(recipe_img)
+        
+    if generate_data:
+        
+        positivePrompt, negativePrompt, options, gen_string = analyze_prompt(generate_data)
+            
         return gr.update(value=setting.NEWRECIPE), \
             gr.update(value=""), gr.update(value=""), gr.update(value=positivePrompt), gr.update(value=negativePrompt), gr.update(value=options), \
             gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
