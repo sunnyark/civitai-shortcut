@@ -71,8 +71,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                 civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)                   
                 with gr.Row():            
                     with gr.Column():
-                        with gr.Accordion("Classcification", open=True):
-                            model_classification = gr.Dropdown(label='Classcification', show_label=False ,multiselect=True, interactive=True, choices=classification.get_list())
+                        with gr.Accordion("Classification", open=True):
+                            model_classification = gr.Dropdown(label='Classification', show_label=False ,multiselect=True, interactive=True, choices=classification.get_list())
                             model_classification_update_btn = gr.Button(value="Update",variant="primary")
 
                         with gr.Accordion("Downloaded Version", open=True, visible=False) as downloaded_tab:                             
