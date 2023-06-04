@@ -43,10 +43,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                     with gr.Row():                
                         with gr.Column(scale=4):
                             select_filename = gr.Textbox(label='Please enter the file name you want to change.', interactive=True, visible=True)
-                            # select_filename = gr.Textbox(label='Change filename',show_label=False, info="Please enter the file name you want to change, and then press Enter.", interactive=True, visible=True)
                         with gr.Column(scale=1):
                             select_fileid = gr.Textbox(label='The ID of the selected file.', interactive=False, visible=True)
-                            # select_fileid = gr.Textbox(label='fileid', show_label=False, info="The ID of the selected file.", interactive=False, visible=True)
                     with gr.Row():
                         close_filename_btn = gr.Button(value="Cancel", visible=True)
                         change_filename_btn = gr.Button(value="Change file name", variant="primary", visible=True)
@@ -54,9 +52,8 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                 with gr.Accordion(label='Select Download Folder', open=True, visible=True):     
                     cs_foldername = gr.Dropdown(label='Can select a classification defined by the user or create a new one as the folder to download the model.', multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
                     ms_foldername = gr.Textbox(label="Model folder name to be created", value="", interactive=True, lines=1, visible=True).style(container=True)
-                    # cs_foldername = gr.Dropdown(label='Select or Create a model folder to download.',  info="Can select a classification defined by the user or create a new one as the folder to download the model." , multiselect=None, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
-                    # ms_foldername = gr.Textbox(label="Model folder name to be created", info="The user can specify the desired name to be used as the folder name for the model that will be created." , value="", interactive=True, lines=1, visible=True).style(container=True)
-                        
+                    # ms_foldername = gr.Dropdown(label='This is the name for the model folder to be created. You can either choose from the suggested names or enter your own.', multiselect=None, choices=None, value=None, interactive=True, allow_custom_value=True)
+
                     vs_folder = gr.Checkbox(label="Create separate independent folders for each version under the generated model folder.", value=False, visible=True , interactive=True)
                     vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
 
@@ -652,7 +649,7 @@ def load_saved_model(modelid=None, ver_index=None):
             ms_foldername = model_info['name']
             cs_foldername = setting.CREATE_MODEL_FOLDER
             is_vsfolder = False
-            
+                        
             try:
                 # 현재 다운로드된 폴더를 찾고 그 형식을 찾는다.
                 # 문제가 발생한다면 그냥 기본으로 내보낸다.
@@ -704,6 +701,20 @@ def load_saved_model(modelid=None, ver_index=None):
                 cs_foldername = setting.CREATE_MODEL_FOLDER
                 is_vsfolder = False
 
+            # 작성자와 tag를 이름으로 추천
+            propose_names = [ms_foldername]
+            
+            if "creator" in model_info.keys():
+                creator = model_info['creator']['username']
+                propose_names.append(creator)
+                
+            if "tags" in model_info.keys():
+                #혹시몰라서
+                tags = [tag for tag in model_info['tags']]
+                propose_names.extend(tags)
+            
+            # util.printD(propose_names)
+            
             if downloaded_versions:
                 downloaded_info = "\n".join(downloaded_versions.values())
                 
@@ -786,8 +797,8 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         
         vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)
                         
-        return model_info, versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta, vs_foldername
-    return None, None,None,None,None,None,None,None,None,None,None,None,None,None     
+        return model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta, vs_foldername
+    return None,None,None,None,None,None,None,None,None,None,None,None,None,None     
     
 def get_version_description_gallery(version_info):
     modelid = None
