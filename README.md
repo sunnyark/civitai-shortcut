@@ -69,6 +69,8 @@ Four folders and five JSON files will be created, each serving the following rol
 # Change Log
 v 1.5.4
 * The prompt recipe has been modified to update only the current state of the prompt content when dropping an image, without generating a new recipe.
+* Add a feature to suggest available names for the model download folder: The names will be listed in the order of model name, author, and model tag.
+* Correcting a typo
 
 v 1.5.3
 * Added the ability to change the file name of the model file to be downloaded.

@@ -212,7 +212,6 @@ def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
     model.update_downloaded_model()
 
     scan_list = list()
-    # shortlist =  sc_browser.get_thumbnail_list(sc_types,True)
     shortlist, thumb_totals, thumb_max_page =  sc_browser_page.get_thumbnail_list(sc_types,True)
     if shortlist:        
         for short in progress.tqdm(shortlist, desc="Scanning new version model"):
