@@ -1,28 +1,20 @@
 import gradio as gr
 import datetime
-import threading
-
-from . import util
 
 from . import model
 from . import civitai
 from . import setting
 from . import sc_browser_page
 
-from . import ishortcut
 from . import model_action
 from . import ishortcut_action
 from . import civitai_gallery_action
 
-def on_civitai_information_tabs_select(evt: gr.SelectData):
-    if evt.index == 2:
-        model.update_downloaded_model()
-
 def on_ui(recipe_input):
     with gr.Row(visible=False):       
-        refresh_shortcut = gr.Textbox()
         selected_model_id = gr.Textbox()
-                                
+        selected_information_tabs = gr.State(0)
+        
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs() as civitai_shortcut_tabs:
             with gr.TabItem("Upload"):
@@ -57,28 +49,26 @@ def on_ui(recipe_input):
             with gr.TabItem("User Gallery" , id="gallery_info"):
                 with gr.Row():
                     civitai_gallery_action.on_ui(selected_model_id, recipe_input)
+                    pass
 
             with gr.TabItem("Downloaded Model Information" , id="download_info"):
                 with gr.Row():
                     refresh_download_information = model_action.on_ui(selected_model_id)
                     
     # sc_gallery.select(on_sc_gallery_select, None,[selected_model_id])
-    sc_gallery.select(on_sc_gallery_select, None,[selected_model_id,sc_gallery,refresh_sc_gallery], show_progress=False)
+    sc_gallery.select(
+        fn=on_sc_gallery_select, 
+        inputs=selected_information_tabs ,
+        outputs=[selected_model_id],
+        show_progress=False
+    )
     
     sc_new_version_gallery.select(on_sc_new_version_gallery_select, None,[selected_model_id], show_progress=False)
 
     civitai_information_tabs.select(
         fn=on_civitai_information_tabs_select,
         inputs=None,        
-        outputs=None        
-    )
-    
-    refresh_shortcut.change(
-        fn=on_refresh_shortcut_change,
-        inputs=None,
-        outputs=[
-            refresh_sc_browser,
-        ]
+        outputs=[selected_information_tabs, refresh_download_information]
     )
     
     civitai_shortcut_tabs.select(
@@ -129,11 +119,7 @@ def on_ui(recipe_input):
         ]                
     )
     
-    return refresh_shortcut, refresh_civitai_information
-               
-def on_refresh_shortcut_change():
-    current_time = datetime.datetime.now()
-    return current_time
+    return refresh_sc_browser, refresh_civitai_information
 
 def on_civitai_shortcut_tabs_select(evt: gr.SelectData):
     if evt.index == 1:      
@@ -141,9 +127,15 @@ def on_civitai_shortcut_tabs_select(evt: gr.SelectData):
         return current_time
     return gr.update(visible=False)
 
+def on_civitai_information_tabs_select(evt: gr.SelectData):
+    current_time = datetime.datetime.now()
+    if evt.index == 2:
+        # return current_time if setting.changed_model_status else gr.update(visible=True)
+        pass
+    return gr.update(value=evt.index),gr.update(visible=True)
+
 ##### sc_gallery 함수 정의 #####
-def on_sc_gallery_select(evt : gr.SelectData):
-    sc_reload = False
+def on_sc_gallery_select(evt : gr.SelectData, selected_information_tabs):
     if evt.value:
         shortcut = evt.value 
         sc_model_id = setting.get_modelid_from_shortcutname(shortcut) #shortcut[0:shortcut.find(':')]      
@@ -151,17 +143,7 @@ def on_sc_gallery_select(evt : gr.SelectData):
         # 최신버전이 있으면 업데이트한다. 백그라운드에서 수행되므로 다음에 번에 반영된다.
         # update_shortcut_thread(sc_model_id)
         current_time = datetime.datetime.now()
-    return gr.update(value=sc_model_id), None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False)
-
-# def on_sc_gallery_select(evt : gr.SelectData):
-#     if evt.value:
-#         shortcut = evt.value 
-#         sc_model_id = setting.get_modelid_from_shortcutname(shortcut) #shortcut[0:shortcut.find(':')]      
-        
-#         # 최신버전이 있으면 업데이트한다. 백그라운드에서 수행되므로 다음에 번에 반영된다.
-#         # update_shortcut_thread(sc_model_id)
-                                
-#     return gr.update(value=sc_model_id)
+    return gr.update(value=sc_model_id)
 
 def on_sc_new_version_gallery_select(evt : gr.SelectData):
     if evt.value:

@@ -120,7 +120,7 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
             versions_list,
         ],
         cancels=gallery
-    ) 
+    )
 
     versions_list.select(
         fn=on_versions_list_select,
@@ -134,28 +134,6 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
         ],
         cancels=gallery
     )
- 
-    # refresh_information.select(
-    #     fn=on_refresh_information_change,
-    #     inputs=[
-    #         selected_model_id,
-    #         usergal_page_url
-    #     ],
-    #     outputs=[            
-    #         model_title_name,             
-    #         #usergal_page_url,
-    
-    #         refresh_gallery,
-    #         usergal_images_url,
-    #         usergal_images_meta,
-    #         page_slider,
-    #         usergal_page,
-    #         img_file_info,            
-       
-    #         versions_list 
-    #     ],
-    #     cancels=gallery
-    # )
     
     usergal_page_url.change(
         fn=on_usergal_page_url_change,

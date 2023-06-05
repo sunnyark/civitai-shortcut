@@ -126,9 +126,12 @@ def update_image(RecipeCollection:dict, recipe, image):
        
     if recipe not in RecipeCollection:
         return RecipeCollection
-    
+        
     try:        
         pre_image = RecipeCollection[recipe]['image']
+        if image == pre_image:
+            return RecipeCollection
+        
         recipe_imgfile = os.path.join(setting.shortcut_recipe_folder,pre_image)  
         if os.path.isfile(recipe_imgfile):
             os.remove(recipe_imgfile)

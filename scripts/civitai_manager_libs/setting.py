@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "V1.5.3"
+Extensions_Version = "V1.5.4"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -78,7 +78,6 @@ ui_typenames = {
 civitai_information_tab = 0
 usergal_information_tab = 1
 download_information_tab = 2
-
 
 # civitai helper 호환성
 info_ext = ".info"

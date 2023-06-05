@@ -20,15 +20,15 @@ from scripts.civitai_manager_libs import recipe_action
 def on_civitai_tabs_select(evt: gr.SelectData):
     current_time = datetime.datetime.now() 
     if evt.index == 0:
-        return current_time,gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
+        return current_time,gr.update(visible=False),gr.update(visible=False)
     elif evt.index == 1:            
-        gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)    
+        return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)    
     elif evt.index == 2:
-        return gr.update(visible=False),gr.update(visible=False),current_time,gr.update(visible=False)
+        return gr.update(visible=False),current_time,gr.update(visible=False)
     elif evt.index == 3:       
-        return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),current_time
+        return gr.update(visible=False),gr.update(visible=False),current_time
         
-    return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
+    return gr.update(visible=False),gr.update(visible=False),gr.update(visible=False)
 
 # def on_civitai_assistance_tabs_select(evt: gr.SelectData):
 #     if evt.index == 0:
@@ -61,7 +61,7 @@ def civitai_shortcut_ui():
             recipe_input = gr.Textbox()
         with gr.TabItem("Civitai Shortcut" , id="Shortcut"):                          
             with gr.Row():
-                refresh_shortcut , refresh_information  = civitai_shortcut_action.on_ui(recipe_input)
+                refresh_civitai_sc_browser, refresh_civitai_information = civitai_shortcut_action.on_ui(recipe_input)
 
         with gr.TabItem("Prompt Recipe" , id="Recipe"):
             with gr.Row():
@@ -89,7 +89,7 @@ def civitai_shortcut_ui():
     civitai_tabs.select(
         fn=on_civitai_tabs_select,
         inputs=None,        
-        outputs=[refresh_shortcut, refresh_information , refresh_classification, refresh_setting]
+        outputs=[refresh_civitai_sc_browser , refresh_classification, refresh_setting]
     )
     
     # civitai_assistance_tabs.select(
