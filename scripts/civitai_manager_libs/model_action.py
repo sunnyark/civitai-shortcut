@@ -88,7 +88,8 @@ def on_ui(selected_model_id:gr.Textbox):
             version_location,
             downloaded_files,
             version_info                        
-        ]
+        ],
+        show_progress=False        
     )
     
     download_openfolder.click(on_download_openfolder_click,[version_location],None)

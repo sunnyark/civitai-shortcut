@@ -13,7 +13,7 @@ from . import setting
 from . import classification
 from . import downloader
 
-def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_input):
+def on_ui(selected_model_id:gr.Textbox, refresh_sc_browser:gr.Textbox(), recipe_input):
     with gr.Column(scale=3):    
         with gr.Accordion("#", open=True) as model_title_name:               
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)             
@@ -37,6 +37,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                         interactive=False,
                         type="array",
                     )
+                gr.Markdown("When you click on the file name, an information window appears where you can change the file name.")
                 filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
                 
                 with gr.Accordion(label='Change File Name', open=True, visible=False) as change_filename:     
@@ -112,11 +113,20 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
         
         refresh_information = gr.Textbox()
         refresh_gallery = gr.Textbox()
+        
+        loaded_modelid = gr.Textbox()
+        
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
-    
+
+    # civitai_information_tabs.select(
+    #     fn=on_information_tabs_select,
+    #     inputs=None,        
+    #     outputs=None
+    # )
+        
     send_to_recipe.click(
         fn=on_send_to_recipe_click,
         inputs=[
@@ -167,7 +177,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             ms_foldername
         ],
         outputs=[
-            refresh_sc_list,
+            refresh_sc_browser,
             downloaded_tab,
             downloaded_info,
             saved_openfolder,
@@ -203,7 +213,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             selected_model_id
         ],
         outputs=[
-            refresh_sc_list
+            refresh_sc_browser
         ]
     )
         
@@ -214,7 +224,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             selected_model_id,
         ],
         outputs=[
-            refresh_sc_list
+            refresh_sc_browser
         ]
     )
     
@@ -225,13 +235,14 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
         ],
         outputs=[
             selected_model_id,
-            refresh_sc_list,
+            refresh_sc_browser,
             # 이건 진행 상황을 표시하게 하기 위해 넣어둔것이다.
             saved_gallery,
             refresh_information #information update 용
         ]
     )
         
+    
     selected_model_id.change(
         fn=on_load_saved_model,
         inputs=[
@@ -341,7 +352,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
     saved_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)  
     vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_foldername)
     change_preview_image.click(on_change_preview_image_click,[selected_model_id,selected_version_id,img_index,saved_images],None)
-    change_thumbnail_image.click(on_change_thumbnail_image_click,[selected_model_id,img_index,saved_images],[refresh_sc_list])
+    change_thumbnail_image.click(on_change_thumbnail_image_click,[selected_model_id,img_index,saved_images],[refresh_sc_browser])
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
     
     ms_suggestedname.select(lambda x:x,ms_suggestedname,ms_foldername,show_progress=False)
@@ -383,6 +394,12 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
     close_filename_btn.click(lambda :gr.update(visible=False),None,change_filename,show_progress=False)
     
     return refresh_information
+
+# def on_information_tabs_select(evt: gr.SelectData):
+#     current_time = datetime.datetime.now()
+#     if evt.index == setting.civitai_information_tab:      
+#         # util.printD("model_information selected")  
+#         pass
 
 def on_send_to_recipe_click(img_file_info, img_index, civitai_images):
     # return img_file_info

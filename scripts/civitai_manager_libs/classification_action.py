@@ -17,7 +17,7 @@ def on_ui():
                 classification_info = gr.Textbox(label="Description", value="",interactive=True, lines=3)
                 classification_create_btn = gr.Button(value="Create", variant="primary")
                 classification_update_btn = gr.Button(value="Update", variant="primary", visible=False)
-                # classification_reload_btn = gr.Button(value="Reload", variant="primary")                
+           
                 with gr.Accordion("Delete Classification", open=False): 
                     classification_delete_btn = gr.Button(value="Delete")    
 
@@ -36,20 +36,7 @@ def on_ui():
         classification_shortcuts = gr.State()
         refresh_gallery = gr.Textbox()
         refresh_classification = gr.Textbox()
-
-    # refresh_classification.change(
-    #     fn=on_refresh_classification_change,
-    #     inputs=classification_list,
-    #     outputs=[
-    #         classification_name,
-    #         classification_info,
-    #         classification_shortcuts,
-    #         refresh_gallery,                        
-    #         refresh_sc_browser,
-    #         classification_title_name
-    #     ]
-    # )
-                            
+                           
     refresh_classification.change(
         fn=on_refresh_classification_change,
         inputs=classification_list,
@@ -178,9 +165,6 @@ def on_ui():
             refresh_gallery
         ]
     )   
-
-    # classification_reload_shortcut_btn.click(lambda :datetime.datetime.now(),None,refresh_classification)   
-    # classification_reload_btn.click(lambda :datetime.datetime.now(),None,refresh_classification)
                         
     classification_list.select(    
         fn=on_classification_list_select,
@@ -207,17 +191,6 @@ def on_classification_reload_shortcut_btn_click(select_name):
         
         return shortcuts, current_time
     return None, gr.update(visible=False)
-
-# def on_refresh_classification_change(select_name):
-
-#     if select_name != setting.PLACEHOLDER:
-#         info = classification.get_classification_info(select_name)
-#         shortcuts = classification.get_classification_shortcuts(select_name)
-        
-#         current_time = datetime.datetime.now()
-        
-#         return gr.update(value=select_name), gr.update(value=info), shortcuts, current_time, current_time, gr.update(label=select_name)
-#     return gr.update(value=""), gr.update(value=""), None, gr.update(visible=False), gr.update(visible=False), gr.update(label=setting.PLACEHOLDER)
 
 def on_refresh_classification_change(select_name):
     current_time = datetime.datetime.now()
