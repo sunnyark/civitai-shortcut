@@ -56,7 +56,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
                             ms_foldername = gr.Textbox(label="Model folder name for the downloaded model. Please set it to the desired name.", value="", interactive=True, lines=1, visible=True).style(container=True)
                             # ms_foldername = gr.Dropdown(label='This is the name for the model folder to be created. You can either choose from the suggested names or enter your own.', multiselect=False, choices=None, value=None, interactive=True, allow_custom_value=True)
                         with gr.Column(scale=1):
-                            ms_proposename = gr.Dropdown(label='Propose names', multiselect=False, choices=None, value=None, interactive=True)                            
+                            ms_suggestedname = gr.Dropdown(label='Suggested names', multiselect=False, choices=None, value=None, interactive=True)                            
 
                     vs_folder = gr.Checkbox(label="Create separate independent folders for each version under the generated model folder.", value=False, visible=True , interactive=True)
                     vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
@@ -151,7 +151,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             vs_folder,
             vs_foldername,
             ms_foldername,
-            ms_proposename
+            ms_suggestedname
         ]          
     )
     
@@ -261,7 +261,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             cs_foldername,
             ms_foldername,
             change_filename,
-            ms_proposename            
+            ms_suggestedname            
         ],
         cancels=gallery 
     )
@@ -295,7 +295,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             cs_foldername,
             ms_foldername,
             change_filename,
-            ms_proposename            
+            ms_suggestedname            
         ],
         cancels=gallery
     )    
@@ -330,7 +330,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
             cs_foldername,
             ms_foldername,
             change_filename,
-            ms_proposename            
+            ms_suggestedname            
         ],
         cancels=gallery
     )
@@ -344,7 +344,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_list:gr.Textbox(), recipe_inp
     change_thumbnail_image.click(on_change_thumbnail_image_click,[selected_model_id,img_index,saved_images],[refresh_sc_list])
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
     
-    ms_proposename.select(lambda x:x,ms_proposename,ms_foldername,show_progress=False)
+    ms_suggestedname.select(lambda x:x,ms_suggestedname,ms_foldername,show_progress=False)
     
     select_filename.submit(
         fn=on_change_filename_submit,
@@ -711,18 +711,18 @@ def load_saved_model(modelid=None, ver_index=None):
                 is_vsfolder = False
 
             # 작성자와 tag를 이름으로 추천
-            propose_names = [ms_foldername]
+            suggested_names = [ms_foldername]
             
             if "creator" in model_info.keys():
                 creator = model_info['creator']['username']
-                propose_names.append(creator)
+                suggested_names.append(creator)
                 
             if "tags" in model_info.keys():
                 #혹시몰라서
                 tags = [tag for tag in model_info['tags']]
-                propose_names.extend(tags)
+                suggested_names.extend(tags)
             
-            # util.printD(propose_names)
+            # util.printD(suggested_names)
             
             if downloaded_versions:
                 downloaded_info = "\n".join(downloaded_versions.values())
@@ -749,7 +749,7 @@ def load_saved_model(modelid=None, ver_index=None):
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=cs_foldername),\
                 gr.update(value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False),\
                 gr.update(visible=False),\
-                gr.update(choices=propose_names, value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False)
+                gr.update(choices=suggested_names, value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False)
                 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
