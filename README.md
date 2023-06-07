@@ -67,30 +67,36 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+
 v 1.5.4
+
 * The prompt recipe has been modified to update only the current state of the prompt content when dropping an image, without generating a new recipe.
 * Add a feature to suggest available names for the model download folder: The names will be listed in the order of model name, author, and model tag.
 * Correcting a typo
+* When the shortcut is selected, the information will load only in the selected tab.
+* Modify to search for the model information used in the User Gallery screen from the downloaded model information. Retrieve only image information in real-time from the user gallery images on the Civitai website. (I expect a reduction in ASGI application errors)
 
 v 1.5.3
+
 * Added the ability to change the file name of the model file to be downloaded.
 * Change to allow selection only through checkboxes when choosing files.
 * When clicking on the file name, an input field appears to allow changing the file name.
 * Changed the behavior during file downloads to prevent the download of info and preview images when there is no download file available. This is done to avoid confusion with the ability to change the file name.
 * Changed the search criteria for Scan Models.
 * Modified the size of the thumbnail image to be smaller.
-Modified the thumbnail image to be changeable.
+  Modified the thumbnail image to be changeable.
 * Shortcut Browser screen ratio error fix
 
 v 1.5.2
+
 * Add description/modify the wording for folder creation during model download.
 * Change the position of Prompt Recipe (Assistance -> Top level)
 * Change the position of Scan and Update Models (Manage -> Assistance)
 
 v 1.5.1
+
 * Add the feature to change the preview image in the model information tab -> images: Change Preview Image button.
   The button will only appear if the model has been downloaded.
-
 * For downloaded models, update the default folder name displayed to be the downloaded folder information.
   There may be inaccuracies if the model is downloaded in more than one location.
   In the Downloaded Model Information Tab, you can view the downloaded location and files.

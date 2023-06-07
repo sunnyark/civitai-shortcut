@@ -13,7 +13,7 @@ from . import setting
 from . import classification
 from . import downloader
 
-def on_ui(selected_model_id:gr.Textbox, refresh_sc_browser:gr.Textbox(), recipe_input):
+def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     with gr.Column(scale=3):    
         with gr.Accordion("#", open=True) as model_title_name:               
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)             
@@ -99,7 +99,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_browser:gr.Textbox(), recipe_
                 shortcut_del_btn = gr.Button(value="Delete")                      
                             
     with gr.Row(visible=False): 
-        # selected_model_id = gr.Textbox()
+        selected_model_id = gr.Textbox()
         selected_version_id = gr.Textbox()
         
         # saved shortcut information  
@@ -120,13 +120,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_browser:gr.Textbox(), recipe_
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
-
-    # civitai_information_tabs.select(
-    #     fn=on_information_tabs_select,
-    #     inputs=None,        
-    #     outputs=None
-    # )
-        
+   
     send_to_recipe.click(
         fn=on_send_to_recipe_click,
         inputs=[
@@ -240,8 +234,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_browser:gr.Textbox(), recipe_
             saved_gallery,
             refresh_information #information update 용
         ]
-    )
-        
+    )       
     
     selected_model_id.change(
         fn=on_load_saved_model,
@@ -393,13 +386,7 @@ def on_ui(selected_model_id:gr.Textbox, refresh_sc_browser:gr.Textbox(), recipe_
     
     close_filename_btn.click(lambda :gr.update(visible=False),None,change_filename,show_progress=False)
     
-    return refresh_information
-
-# def on_information_tabs_select(evt: gr.SelectData):
-#     current_time = datetime.datetime.now()
-#     if evt.index == setting.civitai_information_tab:      
-#         # util.printD("model_information selected")  
-#         pass
+    return selected_model_id, refresh_information
 
 def on_send_to_recipe_click(img_file_info, img_index, civitai_images):
     # return img_file_info
