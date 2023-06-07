@@ -21,7 +21,6 @@ def on_ui(recipe_input, civitai_tabs):
     # aaa = "D:\\AI\\stable-diffusion-webui\\outputs\\download-images\\【Macross Delta】Freyja Wion Charecter LoRA（芙蕾雅·薇恩人物模組）\\images\\59749-651966.png"
     
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
-
         with gr.Tabs():
             with gr.TabItem("Prompt Recipe List"):
                 recipe_classification_list = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)
