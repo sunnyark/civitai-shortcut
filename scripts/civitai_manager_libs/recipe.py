@@ -19,6 +19,21 @@ def get_classifications():
         
     return classifications
 
+def is_classifications(classification):    
+    RecipeCollection = load()
+
+    if not RecipeCollection:        
+        return False
+    
+    try:
+        for v in RecipeCollection.values():
+            if v['classification'] == classification:
+                return True
+    except:
+        pass
+                
+    return False
+
 def update_recipe_image(recipe, image):
     if not recipe:
         return
