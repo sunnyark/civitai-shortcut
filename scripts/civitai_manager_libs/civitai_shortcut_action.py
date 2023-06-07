@@ -10,10 +10,12 @@ from . import model_action
 from . import ishortcut_action
 from . import civitai_gallery_action
 
-def on_ui(recipe_input):
+def on_ui(recipe_input):    
     with gr.Row(visible=False):       
-        selected_model_id = gr.Textbox()
-        selected_information_tabs = gr.State(0)
+        
+        sc_modelid = gr.Textbox()
+        update_informations = gr.Textbox()
+        current_information_tabs = gr.State(0)
         
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs() as civitai_shortcut_tabs:
@@ -44,37 +46,55 @@ def on_ui(recipe_input):
         with gr.Tabs() as civitai_information_tabs:
             with gr.TabItem("Model Information" , id="civitai_info"):
                 with gr.Row():
-                    refresh_civitai_information = ishortcut_action.on_ui(selected_model_id, refresh_sc_browser, recipe_input)
+                    shortcut_modelid, refresh_civitai_information = ishortcut_action.on_ui(refresh_sc_browser, recipe_input)
 
             with gr.TabItem("User Gallery" , id="gallery_info"):
                 with gr.Row():
-                    civitai_gallery_action.on_ui(selected_model_id, recipe_input)
-                    pass
+                    gallery_modelid = civitai_gallery_action.on_ui(recipe_input)
 
             with gr.TabItem("Downloaded Model Information" , id="download_info"):
                 with gr.Row():
-                    refresh_download_information = model_action.on_ui(selected_model_id)
-                    
-    # sc_gallery.select(on_sc_gallery_select, None,[selected_model_id])
-    sc_gallery.select(
-        fn=on_sc_gallery_select, 
-        inputs=selected_information_tabs ,
-        outputs=[selected_model_id],
-        show_progress=False
-    )
+                    downloadinfo_modelid , refresh_download_information = model_action.on_ui()
     
-    sc_new_version_gallery.select(on_sc_new_version_gallery_select, None,[selected_model_id], show_progress=False)
+    scan_new_version_btn.click(on_scan_new_version_btn,shortcut_new_version_type,sc_new_version_gallery)                
+    sc_gallery.select(on_sc_gallery_select, None, [sc_modelid], show_progress=False)    
+    sc_new_version_gallery.select(on_sc_gallery_select, None, [sc_modelid], show_progress=False)
+    update_modelfolder_btn.click(on_update_modelfolder_btn_click,None,refresh_sc_browser)
+    civitai_shortcut_tabs.select(on_civitai_shortcut_tabs_select,None,refresh_sc_browser)
+    
+    update_informations.change(
+        fn=on_sc_modelid_change,
+        inputs=[
+            sc_modelid, 
+            current_information_tabs
+        ],
+        outputs=[
+            shortcut_modelid, 
+            gallery_modelid, 
+            downloadinfo_modelid
+        ]
+    )
 
+    sc_modelid.change(
+        fn=on_sc_modelid_change,
+        inputs=[
+            sc_modelid, 
+            current_information_tabs
+        ],
+        outputs=[
+            shortcut_modelid, 
+            gallery_modelid, 
+            downloadinfo_modelid
+        ]
+    )
+        
     civitai_information_tabs.select(
         fn=on_civitai_information_tabs_select,
         inputs=None,        
-        outputs=[selected_information_tabs, refresh_download_information]
-    )
-    
-    civitai_shortcut_tabs.select(
-        fn=on_civitai_shortcut_tabs_select,
-        inputs=None,
-        outputs=refresh_sc_browser
+        outputs=[
+            current_information_tabs, 
+            update_informations
+        ]
     )
     
     civitai_internet_url.upload(
@@ -84,7 +104,7 @@ def on_ui(recipe_input):
             register_information_only,
         ],
         outputs=[
-            selected_model_id,
+            sc_modelid,
             refresh_sc_browser,
             civitai_internet_url
         ]
@@ -97,28 +117,12 @@ def on_ui(recipe_input):
             register_information_only,
         ],
         outputs=[
-            selected_model_id,
+            sc_modelid, 
             refresh_sc_browser,
             civitai_internet_url_txt
         ]        
     )
-       
-    update_modelfolder_btn.click(
-        fn=on_update_modelfolder_btn_click,
-        inputs=None,
-        outputs=refresh_sc_browser
-    )
 
-    scan_new_version_btn.click(
-        fn=on_scan_new_version_btn,
-        inputs=[
-            shortcut_new_version_type,
-        ],
-        outputs=[
-            sc_new_version_gallery,
-        ]                
-    )
-    
     return refresh_sc_browser, refresh_civitai_information
 
 def on_civitai_shortcut_tabs_select(evt: gr.SelectData):
@@ -128,32 +132,31 @@ def on_civitai_shortcut_tabs_select(evt: gr.SelectData):
     return gr.update(visible=False)
 
 def on_civitai_information_tabs_select(evt: gr.SelectData):
-    current_time = datetime.datetime.now()
-    if evt.index == 2:
-        # return current_time if setting.changed_model_status else gr.update(visible=True)
-        pass
-    return gr.update(value=evt.index),gr.update(visible=True)
+    current_time = datetime.datetime.now()  
+    return evt.index, current_time
 
 ##### sc_gallery 함수 정의 #####
-def on_sc_gallery_select(evt : gr.SelectData, selected_information_tabs):
+def on_sc_gallery_select(evt : gr.SelectData):
     if evt.value:
         shortcut = evt.value 
         sc_model_id = setting.get_modelid_from_shortcutname(shortcut) #shortcut[0:shortcut.find(':')]      
         
         # 최신버전이 있으면 업데이트한다. 백그라운드에서 수행되므로 다음에 번에 반영된다.
         # update_shortcut_thread(sc_model_id)
-        current_time = datetime.datetime.now()
-    return gr.update(value=sc_model_id)
+    return sc_model_id
 
-def on_sc_new_version_gallery_select(evt : gr.SelectData):
-    if evt.value:
-        shortcut = evt.value 
-        sc_model_id = setting.get_modelid_from_shortcutname(shortcut) #shortcut[0:shortcut.find(':')]      
-        
-        # 최신버전이 있으면 업데이트한다. 백그라운드에서 수행되므로 다음에 번에 반영된다.
-        # update_shortcut_thread(sc_model_id)
-                                
-    return gr.update(value=sc_model_id)
+def on_sc_modelid_change(sc_model_id, current_information_tabs):
+   
+    if current_information_tabs == setting.civitai_information_tab:
+        return sc_model_id, gr.update(visible=False), gr.update(visible=False)
+    
+    if current_information_tabs == setting.usergal_information_tab:
+        return gr.update(visible=False), sc_model_id, gr.update(visible=False)
+    
+    if current_information_tabs == setting.download_information_tab:
+        return gr.update(visible=False), gr.update(visible=False), sc_model_id
+    
+    return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
 
 def on_civitai_internet_url_upload(files, register_information_only, progress=gr.Progress()):       
     model_id = None    
@@ -165,9 +168,8 @@ def on_civitai_internet_url_upload(files, register_information_only, progress=gr
     current_time = datetime.datetime.now()
     
     if not model_id:
-        return gr.update(visible=False), gr.update(visible=False), None
-                
-    return gr.update(value=model_id), current_time, None
+        return gr.update(visible=False), gr.update(visible=False), None                
+    return model_id, current_time, None
 
 def on_civitai_internet_url_txt_upload(url, register_information_only, progress=gr.Progress()):       
     model_id = None    
@@ -180,9 +182,8 @@ def on_civitai_internet_url_txt_upload(url, register_information_only, progress=
     current_time = datetime.datetime.now()
     
     if not model_id:
-        return gr.update(visible=False), gr.update(visible=False), None
-                
-    return gr.update(value=model_id), current_time, None
+        return gr.update(visible=False), gr.update(visible=False), None                
+    return model_id, current_time, None
 
 def on_update_modelfolder_btn_click():
     model.update_downloaded_model()

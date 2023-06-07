@@ -12,9 +12,10 @@ from tqdm import tqdm
 from . import util
 from . import civitai
 from . import setting
+from . import ishortcut
 
-def on_ui(selected_model_id:gr.Textbox, recipe_input):
-           
+def on_ui(recipe_input):
+               
     with gr.Column(scale=3):                                                   
         with gr.Accordion("#", open=True) as model_title_name:            
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
@@ -45,9 +46,8 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
                         pass
                     send_to_recipe = gr.Button(value="Send To Recipe", variant="primary", visible=True)
                         
-    with gr.Row(visible=False):                                                           
-        
-        # selected_model_id = gr.Textbox()
+    with gr.Row(visible=False):
+        selected_model_id = gr.Textbox()
         
         # user gallery information  
         img_index = gr.Number(show_label=False)
@@ -70,13 +70,17 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
         refresh_gallery = gr.Textbox()
         
         # 미리 다음페이지를 로딩한다.
-        pre_loading = gr.Textbox()        
+        pre_loading = gr.Textbox()
                 
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden,img_file_info)
     except:
         pass            
-    
+            
+    usergal_gallery.select(on_gallery_select, usergal_images, [img_index, hidden, info_tabs])
+    hidden.change(on_civitai_hidden_change,[hidden,img_index,usergal_images_meta],[img_file_info])
+    open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
+        
     send_to_recipe.click(
         fn=on_send_to_recipe_click,
         inputs=[
@@ -107,35 +111,8 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
             pre_loading
         ]         
     ) 
-    
-    # civitai user gallery information start
-    selected_model_id.change(
-        fn=on_selected_model_id_change,
-        inputs=[
-            selected_model_id,
-        ],
-        outputs=[   
-            model_title_name,             
-            usergal_page_url,
-            versions_list,
-        ],
-        cancels=gallery
-    )
 
-    versions_list.select(
-        fn=on_versions_list_select,
-        inputs=[
-            selected_model_id,            
-        ],
-        outputs=[            
-            model_title_name,             
-            usergal_page_url,
-            versions_list 
-        ],
-        cancels=gallery
-    )
-    
-    usergal_page_url.change(
+    gallery_page = usergal_page_url.change(
         fn=on_usergal_page_url_change,
         inputs=[
             usergal_page_url,            
@@ -149,8 +126,35 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
             img_file_info,            
         ],
         cancels=gallery         
-    )    
-                
+    )   
+            
+    # civitai user gallery information start
+    selected_model_id.change(
+        fn=on_selected_model_id_change,
+        inputs=[
+            selected_model_id,
+        ],
+        outputs=[   
+            model_title_name,             
+            usergal_page_url,
+            versions_list,
+        ],
+        cancels=[gallery, gallery_page]
+    )
+
+    versions_list.select(
+        fn=on_versions_list_select,
+        inputs=[
+            selected_model_id,            
+        ],
+        outputs=[            
+            model_title_name,             
+            usergal_page_url,
+            versions_list 
+        ],
+        cancels=[gallery, gallery_page]
+    )
+
     pre_loading.change(
         fn=on_pre_loading_change,
         inputs=[
@@ -159,7 +163,7 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
         ],
         outputs=None
     )
-    
+                    
     first_btn.click(
         fn=on_first_btn_click,
         inputs=[
@@ -215,14 +219,10 @@ def on_ui(selected_model_id:gr.Textbox, recipe_input):
             usergal_page_url
         ]        
     )
-            
-    usergal_gallery.select(on_gallery_select, usergal_images, [img_index, hidden, info_tabs])
-    hidden.change(on_civitai_hidden_change,[hidden,img_index,usergal_images_meta],[img_file_info])
-
-    open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
+    
+    return selected_model_id
 
 def on_send_to_recipe_click(img_file_info, img_index, usergal_images):
-    # return img_file_info
     try:
         return usergal_images[int(img_index)]
     except:
@@ -230,7 +230,8 @@ def on_send_to_recipe_click(img_file_info, img_index, usergal_images):
     
 def on_open_image_folder_click(modelid):
     if modelid:                
-        model_info = civitai.get_model_info(modelid)
+        # model_info = civitai.get_model_info(modelid)
+        model_info = ishortcut.get_model_info(modelid)
         if model_info:  
             model_name = model_info['name']
             image_folder = util.get_download_image_folder(model_name)
@@ -310,7 +311,8 @@ def on_versions_list_select(evt: gr.SelectData, modelid=None):
     if modelid:
         if evt.index > 0:
             ver_index = evt.index - 1
-            model_info = civitai.get_model_info(modelid)        
+            # model_info = civitai.get_model_info(modelid)
+            model_info = ishortcut.get_model_info(modelid)
             version_info = dict()
             if model_info:
                 if "modelVersions" in model_info.keys():
@@ -325,7 +327,33 @@ def on_versions_list_select(evt: gr.SelectData, modelid=None):
         title_name, versions_list, version_name = get_model_information(page_url)
     
     return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER)    
-    # return load_model( modelid, page_url, None)
+
+def get_model_information(page_url=None):
+    model_info = None
+    version_name = None
+    modelid = None
+    versionid= None
+    
+    if page_url:
+        modelid , versionid = extract_model_info(page_url)
+        
+    if modelid:
+        # model_info = civitai.get_model_info(modelid)    
+        model_info = ishortcut.get_model_info(modelid)    
+                                                        
+    if model_info:       
+        title_name = f"# {model_info['name']}"
+
+        versions_list = list()
+        if 'modelVersions' in model_info:
+            for ver in model_info['modelVersions']:
+                versions_list.append(ver['name'])
+                if versionid:
+                    if versionid == str(ver['id']):
+                        version_name = ver['name']
+
+        return title_name, versions_list, version_name
+    return None,None,None
 
 def on_usergal_page_url_change(usergal_page_url):   
     return load_gallery_page(usergal_page_url)
@@ -418,36 +446,7 @@ def get_gallery_information(page_url=None, show_nsfw=False):
         return page_info, images_url, images_meta
     return None,None,None
 
-def get_model_information(page_url=None):
-    # 현재 모델의 정보를 가져온다.
-
-    model_info = None
-    version_name = None
-    modelid = None
-    versionid= None
-    
-    if page_url:
-        modelid , versionid = extract_model_info(page_url)
-        
-    if modelid:
-        model_info = civitai.get_model_info(modelid)        
-                                                        
-    if model_info:       
-        title_name = f"# {model_info['name']}"
-
-        versions_list = list()
-        if 'modelVersions' in model_info:
-            for ver in model_info['modelVersions']:
-                versions_list.append(ver['name'])
-                if versionid:
-                    if versionid == str(ver['id']):
-                        version_name = ver['name']
-
-        return title_name, versions_list, version_name
-    return None,None,None
-
-def get_user_gallery(modelid, page_url, show_nsfw):
-    
+def get_user_gallery(modelid, page_url, show_nsfw):    
     if not modelid:
         return None,None    
     
@@ -522,34 +521,6 @@ def gallery_loading(images_url, progress):
             os.makedirs(setting.shortcut_gallery_folder)
                             
         for i,  img_url in enumerate(progress.tqdm(images_url, desc=f"Civitai Images Loading")):
-            # result = util.is_url_or_filepath(img_url)            
-            # if result == "filepath":
-            #     dn_image_list.append(img_url)
-            #     image_list.append(img_url) 
-            # elif result == "url":   
-            #     description_img = setting.get_image_url_to_gallery_file(img_url)             
-            #     try:
-            #         with requests.get(img_url,stream=True) as img_r:
-            #             if not img_r.ok:                        
-            #                 util.printD("Get error code: " + str(img_r.status_code) + ": proceed to the next file")                            
-            #                 dn_image_list.append(setting.no_card_preview_image)
-            #                 image_list.append(setting.no_card_preview_image)
-            #                 continue
-                                                                       
-            #             # sc_gallery 에 저장한다.                        
-            #             with open(description_img, 'wb') as f:
-            #                 img_r.raw.decode_content = True
-            #                 shutil.copyfileobj(img_r.raw, f)      
-                                              
-            #             dn_image_list.append(description_img)
-            #             image_list.append(description_img)
-            #     except:
-            #         dn_image_list.append(setting.no_card_preview_image)
-            #         image_list.append(setting.no_card_preview_image)
-            # else:
-            #     dn_image_list.append(setting.no_card_preview_image)
-            #     image_list.append(setting.no_card_preview_image)
-            
             result = util.is_url_or_filepath(img_url) 
             description_img = setting.get_image_url_to_gallery_file(img_url)             
             if result == "filepath":
@@ -574,8 +545,6 @@ def gallery_loading(images_url, progress):
             image_list.append(description_img)
                                         
             current_time = datetime.datetime.now()     
-                       
-        # return dn_image_list, dn_image_list
         return dn_image_list, image_list , current_time       
     return None, None, gr.update(visible=False)
 
@@ -585,7 +554,8 @@ def download_user_gallery_images(model_id, image_urls):
     if not model_id:                
         return         
     
-    model_info = civitai.get_model_info(model_id)
+    # model_info = civitai.get_model_info(model_id)
+    model_info = ishortcut.get_model_info(model_id)
     
     if not model_info:
         return 
@@ -595,7 +565,6 @@ def download_user_gallery_images(model_id, image_urls):
     if not model_folder:
         return
     
-    # save_folder = os.path.join(setting.root_path, model_folder ,"user_gallery_images")
     save_folder = os.path.join(model_folder ,"user_gallery_images")
     
     if not os.path.exists(save_folder):
