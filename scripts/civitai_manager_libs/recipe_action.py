@@ -424,7 +424,7 @@ def on_recipe_create_btn_click(selected_classification, recipe_name, recipe_desc
             return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=recipe_name),\
                 gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=recipe_name),\
                 gr.update(visible=False),gr.update(visible=True)
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(visible=True), \
+    return gr.update(visible=True), gr.update(visible=True), \
         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=setting.NEWRECIPE),\
         gr.update(visible=True),gr.update(visible=False)
 
