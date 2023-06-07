@@ -766,9 +766,9 @@ def load_saved_model(modelid=None, ver_index=None):
         gr.update(choices=classification.get_list(),value=[], interactive=True),\
         gr.update(value=False, visible=True),gr.update(value="",visible=False),\
         gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER),\
-        gr.update(value=""),\
+        gr.update(value=None),\
         gr.update(visible=False),\
-        gr.update(choices="", value="")
+        gr.update(choices=None, value=None)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
