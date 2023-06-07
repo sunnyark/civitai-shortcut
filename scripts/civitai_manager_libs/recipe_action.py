@@ -21,7 +21,6 @@ def on_ui(recipe_input, civitai_tabs):
     # aaa = "D:\\AI\\stable-diffusion-webui\\outputs\\download-images\\【Macross Delta】Freyja Wion Charecter LoRA（芙蕾雅·薇恩人物模組）\\images\\59749-651966.png"
     
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
-
         with gr.Tabs():
             with gr.TabItem("Prompt Recipe List"):
                 recipe_classification_list = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)
@@ -119,26 +118,6 @@ def on_ui(recipe_input, civitai_tabs):
         ],
         cancels=recipe_drop_image_upload
     )  
-   
-    # recipe_generate_data.change(
-    #     fn=on_recipe_generate_data_change,
-    #     inputs=[
-    #         recipe_drop_image
-    #     ],
-    #     outputs=[
-    #         recipe_prompt,
-    #         recipe_negative,                        
-    #         recipe_option,
-    #         recipe_output,        
-    #         recipe_list,
-    #         recipe_name,
-    #         recipe_desc,
-    #         recipe_classification,
-    #         recipe_title_name,
-    #         recipe_create_btn,
-    #         recipe_update_btn
-    #     ]
-    # )   
 
     recipe_generate_data.change(
         fn=on_recipe_generate_data_change,
@@ -155,21 +134,26 @@ def on_ui(recipe_input, civitai_tabs):
               
     refresh_recipe.change(
         fn=on_refresh_recipe_change,
-        inputs=recipe_list,
+        inputs=[
+            recipe_classification_list,
+            recipe_list
+        ],
         outputs=[
+            recipe_classification_list,
             recipe_list,
-            recipe_name,
-            recipe_desc,
-            recipe_prompt,
-            recipe_negative,                        
-            recipe_option,
-            recipe_output,
-            recipe_classification,
-            recipe_title_name,
-            recipe_image,
-            recipe_create_btn,
-            recipe_update_btn
-        ]
+            # recipe_name,
+            # recipe_desc,
+            # recipe_prompt,
+            # recipe_negative,                        
+            # recipe_option,
+            # recipe_output,
+            # recipe_classification,
+            # recipe_title_name,
+            # recipe_image,
+            # recipe_create_btn,
+            # recipe_update_btn
+        ],
+        show_progress=False
     )
 
     recipe_list.select(    
@@ -195,6 +179,7 @@ def on_ui(recipe_input, civitai_tabs):
     recipe_create_btn.click(
         fn=on_recipe_create_btn_click,
         inputs=[
+            recipe_classification_list,
             recipe_name,
             recipe_desc,
             recipe_prompt,
@@ -216,6 +201,7 @@ def on_ui(recipe_input, civitai_tabs):
     recipe_update_btn.click(
         fn=on_recipe_update_btn_click,
         inputs=[
+            recipe_classification_list,
             recipe_list,
             recipe_name,
             recipe_desc,
@@ -236,6 +222,7 @@ def on_ui(recipe_input, civitai_tabs):
     recipe_delete_btn.click(
         fn=on_recipe_delete_btn_click,
         inputs=[
+            recipe_classification_list,
             recipe_list,
         ],
         outputs=[
@@ -248,7 +235,7 @@ def on_ui(recipe_input, civitai_tabs):
         ]        
     )
         
-    return refresh_recipe, recipe_input
+    return refresh_recipe
 
 def analyze_prompt(generate_data):    
     positivePrompt = None
@@ -359,25 +346,6 @@ def on_recipe_drop_image_upload(recipe_img):
         current_time = datetime.datetime.now()
         return current_time, recipe_img
     return gr.update(visible=False),gr.update(visible=True)
-        
-# def on_recipe_generate_data_change(recipe_img):  
-#     generate_data = None  
-#     if recipe_img:
-#         info1,generate_data,info3 = modules.extras.run_pnginfo(recipe_img)
-        
-#     if generate_data:
-        
-#         positivePrompt, negativePrompt, options, gen_string = analyze_prompt(generate_data)
-            
-#         return gr.update(value=positivePrompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string),\
-#             gr.update(value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), \
-#             gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
-#             gr.update(visible=True), gr.update(visible=False)
-            
-#     return gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), \
-#         gr.update(visible=True), gr.update(value=""), gr.update(value=""), \
-#         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
-#         gr.update(visible=True), gr.update(visible=False)
 
 def on_recipe_generate_data_change(recipe_img):  
     generate_data = None  
@@ -396,17 +364,20 @@ def on_recipe_classification_list_change(recipe_classification):
         return gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(recipe_classification))
     return gr.update(choices=[setting.NEWRECIPE] + recipe.get_list())    
 
-def on_refresh_recipe_change(select_name):    
-    if select_name != setting.NEWRECIPE:
+def on_refresh_recipe_change(selected_classification, select_name):    
+    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list())
         
-        description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
-        if not os.path.isfile(imagefile):
-            imagefile = None
+# def on_refresh_recipe_change(select_classification, select_name):    
+#     if select_name != setting.NEWRECIPE:
+        
+#         description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
+#         if not os.path.isfile(imagefile):
+#             imagefile = None
                                                     
-        return gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(), value=select_name),gr.update(value=select_name), gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification) ,gr.update(label=select_name),imagefile,\
-            gr.update(visible=False), gr.update(visible=True)
-    return gr.update(value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),None,\
-        gr.update(visible=True), gr.update(visible=False)
+#         return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=select_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(select_classification) if select_classification != setting.PLACEHOLDER else recipe.get_list(), value=select_name),gr.update(value=select_name), gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification) ,gr.update(label=select_name),imagefile,\
+#             gr.update(visible=False), gr.update(visible=True)
+#     return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=select_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(select_classification) if select_classification != setting.PLACEHOLDER else recipe.get_list(), value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),None,\
+#         gr.update(visible=True), gr.update(visible=False)
 
 def on_recipe_list_select(evt: gr.SelectData):
     if evt.value != setting.NEWRECIPE:
@@ -421,7 +392,7 @@ def on_recipe_list_select(evt: gr.SelectData):
     return gr.update(value=""),gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE), None, None,\
         gr.update(visible=True), gr.update(visible=False)
 
-def on_recipe_create_btn_click(recipe_name, recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None):    
+def on_recipe_create_btn_click(selected_classification, recipe_name, recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None):    
     s_classification = setting.PLACEHOLDER
     if recipe_name and len(recipe_name.strip()) > 0 and recipe_name != setting.NEWRECIPE:
         pmt = dict()
@@ -449,12 +420,14 @@ def on_recipe_create_btn_click(recipe_name, recipe_desc, recipe_prompt, recipe_n
                 recipe_image.save(recipe_imgfile)
                 recipe.update_recipe_image(recipe_name,unique_filename)
 
-            return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(), value=recipe_name), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=recipe_name),\
+            return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=recipe_name),\
+                gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=recipe_name),\
                 gr.update(visible=False),gr.update(visible=True)
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(visible=True), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=setting.NEWRECIPE),\
+    return gr.update(visible=True), gr.update(visible=True), \
+        gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=setting.NEWRECIPE),\
         gr.update(visible=True),gr.update(visible=False)
 
-def on_recipe_update_btn_click(recipe_list, recipe_name ,recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None):    
+def on_recipe_update_btn_click(selected_classification, recipe_list, recipe_name ,recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None):    
     
     chg_name = setting.NEWRECIPE
     s_classification = setting.PLACEHOLDER
@@ -488,13 +461,22 @@ def on_recipe_update_btn_click(recipe_list, recipe_name ,recipe_desc, recipe_pro
                 recipe.update_recipe_image(recipe_name,unique_filename)
             else:
                 recipe.update_recipe_image(recipe_name,None)
-                                                
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(), value=chg_name), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=chg_name)
 
-def on_recipe_delete_btn_click(select_name):
+        if not recipe.is_classifications(selected_classification):
+            selected_classification = setting.PLACEHOLDER
+                                                            
+    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=selected_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=chg_name), \
+        gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=chg_name)
+
+def on_recipe_delete_btn_click(selected_classification, select_name):
     if select_name and select_name.strip() != setting.NEWRECIPE:
         recipe.delete_recipe(select_name)
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(), value=setting.NEWRECIPE), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
+        
+        if not recipe.is_classifications(selected_classification):
+            selected_classification = setting.PLACEHOLDER
+        
+    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=selected_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=setting.NEWRECIPE), \
+        gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
         gr.update(visible=True),gr.update(visible=False)
         
     

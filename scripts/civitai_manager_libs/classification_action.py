@@ -45,7 +45,8 @@ def on_ui():
             classification_info,
             refresh_sc_browser,
             classification_title_name,
-            refresh_gallery
+            refresh_gallery,
+            classification_list
         ],
         show_progress=False
     )
@@ -197,8 +198,8 @@ def on_refresh_classification_change(select_name):
     if select_name != setting.NEWCLASSIFICATION:
         info = classification.get_classification_info(select_name)
         
-        return gr.update(value=select_name), gr.update(value=info), current_time, gr.update(label=select_name), current_time
-    return gr.update(value=""), gr.update(value=""), current_time, gr.update(label=setting.NEWCLASSIFICATION), gr.update(visible=True)
+        return gr.update(value=select_name), gr.update(value=info), current_time, gr.update(label=select_name), current_time, gr.update(choices=[setting.NEWCLASSIFICATION] + classification.get_list())
+    return gr.update(value=""), gr.update(value=""), current_time, gr.update(label=setting.NEWCLASSIFICATION), gr.update(visible=True), gr.update(choices=[setting.NEWCLASSIFICATION] + classification.get_list())
 
 def on_sc_gallery_select(evt: gr.SelectData, Classification_name , shortcuts):
     sc_reload = setting.classification_preview_mode_disable
