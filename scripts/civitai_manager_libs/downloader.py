@@ -93,22 +93,36 @@ def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldern
 
         except Exception as e:
             util.printD(e)
-            pass        
+        # finally:
+        #     pass    
+    
+    # savefile_base 이름이 없다는 것은 primary 파일이 아닌것이다.
+    # 다운로드할 파일 목록중에 primary 파일이 있을때만 버전 인포파일과 프리뷰 이미지를 다운로드한다.
+    # 프리뷰 파일이 아닐때는 단순히 파일만 다운로드한다.
+    if savefile_base:
+        path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
+        info_file = civitai.write_version_info(path_file, version_info)
+        if info_file:
+            util.printD(f"Wrote version info : {path_file}")
 
-    # 저장할 파일명을 생성한다.
-    # 지정한 파일이 없다면 기본 정보에서 생성한다.
-    if not savefile_base:
-        savefile_base = get_save_base_name(version_info)
+        path_img = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
+        preview_file = download_preview_image(path_img, version_info)
+        if preview_file:
+            util.printD(f"Wrote preview image : {path_img}")
+
+    # savefile_base 이름이 없다면 모델인포에서 프라이머리 파일을 찾는다.
+    # if not savefile_base:
+    #     savefile_base = get_save_base_name(version_info)
         
-    path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
-    info_file = civitai.write_version_info(path_file, version_info)
-    if info_file:
-        util.printD(f"Wrote version info : {path_file}")
+    # path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.info_suffix}{setting.info_ext}")
+    # info_file = civitai.write_version_info(path_file, version_info)
+    # if info_file:
+    #     util.printD(f"Wrote version info : {path_file}")
 
-    path_img = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
-    preview_file = download_preview_image(path_img, version_info)
-    if preview_file:
-         util.printD(f"Wrote preview image : {path_img}")
+    # path_img = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}{setting.preview_image_suffix}{setting.preview_image_ext}")
+    # preview_file = download_preview_image(path_img, version_info)
+    # if preview_file:
+    #      util.printD(f"Wrote preview image : {path_img}")
 
     return f"Download started"
 

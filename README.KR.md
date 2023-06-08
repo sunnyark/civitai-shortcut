@@ -70,6 +70,10 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.5.5
+
+* 파일 다운로드시 다운로드 목록에 primary 파일이 없으면 version info 와 프리뷰 이미지를 생성하지 않도록 수정됨. 해당파일만 다운로드하게됨.
+* 다운로드 파일 목록에 primary 여부 표시.
 
 v 1.5.4
 
