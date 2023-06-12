@@ -29,15 +29,16 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             with gr.TabItem("Description" , id="Model_Description"):                             
                 description_html = gr.HTML()       
             with gr.TabItem("Download" , id="Model_Download"): 
-                gr.Markdown("Downloadable Files")
+                # gr.Markdown("Downloadable Files")                
+                gr.Markdown("When you click on the file name, an information window appears where you can change the file name.")
                 downloadable_files = gr.DataFrame(
-                        headers=["","ID","Filename","Type","SizeKB","DownloadUrl"],
-                        datatype=["str","str","str","str","str","str"], 
-                        col_count=(6,"fixed"),
+                        headers=["","ID","Filename","Type","SizeKB","Primary","DownloadUrl"],
+                        datatype=["str","str","str","str","str","str","str"], 
+                        col_count=(7,"fixed"),
                         interactive=False,
                         type="array",
-                    )
-                gr.Markdown("When you click on the file name, an information window appears where you can change the file name.")
+                    )                                
+                gr.Markdown("The information file and preview file names are generated based on the primary file. Additionally, the information file and preview file will only be saved if the primary file is included in the download.")
                 filename_list = gr.CheckboxGroup (show_label=False , label="Model Version File", choices=[], value=[], interactive=True, visible=False)
                 
                 with gr.Accordion(label='Change File Name', open=True, visible=False) as change_filename:     
@@ -740,7 +741,12 @@ def load_saved_model(modelid=None, ver_index=None):
             
             for file in files:            
                 flist.append(f"{file['id']}:{file['name']}")
-                downloadable.append(['✅',file['id'],file['name'],file['type'],round(file['sizeKB']),file['downloadUrl']])
+                
+                primary = False
+                if "primary" in file:
+                    primary = file['primary']
+                    
+                downloadable.append(['✅',file['id'],file['name'],file['type'],round(file['sizeKB']),primary,file['downloadUrl']])
                                 
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
