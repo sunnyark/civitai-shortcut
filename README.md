@@ -69,8 +69,9 @@ Four folders and five JSON files will be created, each serving the following rol
 # Change Log
 v 1.5.5
 
-* 파일 다운로드시 다운로드 목록에 primary 파일이 없으면 version info 와 프리뷰 이미지를 생성하지 않도록 수정됨. 해당파일만 다운로드하게됨.
-* 다운로드 파일 목록에 primary 여부 표시.
+* When downloading a file, if there is no primary file in the download list, it will be modified to not generate version info and preview images. Only the corresponding file will be downloaded. 
+
+* The download file list will indicate whether it is a primary file.
 
 v 1.5.4
 
