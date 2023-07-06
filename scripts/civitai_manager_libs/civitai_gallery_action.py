@@ -524,7 +524,8 @@ def get_totalPages(modelId, modelVersionId = None, show_nsfw=False):
     totalItems = 0
     totalPages = 0
     
-    page_url = f"{civitai.Url_ImagePage()}?limit={setting.usergallery_images_page_limit}&modelId={modelId}"
+    # page_url = f"{civitai.Url_ImagePage()}?limit={setting.usergallery_images_page_limit}&modelId={modelId}"
+    page_url = f"{civitai.Url_ImagePage()}?modelId={modelId}"
     
     if modelVersionId:
         page_url = f"{page_url}&modelVersionId={modelVersionId}"
