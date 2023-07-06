@@ -6,6 +6,7 @@ import datetime
 import modules
 import re
 import threading
+import math
 
 from tqdm import tqdm
 
@@ -548,7 +549,7 @@ def get_totalPages(modelId, modelVersionId = None, show_nsfw=False):
             page_url = None
     
     try:
-        totalPages = int(totalItems / setting.usergallery_images_page_limit) + 1
+        totalPages = math.ceil(totalItems / setting.usergallery_images_page_limit)
     except:
         totalPages = 0        
     
