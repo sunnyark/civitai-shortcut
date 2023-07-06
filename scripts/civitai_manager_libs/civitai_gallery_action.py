@@ -483,8 +483,14 @@ def get_image_page(modelid, page_url, show_nsfw=False):
     if not page_url:
        page_url = get_default_page_url(modelid, None, show_nsfw)
 
+    # util.printD(page_url)
     json_data = civitai.request_models(page_url)
-        
+
+    # util.printD(json_data)                
+    tmp_mid , tmp_vid = extract_model_info(page_url)    
+    totalPages , totalItems = get_totalPages(tmp_mid,tmp_vid,show_nsfw)
+    # util.printD(f"gallery vid : {tmp_vid} , total pages : {totalPages} , total items : {totalItems}")
+    
     try:
         json_data['items']
     except TypeError:
@@ -507,10 +513,45 @@ def get_image_page(modelid, page_url, show_nsfw=False):
     page_info['nextPage'] =  next_page_url
     page_info['currentPage'] = json_data['metadata']['currentPage']
     page_info['pageSize'] =  json_data['metadata']['pageSize']
-    page_info['totalItems'] =  json_data['metadata']['totalItems']
-    page_info['totalPages'] =  json_data['metadata']['totalPages']
+    page_info['totalItems'] =  totalItems
+    page_info['totalPages'] =  totalPages
+    # page_info['totalItems'] =  json_data['metadata']['totalItems']
+    # page_info['totalPages'] =  json_data['metadata']['totalPages']
                         
     return page_info, json_data['items']
+
+def get_totalPages(modelId, modelVersionId = None, show_nsfw=False):
+    totalItems = 0
+    totalPages = 0
+    
+    page_url = f"{civitai.Url_ImagePage()}?limit={setting.usergallery_images_page_limit}&modelId={modelId}"
+    
+    if modelVersionId:
+        page_url = f"{page_url}&modelVersionId={modelVersionId}"
+        
+    if not show_nsfw:    
+        page_url = f"{page_url}&nsfw=false"
+    
+    while page_url is not None:
+        # util.printD(page_url)
+        json_data = civitai.request_models(page_url)        
+        
+        try:
+            totalItems = totalItems + len(json_data['items'])            
+        except:
+            pass
+        
+        try:
+            page_url = json_data['metadata']['nextPage']
+        except:
+            page_url = None
+    
+    try:
+        totalPages = int(totalItems / setting.usergallery_images_page_limit) + 1
+    except:
+        totalPages = 0        
+    
+    return totalPages, totalItems
 
 def gallery_loading(images_url, progress):
     if images_url:
