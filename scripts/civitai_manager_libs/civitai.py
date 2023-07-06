@@ -12,7 +12,7 @@ url_dict = {
     "modelId": "https://civitai.com/api/v1/models/",
     "modelVersionId": "https://civitai.com/api/v1/model-versions/",
     "modelHash": "https://civitai.com/api/v1/model-versions/by-hash/",
-    "imagePage" :  "https://civitai.com/api/v1/images/"
+    "imagePage" :  "https://civitai.com/api/v1/images"
 }
 
 def Url_Page():
