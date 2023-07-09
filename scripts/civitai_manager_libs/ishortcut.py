@@ -59,6 +59,21 @@ def get_latest_version_info_by_model_id(id:str) -> dict:
     
     return def_version
 
+def get_model_filenames(modelid:str):
+    
+    model_info = get_model_info(modelid)    
+    if not model_info:
+        return None
+
+    filenames = []
+    
+    if "modelVersions" in model_info.keys():
+        for ver in model_info["modelVersions"]:
+            for ver_file in ver["files"]:
+                filenames.append(ver_file["name"])
+
+    return filenames
+
 def get_model_info(modelid:str):
     if not modelid:
         return    
@@ -356,7 +371,8 @@ def get_image_list(shortcut_types=None, search=None)->str:
     
     result_list = list()        
 
-    keys, tags, clfs = util.get_search_keyword(search)    
+    keys, tags, clfs = util.get_search_keyword(search)
+    # keys, tags, clfs, filenames = util.get_search_keyword(search)
     # util.printD(f"keys:{keys} ,tags:{tags},clfs:{clfs}")
     
     # classification        
@@ -417,6 +433,23 @@ def get_image_list(shortcut_types=None, search=None)->str:
                     tags_list.append(v)
         result_list = tags_list
         
+    # filename검색
+    # if filenames:
+    #     filenames_list = list()
+    #     for v in result_list:
+    #         if v:
+    #             if "id" not in v.keys():
+    #                 continue
+                
+    #             v_filenames = get_model_filenames(v["id"])
+    #             common_filenames = set(v_filenames) & set(filenames)
+    #             if common_filenames:
+    #                 filenames_list.append(v)
+    #     result_list = filenames_list    
+    
+    # name을 기준으로 정렬
+    result_list = sorted(result_list, key=lambda x: x["name"].lower().strip(), reverse=False)
+    
     # 썸네일이 있는지 판단해서 대체 이미지 작업
     shotcutlist = list()
     for v in result_list:
@@ -525,6 +558,8 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
     def_image = None
     
     if model_info:        
+        filenames = list()
+
         if "modelVersions" in model_info.keys():            
             def_version = model_info["modelVersions"][0]
             def_id = def_version['id']
@@ -533,7 +568,12 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                 if len(def_version["images"]) > 0:
                     img_dict = def_version["images"][0]
                     def_image = img_dict["url"]      
-        
+
+            # 현재 모델의 모델 파일 정보를 추출한다.
+            # for ver in model_info["modelVersions"]:
+            #     for ver_file in ver["files"]:
+            #         filenames.append(ver_file["name"])
+
         # 모델정보가 바뀌어도 피해를 줄이기 위함
         tags = list()
         try:
