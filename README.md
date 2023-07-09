@@ -72,6 +72,7 @@ v 1.5.5
 * When downloading a file, if there is no primary file in the download list, it will be modified to not generate version info and preview images. Only the corresponding file will be downloaded. 
 
 * The download file list will indicate whether it is a primary file.
+* The sorting has been modified so that the shortcuts are sorted based on the 'name' field.
 
 v 1.5.4
 

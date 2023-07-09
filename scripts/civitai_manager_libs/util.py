@@ -209,6 +209,39 @@ def get_search_keyword(search:str):
                     
     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None    
 
+# def get_search_keyword(search:str):
+#     tags = []
+#     keys = []
+#     clfs = []
+#     filenames = []
+    
+#     if not search:
+#         return None , None, None
+    
+#     for word in search.split(","):
+#         word = word.strip()
+#         if word.startswith("#"):
+#             if len(word) > 1:
+#                 tag = word[1:].lower()
+#                 if tag not in tags:
+#                     tags.append(tag)
+#         elif word.startswith("@"):
+#             if len(word) > 1:
+#                 clf = word[1:]
+#                 if clf not in clfs:
+#                     clfs.append(clf)
+#         elif word.startswith("!"):
+#             if len(word) > 1:
+#                 filename = word[1:].lower()
+#                 if filename not in filenames:
+#                     filenames.append(filename)                    
+#         else:
+#             word = word.lower()
+#             if word not in keys:                
+#                 keys.append(word)
+                    
+#     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None, filenames if len(filenames) > 0 else None    
+
 def read_json(path)->dict:
     contents = None
     if not path:
