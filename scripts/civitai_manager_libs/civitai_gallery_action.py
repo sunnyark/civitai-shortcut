@@ -63,7 +63,9 @@ def on_ui(recipe_input):
         
         # 트리거를 위한것
         hidden = gr.Image(type="pil")
-        usergal_page = gr.State()
+        
+        # 페이징 관련 정보
+        paging_information = gr.State()
         
         usergal_page_url = gr.Textbox(value=None)
         
@@ -116,14 +118,14 @@ def on_ui(recipe_input):
     gallery_page = usergal_page_url.change(
         fn=on_usergal_page_url_change,
         inputs=[
-            usergal_page_url,            
+            usergal_page_url,
+            paging_information
         ],
         outputs=[               
             refresh_gallery,
             usergal_images_url,
             usergal_images_meta,
             page_slider,
-            usergal_page,
             img_file_info,            
         ],
         cancels=gallery         
@@ -139,6 +141,8 @@ def on_ui(recipe_input):
             model_title_name,             
             usergal_page_url,
             versions_list,
+            page_slider,
+            paging_information
         ],
         cancels=[gallery, gallery_page]
     )
@@ -151,7 +155,9 @@ def on_ui(recipe_input):
         outputs=[            
             model_title_name,             
             usergal_page_url,
-            versions_list 
+            versions_list,
+            page_slider,
+            paging_information
         ],
         cancels=[gallery, gallery_page]
     )
@@ -160,7 +166,7 @@ def on_ui(recipe_input):
         fn=on_pre_loading_change,
         inputs=[
             usergal_page_url,
-            usergal_page
+            paging_information
         ],
         outputs=None
     )
@@ -169,7 +175,7 @@ def on_ui(recipe_input):
         fn=on_first_btn_click,
         inputs=[
             usergal_page_url,
-            usergal_page
+            paging_information
         ],
         outputs=[            
             usergal_page_url
@@ -180,7 +186,7 @@ def on_ui(recipe_input):
         fn=on_end_btn_click,
         inputs=[
             usergal_page_url,
-            usergal_page
+            paging_information            
         ],
         outputs=[            
             usergal_page_url
@@ -191,7 +197,7 @@ def on_ui(recipe_input):
         fn=on_prev_btn_click,
         inputs=[
             usergal_page_url,
-            usergal_page
+            paging_information
         ],
         outputs=[            
             usergal_page_url
@@ -202,7 +208,7 @@ def on_ui(recipe_input):
         fn=on_next_btn_click,
         inputs=[
             usergal_page_url,
-            usergal_page
+            paging_information
         ],
         outputs=[            
             usergal_page_url
@@ -212,9 +218,9 @@ def on_ui(recipe_input):
     page_slider.release(
         fn=on_page_slider_release,
         inputs=[
-            usergal_page_url,
-            usergal_page,
-            page_slider
+            usergal_page_url,            
+            page_slider,
+            paging_information
         ],
         outputs=[            
             usergal_page_url
@@ -244,41 +250,57 @@ def on_download_images_click(page_url,images_url):
         modelid , versionid = extract_model_info(page_url)
         download_user_gallery_images(modelid,images_url)
     
-def on_page_slider_release(usergal_page_url, page_info, page_slider):
+def on_page_slider_release(usergal_page_url, page_slider, paging_information):
     page_url = usergal_page_url
-    if usergal_page_url:       
-        page_url = util.update_url(usergal_page_url,"page", page_slider)    
+    
+    if paging_information:
+        if paging_information["totalPageUrls"]:
+            totalPageUrls = paging_information["totalPageUrls"]
+            page_url = totalPageUrls[page_slider - 1]
+
     return page_url
      
-def on_first_btn_click(usergal_page_url, page_info):
+def on_first_btn_click(usergal_page_url, paging_information):
     page_url = usergal_page_url
-    if page_info:        
-        if page_info['prevPage']:
-            page_url = util.update_url(page_info['prevPage'],"page",1)
-                    
+
+    if paging_information:
+        if paging_information["totalPageUrls"]:
+            totalPageUrls = paging_information["totalPageUrls"]
+            page_url = totalPageUrls[0]
+          
     return page_url
-
-def on_end_btn_click(usergal_page_url, page_info):
+            
+def on_end_btn_click(usergal_page_url, paging_information):
     page_url = usergal_page_url
-    if page_info:
-        if page_info['nextPage']:            
-            page_url = util.update_url(page_info['nextPage'],"page",page_info['totalPages'])
-
-    return page_url
-
-def on_next_btn_click(usergal_page_url, page_info):
-    page_url = usergal_page_url
-    if page_info:        
-        if page_info['nextPage']:
-            page_url = page_info['nextPage']
+    
+    if paging_information:
+        if paging_information["totalPageUrls"]:
+            totalPageUrls = paging_information["totalPageUrls"]
+            page_url = totalPageUrls[-1]
 
     return page_url
 
-def on_prev_btn_click(usergal_page_url, page_info):
+def on_next_btn_click(usergal_page_url, paging_information):
+    page_url = usergal_page_url  
+    
+    current_Page = get_current_page(paging_information, usergal_page_url) 
+    if paging_information:
+        if paging_information["totalPageUrls"]:
+            totalPageUrls = paging_information["totalPageUrls"]
+            if len(totalPageUrls) > current_Page:
+                page_url = totalPageUrls[current_Page]
+
+    return page_url
+
+def on_prev_btn_click(usergal_page_url, paging_information):
     page_url = usergal_page_url
-    if page_info:        
-        if page_info['prevPage']:
-            page_url = page_info['prevPage']
+
+    current_Page = get_current_page(paging_information, usergal_page_url) 
+    if paging_information:
+        if paging_information["totalPageUrls"]:
+            totalPageUrls = paging_information["totalPageUrls"]
+            if current_Page > 1:
+                page_url = totalPageUrls[current_Page - 2]    
 
     return page_url
 
@@ -297,18 +319,23 @@ def on_selected_model_id_change(modelid):
     versions_list = None
     title_name = None
     version_name = None
-
+    paging_information = None
+    
     if modelid:
         page_url = get_default_page_url(modelid,None,False)
-        title_name, versions_list, version_name = get_model_information(page_url)  
+        title_name, versions_list, version_name, paging_information = get_model_information(page_url)
+        total_page = paging_information["totalPages"]  
     
-    return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER)
+    return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER), \
+        gr.update(minimum=1, maximum=total_page, value=1, step=1, label=f"Total {total_page} Pages"), paging_information
 
 def on_versions_list_select(evt: gr.SelectData, modelid=None): 
     page_url = None
     versions_list = None
     title_name = None
     version_name = None    
+    paging_information = None
+    
     if modelid:
         if evt.index > 0:
             ver_index = evt.index - 1
@@ -325,10 +352,12 @@ def on_versions_list_select(evt: gr.SelectData, modelid=None):
         else:            
             page_url = get_default_page_url(modelid,None,False)
                          
-        title_name, versions_list, version_name = get_model_information(page_url)
-    
-    return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER)    
-
+        title_name, versions_list, version_name, paging_information = get_model_information(page_url)
+        total_page = paging_information["totalPages"]
+        
+    return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER), \
+        gr.update(minimum=1, maximum=total_page, value=1, step=1, label=f"Total {total_page} Pages"), paging_information
+        
 def get_model_information(page_url=None):
     model_info = None
     version_name = None
@@ -353,28 +382,38 @@ def get_model_information(page_url=None):
                     if versionid == str(ver['id']):
                         version_name = ver['name']
 
-        return title_name, versions_list, version_name
-    return None,None,None
+        # 작업중 2023-07-14 여기서 페이지 정보를 가져오도록 변경한다.
+        # paging_information = get_paging_information(modelid,versionid,False)
+        paging_information = get_paging_information_working(modelid,versionid,False)
+        
+        
+        return title_name, versions_list, version_name, paging_information
+    return None,None,None,None
 
-def on_usergal_page_url_change(usergal_page_url):   
-    return load_gallery_page(usergal_page_url)
+def on_usergal_page_url_change(usergal_page_url, paging_information):   
+    return load_gallery_page(usergal_page_url, paging_information)
 
 def on_refresh_gallery_change(images_url, progress=gr.Progress()):    
     return gallery_loading(images_url, progress)
 
-def on_pre_loading_change(usergal_page_url, page_info):
+def on_pre_loading_change(usergal_page_url, paging_information):
     if setting.usergallery_preloading:
-        pre_loading(usergal_page_url, page_info)
+        pre_loading(usergal_page_url, paging_information)
    
-def pre_loading(usergal_page_url, page_info):
+def pre_loading(usergal_page_url, paging_information):
     page_url = usergal_page_url
-    if page_info:        
-        if page_info['nextPage']:
-            page_url = page_info['nextPage']
+
+    current_Page = get_current_page(paging_information, usergal_page_url) 
     
+    if paging_information:
+        if paging_information["totalPageUrls"]:
+            totalPageUrls = paging_information["totalPageUrls"]
+            if len(totalPageUrls) > current_Page:
+                page_url = totalPageUrls[current_Page]
+                    
     if page_url:        
         image_data = None
-        json_data = civitai.request_models(page_url)
+        json_data = civitai.request_models(fix_page_url_cursor(page_url))
         try:
             image_data = json_data['items']
         except Exception as e:
@@ -415,43 +454,41 @@ def download_images(dn_image_list:list):
                         img_r.raw.decode_content = True
                         shutil.copyfileobj(img_r.raw, f)
                                     
-def load_gallery_page(usergal_page_url):           
+def load_gallery_page(usergal_page_url, paging_information):           
     if usergal_page_url:
-        page_info, image_url, images_meta = get_gallery_information(usergal_page_url, False)
-        if page_info:
-            total_page = page_info['totalPages']
-            current_Page = page_info['currentPage']
+        image_url, images_meta = get_gallery_information(usergal_page_url, False)
             
-            current_time = datetime.datetime.now()                            
-            
-            return current_time,\
-                image_url,\
-                images_meta,\
-                gr.update(minimum=1, maximum=total_page, value=current_Page, step=1, label=f"Total {total_page} Pages"),\
-                page_info,\
-                gr.update(value=None)
+        current_Page = get_current_page(paging_information, usergal_page_url) 
+        
+        current_time = datetime.datetime.now()                            
+        
+        return current_time,\
+            image_url,\
+            images_meta,\
+            gr.update(value=current_Page),\
+            gr.update(value=None)
     
-    return None,None,None,gr.update(minimum=1, maximum=1, value=1),None,None                                                    
+    return None,None,None,gr.update(minimum=1, maximum=1, value=1),None                                                    
 
 def get_gallery_information(page_url=None, show_nsfw=False):
     modelid = None       
     if page_url:
-        modelid , versionid = extract_model_info(page_url)
+        modelid, versionid = extract_model_info(page_url)
         
     if modelid:
         images_url = None        
         images_meta = None
         
-        page_info, images_url, images_meta , images_list = get_user_gallery(modelid, page_url, show_nsfw)
+        images_url, images_meta , images_list = get_user_gallery(modelid, page_url, show_nsfw)
 
-        return page_info, images_url, images_meta
-    return None,None,None
+        return images_url, images_meta
+    return None,None
 
 def get_user_gallery(modelid, page_url, show_nsfw):    
     if not modelid:
         return None,None    
     
-    page_info , image_data = get_image_page(modelid, page_url, show_nsfw)
+    image_data = get_image_page(modelid, page_url, show_nsfw)
 
     images_list = {}
     images_url = []
@@ -474,78 +511,66 @@ def get_user_gallery(modelid, page_url, show_nsfw):
                 
         images_list = {image_info['id']:image_info for image_info in image_data}
         
-    return page_info, images_url, images_meta , images_list
+    return images_url, images_meta , images_list
            
 def get_image_page(modelid, page_url, show_nsfw=False):
     json_data = {}
-    prev_page_url = None
-    next_page_url = None
-        
+
     if not page_url:
        page_url = get_default_page_url(modelid, None, show_nsfw)
 
     # util.printD(page_url)
-    json_data = civitai.request_models(page_url)
-
-    # util.printD(json_data)                
-    tmp_mid , tmp_vid = extract_model_info(page_url)    
-    cur_page = extract_url_page(page_url)
-    totalPages , totalItems = get_totalPages(tmp_mid,tmp_vid,show_nsfw)
-    # util.printD(f"gallery vid : {tmp_vid} , total pages : {totalPages} , total items : {totalItems}")
-    
-    # util.printD(f"{page_url},{cur_page}")
+    json_data = civitai.request_models(fix_page_url_cursor(page_url))
+    # util.printD("here")
     
     try:
         json_data['items']
     except TypeError:
         return None,None
-
-    page_info = dict()
-    try:
-        if json_data['metadata']['nextPage'] is not None:
-            next_page_url = json_data['metadata']['nextPage']
-    except:
-        pass
-
-    if cur_page > 1:
-        prev_page_url = util.update_url(page_url,"page",cur_page - 1)
-    
-    # try:
-    #     if json_data['metadata']['prevPage'] is not None:
-    #         prev_page_url = json_data['metadata']['prevPage']
-    # except:
-    #     pass
-
-    page_info['prevPage'] =  prev_page_url
-    page_info['nextPage'] =  next_page_url
-    page_info['currentPage'] = json_data['metadata']['currentPage']
-    page_info['pageSize'] =  json_data['metadata']['pageSize']
-    page_info['totalItems'] =  totalItems
-    page_info['totalPages'] =  totalPages
-    # page_info['totalItems'] =  json_data['metadata']['totalItems']
-    # page_info['totalPages'] =  json_data['metadata']['totalPages']
                         
-    return page_info, json_data['items']
+    return json_data['items']
 
-def get_totalPages(modelId, modelVersionId = None, show_nsfw=False):
-    totalItems = 0
+def get_paging_information(modelId, modelVersionId = None, show_nsfw=False):
     totalPages = 0
     
-    # page_url = f"{civitai.Url_ImagePage()}?limit={setting.usergallery_images_page_limit}&modelId={modelId}"
-    page_url = f"{civitai.Url_ImagePage()}?modelId={modelId}"
+    page_url = get_default_page_url(modelId, modelVersionId, show_nsfw)    
     
-    if modelVersionId:
-        page_url = f"{page_url}&modelVersionId={modelVersionId}"
-        
-    if not show_nsfw:    
-        page_url = f"{page_url}&nsfw=false"
-    
+    total_page_urls = list()    
     while page_url is not None:
+        total_page_urls.append(page_url)
         # util.printD(page_url)
-        json_data = civitai.request_models(page_url)        
+        json_data = civitai.request_models(fix_page_url_cursor(page_url))
         
         try:
-            totalItems = totalItems + len(json_data['items'])            
+            page_url = json_data['metadata']['nextPage']
+        except:
+            page_url = None
+            
+        totalPages = totalPages + 1
+                           
+    paging_information = dict()
+    paging_information["totalPages"] = totalPages
+    paging_information["totalPageUrls"] = total_page_urls
+    
+    return paging_information
+
+# cursor로 쿼리를 보내면 그 다음것부터 검색되어 리턴되고 있다. 
+# 명확해 질때까지 대기....
+# 페잊 수에 오류가 난다.
+def get_paging_information_working(modelId, modelVersionId = None, show_nsfw=False):
+    totalPages = 0
+    
+    # 한번에 가져올수 있는 최대량은 200 이다.
+    page_url = get_default_page_url(modelId, modelVersionId, show_nsfw, 200)    
+    
+    item_list = list()    
+    total_page_urls = list()    
+
+    while page_url is not None:
+        # util.printD(page_url)
+        json_data = civitai.request_models(fix_page_url_cursor(page_url))
+        try:  
+            item_list.extend(json_data['items'])
         except:
             pass
         
@@ -553,13 +578,60 @@ def get_totalPages(modelId, modelVersionId = None, show_nsfw=False):
             page_url = json_data['metadata']['nextPage']
         except:
             page_url = None
+               
+    # totalItems = len(item_list)
+        
+    # try:
+    #     totalPages = math.ceil(totalItems / setting.usergallery_images_page_limit)
+    # except:
+    #     totalPages = 0        
+
+    # import json
+
+    # output_file = 'item_list.json'
+    # with open(output_file, 'w') as f:
+    #     json.dump(item_list, f, indent=4)
+
+    initial_url = get_default_page_url(modelId, modelVersionId, show_nsfw)
+    total_page_urls.append(initial_url)    
+    page_items = item_list[::setting.usergallery_images_page_limit]
+    totalPages = len(page_items)
     
-    try:
-        totalPages = math.ceil(totalItems / setting.usergallery_images_page_limit)
-    except:
-        totalPages = 0        
+    # util.printD(page_items)
+    # util.printD(f"{totalItems} , {totalItems2} , {len(page_items)}")
     
-    return totalPages, totalItems
+    for index, item in enumerate(page_items):        
+        if index > 0:
+            total_page_urls.append(util.update_url(initial_url,"cursor",item["id"]))
+                       
+    paging_information = dict()
+    paging_information["totalPages"] = totalPages
+    paging_information["totalPageUrls"] = total_page_urls
+    
+    # for pags_url in total_page_urls:
+    #     util.printD(pags_url)
+    
+    return paging_information
+
+# 현재 pageurl 의 cursor에서 page를 계산한다.
+def get_current_page(paging_information, page_url):
+    current_cursor = extract_url_cursor(page_url)
+    # util.printD(f"current {current_cursor}")
+    # util.printD(page_url)
+
+    if paging_information:
+        total_page_urls = paging_information["totalPageUrls"]
+        for cur_page, p_url in enumerate(total_page_urls, start=1):
+            p_cursor = extract_url_cursor(p_url)
+            # util.printD(p_cursor)
+            
+            if not p_cursor:
+                continue 
+                
+            if str(current_cursor) == str(p_cursor):
+                # util.printD(f"select {p_cursor}")
+                return cur_page
+    return 1
 
 def gallery_loading(images_url, progress):
     if images_url:
@@ -654,15 +726,22 @@ def extract_model_info(url):
     
     return (model_id, model_version_id)
 
-def extract_url_page(url):
-    model_page_match = re.search(r'page=(\d+)', url)
+# def extract_url_page(url):
+#     model_page_match = re.search(r'page=(\d+)', url)
     
-    page = int(model_page_match.group(1)) if model_page_match else 0
+#     page = int(model_page_match.group(1)) if model_page_match else 0
     
-    return (page)
+#     return (page)
+
+def extract_url_cursor(url):
+    model_cursor_match = re.search(r'cursor=(\d+)', url)
     
-def get_default_page_url(modelId, modelVersionId = None, show_nsfw=False):
-    page_url = f"{civitai.Url_ImagePage()}?limit={setting.usergallery_images_page_limit}&modelId={modelId}"
+    cursor = int(model_cursor_match.group(1)) if model_cursor_match else 0
+    
+    return (cursor)
+    
+def get_default_page_url(modelId, modelVersionId = None, show_nsfw=False, limit=setting.usergallery_images_page_limit):
+    page_url = f"{civitai.Url_ImagePage()}?limit={limit}&modelId={modelId}"
     
     if modelVersionId:
         page_url = f"{page_url}&modelVersionId={modelVersionId}"
@@ -670,7 +749,14 @@ def get_default_page_url(modelId, modelVersionId = None, show_nsfw=False):
     if not show_nsfw:    
         page_url = f"{page_url}&nsfw=false"
 
-    page_url = f"{page_url}&sort=Newest&page=1"
+    page_url = f"{page_url}&sort=Newest"
     
     return page_url
 
+# cursor + 1 로 만들어 준다
+# civitai 에서 cursor 를 수정 한다면 필요 없다.
+def fix_page_url_cursor(page_url):
+    cursor = int(extract_url_cursor(page_url))
+    if cursor > 0:
+        page_url = util.update_url(page_url,"cursor", cursor + 1)        
+    return page_url

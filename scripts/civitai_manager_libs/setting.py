@@ -117,7 +117,7 @@ download_images_folder = os.path.join("outputs","download-images")
 # background thread 설정
 # shortcut_auto_update = True
 shortcut_update_when_start = True
-usergallery_preloading = True
+usergallery_preloading = False
 
 # 생성되는 폴더 및 파일
 shortcut = "CivitaiShortCut.json"
