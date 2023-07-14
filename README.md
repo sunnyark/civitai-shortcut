@@ -67,6 +67,9 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.5.6
+* Change the "user gallery paging" method to cursor-based paging as recommended by Civitai.
+
 v 1.5.5
 
 * When downloading a file, if there is no primary file in the download list, it will be modified to not generate version info and preview images. Only the corresponding file will be downloaded. 
