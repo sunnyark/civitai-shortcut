@@ -70,6 +70,8 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.5.7
+* Civitai에서 제공하는 기본 모델을 사용하여 필터링하는 기능이 추가되었습니다.
 
 v 1.5.6
 * Civitai에서 권장하는 대로 "user gallery paging" 방법을 cursor paging 으로 변경합니다.
