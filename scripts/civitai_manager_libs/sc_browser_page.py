@@ -58,7 +58,7 @@ def on_refresh_sc_list_change(sc_types, sc_search, sc_basemodels, sc_classificat
         sc_page = thumb_max_page
         thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page)
         
-    return gr.update(value=thumb_list),gr.update(choices=[setting.PLACEHOLDER] + classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
+    return gr.update(value=thumb_list),gr.update(choices=classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
 
 def on_shortcut_gallery_refresh(sc_types, sc_search, sc_basemodels, sc_classifications, show_only_downloaded_sc):
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_only_downloaded_sc,sc_search,sc_basemodels,sc_classifications,1)
