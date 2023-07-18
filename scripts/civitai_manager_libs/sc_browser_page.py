@@ -99,7 +99,7 @@ def on_ui():
     with gr.Accordion("Search", open=True):        
         shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
         sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, ....",interactive=True, lines=1)
-        sc_classification_list = gr.Dropdown(label='Classification', multiselect=True, choices=classification.get_list(), interactive=True)
+        sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
         shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels], interactive=True)
         show_only_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
     sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if setting.shortcut_count_per_page > 0 else False)
