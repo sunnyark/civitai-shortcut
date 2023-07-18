@@ -74,6 +74,23 @@ def get_model_filenames(modelid:str):
 
     return filenames
 
+def is_baseModel(modelid:str, baseModels):
+    
+    model_info = get_model_info(modelid)    
+    if not model_info:
+        return None
+
+    if "modelVersions" in model_info.keys():
+        for ver in model_info["modelVersions"]:
+            try:
+                # util.printD(ver["baseModel"])                
+                if ver["baseModel"] in baseModels:
+                    return True
+            except:
+                pass
+
+    return False
+
 def get_model_info(modelid:str):
     if not modelid:
         return    
@@ -363,7 +380,7 @@ def get_list(shortcut_types=None)->str:
                     
     return shotcutlist
     
-def get_image_list(shortcut_types=None, search=None)->str:
+def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None)->str:
     
     ISC = load()
     if not ISC:
@@ -432,7 +449,13 @@ def get_image_list(shortcut_types=None, search=None)->str:
                 if common_tags:
                     tags_list.append(v)
         result_list = tags_list
-        
+
+    # basemodel 검색
+    tmp_basemodels = list()
+    if shortcut_basemodels:
+        tmp_basemodels.extend(shortcut_basemodels)
+        result_list = [v for v in result_list if is_baseModel(str(v['id']), tmp_basemodels)]        
+            
     # filename검색
     # if filenames:
     #     filenames_list = list()

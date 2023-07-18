@@ -68,8 +68,9 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                             
     with gr.Column(scale=1):            
         with gr.Tabs() as info_tabs:
-            with gr.TabItem("Information" , id="Model_Information"):
+            with gr.TabItem("Information" , id="Model_Information"):                
                 model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
+                model_basemodel = gr.Textbox(label="BaseModel", value="", interactive=False, lines=1)
                 trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
                 civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)                   
                 with gr.Row():            
@@ -248,6 +249,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             downloaded_tab, 
             downloaded_info, 
             model_type, 
+            model_basemodel,
             versions_list,                    
             description_html,
             trigger_words,
@@ -282,6 +284,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             downloaded_tab, 
             downloaded_info, 
             model_type, 
+            model_basemodel,
             versions_list,                    
             description_html,
             trigger_words,
@@ -317,6 +320,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             downloaded_tab, 
             downloaded_info, 
             model_type, 
+            model_basemodel,
             versions_list,                    
             description_html,
             trigger_words,
@@ -649,7 +653,7 @@ def on_file_gallery_loading(image_url):
         
 def load_saved_model(modelid=None, ver_index=None):
     if modelid:
-        model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,ver_index)    
+        model_info,versionid,version_name,model_url,downloaded_versions,model_type,model_basemodels,versions_list,dhtml,triger,files,title_name,images_url,images_meta,vs_foldername = get_model_information(modelid,None,ver_index)    
         if model_info:
             downloaded_info = None
             is_downloaded = False       
@@ -750,7 +754,8 @@ def load_saved_model(modelid=None, ver_index=None):
                                 
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
-                gr.update(value=setting.get_ui_typename(model_type)),gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
+                gr.update(value=setting.get_ui_typename(model_type)),gr.update(value=model_basemodels),\
+                gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []), downloadable if len(downloadable) > 0 else None,\
                 gr.update(label=title_name),\
                 current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview),\
@@ -765,7 +770,8 @@ def load_saved_model(modelid=None, ver_index=None):
     # clear model information
     return gr.update(value=None),gr.update(value=None),\
         gr.update(visible=False),gr.update(value=None),\
-        gr.update(value=None),gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
+        gr.update(value=None),gr.update(value=None),\
+        gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(value=None),None,\
         gr.update(label="#"),\
         None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(visible=False),\
@@ -805,11 +811,13 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
     # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
     if model_info and version_info:        
         version_name = version_info["name"]
-        model_type = model_info['type']                    
+        model_type = model_info['type']             
+        model_basemodels = version_info["baseModel"]         
         downloaded_versions = model.get_model_downloaded_versions(modelid)
         versions_list = list()            
         for ver in model_info['modelVersions']:
             versions_list.append(ver['name'])
+            # model_basemodels.append(ver['baseModel'])
         
         model_url = civitai.Url_Page() + str(modelid)        
         dhtml, triger, files = get_version_description(version_info,model_info)
@@ -818,8 +826,8 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         
         vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)
                         
-        return model_info,versionid,version_name,model_url,downloaded_versions,model_type,versions_list,dhtml,triger,files,title_name,images_url,images_meta, vs_foldername
-    return None,None,None,None,None,None,None,None,None,None,None,None,None,None     
+        return model_info,versionid,version_name,model_url,downloaded_versions,model_type,model_basemodels,versions_list,dhtml,triger,files,title_name,images_url,images_meta, vs_foldername
+    return None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
     
 def get_version_description_gallery(version_info):
     modelid = None
@@ -897,9 +905,12 @@ def get_version_description(version_info:dict,model_info:dict=None):
         model_uploader = model_info['creator']['username']
         html_creatorpart = f"<br><b>Uploaded by:</b> {model_uploader}"
 
+        
+        html_descpart = f"<br><b>Version : {version_info['name']}</b><br> BaseModel : {version_info['baseModel']}<br>"
+        
         if 'description' in version_info:  
             if version_info['description']:
-                html_descpart = f"<br><b>Version : {version_info['name']} Description</b><br>{version_info['description']}<br>"
+                html_descpart = html_descpart + f"<b>Description</b><br>{version_info['description']}<br>"
 
         if 'tags' in model_info:  
             model_tags = model_info["tags"]
@@ -912,7 +923,7 @@ def get_version_description(version_info:dict,model_info:dict=None):
             if model_info['description']:
                 html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
                     
-        html_versionpart = f"<br><b>Version:</b> {model_version_name}"
+        html_versionpart = f"<br><b>Version:</b> {model_version_name}"        
 
         if 'files' in version_info:                                
             for file in version_info['files']:
