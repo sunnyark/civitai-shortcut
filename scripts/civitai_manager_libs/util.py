@@ -162,33 +162,12 @@ def open_folder(path):
             else:
                 subprocess.Popen(["xdg-open", path])
                 
-def get_search_keyword_o(search:str):
-    tags = []
-    keys = []
-    
-    if not search:
-        return None , None
-    
-    for word in search.split(","):
-        word = word.strip().lower()
-        if word.startswith("#"):
-            if len(word) > 1:
-                tag = word[1:]
-                if tag not in tags:
-                    tags.append(tag)
-        else:
-            if word not in keys:
-                keys.append(word)
-                    
-    return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None
-    
 def get_search_keyword(search:str):
     tags = []
     keys = []
-    clfs = []
         
     if not search:
-        return None , None, None
+        return None, None
     
     for word in search.split(","):
         word = word.strip()
@@ -197,17 +176,39 @@ def get_search_keyword(search:str):
                 tag = word[1:].lower()
                 if tag not in tags:
                     tags.append(tag)
-        elif word.startswith("@"):
-            if len(word) > 1:
-                clf = word[1:]
-                if clf not in clfs:
-                    clfs.append(clf)
         else:
             word = word.lower()
             if word not in keys:                
                 keys.append(word)
                     
-    return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None    
+    return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None
+    
+# def get_search_keyword(search:str):
+#     tags = []
+#     keys = []
+#     clfs = []
+        
+#     if not search:
+#         return None , None, None
+    
+#     for word in search.split(","):
+#         word = word.strip()
+#         if word.startswith("#"):
+#             if len(word) > 1:
+#                 tag = word[1:].lower()
+#                 if tag not in tags:
+#                     tags.append(tag)
+#         elif word.startswith("@"):
+#             if len(word) > 1:
+#                 clf = word[1:]
+#                 if clf not in clfs:
+#                     clfs.append(clf)
+#         else:
+#             word = word.lower()
+#             if word not in keys:                
+#                 keys.append(word)
+                    
+#     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None    
 
 # def get_search_keyword(search:str):
 #     tags = []

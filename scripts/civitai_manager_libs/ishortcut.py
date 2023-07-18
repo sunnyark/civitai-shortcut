@@ -379,8 +379,8 @@ def get_list(shortcut_types=None)->str:
                 shotcutlist.append(setting.set_shortcutname(v['name'],v['id']))                
                     
     return shotcutlist
-    
-def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None)->str:
+
+def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, shortcut_classification=None)->str:
     
     ISC = load()
     if not ISC:
@@ -388,19 +388,27 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None)->
     
     result_list = list()        
 
-    keys, tags, clfs = util.get_search_keyword(search)
+    keys, tags = util.get_search_keyword(search)
     # keys, tags, clfs, filenames = util.get_search_keyword(search)
     # util.printD(f"keys:{keys} ,tags:{tags},clfs:{clfs}")
     
-    # classification        
-    if clfs:        
+    # classification # and 연산으로 변경한다.  
+    if shortcut_classification:        
         clfs_list = list()
         CISC = classification.load()
         if CISC:
-            for name in clfs:
+            for name in shortcut_classification:
                 name_list = classification.get_shortcut_list(CISC,name)
                 if name_list:
-                    clfs_list.extend(name_list)
+                    if len(clfs_list) > 0:
+                        clfs_list = list(set(clfs_list) & set(name_list))
+                    else:
+                        clfs_list = name_list
+                else:
+                    clfs_list = list()
+                    # 결과가 없다면 교집합으로 나올수 있는것이 없으므로 
+                    break
+                    
             clfs_list = list(set(clfs_list))
             
         if len(clfs_list) > 0:
@@ -409,9 +417,6 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None)->
                     result_list.append(ISC[str(mid)])
     else:
         result_list = ISC.values()
-
-    # keys, tags = util.get_search_keyword(search)
-    # result_list = ISC.values()
             
     # type 을 걸러내자
     tmp_types = list()
@@ -482,7 +487,111 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None)->
             else:
                 shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
 
-    return shotcutlist                
+    return shotcutlist  
+    
+# def get_image_list_prev(shortcut_types=None, search=None, shortcut_basemodels=None)->str:
+    
+#     ISC = load()
+#     if not ISC:
+#         return
+    
+#     result_list = list()        
+
+#     keys, tags, clfs = util.get_search_keyword(search)    
+#     # keys, tags, clfs, filenames = util.get_search_keyword(search)
+#     # util.printD(f"keys:{keys} ,tags:{tags},clfs:{clfs}")
+    
+#     # classification        
+#     if clfs:        
+#         clfs_list = list()
+#         CISC = classification.load()
+#         if CISC:
+#             for name in clfs:
+#                 name_list = classification.get_shortcut_list(CISC,name)
+#                 if name_list:
+#                     clfs_list.extend(name_list)
+#             clfs_list = list(set(clfs_list))
+            
+#         if len(clfs_list) > 0:
+#             for mid in clfs_list:
+#                 if str(mid) in ISC.keys():
+#                     result_list.append(ISC[str(mid)])
+#     else:
+#         result_list = ISC.values()
+
+#     # keys, tags = util.get_search_keyword(search)
+#     # result_list = ISC.values()
+            
+#     # type 을 걸러내자
+#     tmp_types = list()
+#     if shortcut_types:
+#         for sc_type in shortcut_types:
+#             try:
+#                 tmp_types.append(setting.ui_typenames[sc_type])
+#             except:
+#                 pass
+                
+#     if tmp_types:
+#         result_list = [v for v in result_list if v['type'] in tmp_types]
+          
+#     # key를 걸러내자
+#     if keys:
+#         key_list = list()
+#         for v in result_list:
+#             if v:
+#                 for key in keys:
+#                     if key in v['name'].lower():
+#                         key_list.append(v)
+#                         break                    
+#         result_list = key_list
+
+#     # tags를 걸러내자
+#     if tags:
+#         tags_list = list()
+#         for v in result_list:
+#             if v:
+#                 if "tags" not in v.keys():
+#                     continue                     
+#                 # v_tags = [tag["name"].lower() for tag in v["tags"]]
+#                 v_tags = [tag.lower() for tag in v["tags"]]
+#                 common_tags = set(v_tags) & set(tags)
+#                 if common_tags:
+#                     tags_list.append(v)
+#         result_list = tags_list
+
+#     # basemodel 검색
+#     tmp_basemodels = list()
+#     if shortcut_basemodels:
+#         tmp_basemodels.extend(shortcut_basemodels)
+#         result_list = [v for v in result_list if is_baseModel(str(v['id']), tmp_basemodels)]        
+            
+#     # filename검색
+#     # if filenames:
+#     #     filenames_list = list()
+#     #     for v in result_list:
+#     #         if v:
+#     #             if "id" not in v.keys():
+#     #                 continue
+                
+#     #             v_filenames = get_model_filenames(v["id"])
+#     #             common_filenames = set(v_filenames) & set(filenames)
+#     #             if common_filenames:
+#     #                 filenames_list.append(v)
+#     #     result_list = filenames_list    
+    
+#     # name을 기준으로 정렬
+#     result_list = sorted(result_list, key=lambda x: x["name"].lower().strip(), reverse=False)
+    
+#     # 썸네일이 있는지 판단해서 대체 이미지 작업
+#     shotcutlist = list()
+#     for v in result_list:
+#         if v:
+#             if is_sc_image(v['id']):
+#                 shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+#             else:
+#                 shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+
+#     return shotcutlist                
 
 def create_thumbnail(model_id, input_image_path):
     global thumbnail_max_size
