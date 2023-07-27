@@ -384,8 +384,10 @@ def on_recipe_list_select(evt: gr.SelectData):
         select_name = evt.value
         
         description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
-        if not os.path.isfile(imagefile):
-            imagefile = None
+        
+        if imagefile:
+            if not os.path.isfile(imagefile):
+                imagefile = None
             
         return gr.update(value=select_name),gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(label=select_name),imagefile,None,\
             gr.update(visible=False), gr.update(visible=True)

@@ -91,7 +91,12 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                     except:
                         pass 
                     send_to_recipe = gr.Button(value="Send To Recipe", variant="primary", visible=True)
-                    
+
+            with gr.TabItem("Personal Note" , id="PersonalNote_Information"):      
+                with gr.Column():            
+                    personal_note = gr.Textbox(label="Personal Note", interactive=True, lines=6).style(container=True, show_copy_button=True)
+                    personal_note_save = gr.Button(value="Save", variant="primary", visible=True)
+                                        
         # with gr.Row():
         #     with gr.Column():                                                    
         #         refresh_btn = gr.Button(value="Refresh")                                                                                            
@@ -123,6 +128,14 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     except:
         pass
    
+    personal_note_save.click(
+       fn=on_personal_note_save_click,
+       inputs=[
+            selected_model_id,           
+            personal_note
+       ]
+    )
+    
     send_to_recipe.click(
         fn=on_send_to_recipe_click,
         inputs=[
@@ -268,7 +281,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             cs_foldername,
             ms_foldername,
             change_filename,
-            ms_suggestedname            
+            ms_suggestedname,
+            personal_note
         ],
         cancels=gallery 
     )
@@ -303,7 +317,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             cs_foldername,
             ms_foldername,
             change_filename,
-            ms_suggestedname            
+            ms_suggestedname,
+            personal_note
         ],
         cancels=gallery
     )    
@@ -339,7 +354,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             cs_foldername,
             ms_foldername,
             change_filename,
-            ms_suggestedname            
+            ms_suggestedname,
+            personal_note
         ],
         cancels=gallery
     )
@@ -393,6 +409,9 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     
     return selected_model_id, refresh_information
 
+def on_personal_note_save_click(modelid, note):
+    ishortcut.update_shortcut_model_note(modelid,note)
+    
 def on_send_to_recipe_click(img_file_info, img_index, civitai_images):
     # return img_file_info
     try:
@@ -751,7 +770,9 @@ def load_saved_model(modelid=None, ver_index=None):
                     primary = file['primary']
                     
                 downloadable.append(['✅',file['id'],file['name'],file['type'],round(file['sizeKB']),primary,file['downloadUrl']])
-                                
+            
+            note = ishortcut.get_shortcut_model_note(modelid)
+            
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
                 gr.update(value=setting.get_ui_typename(model_type)),gr.update(value=model_basemodels),\
@@ -764,7 +785,8 @@ def load_saved_model(modelid=None, ver_index=None):
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=cs_foldername),\
                 gr.update(value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False),\
                 gr.update(visible=False),\
-                gr.update(choices=suggested_names, value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False)
+                gr.update(choices=suggested_names, value=ms_foldername, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False),\
+                gr.update(value=note)
                 
     # 모델 정보가 없다면 클리어 한다.
     # clear model information
@@ -780,7 +802,8 @@ def load_saved_model(modelid=None, ver_index=None):
         gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER),\
         gr.update(value=None),\
         gr.update(visible=False),\
-        gr.update(choices=None, value=None)
+        gr.update(choices=None, value=None),\
+        gr.update(value=None)
 
 def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
     # 현재 모델의 정보를 가져온다.
