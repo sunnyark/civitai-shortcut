@@ -154,6 +154,36 @@ def get_images_meta(images:dict, imageid):
     
     return None
 
+# 모델에 해당하는 shortcut에서 note를 변경한다.
+def update_shortcut_model_note(modelid, note):
+    if modelid:
+        ISC = load()            
+        try:           
+            ISC[str(modelid)]["note"] = note
+            save(ISC)
+        except:
+            pass
+        
+# 모델에 해당하는 shortcut에서 note를 가져온다
+def get_shortcut_model_note(modelid):
+    if modelid:
+        ISC = load()            
+        try:           
+            return ISC[str(modelid)]["note"]
+        except:
+            pass
+    return None
+
+# 모델에 해당하는 shortcut 을 가져온다
+def get_shortcut_model(modelid):
+    if modelid:
+        ISC = load()            
+        try:           
+            return ISC[str(modelid)]
+        except:
+            pass
+    return None
+        
 # 모델에 해당하는 shortcut 을 지운다
 def delete_shortcut_model(modelid):
     if modelid:
@@ -165,9 +195,19 @@ def delete_shortcut_model(modelid):
 # 솟컷을 업데이트하며 없으면 해당 아이디의 모델을 새로 생성한다.
 def update_shortcut(modelid, progress = None):
     if modelid:
+        note = None
+        
         add_ISC = add(None, str(modelid), False, progress)
         ISC = load()
         if ISC:
+            if str(modelid) in ISC:
+                # 개별적으로 저장한 정보를 가져온다.
+                if "note" in ISC[str(modelid)]:
+                    note = ISC[str(modelid)]["note"]
+                
+                if add_ISC:
+                    add_ISC[str(modelid)]["note"] = note
+                    
             ISC.update(add_ISC)
         else:
             ISC = add_ISC
@@ -189,17 +229,27 @@ def update_shortcut_informations(modelid_list:list, progress):
     #     write_model_information(modelid, False, progress) 
 
     for modelid in progress.tqdm(modelid_list,desc="Updating Models Information"):        
+        note = None
+        
         if modelid:                
             add_ISC = add(None,str(modelid),False,progress)
 
             ISC = load()
-            # hot fix and delete model
-            # civitiai 에서 제거된 모델때문임
-            # tags 를 변경해줘야함
-            # 이슈가 해결되면 제거할코드
-            if str(modelid) in ISC:
-                ISC[str(modelid)]["tags"]=[]
 
+            if str(modelid) in ISC:
+                # 개별적으로 저장한 정보를 가져온다.
+                if "note" in ISC[str(modelid)]:
+                    note = ISC[str(modelid)]["note"]
+                    
+                if add_ISC:
+                    add_ISC[str(modelid)]["note"] = note
+
+                # hot fix and delete model
+                # civitiai 에서 제거된 모델때문임
+                # tags 를 변경해줘야함
+                # 이슈가 해결되면 제거할코드
+                # ISC[str(modelid)]["tags"]=[]
+                
             if ISC:
                 ISC.update(add_ISC)
             else:
@@ -388,9 +438,8 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
     
     result_list = list()        
 
-    keys, tags = util.get_search_keyword(search)
-    # keys, tags, clfs, filenames = util.get_search_keyword(search)
-    # util.printD(f"keys:{keys} ,tags:{tags},clfs:{clfs}")
+    keys, tags, notes = util.get_search_keyword(search)
+    # util.printD(f"keys:{keys} ,tags:{tags},notes:{notes}")
     
     # classification # and 연산으로 변경한다.  
     if shortcut_classification:        
@@ -418,7 +467,7 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
     else:
         result_list = ISC.values()
             
-    # type 을 걸러내자
+    # filtering type
     tmp_types = list()
     if shortcut_types:
         for sc_type in shortcut_types:
@@ -430,7 +479,7 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
     if tmp_types:
         result_list = [v for v in result_list if v['type'] in tmp_types]
           
-    # key를 걸러내자
+    # filtering key
     if keys:
         key_list = list()
         for v in result_list:
@@ -441,7 +490,7 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
                         break                    
         result_list = key_list
 
-    # tags를 걸러내자
+    # filtering tags
     if tags:
         tags_list = list()
         for v in result_list:
@@ -455,6 +504,23 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
                     tags_list.append(v)
         result_list = tags_list
 
+    # filtering personal note key
+    if notes:
+        note_list = list()
+        for v in result_list:
+            if v:
+                if "note" not in v.keys():
+                    continue
+                
+                if not v['note']:
+                    continue
+
+                for note in notes:                    
+                    if note in v['note'].lower():
+                        note_list.append(v)
+                        break                    
+        result_list = note_list
+        
     # basemodel 검색
     tmp_basemodels = list()
     if shortcut_basemodels:
@@ -487,111 +553,7 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
             else:
                 shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
 
-    return shotcutlist  
-    
-# def get_image_list_prev(shortcut_types=None, search=None, shortcut_basemodels=None)->str:
-    
-#     ISC = load()
-#     if not ISC:
-#         return
-    
-#     result_list = list()        
-
-#     keys, tags, clfs = util.get_search_keyword(search)    
-#     # keys, tags, clfs, filenames = util.get_search_keyword(search)
-#     # util.printD(f"keys:{keys} ,tags:{tags},clfs:{clfs}")
-    
-#     # classification        
-#     if clfs:        
-#         clfs_list = list()
-#         CISC = classification.load()
-#         if CISC:
-#             for name in clfs:
-#                 name_list = classification.get_shortcut_list(CISC,name)
-#                 if name_list:
-#                     clfs_list.extend(name_list)
-#             clfs_list = list(set(clfs_list))
-            
-#         if len(clfs_list) > 0:
-#             for mid in clfs_list:
-#                 if str(mid) in ISC.keys():
-#                     result_list.append(ISC[str(mid)])
-#     else:
-#         result_list = ISC.values()
-
-#     # keys, tags = util.get_search_keyword(search)
-#     # result_list = ISC.values()
-            
-#     # type 을 걸러내자
-#     tmp_types = list()
-#     if shortcut_types:
-#         for sc_type in shortcut_types:
-#             try:
-#                 tmp_types.append(setting.ui_typenames[sc_type])
-#             except:
-#                 pass
-                
-#     if tmp_types:
-#         result_list = [v for v in result_list if v['type'] in tmp_types]
-          
-#     # key를 걸러내자
-#     if keys:
-#         key_list = list()
-#         for v in result_list:
-#             if v:
-#                 for key in keys:
-#                     if key in v['name'].lower():
-#                         key_list.append(v)
-#                         break                    
-#         result_list = key_list
-
-#     # tags를 걸러내자
-#     if tags:
-#         tags_list = list()
-#         for v in result_list:
-#             if v:
-#                 if "tags" not in v.keys():
-#                     continue                     
-#                 # v_tags = [tag["name"].lower() for tag in v["tags"]]
-#                 v_tags = [tag.lower() for tag in v["tags"]]
-#                 common_tags = set(v_tags) & set(tags)
-#                 if common_tags:
-#                     tags_list.append(v)
-#         result_list = tags_list
-
-#     # basemodel 검색
-#     tmp_basemodels = list()
-#     if shortcut_basemodels:
-#         tmp_basemodels.extend(shortcut_basemodels)
-#         result_list = [v for v in result_list if is_baseModel(str(v['id']), tmp_basemodels)]        
-            
-#     # filename검색
-#     # if filenames:
-#     #     filenames_list = list()
-#     #     for v in result_list:
-#     #         if v:
-#     #             if "id" not in v.keys():
-#     #                 continue
-                
-#     #             v_filenames = get_model_filenames(v["id"])
-#     #             common_filenames = set(v_filenames) & set(filenames)
-#     #             if common_filenames:
-#     #                 filenames_list.append(v)
-#     #     result_list = filenames_list    
-    
-#     # name을 기준으로 정렬
-#     result_list = sorted(result_list, key=lambda x: x["name"].lower().strip(), reverse=False)
-    
-#     # 썸네일이 있는지 판단해서 대체 이미지 작업
-#     shotcutlist = list()
-#     for v in result_list:
-#         if v:
-#             if is_sc_image(v['id']):
-#                 shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
-#             else:
-#                 shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
-
-#     return shotcutlist                
+    return shotcutlist               
 
 def create_thumbnail(model_id, input_image_path):
     global thumbnail_max_size
@@ -722,7 +684,8 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                 "nsfw" : model_info['nsfw'],
                 "url": f"{civitai.Url_ModelId()}{model_id}",
                 "versionid" : def_id,
-                "imageurl" : def_image
+                "imageurl" : def_image,
+                "note" : ""
         }
 
         # ISC[str(model_id)] = cis

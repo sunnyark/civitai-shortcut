@@ -67,6 +67,9 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.5.8
+* Add a 'Personal Note' section to the model information, and make it searchable using '@' in the search.
+
 v 1.5.7
 * The functionality to filter using the base model provided by Civitai has been added.
 * I changed the classification categories to be selected from a dropdown list instead of searching in the search section. The selected classification categories will work as an 'AND' operation, meaning they will function as an intersection. This way, we can manage shortcuts that are classified under multiple categories in a more detailed manner

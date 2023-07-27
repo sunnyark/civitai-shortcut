@@ -34,6 +34,20 @@ def is_classifications(classification):
                 
     return False
 
+def update_recipe_shortcuts(recipe, shortcuts:list):
+    if not recipe:
+        return
+    
+    RecipeCollection = load()
+    RecipeCollection = update_shortcuts(RecipeCollection, recipe, shortcuts)    
+    save(RecipeCollection)
+
+    if RecipeCollection:
+        if recipe in RecipeCollection:
+            return True
+        
+    return False
+
 def update_recipe_image(recipe, image):
     if not recipe:
         return
@@ -131,6 +145,24 @@ def get_list(key=None):
     return result
 
 #================= raw ===================================
+def update_shortcuts(RecipeCollection:dict, recipe, shortcuts:list):
+
+    if not RecipeCollection:
+        return RecipeCollection
+    
+    if not recipe:
+        return RecipeCollection   
+       
+    if recipe not in RecipeCollection:
+        return RecipeCollection
+    
+    if not shortcuts:
+        return RecipeCollection
+        
+    RecipeCollection[recipe]['shortcuts'] = shortcuts        
+            
+    return RecipeCollection
+
 def update_image(RecipeCollection:dict, recipe, image):
 
     if not RecipeCollection:
@@ -227,8 +259,9 @@ def create(RecipeCollection:dict, recipe, desc, prompt=None, classification=None
             RecipeCollection[recipe] = {
                 "description": desc,                 
                 "generate": prompt,
-                "classification":classification,
-                "image": None
+                "classification": classification,
+                "image": None,
+                "shortcuts":[]
             } 
             
     return RecipeCollection
@@ -262,9 +295,9 @@ def update(RecipeCollection:dict, recipe, name, desc, prompt=None, classificatio
             sc = {
                 "description": desc,                 
                 "generate": prompt,
-                "classification":classification,
-                "image": None
-            }                         
+                "classification": classification
+                # "image": None
+            }
             RecipeCollection[name] = sc
             
     return RecipeCollection
