@@ -9,7 +9,6 @@ from . import setting
 from modules import scripts, script_callbacks, shared    
             
 def on_setting_ui():
-            
     with gr.Column(): 
         with gr.Row():
             with gr.Accordion("Option", open=False):    
@@ -25,7 +24,8 @@ def on_setting_ui():
                 with gr.Row():                                                
                     info_gallery_height = gr.Dropdown(choices=["auto","fit"], value=setting.information_gallery_height, allow_custom_value=True, interactive=True, info="You can also specify a specific size other than 'auto' or 'fit'" , label="Information Gallery Height")                    
                     gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, interactive=True, info="This specifies the shape of the displayed thumbnail." , label="Gallery Thumbnail Image Style")
-                                        
+                    shortcut_browser_search_up = gr.Dropdown(choices=["Up","Down"], value="Up" if setting.shortcut_browser_search_up else "Down", interactive=True, label="Set the position of the search bar in the shortcut browser.", info="If you select 'Up', the search bar will be placed above the thumbnail pane.")
+                    
         with gr.Row():
             with gr.Accordion("Shortcut Browser and Information Images", open=False):    
                 with gr.Row():
@@ -79,6 +79,7 @@ def on_setting_ui():
             usergallery_images_page_limit,            
             shortcut_max_download_image_per_version,
             gallery_thumbnail_image_style,
+            shortcut_browser_search_up,
             extension_locon_folder,
             extension_wildcards_folder,
             extension_controlnet_folder,
@@ -86,7 +87,7 @@ def on_setting_ui():
             extension_poses_folder,
             extension_other_folder,
             download_images_folder,
-            classification_preview_mode_disable 
+            classification_preview_mode_disable             
         ],
         show_progress=False
     )
@@ -120,6 +121,7 @@ def on_setting_ui():
             usergallery_images_page_limit,            
             shortcut_max_download_image_per_version,
             gallery_thumbnail_image_style,
+            shortcut_browser_search_up,
             extension_locon_folder,
             extension_wildcards_folder,
             extension_controlnet_folder,
@@ -140,6 +142,7 @@ def on_save_btn_click(shortcut_update_when_start,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
+                      shortcut_browser_search_up,
                       locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
                       classification_preview_mode_disable
                       ):    
@@ -150,6 +153,7 @@ def on_save_btn_click(shortcut_update_when_start,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
+                      shortcut_browser_search_up,
                       locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
                       classification_preview_mode_disable
                       )    
@@ -160,12 +164,15 @@ def save_setting(shortcut_update_when_start,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
+                      shortcut_browser_search_up,
                       locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
                       classification_preview_mode_disable
                       ):    
     
-    environment = dict()    
-    
+    environment = setting.load()
+    if not environment:
+         environment = dict()        
+         
     application_allow = dict()    
     application_allow['shortcut_update_when_start'] = shortcut_update_when_start
     application_allow['shortcut_max_download_image_per_version'] = shortcut_max_download_image_per_version
@@ -175,6 +182,7 @@ def save_setting(shortcut_update_when_start,
     screen_style['shortcut_browser_screen_split_ratio'] = scbrowser_screen_split_ratio
     screen_style['information_gallery_height'] = info_gallery_height
     screen_style['gallery_thumbnail_image_style'] = gallery_thumbnail_image_style
+    screen_style['shortcut_browser_search_up'] = True if shortcut_browser_search_up == "Up" else False
     environment['screen_style'] = screen_style
     
     image_style = dict()
@@ -256,6 +264,7 @@ def on_refresh_setting_change():
             setting.usergallery_images_page_limit,\
             setting.shortcut_max_download_image_per_version,\
             setting.gallery_thumbnail_image_style,\
+            "Up" if setting.shortcut_browser_search_up else "Down",\
             setting.model_folders['LoCon'],\
             setting.model_folders['Wildcards'],\
             setting.model_folders['Controlnet'],\

@@ -67,6 +67,13 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.6.0
+* Adding NSFW Filter function
+* Revamping prompt recipe
+* Adding a tab to register reference models in the prompt recipe
+* Enhancing the search function for prompt recipes
+* Added a setting in the shortcut browser to allow users to change the position of the search bar to their desired location, either above or below the thumbnail list.
+
 v 1.5.8
 * Add a 'Personal Note' section to the model information, and make it searchable using '@' in the search.
 
