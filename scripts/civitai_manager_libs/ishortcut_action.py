@@ -15,11 +15,14 @@ from . import downloader
 
 def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     with gr.Column(scale=3):    
-        with gr.Accordion("#", open=True) as model_title_name:               
+        with gr.Accordion("#", open=True) as model_title_name:    
+            # with gr.Row():
+            #     nsfw_level = gr.Dropdown(label="NSFW LEVEL", choices=["None","Soft","Mature","X"], interactive=True, value="None")
+            # with gr.Row():           
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.NORESULT], interactive=True, value=setting.NORESULT)             
 
         with gr.Tabs():
-            with gr.TabItem("Images" , id="Model_Images"):                                 
+            with gr.TabItem("Images" , id="Model_Images"):    
                 saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
@@ -877,10 +880,17 @@ def get_version_description_gallery(version_info):
         for ver in ver_images:
             description_img = setting.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
             meta_string = ""
+            
+            # NSFW filtering ....
+            if setting.NSFW_filtering_enable:
+                if not setting.NSFW_level[ver["nsfw"]]:
+                    description_img = setting.nsfw_disable_image
+                    meta_string = ""
+                    
             if os.path.isfile(description_img):               
                 meta_string = util.convert_civitai_meta_to_stable_meta(ver['meta'])
                 images_url.append(description_img)
-                images_meta.append(meta_string)                    
+                images_meta.append(meta_string)
     except:
         return None, None
                 

@@ -4,6 +4,80 @@ import json
 from . import util
 from . import setting
 
+def get_list(search=None, classification=None, shortcuts=None):    
+
+    RecipeCollection = load()                           
+    if not RecipeCollection:
+        return
+                
+    result_list = dict()
+    
+    keys, descs, notes = util.get_search_keyword(search)
+
+    # filtering classification
+    for name, v in RecipeCollection.items():
+        if classification:
+            if v['classification'] and classification == v['classification']:
+                result_list[name] = v
+        else:
+            result_list[name] = v
+
+    # filtering shortcuts
+    if shortcuts:
+        shortcut_list = dict()
+        for name, v in result_list.items():
+            if 'shortcuts' in v.keys():
+                different_shortcuts = set(shortcuts) - set(v["shortcuts"])
+                if not different_shortcuts:
+                    shortcut_list[name]= v
+                                        
+        result_list = shortcut_list    
+    
+    # filtering key
+    if keys:
+        key_list = dict()
+        for name, v in result_list.items():
+            for key in keys:
+                if key in name.lower():
+                    key_list[name] = v
+                    break                    
+        result_list = key_list
+    
+    # filtering descs
+    if descs:
+        desc_list = dict()
+        for name, v in result_list.items():            
+            if not v['description']:
+                continue
+
+            for desc in descs:                    
+                if desc in v['description'].lower():
+                    desc_list[name] = v
+                    break                    
+        result_list = desc_list        
+    
+    # 필요한것으로 변환
+    recipelist = list()
+    for name in result_list.keys():
+        recipelist.append(name)
+
+    return recipelist  
+
+def get_reference_shortcuts():    
+    RecipeCollection = load()
+    reference_shortcuts = list()
+    
+    if not RecipeCollection:        
+        return reference_shortcuts
+    
+    for v in RecipeCollection.values():
+        if 'shortcuts' in v.keys():
+            reference_shortcuts.extend(v['shortcuts'])
+                
+    reference_shortcuts = list(set(reference_shortcuts))
+        
+    return reference_shortcuts
+
 def get_classifications():    
     RecipeCollection = load()
     classifications = list()
@@ -33,6 +107,17 @@ def is_classifications(classification):
         pass
                 
     return False
+
+def get_recipe_shortcuts(recipe):
+    if not recipe:
+        return None
+    
+    RecipeCollection = load()
+    if recipe in RecipeCollection:
+        if 'shortcuts' in RecipeCollection[recipe]:
+            return RecipeCollection[recipe]['shortcuts']
+            
+    return None
 
 def update_recipe_shortcuts(recipe, shortcuts:list):
     if not recipe:
@@ -118,31 +203,6 @@ def get_recipe(s_name):
         return RecipeCollection[s_name]
     
     return None
-
-# def get_list():
-    
-#     RecipeCollection = load()                           
-    
-#     tmp_recipe_name = []
-#     if RecipeCollection:   
-#         tmp_recipe_name = [k for k in RecipeCollection.keys()]
-    
-#     return tmp_recipe_name
-
-def get_list(key=None):    
-
-    RecipeCollection = load()                           
-            
-    result = []
-    if RecipeCollection:   
-        for name, value in RecipeCollection.items():
-            if key:
-                if value['classification'] and key == value['classification']:
-                    result.append(name)
-            else:
-                result.append(name)
-
-    return result
 
 #================= raw ===================================
 def update_shortcuts(RecipeCollection:dict, recipe, shortcuts:list):

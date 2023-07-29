@@ -70,6 +70,13 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.6.0
+* NSFW Filter 기능 추가
+* prompt recipe 리뉴얼
+* prompt recipe에 reference model을 등록 할수 있는 tab추가
+* prompt recipe 검색기능 보강
+* shortcut broswer의 검색창의 위치를 섬네일 목록의 상/하중 원하는 위치로 변경할 수 있도록 setting 에 추가.
+ 
 v 1.5.8
 * 모델 인포메이션에 personal note 항목을 추가, 검색에서 "@" 를 이용해서 검색가능
 

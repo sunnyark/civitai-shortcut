@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "v 1.5.8"
+Extensions_Version = "v 1.6.0"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -24,7 +24,7 @@ CREATE_MODEL_FOLDER = "Create a model folder to download the model"
 
 model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 
-model_basemodels = ("SD 1.4", "SD 1.5", "SD 2.0", "SD 2.0 768", "SD 2.1", "SD 2.1 768", "SD 2.1 Unclip", "SDXL 0.9", "Other")
+model_basemodels = ("SD 1.4", "SD 1.5", "SD 2.0", "SD 2.0 768", "SD 2.1", "SD 2.1 768", "SD 2.1 Unclip", "SDXL 0.9", "SDXL 1.0", "Other")
 
 # civitai model type -> folder path
 model_folders = {
@@ -101,6 +101,8 @@ information_gallery_height = "auto" # auto , fit
 shortcut_browser_screen_split_ratio = 3
 shortcut_browser_screen_split_ratio_max  = 10
 
+shortcut_browser_search_up = False
+
 # 갤러리 ui설정
 gallery_column = 7
 shortcut_column = 5  
@@ -135,9 +137,65 @@ shortcut_info_folder =  "sc_infos"
 shortcut_gallery_folder =  "sc_gallery"
 
 no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
+nsfw_disable_image = os.path.join(extension_base,"img","nsfw-no-preview.png")
+
+NSFW_filtering_enable = True 
+NSFW_level = { "None":True, "Soft":False, "Mature":False, "X":False } # None, Soft, Mature, X
 
 shortcut_env = dict()
 
+def set_NSFW(enable, level="None"):
+    global NSFW_filtering_enable
+    global NSFW_level
+    
+    NSFW_filtering_enable = enable
+    
+    if level == "Soft":
+        NSFW_level["None"] = True
+        NSFW_level["Soft"] = True
+        NSFW_level["Mature"] = False
+        NSFW_level["X"] = False  
+    elif level == "Mature":
+        NSFW_level["None"] = True
+        NSFW_level["Soft"] = True
+        NSFW_level["Mature"] = True
+        NSFW_level["X"] = False  
+    elif level == "X":
+        NSFW_level["None"] = True
+        NSFW_level["Soft"] = True
+        NSFW_level["Mature"] = True
+        NSFW_level["X"] = True        
+    else:
+        # level == 1
+        NSFW_level["None"] = True
+        NSFW_level["Soft"] = False
+        NSFW_level["Mature"] = False
+        NSFW_level["X"] = False
+
+def get_NSFW_Level():
+    prev = "None"
+    for level, v in NSFW_level.items():
+        if not v:
+            return prev
+        else:
+            prev = level
+    
+    return prev
+
+def save_NSFW():
+    global NSFW_filtering_enable
+
+    environment = load()
+    if not environment:
+         environment = dict()  
+             
+    nsfw_filter = dict()    
+    nsfw_filter['nsfw_filter_enable'] = NSFW_filtering_enable
+    nsfw_filter['nsfw_level'] = get_NSFW_Level()
+    environment['NSFW_filter'] = nsfw_filter   
+    
+    save(environment)
+         
 def init():
     global extension_base
     
@@ -162,7 +220,7 @@ def init():
     shortcut_recipe_folder = os.path.join(extension_base,shortcut_recipe_folder)
     shortcut_info_folder = os.path.join(extension_base,shortcut_info_folder)
     shortcut_gallery_folder = os.path.join(extension_base,shortcut_gallery_folder)
-
+    
     load_data()        
 
 def load_data():
@@ -176,7 +234,8 @@ def load_data():
     global usergallery_images_page_limit
     global shortcut_max_download_image_per_version
     global gallery_thumbnail_image_style
-
+    global shortcut_browser_search_up
+    
     global download_images_folder
     global shortcut_browser_screen_split_ratio
     global information_gallery_height
@@ -198,7 +257,15 @@ def load_data():
                 
     environment = load()
     if environment:
+        if "NSFW_filter" in  environment.keys():
+            nsfw_filter = environment['NSFW_filter']
+            filtering_enable = True
+            if 'nsfw_filter_enable' in nsfw_filter.keys():
+                filtering_enable = bool(nsfw_filter['nsfw_filter_enable'])       
                 
+            if 'nsfw_level' in  nsfw_filter.keys():
+                set_NSFW(filtering_enable, nsfw_filter['nsfw_level'])
+            
         if "application_allow" in environment.keys():
             application_allow = environment['application_allow']
 
@@ -217,6 +284,8 @@ def load_data():
                     information_gallery_height = screen_style['information_gallery_height']
             if "gallery_thumbnail_image_style" in screen_style.keys():
                 gallery_thumbnail_image_style = screen_style['gallery_thumbnail_image_style']
+            if "shortcut_browser_search_up" in screen_style.keys():
+                shortcut_browser_search_up = bool(screen_style['shortcut_browser_search_up'])
                         
         if "image_style" in environment.keys():
             image_style = environment['image_style']

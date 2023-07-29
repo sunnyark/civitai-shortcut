@@ -43,13 +43,15 @@ def civitai_shortcut_ui():
     with gr.Tabs(elem_id="civitai_shortcut_tabs_container") as civitai_tabs:
         with gr.Row(visible=False):
             recipe_input = gr.Textbox()
+            shortcut_input = gr.Textbox()
+            
         with gr.TabItem("Civitai Shortcut" , id="Shortcut"):
             with gr.Row():
-                refresh_civitai_sc_browser, refresh_civitai_information = civitai_shortcut_action.on_ui(recipe_input)
+                refresh_civitai_sc_browser, refresh_civitai_information = civitai_shortcut_action.on_ui(recipe_input, shortcut_input, civitai_tabs)
 
         with gr.TabItem("Prompt Recipe" , id="Recipe"):
             with gr.Row():
-                refresh_recipe = recipe_action.on_ui(recipe_input, civitai_tabs)
+                refresh_recipe = recipe_action.on_ui(recipe_input, shortcut_input, civitai_tabs)
 
         with gr.TabItem("Assistance" , id="Assistance"):
             with gr.Tabs() as civitai_assistance_tabs:

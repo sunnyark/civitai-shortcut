@@ -9,10 +9,14 @@ from . import setting
 from . import recipe
 from . import prompt
 # from . import prompt_ui
+from . import sc_browser_page
+from . import ishortcut
+
+from . import recipe_browser_page
 
 from PIL import Image
-    
-def on_ui(recipe_input, civitai_tabs):   
+                
+def on_ui(recipe_input, shortcut_input, civitai_tabs):   
 
     # data = '''Best quality, masterpiece, ultra high res, (photorealistic:1.4),girl, beautiful_face, detailed skin,upper body, <lora:caise2-000022:0.6>
     # Negative prompt: ng_deepnegative_v1_75t, badhandv4 (worst quality:2), (low quality:2), (normal quality:2), lowres, bad anatomy, bad hands, normal quality, ((monochrome)), ((grayscale)), ng_deepnegative_v1_75t, badhandv4 (worst quality:2), (low quality:2), (normal quality:2), lowres, bad anatomy, bad hands, normal quality, ((monochrome)), ((grayscale)),
@@ -23,14 +27,15 @@ def on_ui(recipe_input, civitai_tabs):
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs():
             with gr.TabItem("Prompt Recipe List"):
-                recipe_classification_list = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)
-                recipe_list = gr.Dropdown(label="Prompt Recipe List", choices=[setting.NEWRECIPE] + recipe.get_list(), value=setting.NEWRECIPE, interactive=True, multiselect=None)
-                recipe_drop_image = gr.Image(type="pil", label="Drop image").style(height='100%')                       
+                recipe_new_btn = gr.Button(value="New Recipe", variant="primary")
+                recipe_list, recipe_gallery, refresh_recipe_browser = recipe_browser_page.on_ui()
+            with gr.TabItem("Generate Prompt From Image"):
+                recipe_drop_image = gr.Image(type="pil", label="Drop image").style(height='100%')
 
     with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):       
         with gr.Accordion(label=setting.NEWRECIPE, open=True) as recipe_title_name: 
             with gr.Row():
-                with gr.Column(scale=5):
+                with gr.Column(scale=4):
                     recipe_name = gr.Textbox(label="Name", value="", interactive=True, lines=1, placeholder="Please enter the prompt recipe name.").style(container=True)
                     recipe_desc = gr.Textbox(label="Description", value="",interactive=True, lines=3, placeholder="Please enter the prompt recipe description.").style(container=True, show_copy_button=True)
                     recipe_prompt = gr.Textbox(label="Prompt", placeholder="Prompt", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
@@ -50,32 +55,76 @@ def on_ui(recipe_input, civitai_tabs):
                         recipe_update_btn = gr.Button(value="Update", variant="primary", visible=False)
                         with gr.Accordion("Delete Prompt Recipe", open=False):
                             recipe_delete_btn = gr.Button(value="Delete", variant="primary")                        
-                with gr.Column(scale=2):
+                with gr.Column(scale=2):                    
                     gr.Markdown("###")
-                    recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image").style(height='100%')
-                    gr.Markdown("This image does not influence the prompt on the left. You can choose any image that matches the created prompt.")
-                    # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
+                    with gr.Tabs():
+                        with gr.TabItem("Reference Image"):
+                            recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image").style(height='100%')
+                            gr.Markdown("This image does not influence the prompt on the left. You can choose any image that matches the created prompt.")
+                            # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
+                        with gr.TabItem("Reference Models"):
+                            reference_gallery = gr.Gallery(elem_id="reference_gallery", show_label=False).style(grid=[2], height="full", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+                            reference_delete = gr.Checkbox(label="Delete from references when selecting a thumbnail.", value=False)
+                            with gr.Accordion("Add Reference Shortcut Items", open=False):
+                                reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui()
                 
     with gr.Row(visible=False):
-        refresh_recipe = gr.Textbox()
-        recipe_generate_data = gr.Textbox()
+        selected_recipe_name = gr.Textbox()
         
+        refresh_recipe = gr.Textbox()
+        recipe_generate_data = gr.Textbox()        
+        
+        reference_shortcuts = gr.State()
+        refresh_reference_gallery = gr.Textbox()
     try:
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, recipe_image, recipe_output)
     except:
         pass
+                
+    # reference shortcuts
+    reference_gallery.select(
+        fn=on_reference_gallery_select,
+        inputs=[
+            reference_shortcuts,
+            reference_delete
+        ],
+        outputs=[
+            reference_shortcuts,
+            refresh_reference_gallery,
+            reference_gallery,
+            shortcut_input
+        ],
+        show_progress=False
+    )   
+    
+    refresh_reference_gallery.change(
+        fn=on_reference_gallery_loading,
+        inputs=[
+            reference_shortcuts,
+        ],
+        outputs=[
+            reference_gallery
+        ],
+        show_progress=False
+    )
+        
+    reference_sc_gallery.select(
+        fn=on_reference_sc_gallery_select,
+        inputs=[
+            reference_shortcuts
+        ],
+        outputs=[
+            reference_shortcuts,            
+            refresh_reference_gallery,
+        ],
+        show_progress=False        
+    )        
+    # reference shortcuts
     
     recipe_prompt.blur(generate_prompt,[recipe_prompt,recipe_negative,recipe_option],recipe_output)
     recipe_negative.blur(generate_prompt,[recipe_prompt,recipe_negative,recipe_option],recipe_output)
     recipe_option.blur(generate_prompt,[recipe_prompt,recipe_negative,recipe_option],recipe_output)
-    recipe_classification_list.change(
-        fn=on_recipe_classification_list_change,
-        inputs=recipe_classification_list,
-        outputs=[
-            recipe_list
-        ]
-    )
-
+    
     # 이렇게 합시다.
     # send to reciepe -> recipe_input : input drop image, reciep image, call recipe_generate_data(drop image) -> recipe_generate_data: img info 생성 ,분석, 갱신
     # drop image -> recipe_drop_image.upload(drop image) : reciep image, call recipe_generate_data(drop image) -> recipe_generate_data: img info 생성 ,분석, 갱신
@@ -101,6 +150,8 @@ def on_ui(recipe_input, civitai_tabs):
             recipe_input
         ],
         outputs=[
+            selected_recipe_name,
+            
             recipe_drop_image,
             recipe_image,
             recipe_generate_data,
@@ -108,13 +159,14 @@ def on_ui(recipe_input, civitai_tabs):
             civitai_tabs,
 
             # 새 레시피 상태로 만든다.
-            recipe_list,
             recipe_name,
             recipe_desc,
             recipe_classification,
             recipe_title_name,
             recipe_create_btn,
-            recipe_update_btn                    
+            recipe_update_btn,
+            reference_shortcuts,
+            refresh_reference_gallery            
         ],
         cancels=recipe_drop_image_upload
     )  
@@ -134,32 +186,42 @@ def on_ui(recipe_input, civitai_tabs):
               
     refresh_recipe.change(
         fn=on_refresh_recipe_change,
-        inputs=[
-            recipe_classification_list,
-            recipe_list
-        ],
+        inputs=None,
         outputs=[
-            recipe_classification_list,
-            recipe_list,
-            # recipe_name,
-            # recipe_desc,
-            # recipe_prompt,
-            # recipe_negative,                        
-            # recipe_option,
-            # recipe_output,
-            # recipe_classification,
-            # recipe_title_name,
-            # recipe_image,
-            # recipe_create_btn,
-            # recipe_update_btn
+            refresh_reference_sc_browser,
+            refresh_recipe_browser
         ],
         show_progress=False
     )
 
-    recipe_list.select(    
-        fn=on_recipe_list_select,
+    # recipe_list.select(    
+    #     fn=on_recipe_list_select,
+    #     inputs=None,
+    #     outputs=[
+    #         selected_recipe_name,
+    #         recipe_name,
+    #         recipe_desc,
+    #         recipe_prompt,
+    #         recipe_negative,
+    #         recipe_option,            
+    #         recipe_output,
+    #         recipe_classification,
+    #         recipe_title_name,
+    #         recipe_image,
+    #         recipe_drop_image,
+    #         recipe_create_btn,
+    #         recipe_update_btn,
+    #         reference_shortcuts,
+    #         refresh_reference_gallery                             
+    #     ],
+    #     cancels=recipe_drop_image_upload
+    # )
+
+    recipe_gallery.select(
+        fn=on_recipe_gallery_select,
         inputs=None,
         outputs=[
+            selected_recipe_name,
             recipe_name,
             recipe_desc,
             recipe_prompt,
@@ -171,67 +233,90 @@ def on_ui(recipe_input, civitai_tabs):
             recipe_image,
             recipe_drop_image,
             recipe_create_btn,
-            recipe_update_btn            
+            recipe_update_btn,
+            reference_shortcuts,
+            refresh_reference_gallery                             
         ],
         cancels=recipe_drop_image_upload
+    )  
+    
+    recipe_new_btn.click(
+        fn=on_recipe_new_btn_click,
+        inputs=None,
+        outputs=[
+            selected_recipe_name,
+            recipe_name,
+            recipe_desc,
+            recipe_prompt,
+            recipe_negative,
+            recipe_option,            
+            recipe_output,
+            recipe_classification,
+            recipe_title_name,
+            recipe_image,
+            recipe_drop_image,
+            recipe_create_btn,
+            recipe_update_btn,
+            reference_shortcuts,
+            refresh_reference_gallery          
+        ]
     )
-
+        
     recipe_create_btn.click(
         fn=on_recipe_create_btn_click,
         inputs=[
-            recipe_classification_list,
             recipe_name,
             recipe_desc,
             recipe_prompt,
             recipe_negative,
             recipe_option,
             recipe_classification,
-            recipe_image
+            recipe_image,
+            reference_shortcuts
         ],
         outputs=[
-            recipe_classification_list,
-            recipe_list,
+            selected_recipe_name,            
             recipe_classification,
             recipe_title_name,
             recipe_create_btn,
-            recipe_update_btn              
+            recipe_update_btn,
+            refresh_recipe_browser            
         ]
     )
             
     recipe_update_btn.click(
         fn=on_recipe_update_btn_click,
         inputs=[
-            recipe_classification_list,
-            recipe_list,
+            selected_recipe_name,
             recipe_name,
             recipe_desc,
             recipe_prompt,
             recipe_negative,
             recipe_option,
             recipe_classification,
-            recipe_image
+            recipe_image,
+            reference_shortcuts
         ],
         outputs=[
-            recipe_classification_list,
-            recipe_list,
+            selected_recipe_name,
             recipe_classification,
-            recipe_title_name,          
+            recipe_title_name,
+            refresh_recipe_browser                      
         ]        
     )
 
     recipe_delete_btn.click(
         fn=on_recipe_delete_btn_click,
         inputs=[
-            recipe_classification_list,
-            recipe_list,
+            selected_recipe_name            
         ],
-        outputs=[
-            recipe_classification_list,
-            recipe_list,
+        outputs=[            
+            selected_recipe_name,
             recipe_classification,
             recipe_title_name,
             recipe_create_btn,
-            recipe_update_btn
+            recipe_update_btn,
+            refresh_recipe_browser            
         ]        
     )
         
@@ -329,17 +414,19 @@ def get_recipe_information(select_name):
     return description, Prompt, negativePrompt, options, gen_string, classification, imagefile
 
 def on_recipe_input_change(recipe_input):
-    if recipe_input:
-        current_time = datetime.datetime.now()
-        return recipe_input, recipe_input, current_time, None, gr.update(selected="Recipe"),\
-            gr.update(value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), \
+    current_time = datetime.datetime.now()
+    if recipe_input:        
+        return gr.update(value=""), recipe_input, recipe_input, current_time, None, gr.update(selected="Recipe"),\
+            gr.update(value=""), gr.update(value=""), \
             gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
-            gr.update(visible=True), gr.update(visible=False)            
+            gr.update(visible=True), gr.update(visible=False),\
+            None, current_time            
     
-    return gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),gr.update(selected="Recipe"),\
-        gr.update(visible=True), gr.update(value=""), gr.update(value=""), \
+    return gr.update(visible=False),gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),gr.update(selected="Recipe"),\
+        gr.update(value=""), gr.update(value=""), \
         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
-        gr.update(visible=True), gr.update(visible=False)
+        gr.update(visible=True), gr.update(visible=False),\
+        None, current_time
     
 def on_recipe_drop_image_upload(recipe_img):
     if recipe_img:
@@ -359,42 +446,50 @@ def on_recipe_generate_data_change(recipe_img):
         return gr.update(value=positivePrompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string)            
     return gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value="")
         
-def on_recipe_classification_list_change(recipe_classification):
-    if recipe_classification and recipe_classification != setting.PLACEHOLDER:
-        return gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(recipe_classification))
-    return gr.update(choices=[setting.NEWRECIPE] + recipe.get_list())    
+def on_refresh_recipe_change():    
+    current_time = datetime.datetime.now()
+    return current_time, current_time
 
-def on_refresh_recipe_change(selected_classification, select_name):    
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list())
-        
-# def on_refresh_recipe_change(select_classification, select_name):    
-#     if select_name != setting.NEWRECIPE:
-        
-#         description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
+# def on_recipe_list_select(evt: gr.SelectData):
+#     current_time = datetime.datetime.now()
+#     select_name = evt.value
+    
+#     description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
+    
+#     if imagefile:
 #         if not os.path.isfile(imagefile):
 #             imagefile = None
-                                                    
-#         return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=select_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(select_classification) if select_classification != setting.PLACEHOLDER else recipe.get_list(), value=select_name),gr.update(value=select_name), gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification) ,gr.update(label=select_name),imagefile,\
-#             gr.update(visible=False), gr.update(visible=True)
-#     return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=select_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(select_classification) if select_classification != setting.PLACEHOLDER else recipe.get_list(), value=setting.NEWRECIPE), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),None,\
-#         gr.update(visible=True), gr.update(visible=False)
+    
+#     shortcuts = recipe.get_recipe_shortcuts(select_name)                 
+    
+#     return gr.update(value=select_name),gr.update(value=select_name),gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(label=select_name),imagefile,None,\
+#         gr.update(visible=False), gr.update(visible=True),\
+#         shortcuts, current_time
 
-def on_recipe_list_select(evt: gr.SelectData):
-    if evt.value != setting.NEWRECIPE:
-        select_name = evt.value
+def on_recipe_gallery_select(evt: gr.SelectData):
+    current_time = datetime.datetime.now()
+    select_name = evt.value
+    
+    description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
+    
+    if imagefile:
+        if not os.path.isfile(imagefile):
+            imagefile = None
+    
+    shortcuts = recipe.get_recipe_shortcuts(select_name)                 
+    
+    return gr.update(value=select_name),gr.update(value=select_name),gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(label=select_name),imagefile,None,\
+        gr.update(visible=False), gr.update(visible=True),\
+        shortcuts, current_time
+                
+def on_recipe_new_btn_click():
+    current_time = datetime.datetime.now()
+    return gr.update(value=""),gr.update(value=""),gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE), None, None,\
+        gr.update(visible=True), gr.update(visible=False),\
+        None, current_time
         
-        description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
-        
-        if imagefile:
-            if not os.path.isfile(imagefile):
-                imagefile = None
-            
-        return gr.update(value=select_name),gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(label=select_name),imagefile,None,\
-            gr.update(visible=False), gr.update(visible=True)
-    return gr.update(value=""),gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE), None, None,\
-        gr.update(visible=True), gr.update(visible=False)
-
-def on_recipe_create_btn_click(selected_classification, recipe_name, recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None):    
+def on_recipe_create_btn_click(recipe_name, recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None, recipe_shortcuts=None):  
+    current_time = datetime.datetime.now()  
     s_classification = setting.PLACEHOLDER
     if recipe_name and len(recipe_name.strip()) > 0 and recipe_name != setting.NEWRECIPE:
         pmt = dict()
@@ -421,20 +516,23 @@ def on_recipe_create_btn_click(selected_classification, recipe_name, recipe_desc
                 recipe_imgfile = os.path.join(setting.shortcut_recipe_folder,unique_filename)                      
                 recipe_image.save(recipe_imgfile)
                 recipe.update_recipe_image(recipe_name,unique_filename)
-
-            return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications()), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=recipe_name),\
+                recipe.update_recipe_shortcuts(recipe_name, recipe_shortcuts)
+                
+            return gr.update(value=recipe_name),\
                 gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=recipe_name),\
-                gr.update(visible=False),gr.update(visible=True)
-    return gr.update(visible=True), gr.update(visible=True), \
+                gr.update(visible=False),gr.update(visible=True),\
+                current_time
+    return gr.update(value=""),\
         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=setting.NEWRECIPE),\
-        gr.update(visible=True),gr.update(visible=False)
+        gr.update(visible=True),gr.update(visible=False),\
+        gr.update(visible=False)
 
-def on_recipe_update_btn_click(selected_classification, recipe_list, recipe_name ,recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None):    
+def on_recipe_update_btn_click(select_name, recipe_name ,recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None, recipe_shortcuts=None):    
     
     chg_name = setting.NEWRECIPE
     s_classification = setting.PLACEHOLDER
     
-    if recipe_list and recipe_list != setting.NEWRECIPE and recipe_name and recipe_name != setting.NEWRECIPE:
+    if select_name and select_name != setting.NEWRECIPE and recipe_name and recipe_name != setting.NEWRECIPE:
         
         pmt = dict()
         pmt['prompt'] = recipe_prompt
@@ -452,7 +550,7 @@ def on_recipe_update_btn_click(selected_classification, recipe_list, recipe_name
                 recipe_classification = recipe_classification.strip()
                 s_classification = recipe_classification
         
-        if recipe.update_recipe(recipe_list, recipe_name, recipe_desc, pmt, recipe_classification):        
+        if recipe.update_recipe(select_name, recipe_name, recipe_desc, pmt, recipe_classification):        
             chg_name = recipe_name     
             if recipe_image:
                 if not os.path.exists(setting.shortcut_recipe_folder):
@@ -464,24 +562,77 @@ def on_recipe_update_btn_click(selected_classification, recipe_list, recipe_name
             else:
                 recipe.update_recipe_image(recipe_name,None)
 
-        if not recipe.is_classifications(selected_classification):
-            selected_classification = setting.PLACEHOLDER
-                                                            
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=selected_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=chg_name), \
-        gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=chg_name)
+            recipe.update_recipe_shortcuts(recipe_name, recipe_shortcuts)
+                   
+    current_time = datetime.datetime.now()                                   
+    return gr.update(value=chg_name), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=s_classification), gr.update(label=chg_name), current_time
 
-def on_recipe_delete_btn_click(selected_classification, select_name):
-    if select_name and select_name.strip() != setting.NEWRECIPE:
+def on_recipe_delete_btn_click(select_name):
+    if select_name:
         recipe.delete_recipe(select_name)
-        
-        if not recipe.is_classifications(selected_classification):
-            selected_classification = setting.PLACEHOLDER
-        
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=selected_classification), gr.update(choices=[setting.NEWRECIPE] + recipe.get_list(selected_classification) if selected_classification != setting.PLACEHOLDER else recipe.get_list(), value=setting.NEWRECIPE), \
+           
+    current_time = datetime.datetime.now()                                   
+    return gr.update(value=""),\
         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
-        gr.update(visible=True),gr.update(visible=False)
-        
+        gr.update(visible=True),gr.update(visible=False),\
+        current_time
+           
+# reference shortcuts
+def on_reference_gallery_loading(shortcuts):
+    ISC = ishortcut.load()
+    if not ISC:
+        return None
     
+    shotcutlist = list()
+    
+    if shortcuts:
+        result_list = list()
+        for mid in shortcuts:
+            mid = str(mid)
+            if mid in ISC:
+                result_list.append(ISC[mid])
+                
+        for v in result_list:
+            if v:
+                if ishortcut.is_sc_image(v['id']):
+                    shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                else:
+                    shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+
+    return shotcutlist      
+
+def on_reference_sc_gallery_select(evt: gr.SelectData, shortcuts):
+    clf = None
+    current_time = datetime.datetime.now()
+            
+    if evt.value:
+               
+        shortcut = evt.value 
+        sc_model_id = setting.get_modelid_from_shortcutname(shortcut)            
         
+        if not shortcuts:
+            shortcuts = list()
+            
+        if sc_model_id not in shortcuts:
+            shortcuts.append(sc_model_id)
+
+        return shortcuts, current_time
+    return shortcuts, None
+
+def on_reference_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
+    if evt.value:               
+        shortcut = evt.value 
+        sc_model_id = setting.get_modelid_from_shortcutname(shortcut)
+        current_time = datetime.datetime.now()
+            
+        if not shortcuts:
+            shortcuts = list()
+                
+        if sc_model_id in shortcuts:
+            if delete_opt:
+                shortcuts.remove(sc_model_id)
+                    
+        return shortcuts, current_time, None, gr.update(visible=False) if delete_opt else sc_model_id
+    return shortcuts, None, None, gr.update(visible=False)        
             
                 

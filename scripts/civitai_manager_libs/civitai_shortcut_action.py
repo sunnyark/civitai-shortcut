@@ -10,12 +10,16 @@ from . import model_action
 from . import ishortcut_action
 from . import civitai_gallery_action
 
-def on_ui(recipe_input):    
+def on_shortcut_input_change(shortcut_input):
+    return shortcut_input, gr.update(selected="Shortcut")
+        
+def on_ui(recipe_input, shortcut_input, civitai_tabs):    
     with gr.Row(visible=False):       
         
         sc_modelid = gr.Textbox()
         update_informations = gr.Textbox()
         current_information_tabs = gr.State(0)
+        refresh_NSFW = gr.Textbox()
         
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs() as civitai_shortcut_tabs:
@@ -41,7 +45,13 @@ def on_ui(recipe_input):
                         scan_new_version_btn = gr.Button(value="Scan new version model", variant="primary")
                         sc_new_version_gallery = gr.Gallery(label="SC New Version Gallery", elem_id="sc_new_version_gallery", show_label=False).style(grid=[setting.shortcut_column], height="fit", object_fit=setting.gallery_thumbnail_image_style)
                         gr.Markdown(value="The feature is to search for new versions of models on Civitai among the downloaded ones.", visible=True)
-                
+            with gr.TabItem("NSFW Filter"):
+                with gr.Row():
+                    with gr.Column():
+                        nsfw_filter_enable = gr.Dropdown(value='On', choices=['On','Off'], label='NSFW Filtering', interactive=True)
+                        nsfw_level = gr.Dropdown(value=setting.get_NSFW_Level(), choices=setting.NSFW_level.keys(), label='NSFW Filtering Level', visible=True, interactive=True)
+                        nsfw_save_btn = gr.Button(value="Save NSFW Setting", variant="primary", visible=True)
+                        
     with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):
         with gr.Tabs() as civitai_information_tabs:
             with gr.TabItem("Model Information" , id="civitai_info"):
@@ -50,17 +60,67 @@ def on_ui(recipe_input):
 
             with gr.TabItem("User Gallery" , id="gallery_info"):
                 with gr.Row():
-                    gallery_modelid = civitai_gallery_action.on_ui(recipe_input)
+                    gallery_modelid, refresh_gallery_information = civitai_gallery_action.on_ui(recipe_input)
 
             with gr.TabItem("Downloaded Model Information" , id="download_info"):
                 with gr.Row():
                     downloadinfo_modelid , refresh_download_information = model_action.on_ui()
+                    
+    # NSFW Filter Setting Refresh    
+    refresh_NSFW.change(
+        fn=on_refresh_NSFW_change,
+        inputs=None,
+        outputs=[
+            nsfw_filter_enable,
+            nsfw_level
+        ]
+    )
+
+    nsfw_filter_enable.select(
+        fn=on_nsfw_filter,
+        inputs=[
+            nsfw_filter_enable,
+            nsfw_level
+        ],
+        outputs=[
+            nsfw_level,
+            refresh_civitai_information,
+            refresh_gallery_information
+        ]
+    )
+    
+    nsfw_level.select(
+        fn=on_nsfw_filter,
+        inputs=[
+            nsfw_filter_enable,
+            nsfw_level            
+        ],
+        outputs=[
+            nsfw_level,            
+            refresh_civitai_information,
+            refresh_gallery_information
+        ]        
+    )
+    
+    nsfw_save_btn.click(fn=on_nsfw_save_btn_click)
+    
+    # shortcut information 에서 넘어올때는 새로운 레시피를 만든다.
+    shortcut_input.change(
+        fn=on_shortcut_input_change,
+        inputs=[
+            shortcut_input
+        ],
+        outputs=[
+            sc_modelid,
+            civitai_tabs,
+        ], show_progress=False
+    )
     
     scan_new_version_btn.click(on_scan_new_version_btn,shortcut_new_version_type,sc_new_version_gallery)                
     sc_gallery.select(on_sc_gallery_select, None, [sc_modelid], show_progress=False)    
     sc_new_version_gallery.select(on_sc_gallery_select, None, [sc_modelid], show_progress=False)
     update_modelfolder_btn.click(on_update_modelfolder_btn_click,None,refresh_sc_browser)
-    civitai_shortcut_tabs.select(on_civitai_shortcut_tabs_select,None,refresh_sc_browser)
+    civitai_shortcut_tabs.select(on_civitai_shortcut_tabs_select,None,[refresh_sc_browser,refresh_NSFW],show_progress=False)
     
     update_informations.change(
         fn=on_sc_modelid_change,
@@ -125,11 +185,29 @@ def on_ui(recipe_input):
 
     return refresh_sc_browser, refresh_civitai_information
 
+def on_refresh_NSFW_change():
+    if setting.NSFW_filtering_enable:
+        return gr.update(value="On") , gr.update(visible=True, value=setting.get_NSFW_Level())
+    else:
+        return gr.update(value="Off") , gr.update(visible=False, value=setting.get_NSFW_Level())
+
+def on_nsfw_filter(enable, level):
+    current_time = datetime.datetime.now()  
+    setting.set_NSFW(True if enable == "On" else False , level)
+    
+    return gr.update(visible=True if enable == "On" else False, value=level), current_time, current_time
+
+def on_nsfw_save_btn_click():
+    setting.save_NSFW()
+
 def on_civitai_shortcut_tabs_select(evt: gr.SelectData):
     if evt.index == 1:      
         current_time = datetime.datetime.now()  
-        return current_time
-    return gr.update(visible=False)
+        return current_time,gr.update(visible=False)
+    elif evt.index == 3:      
+        current_time = datetime.datetime.now()  
+        return gr.update(visible=False), current_time    
+    return gr.update(visible=False),gr.update(visible=False)
 
 def on_civitai_information_tabs_select(evt: gr.SelectData):
     current_time = datetime.datetime.now()  
