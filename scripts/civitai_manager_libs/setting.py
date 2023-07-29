@@ -136,7 +136,7 @@ shortcut_recipe_folder =  "sc_recipes"
 shortcut_info_folder =  "sc_infos"
 shortcut_gallery_folder =  "sc_gallery"
 
-no_card_preview_image = os.path.join(root_path,"html","card-no-preview.png")
+no_card_preview_image = os.path.join(extension_base,"img","card-no-preview.png")
 nsfw_disable_image = os.path.join(extension_base,"img","nsfw-no-preview.png")
 
 NSFW_filtering_enable = True 

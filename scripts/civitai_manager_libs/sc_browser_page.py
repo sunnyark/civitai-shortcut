@@ -1,5 +1,6 @@
 import gradio as gr
 import math
+import os
 
 from . import util
 from . import setting
@@ -16,48 +17,45 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
     
     total = 0
     max_page = 1
-    shortlist =  ishortcut.get_image_list(shortcut_types, search, shortcut_basemodels, sc_classifications)
-    result = None
+    shortcut_list =  ishortcut.get_image_list(shortcut_types, search, shortcut_basemodels, sc_classifications)
+    shortlist = None
     
-    if not shortlist:
+    if not shortcut_list:
         return None, total, max_page
         
     # if downloaded_sc == DOWNLOADED_MODEL:
     #     if model.Downloaded_Models:                
     #         downloaded_list = list()            
-    #         for short in shortlist:
-    #             sc_name = short[1]
-    #             mid = setting.get_modelid_from_shortcutname(sc_name)
+    #         for short in shortcut_list:
+    #             mid = v['id']
     #             if mid in model.Downloaded_Models.keys():
     #                 downloaded_list.append(short)
-    #         shortlist = downloaded_list
+    #         shortcut_list = downloaded_list
     #     else:
-    #         shortlist = None
+    #         shortcut_list = None
     # elif downloaded_sc == NOT_DOWNLOADED_MODEL:
     #     if model.Downloaded_Models:                
     #         downloaded_list = list()            
-    #         for short in shortlist:
-    #             sc_name = short[1]
-    #             mid = setting.get_modelid_from_shortcutname(sc_name)
+    #         for short in shortcut_list:
+    #             mid = v['id']
     #             if mid not in model.Downloaded_Models.keys():
     #                 downloaded_list.append(short)
-    #         shortlist = downloaded_list
+    #         shortcut_list = downloaded_list
     
     if downloaded_sc:
         if model.Downloaded_Models:                
             downloaded_list = list()            
-            for short in shortlist:
-                sc_name = short[1]
-                mid = setting.get_modelid_from_shortcutname(sc_name)
+            for short in shortcut_list:
+                mid = v['id']
                 if mid in model.Downloaded_Models.keys():
                     downloaded_list.append(short)
-            shortlist = downloaded_list
+            shortcut_list = downloaded_list
         else:
-            shortlist = None
+            shortcut_list = None
             
-    if shortlist:
-        total = len(shortlist)
-        result = shortlist
+    if shortcut_list:
+        total = len(shortcut_list)
+        shortlist = shortcut_list
         
     if total > 0:
         # page 즉 페이징이 아닌 전체가 필요할때도 총페이지 수를 구할때도 있으므로..
@@ -70,8 +68,18 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
             item_end = (setting.shortcut_count_per_page * page)
             if total < item_end:
                 item_end = total
-            result = shortlist[item_start:item_end]
-                    
+            shortlist = shortcut_list[item_start:item_end]
+
+    if shortlist:
+        result = list()        
+        # 썸네일이 있는지 판단해서 대체 이미지 작업
+        for v in shortlist:
+            if v:
+                if ishortcut.is_sc_image(v['id']):
+                    result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                else:
+                    result.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+                                    
     return result, total, max_page
 
 def on_refresh_sc_list_change(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc,sc_page):
