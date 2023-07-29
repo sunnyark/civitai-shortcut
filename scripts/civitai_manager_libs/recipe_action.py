@@ -28,7 +28,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         with gr.Tabs():
             with gr.TabItem("Prompt Recipe List"):
                 recipe_new_btn = gr.Button(value="New Recipe", variant="primary")
-                recipe_list, recipe_gallery, refresh_recipe_browser = recipe_browser_page.on_ui()
+                recipe_gallery, refresh_recipe_browser = recipe_browser_page.on_ui()
             with gr.TabItem("Generate Prompt From Image"):
                 recipe_drop_image = gr.Image(type="pil", label="Drop image").style(height='100%')
 
@@ -63,7 +63,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                             gr.Markdown("This image does not influence the prompt on the left. You can choose any image that matches the created prompt.")
                             # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
                         with gr.TabItem("Reference Models"):
-                            reference_gallery = gr.Gallery(elem_id="reference_gallery", show_label=False).style(grid=[2], height="full", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+                            reference_gallery = gr.Gallery(show_label=False).style(grid=[3], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
                             reference_delete = gr.Checkbox(label="Delete from references when selecting a thumbnail.", value=False)
                             with gr.Accordion("Add Reference Shortcut Items", open=False):
                                 reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui()
@@ -582,31 +582,27 @@ def on_reference_gallery_loading(shortcuts):
     ISC = ishortcut.load()
     if not ISC:
         return None
-    
-    shotcutlist = list()
+        
+    result_list = None
     
     if shortcuts:
         result_list = list()
-        for mid in shortcuts:
-            mid = str(mid)
-            if mid in ISC:
-                result_list.append(ISC[mid])
-                
-        for v in result_list:
-            if v:
+        for mid in shortcuts:            
+            if str(mid) in ISC.keys():
+                v = ISC[str(mid)]
                 if ishortcut.is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                    result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
                 else:
-                    shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+                    result_list.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+            else:
+                result_list.append((setting.no_card_preview_image,setting.set_shortcutname("delete",mid)))                
 
-    return shotcutlist      
+    return result_list
 
 def on_reference_sc_gallery_select(evt: gr.SelectData, shortcuts):
-    clf = None
     current_time = datetime.datetime.now()
             
-    if evt.value:
-               
+    if evt.value:               
         shortcut = evt.value 
         sc_model_id = setting.get_modelid_from_shortcutname(shortcut)            
         
@@ -617,10 +613,10 @@ def on_reference_sc_gallery_select(evt: gr.SelectData, shortcuts):
             shortcuts.append(sc_model_id)
 
         return shortcuts, current_time
-    return shortcuts, None
+    return shortcuts, gr.update(visible=False)
 
 def on_reference_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
-    if evt.value:               
+    if evt.value:                       
         shortcut = evt.value 
         sc_model_id = setting.get_modelid_from_shortcutname(shortcut)
         current_time = datetime.datetime.now()
@@ -633,6 +629,6 @@ def on_reference_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
                 shortcuts.remove(sc_model_id)
                     
         return shortcuts, current_time, None, gr.update(visible=False) if delete_opt else sc_model_id
-    return shortcuts, None, None, gr.update(visible=False)        
+    return shortcuts, gr.update(visible=False), None, gr.update(visible=False)        
             
                 
