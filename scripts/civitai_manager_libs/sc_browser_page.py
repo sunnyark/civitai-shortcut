@@ -116,11 +116,11 @@ def on_ui():
 
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if setting.shortcut_count_per_page > 0 else False)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
-        sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height=["fit" if setting.shortcut_count_per_page != 0 else "auto"], object_fit=setting.gallery_thumbnail_image_style)    
+        sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
     else:
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if setting.shortcut_count_per_page > 0 else False)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
-        sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height=["fit" if setting.shortcut_count_per_page != 0 else "auto"], object_fit=setting.gallery_thumbnail_image_style)    
+        sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
         
         with gr.Accordion("Search", open=True):        
             shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)

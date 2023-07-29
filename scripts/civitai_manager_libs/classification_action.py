@@ -30,7 +30,7 @@ def on_ui():
             with gr.Row():
                 classification_clear_shortcut_btn = gr.Button(value="Clear")
                 classification_reload_shortcut_btn = gr.Button(value="Reload")
-            classification_gallery = gr.Gallery(elem_id="classification_gallery", show_label=False).style(grid=[setting.classification_gallery_column], height="full", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+            classification_gallery = gr.Gallery(elem_id="classification_gallery", show_label=False).style(grid=[setting.classification_gallery_column], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
     
     with gr.Row(visible=False):
         classification_shortcuts = gr.State()

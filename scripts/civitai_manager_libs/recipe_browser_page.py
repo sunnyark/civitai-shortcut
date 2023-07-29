@@ -12,21 +12,20 @@ from PIL import Image
 
 def on_ui():
     
-    recipe_thumb_list, thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(None,None,None,1)    
+    thumb_list, thumb_totals, thumb_max_page  = get_recipe_list(None,None,None,1)    
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(1)
         
-    recipe_list = gr.Dropdown(label="Recipe List", choices=recipe_thumb_list, interactive=True, multiselect=None, visible=False)
     recipe_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True)
-    recipe_gallery = gr.Gallery(value=thumb_list, show_label=False).style(grid=[setting.shortcut_column], height="full", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+    recipe_gallery = gr.Gallery(value=thumb_list, show_label=False).style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
     
     with gr.Accordion(label="Search Recipe", open=True):
         recipe_search = gr.Textbox(label="Search", value="", placeholder="Search name, #description ....",interactive=True, lines=1)
         recipe_classification_list = gr.Dropdown(label="Filter Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)        
 
     with gr.Accordion(label="Filter Reference Shortcut Items", open=False):      
-        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models").style(grid=[setting.shortcut_column], height="full", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models").style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
         recipe_reference_gallery_page = gr.Slider(minimum=1, maximum=reference_max_page, value=1, step=1, label=f"Total {reference_max_page} Pages", interactive=True, visible=True)      
-        recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False).style(grid=[setting.shortcut_column], height="full", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+        recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False).style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
 
     with gr.Row(visible=False):
         # recipe_browser 갱신 트리거
@@ -88,11 +87,8 @@ def on_ui():
         ],
         outputs=[
             recipe_reference_gallery,
-            refresh_recipe_reference_select_gallery
         ]                    
     )
-        
-    #==============================
     
     recipe_gallery_page.release(
         fn = on_recipe_gallery_page,
@@ -115,8 +111,8 @@ def on_ui():
             recipe_reference_select
         ],
         outputs=[
-            recipe_list,
-            recipe_gallery
+            recipe_gallery,
+            recipe_gallery_page
         ]        
     )
         
@@ -126,16 +122,13 @@ def on_ui():
             recipe_search,
             recipe_classification_list,            
             recipe_reference_select,
-            recipe_gallery_page,
-            
+            recipe_gallery_page,            
             recipe_reference_gallery_page
         ],
         outputs=[
             recipe_classification_list,
-            recipe_list,
             recipe_gallery,
-            recipe_gallery_page,
-            
+            recipe_gallery_page,            
             recipe_reference_gallery,            
             recipe_reference_gallery_page
         ],
@@ -150,8 +143,8 @@ def on_ui():
             recipe_reference_select
         ],
         outputs=[
-            recipe_list,
-            recipe_gallery
+            recipe_gallery,
+            recipe_gallery_page
         ]        
     )
 
@@ -163,19 +156,19 @@ def on_ui():
             recipe_reference_select
         ],
         outputs=[
-            recipe_list,
-            recipe_gallery
+            recipe_gallery,
+            recipe_gallery_page
         ]
     )
-        
-    return recipe_list, recipe_gallery, refresh_recipe_browser
+
+    return recipe_gallery, refresh_recipe_browser
 
 def on_recipe_reference_gallery_page(page):    
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(page)
-    return gr.update(value=reference_list), reference_list
+    return gr.update(value=reference_list)
 
 def on_recipe_gallery_page(search, classification, shortcut, page = 0):        
-    recipe_thumb_list, thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut,page)        
+    thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut, page)        
     return gr.update(value=thumb_list)
 
 def get_shortcut_by_modelid(ISC, modelid):
@@ -227,7 +220,11 @@ def get_recipe_reference_list(page = 0):
                     result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"), setting.set_shortcutname(v['name'],v['id'])))
                 else:
                     result.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
-                    
+            else:
+                result.append((setting.no_card_preview_image,setting.set_shortcutname("delete",shortcut)))
+                
+    # util.printD(shortlist)
+    # util.printD(result)
     return result, total, max_page                        
 
 def get_recipe(RC, s_name):
@@ -249,7 +246,6 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
     max_page = 1
     shortlist = None
     result = None
-    txtlist = list()
     
     if classification == setting.PLACEHOLDER:
         classification = None
@@ -257,7 +253,7 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
     recipe_list =  recipe.get_list(search, classification, shortcut)
                                     
     if not recipe_list:
-        return txtlist, None, total, max_page
+        return None, total, max_page
        
     if recipe_list:
         total = len(recipe_list)
@@ -278,7 +274,6 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
     
     if shortlist:
         result = list()
-        txtlist = list()
         RecipeCollection = recipe.load()
         for shortcut in shortlist:            
             # re = recipe.get_recipe(shortcut)
@@ -293,32 +288,34 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
                         result.append((setting.no_card_preview_image,shortcut))
                 else:                    
                     result.append((setting.no_card_preview_image,shortcut))
-                txtlist.append(shortcut)
+            else:
+                result.append((setting.no_card_preview_image,shortcut))
 
-    return txtlist, result, total, max_page
+    return result, total, max_page
 
 def on_recipe_list_search(search, classification, shortcut):
     thumb_list = None
     thumb_totals = 0
     thumb_max_page = 1
         
-    recipe_thumb_list, thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut,1)        
+    thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut,1)        
         
-    return gr.update(choices=recipe_thumb_list), gr.update(value=thumb_list)
+    return gr.update(value=thumb_list), gr.update(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages")
 
 def on_refresh_recipe_browser_change(search, classification, shortcut, sc_page, rs_page):
     thumb_list = None
     thumb_totals = 0
     thumb_max_page = 1
     
-    recipe_thumb_list, thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut, sc_page)
+    thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut, sc_page)
     
     if not recipe.is_classifications(classification):        
         classification = setting.PLACEHOLDER
         
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(rs_page)
-    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(choices=recipe_thumb_list), gr.update(value=thumb_list), gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages"), \
-        reference_list, gr.update(minimum=1, maximum=reference_max_page, value=rs_page, step=1, label=f"Total {reference_max_page} Pages")
+    return gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), \
+        gr.update(value=thumb_list), gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages"), \
+        gr.update(value=reference_list), gr.update(minimum=1, maximum=reference_max_page, value=rs_page, step=1, label=f"Total {reference_max_page} Pages")
 
 def on_recipe_reference_select_gallery_select(evt: gr.SelectData, shortcuts):
     if evt.value:               
@@ -333,35 +330,32 @@ def on_recipe_reference_select_gallery_select(evt: gr.SelectData, shortcuts):
             shortcuts.remove(sc_model_id)
                     
         return shortcuts, None, current_time
-    return shortcuts, None, None
+    return shortcuts, None, gr.update(visible=False)
 
 def on_recipe_reference_select_gallery_loading(shortcuts):
     ISC = ishortcut.load()
     if not ISC:
         return None, gr.update(visible=False)
-    
-    shotcutlist = list()
+
+    result_list = None
     
     if shortcuts:
         result_list = list()
-        for mid in shortcuts:
-            mid = str(mid)
-            if mid in ISC:
-                result_list.append(ISC[mid])
-                
-        for v in result_list:
-            if v:
+        for mid in shortcuts:            
+            if str(mid) in ISC.keys():
+                v = ISC[str(mid)]
                 if ishortcut.is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                    result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
                 else:
-                    shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+                    result_list.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+            else:
+                result_list.append((setting.no_card_preview_image,setting.set_shortcutname("delete",mid)))                
 
     current_time = datetime.datetime.now()
     
-    return shotcutlist, current_time    
+    return result_list, current_time
 
 def on_recipe_reference_gallery_select(evt: gr.SelectData, shortcuts):
-    clf = None
     current_time = datetime.datetime.now()
             
     if evt.value:
@@ -376,5 +370,5 @@ def on_recipe_reference_gallery_select(evt: gr.SelectData, shortcuts):
             shortcuts.append(str(sc_model_id))
 
         return shortcuts, current_time
-    return shortcuts, None
+    return shortcuts, gr.update(visible=False)
 

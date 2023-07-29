@@ -22,7 +22,7 @@ def on_setting_ui():
                 with gr.Row():
                     scbrowser_screen_split_ratio = gr.Slider(minimum=0, maximum=setting.shortcut_browser_screen_split_ratio_max, value=setting.shortcut_browser_screen_split_ratio, step=1, info="You can specify the size ratio between the shortcut browser and the information screen.", label='Shortcut Browser screen ratio', interactive=True)              
                 with gr.Row():                                                
-                    info_gallery_height = gr.Dropdown(choices=["auto","fit"], value=setting.information_gallery_height, allow_custom_value=True, interactive=True, info="You can also specify a specific size other than 'auto' or 'fit'" , label="Information Gallery Height")                    
+                    info_gallery_height = gr.Dropdown(choices=["auto"], value=setting.information_gallery_height, allow_custom_value=True, interactive=True, info="You can also specify a specific size other than 'auto'" , label="Information Gallery Height")                    
                     gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, interactive=True, info="This specifies the shape of the displayed thumbnail." , label="Gallery Thumbnail Image Style")
                     shortcut_browser_search_up = gr.Dropdown(choices=["Up","Down"], value="Up" if setting.shortcut_browser_search_up else "Down", interactive=True, label="Set the position of the search bar in the shortcut browser.", info="If you select 'Up', the search bar will be placed above the thumbnail pane.")
                     
