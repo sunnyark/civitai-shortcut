@@ -178,6 +178,14 @@ def on_recipe_gallery_page(search, classification, shortcut, page = 0):
     recipe_thumb_list, thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut,page)        
     return gr.update(value=thumb_list)
 
+def get_shortcut_by_modelid(ISC, modelid):
+    if ISC and modelid:
+        try:           
+            return ISC[str(modelid)]
+        except:
+            pass
+    return None
+
 def get_recipe_reference_list(page = 0):
 
     total = 0
@@ -210,8 +218,10 @@ def get_recipe_reference_list(page = 0):
 
     if shortlist:
         result = list()
+        ISC = ishortcut.load()  
         for shortcut in shortlist:
-            v = ishortcut.get_shortcut_model(str(shortcut))
+            # v = ishortcut.get_shortcut_model(str(shortcut))
+            v = get_shortcut_by_modelid(ISC,str(shortcut))
             if v:
                 if ishortcut.is_sc_image(v['id']):
                     result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"), setting.set_shortcutname(v['name'],v['id'])))
@@ -219,6 +229,19 @@ def get_recipe_reference_list(page = 0):
                     result.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
                     
     return result, total, max_page                        
+
+def get_recipe(RC, s_name):
+    
+    if not RC:
+        return None
+    
+    if not s_name:
+        return None    
+    
+    if s_name in RC:
+        return RC[s_name]
+    
+    return None
 
 def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
     
@@ -256,8 +279,10 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
     if shortlist:
         result = list()
         txtlist = list()
+        RecipeCollection = recipe.load()
         for shortcut in shortlist:            
-            re = recipe.get_recipe(shortcut)            
+            # re = recipe.get_recipe(shortcut)
+            re = get_recipe(RecipeCollection, shortcut)
             if re:
                 if re["image"]:
                     dpimage = os.path.join(setting.shortcut_recipe_folder,f"{re['image']}")

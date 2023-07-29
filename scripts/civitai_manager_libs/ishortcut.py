@@ -545,15 +545,16 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
     result_list = sorted(result_list, key=lambda x: x["name"].lower().strip(), reverse=False)
     
     # 썸네일이 있는지 판단해서 대체 이미지 작업
-    shotcutlist = list()
-    for v in result_list:
-        if v:
-            if is_sc_image(v['id']):
-                shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
-            else:
-                shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+    # shotcutlist = list()
+    # for v in result_list:
+    #     if v:
+    #         if is_sc_image(v['id']):
+    #             shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+    #         else:
+    #             shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
 
-    return shotcutlist               
+    # return shotcutlist 
+    return result_list              
 
 def create_thumbnail(model_id, input_image_path):
     global thumbnail_max_size
