@@ -1,11 +1,14 @@
 import gradio as gr
 import datetime
+import os
 
 from . import model
 from . import civitai
 from . import setting
 from . import sc_browser_page
 
+from . import util
+from . import ishortcut
 from . import model_action
 from . import ishortcut_action
 from . import civitai_gallery_action
@@ -272,35 +275,67 @@ def on_update_modelfolder_btn_click():
 def on_scan_new_version_btn(sc_types, progress=gr.Progress()):
     model.update_downloaded_model()
 
-    scan_list = list()
-    shortlist, thumb_totals, thumb_max_page =  sc_browser_page.get_thumbnail_list(sc_types,True)
+    result = None
+    scan_list = None
+    shortlist =  get_shortcut_list(sc_types,True)
+    
     if shortlist:        
-        for short in progress.tqdm(shortlist, desc="Scanning new version model"):
-            sc_name = short[1]
-            mid = setting.get_modelid_from_shortcutname(sc_name) # str(sc_name[0:sc_name.find(':')])
-            # util.printD(mid)
-            if not is_latest(mid):
+        for short in progress.tqdm(shortlist, desc="Scanning new version model"):            
+            if not is_latest(str(short['id'])):
+                if not scan_list:
+                    scan_list = list()
                 scan_list.append(short)
-    #             util.printD(short)
-    # util.printD("end")
-    return gr.update(value=scan_list)
+                
+    # util.printD(scan_list)
+    if scan_list:
+        result = list()        
+        for v in scan_list:
+            if v:
+                if ishortcut.is_sc_image(v['id']):
+                    result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                else:
+                    result.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+                        
+    return gr.update(value=result)
+
+def get_shortcut_list(shortcut_types=None, downloaded_sc=False):
+    
+    shortcut_list =  ishortcut.get_image_list(shortcut_types, None, None, None)
+   
+    if not shortcut_list:
+        return None
+    
+    if downloaded_sc:
+        if model.Downloaded_Models:                
+            downloaded_list = list()            
+            for short in shortcut_list:
+                mid = short['id']
+                if str(mid) in model.Downloaded_Models.keys():
+                    downloaded_list.append(short)
+            shortcut_list = downloaded_list
+        else:
+            shortcut_list = None
+                                    
+    return shortcut_list
 
 def is_latest(modelid:str)->bool:
     if not modelid:
         return False
    
-    if modelid in model.Downloaded_Models.keys():
+    if str(modelid) in model.Downloaded_Models.keys():
         # civitai 에서 최신 모델 정보를 가져온다.
-        version_info = civitai.get_latest_version_info_by_model_id(modelid)
+        version_info = civitai.get_latest_version_info_by_model_id(str(modelid))
         if version_info:
             latest_versionid = str(version_info['id']).strip()                
-            
+            # util.printD(latest_versionid)
             # 현재 가지고 있는 버전들을 가져온다.                
             dnver_list = list()                
             for vid, version_paths in model.Downloaded_Models[str(modelid)]:
                 dnver_list.append(str(vid).strip())
                 
-            if latest_versionid in dnver_list:                        
+                # util.printD(dnver_list)
+            if latest_versionid in dnver_list:     
+                # util.printD("True")                   
                 return True
     return False
 
