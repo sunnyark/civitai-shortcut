@@ -30,7 +30,7 @@ def on_setting_ui():
             with gr.Accordion("Shortcut Browser and Information Images", open=False):    
                 with gr.Row():
                     shortcut_column = gr.Slider(minimum=1, maximum=12, value=setting.shortcut_column, step=1, label='Shortcut Browser Column Count', interactive=True)
-                    shortcut_count_per_page = gr.Slider(minimum=0, maximum=100, value=setting.shortcut_count_per_page, step=1, label='Shortcut Browser Thumbnail Count per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
+                    shortcut_rows_per_page = gr.Slider(minimum=0, maximum=10, value=setting.shortcut_rows_per_page, step=1, label='Shortcut Browser Thumbnail Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
                 with gr.Row():                    
                     gallery_column = gr.Slider(minimum=1, maximum=24, value=setting.gallery_column, step=1, label='Model Information Column Count', interactive=True)
                     classification_gallery_column = gr.Slider(minimum=1, maximum=24, value=setting.classification_gallery_column, step=1, label='Classification Model Column Count', interactive=True)
@@ -72,7 +72,7 @@ def on_setting_ui():
             scbrowser_screen_split_ratio,
             info_gallery_height,
             shortcut_column,
-            shortcut_count_per_page,
+            shortcut_rows_per_page,
             gallery_column,
             classification_gallery_column,
             usergallery_images_column,
@@ -114,7 +114,7 @@ def on_setting_ui():
             scbrowser_screen_split_ratio,
             info_gallery_height,
             shortcut_column,
-            shortcut_count_per_page,
+            shortcut_rows_per_page,
             gallery_column,
             classification_gallery_column,
             usergallery_images_column,
@@ -138,7 +138,7 @@ def on_setting_ui():
 
 def on_save_btn_click(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
-                      shortcut_column, shortcut_count_per_page,
+                      shortcut_column, shortcut_rows_per_page,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
@@ -149,7 +149,7 @@ def on_save_btn_click(shortcut_update_when_start,
     
     save_setting(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
-                      shortcut_column, shortcut_count_per_page,
+                      shortcut_column, shortcut_rows_per_page,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
@@ -160,7 +160,7 @@ def on_save_btn_click(shortcut_update_when_start,
 
 def save_setting(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
-                      shortcut_column, shortcut_count_per_page,
+                      shortcut_column, shortcut_rows_per_page,
                       gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_page_limit,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
@@ -187,7 +187,7 @@ def save_setting(shortcut_update_when_start,
     
     image_style = dict()
     image_style['shortcut_column'] = shortcut_column
-    image_style['shortcut_count_per_page'] = shortcut_count_per_page
+    image_style['shortcut_rows_per_page'] = shortcut_rows_per_page
 
     image_style['gallery_column'] = gallery_column
     image_style['classification_gallery_column'] = classification_gallery_column
@@ -257,7 +257,7 @@ def on_refresh_setting_change():
             setting.shortcut_browser_screen_split_ratio,\
             setting.information_gallery_height,\
             setting.shortcut_column,\
-            setting.shortcut_count_per_page,\
+            setting.shortcut_rows_per_page,\
             setting.gallery_column,\
             setting.classification_gallery_column,\
             setting.usergallery_images_column,\

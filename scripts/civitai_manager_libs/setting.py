@@ -106,7 +106,8 @@ shortcut_browser_search_up = False
 # 갤러리 ui설정
 gallery_column = 7
 shortcut_column = 5  
-shortcut_count_per_page = 20
+# shortcut_count_per_page = 20
+shortcut_rows_per_page = 4
 classification_gallery_column = 8
 
 # 유저 갤러리 설정
@@ -227,7 +228,7 @@ def load_data():
     global model_folders
    
     global shortcut_column
-    global shortcut_count_per_page
+    global shortcut_rows_per_page
     global gallery_column
     global classification_gallery_column
     global usergallery_images_column
@@ -292,8 +293,8 @@ def load_data():
 
             if "shortcut_column" in image_style.keys():
                 shortcut_column = int(image_style['shortcut_column'])
-            if "shortcut_count_per_page" in image_style.keys():
-                shortcut_count_per_page = int(image_style['shortcut_count_per_page'])
+            if "shortcut_rows_per_page" in image_style.keys():
+                shortcut_rows_per_page = int(image_style['shortcut_rows_per_page'])
 
             if "gallery_column" in image_style.keys():            
                 gallery_column = int(image_style['gallery_column'])

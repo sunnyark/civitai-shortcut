@@ -36,37 +36,42 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         with gr.Accordion(label=setting.NEWRECIPE, open=True) as recipe_title_name: 
             with gr.Row():
                 with gr.Column(scale=4):
-                    recipe_name = gr.Textbox(label="Name", value="", interactive=True, lines=1, placeholder="Please enter the prompt recipe name.").style(container=True)
-                    recipe_desc = gr.Textbox(label="Description", value="",interactive=True, lines=3, placeholder="Please enter the prompt recipe description.").style(container=True, show_copy_button=True)
-                    recipe_prompt = gr.Textbox(label="Prompt", placeholder="Prompt", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
-                    recipe_negative = gr.Textbox(label="Negative prompt", placeholder="Negative prompt", show_label=False, value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
-                    recipe_option = gr.Textbox(label="Parameter", placeholder="Parameter", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
-                    # with gr.Accordion(label="Parameter", open=True):
-                    #     prompt_ui.ui(recipe_option)
-                    recipe_output = gr.Textbox(label="Generate Info", interactive=False, lines=6, placeholder="The prompt and parameters are combined and displayed here.").style(container=True, show_copy_button=True)
-                    with gr.Row():
-                        try:
-                            send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img","img2img", "inpaint", "extras"])
-                        except:
-                            pass                         
-                    recipe_classification = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, info="You can choose from a list or enter manually. If you enter a classification that didn't exist before, a new classification will be created." ,interactive=True, allow_custom_value=True)
+                    with gr.Tabs() as recipe_prompt_tabs:
+                        with gr.TabItem("Prompt"):                    
+                            recipe_name = gr.Textbox(label="Name", value="", interactive=True, lines=1, placeholder="Please enter the prompt recipe name.").style(container=True)
+                            recipe_desc = gr.Textbox(label="Description", value="",interactive=True, lines=3, placeholder="Please enter the prompt recipe description.").style(container=True, show_copy_button=True)
+                            recipe_prompt = gr.Textbox(label="Prompt", placeholder="Prompt", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
+                            recipe_negative = gr.Textbox(label="Negative prompt", placeholder="Negative prompt", show_label=False, value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
+                            recipe_option = gr.Textbox(label="Parameter", placeholder="Parameter", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
+                            # with gr.Accordion(label="Parameter", open=True):
+                            #     prompt_ui.ui(recipe_option)
+                            recipe_output = gr.Textbox(label="Generate Info", interactive=False, lines=6, placeholder="The prompt and parameters are combined and displayed here.").style(container=True, show_copy_button=True)
+                            with gr.Row():
+                                try:
+                                    send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img","img2img", "inpaint", "extras"])
+                                except:
+                                    pass                         
+                            recipe_classification = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, info="You can choose from a list or enter manually. If you enter a classification that didn't exist before, a new classification will be created." ,interactive=True, allow_custom_value=True)
+                        with gr.TabItem("Add Reference Shortcut Models"):                    
+                            reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui(False,"DOWN",8,4)
                     with gr.Row():
                         recipe_create_btn = gr.Button(value="Create", variant="primary")
                         recipe_update_btn = gr.Button(value="Update", variant="primary", visible=False)
                         with gr.Accordion("Delete Prompt Recipe", open=False):
                             recipe_delete_btn = gr.Button(value="Delete", variant="primary")                        
+
                 with gr.Column(scale=2):                    
                     gr.Markdown("###")
-                    with gr.Tabs():
-                        with gr.TabItem("Reference Image"):
+                    with gr.Tabs() as recipe_reference_tabs:
+                        with gr.TabItem("Reference Image", id="reference_image"):
                             recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image").style(height='100%')
                             gr.Markdown("This image does not influence the prompt on the left. You can choose any image that matches the created prompt.")
                             # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
-                        with gr.TabItem("Reference Models"):
-                            reference_gallery = gr.Gallery(show_label=False).style(grid=[3], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+                        with gr.TabItem("Reference Models", id="reference_model"):
+                            reference_gallery = gr.Gallery(show_label=False).style(grid=[3], height='auto', object_fit=setting.gallery_thumbnail_image_style, preview=False)
                             reference_delete = gr.Checkbox(label="Delete from references when selecting a thumbnail.", value=False)
-                            with gr.Accordion("Add Reference Shortcut Items", open=False):
-                                reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui()
+                            # with gr.Accordion("Add Reference Shortcut Items", open=False):
+                            #     reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui()
                 
     with gr.Row(visible=False):
         selected_recipe_name = gr.Textbox()
@@ -80,7 +85,9 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, recipe_image, recipe_output)
     except:
         pass
-                
+
+    recipe_prompt_tabs.select(on_recipe_prompt_tabs_select,None,[recipe_reference_tabs])
+                    
     # reference shortcuts
     reference_gallery.select(
         fn=on_reference_gallery_select,
@@ -321,6 +328,11 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
     )
         
     return refresh_recipe
+
+def on_recipe_prompt_tabs_select(evt: gr.SelectData):
+    if evt.index == 1:      
+        return gr.update(selected="reference_model")
+    return gr.update(selected=None)
 
 def analyze_prompt(generate_data):    
     positivePrompt = None
@@ -597,7 +609,7 @@ def on_reference_gallery_loading(shortcuts):
             else:
                 result_list.append((setting.no_card_preview_image,setting.set_shortcutname("delete",mid)))                
 
-    return result_list
+    return gr.update(value=result_list)
 
 def on_reference_sc_gallery_select(evt: gr.SelectData, shortcuts):
     current_time = datetime.datetime.now()

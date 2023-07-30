@@ -341,7 +341,10 @@ def on_selected_model_id_change(modelid):
     if modelid:
         page_url = get_default_page_url(modelid,None,False)
         title_name, versions_list, version_name, paging_information = get_model_information(page_url)
-        total_page = paging_information["totalPages"]  
+        if paging_information:
+            total_page = paging_information["totalPages"]
+        else:
+            total_page = 0    
     
     return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER), \
         gr.update(minimum=1, maximum=total_page, value=1, step=1, label=f"Total {total_page} Pages"), paging_information
@@ -370,7 +373,10 @@ def on_versions_list_select(evt: gr.SelectData, modelid=None):
             page_url = get_default_page_url(modelid,None,False)
                          
         title_name, versions_list, version_name, paging_information = get_model_information(page_url)
-        total_page = paging_information["totalPages"]
+        if paging_information:
+            total_page = paging_information["totalPages"]
+        else:
+            total_page = 0
         
     return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER), \
         gr.update(minimum=1, maximum=total_page, value=1, step=1, label=f"Total {total_page} Pages"), paging_information
