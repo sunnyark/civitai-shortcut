@@ -19,6 +19,7 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
     max_page = 1
     shortcut_list =  ishortcut.get_image_list(shortcut_types, search, shortcut_basemodels, sc_classifications)
     shortlist = None
+    result = None
     
     if not shortcut_list:
         return None, total, max_page
@@ -27,8 +28,8 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
     #     if model.Downloaded_Models:                
     #         downloaded_list = list()            
     #         for short in shortcut_list:
-    #             mid = v['id']
-    #             if mid in model.Downloaded_Models.keys():
+    #             mid = short['id']
+    #             if str(mid) in model.Downloaded_Models.keys():
     #                 downloaded_list.append(short)
     #         shortcut_list = downloaded_list
     #     else:
@@ -37,8 +38,8 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
     #     if model.Downloaded_Models:                
     #         downloaded_list = list()            
     #         for short in shortcut_list:
-    #             mid = v['id']
-    #             if mid not in model.Downloaded_Models.keys():
+    #             mid = short['id']
+    #             if str(mid) not in model.Downloaded_Models.keys():
     #                 downloaded_list.append(short)
     #         shortcut_list = downloaded_list
     
@@ -46,8 +47,8 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
         if model.Downloaded_Models:                
             downloaded_list = list()            
             for short in shortcut_list:
-                mid = v['id']
-                if mid in model.Downloaded_Models.keys():
+                mid = short['id']
+                if str(mid) in model.Downloaded_Models.keys():
                     downloaded_list.append(short)
             shortcut_list = downloaded_list
         else:
