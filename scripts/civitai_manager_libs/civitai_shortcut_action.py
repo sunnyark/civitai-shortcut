@@ -52,7 +52,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                 with gr.Row():
                     with gr.Column():
                         nsfw_filter_enable = gr.Dropdown(value='On', choices=['On','Off'], label='NSFW Filtering', interactive=True)
-                        nsfw_level = gr.Dropdown(value=setting.get_NSFW_Level(), choices=setting.NSFW_level.keys(), label='NSFW Filtering Level', visible=True, interactive=True)
+                        nsfw_level = gr.Dropdown(value=setting.NSFW_level_user, choices=setting.NSFW_levels, label='NSFW Filtering Level', visible=True, interactive=True)
                         nsfw_save_btn = gr.Button(value="Save NSFW Setting", variant="primary", visible=True)
                         
     with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):
@@ -190,9 +190,9 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
 
 def on_refresh_NSFW_change():
     if setting.NSFW_filtering_enable:
-        return gr.update(value="On") , gr.update(visible=True, value=setting.get_NSFW_Level())
+        return gr.update(value="On") , gr.update(visible=True, value=setting.NSFW_level_user)
     else:
-        return gr.update(value="Off") , gr.update(visible=False, value=setting.get_NSFW_Level())
+        return gr.update(value="Off") , gr.update(visible=False, value=setting.NSFW_level_user)
 
 def on_nsfw_filter(enable, level):
     current_time = datetime.datetime.now()  

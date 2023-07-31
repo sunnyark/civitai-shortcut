@@ -196,7 +196,8 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         inputs=None,
         outputs=[
             refresh_reference_sc_browser,
-            refresh_recipe_browser
+            refresh_recipe_browser,
+            refresh_reference_gallery
         ],
         show_progress=False
     )
@@ -460,7 +461,7 @@ def on_recipe_generate_data_change(recipe_img):
         
 def on_refresh_recipe_change():    
     current_time = datetime.datetime.now()
-    return current_time, current_time
+    return current_time, current_time, current_time
 
 # def on_recipe_list_select(evt: gr.SelectData):
 #     current_time = datetime.datetime.now()
@@ -603,12 +604,15 @@ def on_reference_gallery_loading(shortcuts):
             if str(mid) in ISC.keys():
                 v = ISC[str(mid)]
                 if ishortcut.is_sc_image(v['id']):
-                    result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                    if bool(v['nsfw']) and setting.NSFW_filtering_enable:
+                        result_list.append((setting.nsfw_disable_image,setting.set_shortcutname(v['name'],v['id'])))
+                    else:                    
+                        result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
                 else:
                     result_list.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
             else:
                 result_list.append((setting.no_card_preview_image,setting.set_shortcutname("delete",mid)))                
-
+                
     return gr.update(value=result_list)
 
 def on_reference_sc_gallery_select(evt: gr.SelectData, shortcuts):

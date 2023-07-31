@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "v 1.6.0"
+Extensions_Version = "v1.6.1"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -141,58 +141,65 @@ no_card_preview_image = os.path.join(extension_base,"img","card-no-preview.png")
 nsfw_disable_image = os.path.join(extension_base,"img","nsfw-no-preview.png")
 
 NSFW_filtering_enable = True 
-NSFW_level = { "None":True, "Soft":False, "Mature":False, "X":False } # None, Soft, Mature, X
+# NSFW_level = { "None":True, "Soft":False, "Mature":False, "X":False } # None, Soft, Mature, X
+NSFW_levels = ("None","Soft","Mature","X") # None, Soft, Mature, X
+NSFW_level_user = "None"
 
 shortcut_env = dict()
 
 def set_NSFW(enable, level="None"):
-    global NSFW_filtering_enable
-    global NSFW_level
+    # global NSFW_level
+    global NSFW_filtering_enable    
+    global NSFW_level_user
     
     NSFW_filtering_enable = enable
+    NSFW_level_user = level
     
-    if level == "Soft":
-        NSFW_level["None"] = True
-        NSFW_level["Soft"] = True
-        NSFW_level["Mature"] = False
-        NSFW_level["X"] = False  
-    elif level == "Mature":
-        NSFW_level["None"] = True
-        NSFW_level["Soft"] = True
-        NSFW_level["Mature"] = True
-        NSFW_level["X"] = False  
-    elif level == "X":
-        NSFW_level["None"] = True
-        NSFW_level["Soft"] = True
-        NSFW_level["Mature"] = True
-        NSFW_level["X"] = True        
-    else:
-        # level == 1
-        NSFW_level["None"] = True
-        NSFW_level["Soft"] = False
-        NSFW_level["Mature"] = False
-        NSFW_level["X"] = False
+    # if level == "Soft":
+    #     NSFW_level["None"] = True
+    #     NSFW_level["Soft"] = True
+    #     NSFW_level["Mature"] = False
+    #     NSFW_level["X"] = False  
+    # elif level == "Mature":
+    #     NSFW_level["None"] = True
+    #     NSFW_level["Soft"] = True
+    #     NSFW_level["Mature"] = True
+    #     NSFW_level["X"] = False  
+    # elif level == "X":
+    #     NSFW_level["None"] = True
+    #     NSFW_level["Soft"] = True
+    #     NSFW_level["Mature"] = True
+    #     NSFW_level["X"] = True        
+    # else:
+    #     # level == 1
+    #     NSFW_level["None"] = True
+    #     NSFW_level["Soft"] = False
+    #     NSFW_level["Mature"] = False
+    #     NSFW_level["X"] = False
 
-def get_NSFW_Level():
-    prev = "None"
-    for level, v in NSFW_level.items():
-        if not v:
-            return prev
-        else:
-            prev = level
+# def get_NSFW_Level():
+#     return NSFW_level_user
+
+#     prev = "None"
+#     for level, v in NSFW_level.items():
+#         if not v:
+#             return prev
+#         else:
+#             prev = level
     
-    return prev
+#     return prev
 
 def save_NSFW():
     global NSFW_filtering_enable
-
+    global NSFW_level_user
+    
     environment = load()
     if not environment:
          environment = dict()  
              
     nsfw_filter = dict()    
     nsfw_filter['nsfw_filter_enable'] = NSFW_filtering_enable
-    nsfw_filter['nsfw_level'] = get_NSFW_Level()
+    nsfw_filter['nsfw_level'] = NSFW_level_user
     environment['NSFW_filter'] = nsfw_filter   
     
     save(environment)

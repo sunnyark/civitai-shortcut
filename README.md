@@ -67,6 +67,12 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.6.1
+* The interface of the reference shortcut model in the recipe has been modified.
+* When generating thumbnails automatically, the model with the lowest NSFW level (most safe for work) will be selected.
+* The NSFW filter will now operate across all ranges.
+* In the classification, display the removed models among the shortcut models.
+
 v 1.6.0
 * Adding NSFW Filter function
 * Revamping prompt recipe
