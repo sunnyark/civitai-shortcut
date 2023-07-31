@@ -219,7 +219,10 @@ def get_recipe_reference_list(page = 0):
             v = get_shortcut_by_modelid(ISC,str(shortcut))
             if v:
                 if ishortcut.is_sc_image(v['id']):
-                    result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"), setting.set_shortcutname(v['name'],v['id'])))
+                    if bool(v['nsfw']) and setting.NSFW_filtering_enable:
+                        result.append((setting.nsfw_disable_image,setting.set_shortcutname(v['name'],v['id'])))
+                    else:                    
+                        result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"), setting.set_shortcutname(v['name'],v['id'])))
                 else:
                     result.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
             else:
@@ -349,7 +352,10 @@ def on_recipe_reference_select_gallery_loading(shortcuts):
             if str(mid) in ISC.keys():
                 v = ISC[str(mid)]
                 if ishortcut.is_sc_image(v['id']):
-                    result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                    if bool(v['nsfw']) and setting.NSFW_filtering_enable:
+                        result_list.append((setting.nsfw_disable_image,setting.set_shortcutname(v['name'],v['id'])))
+                    else:                    
+                        result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
                 else:
                     result_list.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
             else:

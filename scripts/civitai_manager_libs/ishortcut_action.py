@@ -883,7 +883,8 @@ def get_version_description_gallery(version_info):
             
             # NSFW filtering ....
             if setting.NSFW_filtering_enable:
-                if not setting.NSFW_level[ver["nsfw"]]:
+                # if not setting.NSFW_level[ver["nsfw"]]:
+                if setting.NSFW_levels.index(ver["nsfw"]) > setting.NSFW_levels.index(setting.NSFW_level_user):                
                     description_img = setting.nsfw_disable_image
                     meta_string = ""
                     

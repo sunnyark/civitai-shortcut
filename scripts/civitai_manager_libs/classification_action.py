@@ -235,24 +235,25 @@ def on_classification_gallery_loading(shortcuts):
     ISC = ishortcut.load()
     if not ISC:
         return None
-    
-    shotcutlist = list()
+        
+    result_list = None
     
     if shortcuts:
         result_list = list()
-        for mid in shortcuts:
-            mid = str(mid)
-            if mid in ISC:
-                result_list.append(ISC[mid])
-                
-        for v in result_list:
-            if v:
+        for mid in shortcuts:            
+            if str(mid) in ISC.keys():
+                v = ISC[str(mid)]
                 if ishortcut.is_sc_image(v['id']):
-                    shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                    if bool(v['nsfw']) and setting.NSFW_filtering_enable:
+                        result_list.append((setting.nsfw_disable_image,setting.set_shortcutname(v['name'],v['id'])))
+                    else:                    
+                        result_list.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
                 else:
-                    shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
-
-    return shotcutlist          
+                    result_list.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
+            else:
+                result_list.append((setting.no_card_preview_image,setting.set_shortcutname("delete",mid)))                
+                
+    return gr.update(value=result_list)
 
 def on_classification_gallery_select(evt: gr.SelectData, shortcuts):
     classification_reload = setting.classification_preview_mode_disable

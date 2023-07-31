@@ -70,6 +70,12 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.6.1
+* recipe의 reference shortcut model의 인터페이스 변경
+* 섬네일이 자동으로 생성될때 nsfw level이 가장 낮은 (건전한) 모델이 선정되게 변경.
+* 전체 모든 범위에서 nsfw filter 가 작동하게 변경
+* classification 에서 표시되는 shortcut model중 삭제된 모델이 표시되도록 변경
+
 v 1.6.0
 * NSFW Filter 기능 추가
 * prompt recipe 리뉴얼

@@ -77,7 +77,10 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
         for v in shortlist:
             if v:
                 if ishortcut.is_sc_image(v['id']):
-                    result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
+                    if bool(v['nsfw']) and setting.NSFW_filtering_enable:
+                        result.append((setting.nsfw_disable_image,setting.set_shortcutname(v['name'],v['id'])))
+                    else:
+                        result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
                 else:
                     result.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
                                     
