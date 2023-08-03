@@ -598,7 +598,6 @@ def get_paging_information_working(modelId, modelVersionId = None, show_nsfw=Fal
     total_page_urls = list()    
 
     while page_url is not None:
-        # util.printD(page_url)
         json_data = civitai.request_models(fix_page_url_cursor(page_url))
         try:  
             item_list.extend(json_data['items'])
@@ -609,27 +608,14 @@ def get_paging_information_working(modelId, modelVersionId = None, show_nsfw=Fal
             page_url = json_data['metadata']['nextPage']
         except:
             page_url = None
-               
-    # totalItems = len(item_list)
-        
-    # try:
-    #     totalPages = math.ceil(totalItems / setting.usergallery_images_page_limit)
-    # except:
-    #     totalPages = 0        
 
-    # import json
-
-    # output_file = 'item_list.json'
-    # with open(output_file, 'w') as f:
-    #     json.dump(item_list, f, indent=4)
-
+    images_per_page = setting.usergallery_images_column * setting.usergallery_images_rows_per_page
+    
     initial_url = get_default_page_url(modelId, modelVersionId, show_nsfw)
     total_page_urls.append(initial_url)    
-    page_items = item_list[::setting.usergallery_images_page_limit]
+    # page_items = item_list[::setting.usergallery_images_page_limit]
+    page_items = item_list[::images_per_page]
     totalPages = len(page_items)
-    
-    # util.printD(page_items)
-    # util.printD(f"{totalItems} , {totalItems2} , {len(page_items)}")
     
     for index, item in enumerate(page_items):        
         if index > 0:
@@ -638,9 +624,6 @@ def get_paging_information_working(modelId, modelVersionId = None, show_nsfw=Fal
     paging_information = dict()
     paging_information["totalPages"] = totalPages
     paging_information["totalPageUrls"] = total_page_urls
-    
-    # for pags_url in total_page_urls:
-    #     util.printD(pags_url)
     
     return paging_information
 
@@ -771,7 +754,15 @@ def extract_url_cursor(url):
     
     return (cursor)
     
-def get_default_page_url(modelId, modelVersionId = None, show_nsfw=False, limit=setting.usergallery_images_page_limit):
+def get_default_page_url(modelId, modelVersionId = None, show_nsfw=False, limit=0):
+    
+    if limit <= 0:
+        limit = setting.usergallery_images_rows_per_page * setting.usergallery_images_column
+    
+    # 200이 최대값이다
+    if limit > 200:
+        limit = 200
+        
     page_url = f"{civitai.Url_ImagePage()}?limit={limit}&modelId={modelId}"
     
     if modelVersionId:

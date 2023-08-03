@@ -1,6 +1,7 @@
 import gradio as gr
 import math
 import os
+import datetime
 
 from . import util
 from . import setting
@@ -52,9 +53,20 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
             shortcut_list = downloaded_list
         else:
             shortcut_list = None
-            
-    if shortcut_list:
+    
+    if shortcut_list:        
         total = len(shortcut_list)
+
+        # name 기준으로 정렬        
+        shortcut_list = sorted(shortcut_list, key=lambda x: x["name"].lower().strip(), reverse=False)
+        
+        # 등록일 기준으로 정렬
+        # strptime str을 datetime 형식으로 변환(스트링과 형식일치해야함)
+        # strftime datetime 형식을 str로 변환(스트링과 형식이 일치할필요는 없다.)
+        # shortcut_list = sorted(shortcut_list, key=lambda x: datetime.datetime.strptime(x["date"], '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), reverse=True)
+        # shortcut_list = sorted(shortcut_list, key=lambda x: x["date"], reverse=True)        
+        # shortcut_list = sorted(shortcut_list, key=lambda x: (x["date"], x['name']) , reverse=True)
+
         shortlist = shortcut_list
         
     if total > 0:

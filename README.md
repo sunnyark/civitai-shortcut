@@ -67,6 +67,11 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.6.2
+* Update the registration date of the shortcut
+(Perform Assistance->Update Shortcuts: Update the model information for the shortcut for existing data)
+* Intuitively modify the settings of the gallery
+
 v 1.6.1
 * The interface of the reference shortcut model in the recipe has been modified.
 * When generating thumbnails automatically, the model with the lowest NSFW level (most safe for work) will be selected.
