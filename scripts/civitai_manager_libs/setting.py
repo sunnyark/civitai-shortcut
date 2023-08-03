@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "v1.6.1"
+Extensions_Version = "v1.6.2"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -112,7 +112,8 @@ classification_gallery_column = 8
 
 # 유저 갤러리 설정
 usergallery_images_column = 6
-usergallery_images_page_limit = 12
+# usergallery_images_page_limit = 12
+usergallery_images_rows_per_page = 2
 shortcut_max_download_image_per_version = 0 # 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
 gallery_thumbnail_image_style = "scale-down"
 
@@ -239,7 +240,7 @@ def load_data():
     global gallery_column
     global classification_gallery_column
     global usergallery_images_column
-    global usergallery_images_page_limit
+    global usergallery_images_rows_per_page
     global shortcut_max_download_image_per_version
     global gallery_thumbnail_image_style
     global shortcut_browser_search_up
@@ -310,8 +311,8 @@ def load_data():
 
             if "usergallery_images_column" in image_style.keys():
                 usergallery_images_column = int(image_style['usergallery_images_column'])
-            if "usergallery_images_page_limit" in image_style.keys():
-                usergallery_images_page_limit = int(image_style['usergallery_images_page_limit'])
+            if "usergallery_images_rows_per_page" in image_style.keys():
+                usergallery_images_rows_per_page = int(image_style['usergallery_images_rows_per_page'])
             
         if "model_folders" in environment.keys():
                 

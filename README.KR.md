@@ -70,6 +70,11 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.6.2
+* shortcut의 등록날짜를 업데이트 
+  (기존데이터는 Assistance->Update Shortcuts:Update the model information for the shortcut 수행필요)
+* gallery의 설정을 직관적으로 변경
+
 v 1.6.1
 * recipe의 reference shortcut model의 인터페이스 변경
 * 섬네일이 자동으로 생성될때 nsfw level이 가장 낮은 (건전한) 모델이 선정되게 변경.

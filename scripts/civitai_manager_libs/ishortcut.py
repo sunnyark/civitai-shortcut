@@ -3,6 +3,7 @@ import json
 import shutil
 import requests
 import gradio as gr
+import datetime
 
 from tqdm import tqdm
 
@@ -159,7 +160,7 @@ def update_shortcut_model_note(modelid, note):
     if modelid:
         ISC = load()            
         try:           
-            ISC[str(modelid)]["note"] = note
+            ISC[str(modelid)]["note"] = str(note)
             save(ISC)
         except:
             pass
@@ -206,8 +207,18 @@ def update_shortcut(modelid, progress = None):
                     note = ISC[str(modelid)]["note"]
                 
                 if add_ISC:
-                    add_ISC[str(modelid)]["note"] = note
+                    add_ISC[str(modelid)]["note"] = str(note)
                     
+                # shortcut의 등록날짜 정보가 없을경우 현재날짜를 입력한다.
+                date = datetime.datetime.now()
+                date = date.strftime("%Y-%m-%d %H:%M:%S")
+                if "date" in ISC[str(modelid)]:
+                    if ISC[str(modelid)]["date"]:
+                        date = ISC[str(modelid)]["date"]
+
+                if add_ISC:
+                    add_ISC[str(modelid)]["date"] = date
+                
             ISC.update(add_ISC)
         else:
             ISC = add_ISC
@@ -242,8 +253,18 @@ def update_shortcut_informations(modelid_list:list, progress):
                     note = ISC[str(modelid)]["note"]
                     
                 if add_ISC:
-                    add_ISC[str(modelid)]["note"] = note
+                    add_ISC[str(modelid)]["note"] = str(note)
 
+                # shortcut의 등록날짜 정보가 없을경우 현재날짜를 입력한다.
+                date = datetime.datetime.now()
+                date = date.strftime("%Y-%m-%d %H:%M:%S")
+                if "date" in ISC[str(modelid)]:
+                    if ISC[str(modelid)]["date"]:
+                        date = ISC[str(modelid)]["date"]
+
+                if add_ISC:
+                    add_ISC[str(modelid)]["date"] = date
+                    
                 # hot fix and delete model
                 # civitiai 에서 제거된 모델때문임
                 # tags 를 변경해줘야함
@@ -558,19 +579,6 @@ def get_image_list(shortcut_types=None, search=None, shortcut_basemodels=None, s
     #                 filenames_list.append(v)
     #     result_list = filenames_list    
     
-    # name을 기준으로 정렬
-    result_list = sorted(result_list, key=lambda x: x["name"].lower().strip(), reverse=False)
-    
-    # 썸네일이 있는지 판단해서 대체 이미지 작업
-    # shotcutlist = list()
-    # for v in result_list:
-    #     if v:
-    #         if is_sc_image(v['id']):
-    #             shotcutlist.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"),setting.set_shortcutname(v['name'],v['id'])))
-    #         else:
-    #             shotcutlist.append((setting.no_card_preview_image,setting.set_shortcutname(v['name'],v['id'])))
-
-    # return shotcutlist 
     return result_list              
 
 def create_thumbnail(model_id, input_image_path):
@@ -705,7 +713,8 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                 tags = [tag for tag in model_info['tags']]
         except:
             pass
-            
+        
+        date = datetime.datetime.now()
         ISC[str(model_id)] = {
                 "id" : model_info['id'],
                 "type" : model_info['type'],
@@ -715,10 +724,9 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                 "url": f"{civitai.Url_ModelId()}{model_id}",
                 "versionid" : def_id,
                 "imageurl" : def_image,
-                "note" : ""
+                "note" : "",
+                "date" : date.strftime("%Y-%m-%d %H:%M:%S")
         }
-
-        # ISC[str(model_id)] = cis
         
         cis_to_file(ISC[str(model_id)])
         
