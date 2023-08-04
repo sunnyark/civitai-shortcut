@@ -219,7 +219,7 @@ def get_recipe_reference_list(page = 0):
             v = get_shortcut_by_modelid(ISC,str(shortcut))
             if v:
                 if ishortcut.is_sc_image(v['id']):
-                    if bool(v['nsfw']) and setting.NSFW_filtering_enable:
+                    if 'nsfw' in v.keys() and bool(v['nsfw']) and setting.NSFW_filtering_enable:
                         result.append((setting.nsfw_disable_image,setting.set_shortcutname(v['name'],v['id'])))
                     else:                    
                         result.append((os.path.join(setting.shortcut_thumbnail_folder,f"{v['id']}{setting.preview_image_ext}"), setting.set_shortcutname(v['name'],v['id'])))

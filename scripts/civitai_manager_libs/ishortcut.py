@@ -197,28 +197,30 @@ def delete_shortcut_model(modelid):
 def update_shortcut(modelid, progress = None):
     if modelid:
         note = None
-        
+        date = datetime.datetime.now()
+        date = date.strftime("%Y-%m-%d %H:%M:%S")
+                            
         add_ISC = add(None, str(modelid), False, progress)
         ISC = load()
         if ISC:
             if str(modelid) in ISC:
-                # 개별적으로 저장한 정보를 가져온다.
+                                
+                #만일 civitai 에서 정보를 가져올수 없다면 기존것을 그대로 사용한다.
+                if str(modelid) not in add_ISC:
+                    add_ISC[str(modelid)] = ISC[str(modelid)]
+
+                # 기존의 개별적으로 저장한 정보를 가져온다.
                 if "note" in ISC[str(modelid)]:
-                    note = ISC[str(modelid)]["note"]
-                
-                if add_ISC:
-                    add_ISC[str(modelid)]["note"] = str(note)
-                    
-                # shortcut의 등록날짜 정보가 없을경우 현재날짜를 입력한다.
-                date = datetime.datetime.now()
-                date = date.strftime("%Y-%m-%d %H:%M:%S")
+                    note = ISC[str(modelid)]["note"]                                    
+
+                # 기존의 등록날짜 정보를 가져온다.
                 if "date" in ISC[str(modelid)]:
                     if ISC[str(modelid)]["date"]:
                         date = ISC[str(modelid)]["date"]
-
-                if add_ISC:
-                    add_ISC[str(modelid)]["date"] = date
                 
+                add_ISC[str(modelid)]["note"] = str(note)
+                add_ISC[str(modelid)]["date"] = date
+                    
             ISC.update(add_ISC)
         else:
             ISC = add_ISC
@@ -240,30 +242,31 @@ def update_shortcut_informations(modelid_list:list, progress):
     #     write_model_information(modelid, False, progress) 
 
     for modelid in progress.tqdm(modelid_list,desc="Updating Models Information"):        
-        note = None
-        
         if modelid:                
+            note = None
+            date = datetime.datetime.now()
+            date = date.strftime("%Y-%m-%d %H:%M:%S")
             add_ISC = add(None,str(modelid),False,progress)
 
             ISC = load()
 
             if str(modelid) in ISC:
+                
+                #만일 civitai 에서 정보를 가져올수 없다면 기존것을 그대로 사용한다.
+                if str(modelid) not in add_ISC:
+                    add_ISC[str(modelid)] = ISC[str(modelid)]
+                                    
                 # 개별적으로 저장한 정보를 가져온다.
                 if "note" in ISC[str(modelid)]:
                     note = ISC[str(modelid)]["note"]
-                    
-                if add_ISC:
-                    add_ISC[str(modelid)]["note"] = str(note)
 
-                # shortcut의 등록날짜 정보가 없을경우 현재날짜를 입력한다.
-                date = datetime.datetime.now()
-                date = date.strftime("%Y-%m-%d %H:%M:%S")
+                # 기존의 등록날짜 정보를 가져온다.
                 if "date" in ISC[str(modelid)]:
                     if ISC[str(modelid)]["date"]:
                         date = ISC[str(modelid)]["date"]
-
-                if add_ISC:
-                    add_ISC[str(modelid)]["date"] = date
+                    
+                add_ISC[str(modelid)]["note"] = str(note)
+                add_ISC[str(modelid)]["date"] = date
                     
                 # hot fix and delete model
                 # civitiai 에서 제거된 모델때문임
