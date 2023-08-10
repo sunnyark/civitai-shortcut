@@ -220,6 +220,9 @@ def update_shortcut(modelid, progress = None):
                 
                 add_ISC[str(modelid)]["note"] = str(note)
                 add_ISC[str(modelid)]["date"] = date
+                
+                if 'nsfw' not in add_ISC[str(modelid)].keys():
+                    add_ISC[str(modelid)]["nsfw"] = False
                     
             ISC.update(add_ISC)
         else:
@@ -267,6 +270,9 @@ def update_shortcut_informations(modelid_list:list, progress):
                     
                 add_ISC[str(modelid)]["note"] = str(note)
                 add_ISC[str(modelid)]["date"] = date
+
+                if 'nsfw' not in add_ISC[str(modelid)].keys():
+                    add_ISC[str(modelid)]["nsfw"] = False
                     
                 # hot fix and delete model
                 # civitiai 에서 제거된 모델때문임

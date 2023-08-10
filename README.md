@@ -10,7 +10,7 @@ Stable Diffusion Webui's Extension tab, go to Install from url sub-tab. Copy thi
 
 # Usage instructions
 
-![screenshot 2023-05-24 132752](https://github.com/sunnyark/civitai-shortcut/assets/40237431/17f28498-43a6-4be3-83cb-b7d8602e3b00)
+![screenshot 2023-08-10 105556](https://github.com/sunnyark/civitai-shortcut/assets/40237431/77e103b6-6767-456b-8073-a4dbe7d0c042)
 
 * Upload : This function creates a shortcut that can be used by the extension when you enter the Civitai site's model URL. It only works when the site is functioning properly. You can either click and drag the URL from the address bar or drag and drop saved internet shortcuts. You can also select multiple internet shortcuts and drop them at once.
 * Browsing : This function displays the registered shortcuts in thumbnail format, and when selected, displays their details on the right-hand side of the window. This function works independently of the Civitai site.
@@ -24,15 +24,18 @@ Stable Diffusion Webui's Extension tab, go to Install from url sub-tab. Copy thi
 
 * Classification : Function for managing shortcuts by classification.
 
-![classification_action](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ec0ddb51-6b8b-485a-a560-9c174a962001)
+![screenshot 2023-08-10 101404](https://github.com/sunnyark/civitai-shortcut/assets/40237431/bd8ed2b4-5551-4d4a-bd64-91a99a0e5187)
+
+![screenshot 2023-08-10 101352](https://github.com/sunnyark/civitai-shortcut/assets/40237431/66b4bace-7b89-4938-aef2-c957dd3a5a06)
+
 
 * Prompt Recipe : The Prompt Recipe feature allows you to register and manage frequently used prompts.
 
-![prompt_recipe_create01](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f8db7b5-f3d0-45bc-a8b9-181f3befe4ef)
+![screenshot 2023-08-10 110136](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4ef04b3-b82d-420b-a73b-87ceeada3c1d)
 
-![prompt_recipe_create02](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9218f2bd-9bf9-47ee-b61f-80cc1816da1e)
+![screenshot 2023-08-10 110147](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7034ac04-b4e0-415b-af38-58b4e5789dac)
 
-![prompt_recipe_send_txt2image](https://github.com/sunnyark/civitai-shortcut/assets/40237431/abeb0af6-fe97-4cef-b4b5-92110237c6b2)
+![screenshot 2023-08-10 110158](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dd737ca1-34c6-48c2-b694-98f42972988b)
 
 * Scan and Update Models
   Scan Models - Scan and register shortcut for models without model information that are currently held.
@@ -40,7 +43,7 @@ Stable Diffusion Webui's Extension tab, go to Install from url sub-tab. Copy thi
   Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
   Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
 
-![screenshot 2023-05-24 134729](https://github.com/sunnyark/civitai-shortcut/assets/40237431/812457f2-5ea1-460e-b023-c9b50c664227)
+![screenshot 2023-08-10 110607](https://github.com/sunnyark/civitai-shortcut/assets/40237431/927fc11b-6e08-4360-a968-0f63130cb3c5)
 
 * Setting tab - Set the number of columns in the image gallery.
 
@@ -67,6 +70,11 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1,6.3
+* The interface of the classification has been modified.
+* Added shortcut browser feature to the classification, improving convenience.
+* Modified shortcut information to include the respective shortcut as the default reference model when sending a prompt from the image to the recipe.
+
 v 1.6.2
 * Update the registration date of the shortcut
 (Perform Assistance->Update Shortcuts: Update the model information for the shortcut for existing data)
@@ -266,16 +274,17 @@ v 1.1
 * "Update Model Information" button is added to "Saved Model Information" Tab for individual updating of model information, in addition to "Update Shortcut's Model Information" that updates all model information.
 
 # Screenshot
+![screenshot 2023-08-10 105556](https://github.com/sunnyark/civitai-shortcut/assets/40237431/77e103b6-6767-456b-8073-a4dbe7d0c042)
 
-![screenshot 2023-05-24 132752](https://github.com/sunnyark/civitai-shortcut/assets/40237431/17f28498-43a6-4be3-83cb-b7d8602e3b00)
+![screenshot 2023-08-10 101352](https://github.com/sunnyark/civitai-shortcut/assets/40237431/66b4bace-7b89-4938-aef2-c957dd3a5a06)
 
-![screenshot 2023-05-24 133740](https://github.com/sunnyark/civitai-shortcut/assets/40237431/14cba843-33f4-4100-80e9-ed17662a8fb9)
+![screenshot 2023-08-10 101404](https://github.com/sunnyark/civitai-shortcut/assets/40237431/bd8ed2b4-5551-4d4a-bd64-91a99a0e5187)
 
-![screenshot 2023-05-24 134646](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a38fe1d8-4f00-47e8-826a-3f8f8dee61f6)
+![screenshot 2023-08-10 110136](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4ef04b3-b82d-420b-a73b-87ceeada3c1d)
+![screenshot 2023-08-10 110147](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7034ac04-b4e0-415b-af38-58b4e5789dac)
+![screenshot 2023-08-10 110158](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dd737ca1-34c6-48c2-b694-98f42972988b)
 
-![screenshot 2023-05-24 134708](https://github.com/sunnyark/civitai-shortcut/assets/40237431/52cc44c3-20cd-4177-b848-274374acaab6)
-
-![screenshot 2023-05-24 134729](https://github.com/sunnyark/civitai-shortcut/assets/40237431/812457f2-5ea1-460e-b023-c9b50c664227)
+![screenshot 2023-08-10 110607](https://github.com/sunnyark/civitai-shortcut/assets/40237431/927fc11b-6e08-4360-a968-0f63130cb3c5)
 
 ![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
 

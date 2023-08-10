@@ -34,7 +34,7 @@ def on_ui(recipe_input):
                     end_btn = gr.Button(value="End Page")        
         with gr.Row():
             download_images = gr.Button(value="Download Images")
-            open_image_folder = gr.Button(value="Open Download Image Folder")                    
+            open_image_folder = gr.Button(value="Open Download Image Folder" ,visible=False)                    
 
     with gr.Column(scale=1):     
         with gr.Tabs() as info_tabs:
@@ -88,6 +88,7 @@ def on_ui(recipe_input):
     send_to_recipe.click(
         fn=on_send_to_recipe_click,
         inputs=[
+            selected_model_id,
             img_file_info,
             img_index,
             usergal_images
@@ -101,7 +102,7 @@ def on_ui(recipe_input):
             usergal_page_url,
             usergal_images_url       
         ],
-        outputs=None 
+        outputs=[open_image_folder]
     )
     
     gallery = refresh_gallery.change(
@@ -159,7 +160,8 @@ def on_ui(recipe_input):
             usergal_page_url,
             versions_list,
             page_slider,
-            paging_information
+            paging_information,
+            open_image_folder
         ],
         cancels=[gallery, gallery_page]
     )
@@ -246,12 +248,24 @@ def on_ui(recipe_input):
     
     return selected_model_id , refresh_information
 
-def on_send_to_recipe_click(img_file_info, img_index, usergal_images):
-    try:
-        return usergal_images[int(img_index)]
+# def on_send_to_recipe_click(img_file_info, img_index, usergal_images):
+#     try:
+#         return usergal_images[int(img_index)]
+#     except:
+#         return gr.update(visible=False)
+
+def on_send_to_recipe_click(model_id, img_file_info, img_index, civitai_images):
+    try:        
+        # recipe_input의 넘어가는 데이터 형식을 [ shortcut_id:파일네임 ] 으로 하면 
+        # reference shortcut id를 넣어줄수 있다.        
+        recipe_image = setting.set_imagefn_and_shortcutid_for_recipe_image(model_id, civitai_images[int(img_index)])
+        # util.printD(recipe_image)
+        # util.printD(setting.get_image_and_shortcutid_from_recipe_image(recipe_image))        
+        # recipe_image = civitai_images[int(img_index)]
+        return recipe_image
     except:
         return gr.update(visible=False)
-    
+        
 def on_open_image_folder_click(modelid):
     if modelid:                
         # model_info = civitai.get_model_info(modelid)
@@ -263,9 +277,13 @@ def on_open_image_folder_click(modelid):
                 util.open_folder(image_folder)
                 
 def on_download_images_click(page_url,images_url):
+    is_image_folder = False
     if page_url:
         modelid , versionid = extract_model_info(page_url)
-        download_user_gallery_images(modelid,images_url)
+        image_folder = download_user_gallery_images(modelid,images_url)
+        if image_folder:
+            is_image_folder = True
+    return gr.update(visible=is_image_folder)
     
 def on_page_slider_release(usergal_page_url, page_slider, paging_information):
     page_url = usergal_page_url
@@ -337,18 +355,25 @@ def on_selected_model_id_change(modelid):
     title_name = None
     version_name = None
     paging_information = None
-    
+    is_image_folder = False
     if modelid:
         page_url = get_default_page_url(modelid,None,False)
-        title_name, versions_list, version_name, paging_information = get_model_information(page_url)
+        model_name, versions_list, version_name, paging_information = get_model_information(page_url)
+        
+        title_name = f"# {model_name}"
         if paging_information:
             total_page = paging_information["totalPages"]
         else:
             total_page = 0    
-    
-    return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER), \
-        gr.update(minimum=1, maximum=total_page, value=1, step=1, label=f"Total {total_page} Pages"), paging_information
 
+        image_folder = util.get_download_image_folder(model_name)
+        if image_folder:
+            is_image_folder = True
+                    
+    return  gr.update(label=title_name),page_url,gr.update(choices=[setting.PLACEHOLDER] + versions_list if versions_list else None, value=version_name if version_name else setting.PLACEHOLDER), \
+        gr.update(minimum=1, maximum=total_page, value=1, step=1, label=f"Total {total_page} Pages"), paging_information,\
+        gr.update(visible=is_image_folder)
+            
 def on_versions_list_select(evt: gr.SelectData, modelid=None): 
     page_url = None
     versions_list = None
@@ -372,7 +397,8 @@ def on_versions_list_select(evt: gr.SelectData, modelid=None):
         else:            
             page_url = get_default_page_url(modelid,None,False)
                          
-        title_name, versions_list, version_name, paging_information = get_model_information(page_url)
+        model_name, versions_list, version_name, paging_information = get_model_information(page_url)
+        title_name = f"# {model_name}"
         if paging_information:
             total_page = paging_information["totalPages"]
         else:
@@ -395,7 +421,7 @@ def get_model_information(page_url=None):
         model_info = ishortcut.get_model_info(modelid)    
                                                         
     if model_info:       
-        title_name = f"# {model_info['name']}"
+        model_name = model_info['name']
 
         versions_list = list()
         if 'modelVersions' in model_info:
@@ -410,7 +436,7 @@ def get_model_information(page_url=None):
         paging_information = get_paging_information_working(modelid,versionid,False)
         
         
-        return title_name, versions_list, version_name, paging_information
+        return model_name, versions_list, version_name, paging_information
     return None,None,None,None
 
 def on_usergal_page_url_change(usergal_page_url, paging_information):   
@@ -687,20 +713,20 @@ def download_user_gallery_images(model_id, image_urls):
     base = None
     
     if not model_id:                
-        return         
+        return None
     
     # model_info = civitai.get_model_info(model_id)
     model_info = ishortcut.get_model_info(model_id)
     
     if not model_info:
-        return 
+        return None
                       
-    model_folder = util.make_download_image_folder(model_info['name'])    
+    image_folder = util.make_download_image_folder(model_info['name'])    
     
-    if not model_folder:
-        return
+    if not image_folder:
+        return None
     
-    save_folder = os.path.join(model_folder ,"user_gallery_images")
+    save_folder = os.path.join(image_folder ,"user_gallery_images")
     
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)        
@@ -729,7 +755,7 @@ def download_user_gallery_images(model_id, image_urls):
 
                 except Exception as e:
                     pass
-    return 
+    return image_folder
 
 def extract_model_info(url):
     model_id_match = re.search(r'modelId=(\d+)', url)

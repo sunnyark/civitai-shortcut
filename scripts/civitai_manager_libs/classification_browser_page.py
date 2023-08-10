@@ -13,7 +13,7 @@ DOWNLOADED_MODEL = "Downloaded"
 NOT_DOWNLOADED_MODEL = "Not Downloaded"
 ALL_DOWNLOADED_MODEL = "All"
 
-def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_column=None, user_shortcut_rows_per_page=None):
+def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=None,user_shortcut_column=None, user_shortcut_rows_per_page=None):
     shortcut_browser_search_up = setting.shortcut_browser_search_up
     shortcut_column = setting.shortcut_column
     shortcut_rows_per_page = setting.shortcut_rows_per_page
@@ -33,6 +33,7 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(None,False,None,None,None,1,shortcut_column,shortcut_rows_per_page)
             
     if shortcut_browser_search_up:
+        
         with gr.Accordion("Search", open=search_open):        
             shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
             sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @personal note ....",interactive=True, lines=1)
@@ -40,22 +41,24 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels], interactive=True)
             # show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
             # show_downloaded_sc = gr.Dropdown(label='Filter Downloaded Model View', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
-
-        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)        
+        
+        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
+        show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
         sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
         show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
-    else:
-        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)        
+    else:        
+        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
+        show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
         sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
-        show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
+        show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)        
         
         with gr.Accordion("Search", open=search_open):        
             shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
             sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @personal note ....",interactive=True, lines=1)
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
-            shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels], interactive=True)
+            shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels], interactive=True)            
             # show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
             # show_downloaded_sc = gr.Dropdown(label='Filter Downloaded Model View', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
 
@@ -76,8 +79,11 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,
-            sc_gallery_page,
+            ex_shortcuts,
+            show_ex_shortcuts,
             
+            sc_gallery_page,
+                        
             sc_shortcut_column,
             sc_shortcut_rows_per_page
         ],
@@ -96,8 +102,11 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,
-            sc_gallery_page,
-
+            ex_shortcuts,
+            show_ex_shortcuts,
+            
+            sc_gallery_page,            
+                        
             sc_shortcut_column,
             sc_shortcut_rows_per_page
         ],
@@ -118,6 +127,8 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,    
+            ex_shortcuts,
+            show_ex_shortcuts,
             
             sc_shortcut_column,
             sc_shortcut_rows_per_page            
@@ -137,6 +148,8 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,    
+            ex_shortcuts,
+            show_ex_shortcuts,
             
             sc_shortcut_column,
             sc_shortcut_rows_per_page            
@@ -156,6 +169,8 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,    
+            ex_shortcuts,
+            show_ex_shortcuts,
             
             sc_shortcut_column,
             sc_shortcut_rows_per_page            
@@ -175,6 +190,8 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,
+            ex_shortcuts,
+            show_ex_shortcuts,
             
             sc_shortcut_column,
             sc_shortcut_rows_per_page            
@@ -186,6 +203,27 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
         ]
     )    
 
+    show_ex_shortcuts.change(
+        fn=on_shortcut_gallery_refresh,
+        inputs=[
+            shortcut_type,
+            sc_search,
+            shortcut_basemodel,
+            sc_classification_list,            
+            show_downloaded_sc,
+            ex_shortcuts,
+            show_ex_shortcuts,
+            
+            sc_shortcut_column,
+            sc_shortcut_rows_per_page            
+        ],
+        outputs=[
+            sc_gallery,
+            sc_gallery_page,
+            sc_gallery_result
+        ]
+    )  
+    
     sc_classification_list.change(
         fn=on_shortcut_gallery_refresh,
         inputs=[
@@ -194,6 +232,8 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             shortcut_basemodel,
             sc_classification_list,            
             show_downloaded_sc,    
+            ex_shortcuts,
+            show_ex_shortcuts,
             
             sc_shortcut_column,
             sc_shortcut_rows_per_page            
@@ -207,9 +247,7 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
     
     return sc_gallery, refresh_sc_browser, refresh_sc_gallery
 
-
-
-def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, shortcut_basemodels=None, sc_classifications=None, page = 0, columns=0, rows=0):
+def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, shortcut_basemodels=None, sc_classifications=None, page = 0, columns=0, rows=0, ex_shortcuts:list=None):
     
     total = 0
     max_page = 1
@@ -238,7 +276,7 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
     #             if str(mid) not in model.Downloaded_Models.keys():
     #                 downloaded_list.append(short)
     #         shortcut_list = downloaded_list
-    
+
     if downloaded_sc:
         if model.Downloaded_Models:                
             downloaded_list = list()            
@@ -249,7 +287,16 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
             shortcut_list = downloaded_list
         else:
             shortcut_list = None
-    
+
+    # ex_shortcuts에 있는 shortcut은 제외한다.    
+    if ex_shortcuts:
+        ex_shortcut_list = list()            
+        for short in shortcut_list:
+            mid = short['id']
+            if str(mid) not in ex_shortcuts:
+                ex_shortcut_list.append(short)
+        shortcut_list = ex_shortcut_list
+            
     if shortcut_list:        
         total = len(shortcut_list)
 
@@ -297,21 +344,21 @@ def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, sh
                                     
     return result, total, max_page
 
-def on_refresh_sc_list_change(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, sc_page, columns, rows):
+def on_refresh_sc_list_change(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, ex_shortcuts, show_ex_shortcuts, sc_page, columns, rows):
     
-    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows)
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows ,ex_shortcuts if show_ex_shortcuts else None)
     
     # 현재 페이지가 최대 페이지보다 크면 (최대 페이지를 현재 페이지로 넣고)다시한번 리스트를 구한다.
     if thumb_max_page < sc_page:
         sc_page = thumb_max_page
-        thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows)
+        thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows, ex_shortcuts)
         
     return gr.update(value=thumb_list),gr.update(choices=classification.get_list()),gr.update(minimum=1, maximum=thumb_max_page, value=sc_page, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
 
-def on_shortcut_gallery_refresh(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, columns, rows):
-    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,1, columns, rows)
+def on_shortcut_gallery_refresh(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, ex_shortcuts, show_ex_shortcuts, columns, rows):
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,1, columns, rows, ex_shortcuts if show_ex_shortcuts else None)
     return gr.update(value=thumb_list),gr.update(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages"),thumb_list
 
-def on_sc_gallery_page(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, sc_page, columns, rows):
-    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows)
+def on_sc_gallery_page(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, ex_shortcuts , show_ex_shortcuts, sc_page, columns, rows):
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows, ex_shortcuts if show_ex_shortcuts else None)
     return gr.update(value=thumb_list),thumb_list

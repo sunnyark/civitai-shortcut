@@ -28,12 +28,14 @@ def on_setting_ui():
                     
         with gr.Row():
             with gr.Accordion("Shortcut Browser and Information Images", open=False):    
+                with gr.Row():                    
+                    gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.gallery_column, step=1, label='Model Information Image Counts per Row', interactive=True)                
                 with gr.Row():
                     shortcut_column = gr.Slider(minimum=1, maximum=14, value=setting.shortcut_column, step=1, label='Shortcut Browser Thumbnail Counts per Row', interactive=True)
                     shortcut_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.shortcut_rows_per_page, step=1, label='Shortcut Browser Thumbnails Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
-                with gr.Row():                    
-                    gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.gallery_column, step=1, label='Model Information Image Counts per Row', interactive=True)
+                with gr.Row():                                        
                     classification_gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.classification_gallery_column, step=1, label='Classification Model Counts per Row', interactive=True)
+                    classification_gallery_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.classification_gallery_rows_per_page, step=1, label='Classification Model Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
                 # with gr.Row():                        
                 #     shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
                 #     gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
@@ -75,6 +77,7 @@ def on_setting_ui():
             shortcut_rows_per_page,
             gallery_column,
             classification_gallery_column,
+            classification_gallery_rows_per_page,
             usergallery_images_column,
             usergallery_images_rows_per_page,            
             shortcut_max_download_image_per_version,
@@ -117,6 +120,7 @@ def on_setting_ui():
             shortcut_rows_per_page,
             gallery_column,
             classification_gallery_column,
+            classification_gallery_rows_per_page,
             usergallery_images_column,
             usergallery_images_rows_per_page,            
             shortcut_max_download_image_per_version,
@@ -139,7 +143,7 @@ def on_setting_ui():
 def on_save_btn_click(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
                       shortcut_column, shortcut_rows_per_page,
-                      gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_rows_per_page,
+                      gallery_column, classification_gallery_column, classification_gallery_rows_per_page, usergallery_images_column, usergallery_images_rows_per_page,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
@@ -150,7 +154,7 @@ def on_save_btn_click(shortcut_update_when_start,
     save_setting(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
                       shortcut_column, shortcut_rows_per_page,
-                      gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_rows_per_page,
+                      gallery_column, classification_gallery_column, classification_gallery_rows_per_page, usergallery_images_column, usergallery_images_rows_per_page,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
@@ -161,7 +165,7 @@ def on_save_btn_click(shortcut_update_when_start,
 def save_setting(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
                       shortcut_column, shortcut_rows_per_page,
-                      gallery_column, classification_gallery_column, usergallery_images_column, usergallery_images_rows_per_page,
+                      gallery_column, classification_gallery_column, classification_gallery_rows_per_page, usergallery_images_column, usergallery_images_rows_per_page,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
@@ -190,7 +194,9 @@ def save_setting(shortcut_update_when_start,
     image_style['shortcut_rows_per_page'] = shortcut_rows_per_page
 
     image_style['gallery_column'] = gallery_column
+    
     image_style['classification_gallery_column'] = classification_gallery_column
+    image_style['classification_gallery_rows_per_page'] = classification_gallery_rows_per_page
         
     image_style['usergallery_images_column'] = usergallery_images_column
     image_style['usergallery_images_rows_per_page'] = usergallery_images_rows_per_page           
@@ -260,6 +266,7 @@ def on_refresh_setting_change():
             setting.shortcut_rows_per_page,\
             setting.gallery_column,\
             setting.classification_gallery_column,\
+            setting.classification_gallery_rows_per_page,\
             setting.usergallery_images_column,\
             setting.usergallery_images_rows_per_page,\
             setting.shortcut_max_download_image_per_version,\
