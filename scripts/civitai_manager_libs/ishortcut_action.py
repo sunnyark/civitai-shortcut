@@ -13,6 +13,8 @@ from . import setting
 from . import classification
 from . import downloader
 
+
+
 def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     with gr.Column(scale=3):    
         with gr.Accordion("#", open=True) as model_title_name:    
@@ -26,7 +28,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                 saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
-                    open_image_folder = gr.Button(value="Open Download Image Folder") 
+                    open_image_folder = gr.Button(value="Open Download Image Folder", visible=False) 
                     change_thumbnail_image = gr.Button(value="Change thumbnail to selected image", variant="primary", visible=True)
                     change_preview_image = gr.Button(value="Change preview to selected image", variant="primary", visible=False)                    
             with gr.TabItem("Description" , id="Model_Description"):                             
@@ -67,7 +69,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                     vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
 
                 download_model = gr.Button(value="Download", variant="primary")
-                gr.Markdown("Downloading may take some time. Check console log for detail")     
+                # download_model_test = gr.Button(value="Download Test", variant="primary")
+                dn_msg = gr.Markdown("Downloading may take some time. Check console log for detail")     
                             
     with gr.Column(scale=1):            
         with gr.Tabs() as info_tabs:
@@ -75,17 +78,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                 model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
                 model_basemodel = gr.Textbox(label="BaseModel", value="", interactive=False, lines=1)
                 trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
-                civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)                   
-                with gr.Row():            
-                    with gr.Column():
-                        with gr.Accordion("Classification", open=True):
-                            model_classification = gr.Dropdown(label='Classification', show_label=False ,multiselect=True, interactive=True, choices=classification.get_list())
-                            model_classification_update_btn = gr.Button(value="Update",variant="primary")
-
-                        with gr.Accordion("Downloaded Version", open=True, visible=False) as downloaded_tab:                             
-                            downloaded_info = gr.Textbox(interactive=False,show_label=False)
-                            saved_openfolder = gr.Button(value="Open Download Folder", variant="primary", visible=False)
-
+                civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
+                
             with gr.TabItem("Image Information" , id="Image_Information"):      
                 with gr.Column():            
                     img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
@@ -99,7 +93,15 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                 with gr.Column():            
                     personal_note = gr.Textbox(label="Personal Note", interactive=True, lines=6).style(container=True, show_copy_button=True)
                     personal_note_save = gr.Button(value="Save", variant="primary", visible=True)
-                                        
+                    
+        with gr.Accordion("Classification", open=True):
+            model_classification = gr.Dropdown(label='Classification', show_label=False ,multiselect=True, interactive=True, choices=classification.get_list())
+            model_classification_update_btn = gr.Button(value="Update",variant="primary")
+
+        with gr.Accordion("Downloaded Version", open=True, visible=False) as downloaded_tab:                             
+            downloaded_info = gr.Textbox(interactive=False,show_label=False)
+            saved_openfolder = gr.Button(value="Open Download Folder", variant="primary", visible=False)      
+                                              
         # with gr.Row():
         #     with gr.Column():                                                    
         #         refresh_btn = gr.Button(value="Refresh")                                                                                            
@@ -130,7 +132,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
         modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
-   
+       
     personal_note_save.click(
        fn=on_personal_note_save_click,
        inputs=[
@@ -142,6 +144,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     send_to_recipe.click(
         fn=on_send_to_recipe_click,
         inputs=[
+            selected_model_id,
             img_file_info,
             img_index,
             saved_images
@@ -176,7 +179,27 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             ms_suggestedname
         ]          
     )
-    
+
+    # download_model.click(
+    #     fn=on_download_model_click,
+    #     inputs=[
+    #         selected_model_id,
+    #         selected_version_id,
+    #         filename_list,            
+    #         vs_folder,
+    #         vs_foldername,
+    #         cs_foldername,
+    #         ms_foldername
+    #     ],
+    #     outputs=[
+    #         refresh_sc_browser,
+    #         downloaded_tab,
+    #         downloaded_info,
+    #         saved_openfolder,
+    #         change_preview_image
+    #     ]
+    # ) 
+        
     download_model.click(
         fn=on_download_model_click,
         inputs=[
@@ -190,11 +213,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
         ],
         outputs=[
             refresh_sc_browser,
-            downloaded_tab,
-            downloaded_info,
-            saved_openfolder,
-            change_preview_image
-            # refresh_information
+            refresh_information
         ]
     )  
         
@@ -204,7 +223,9 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             selected_model_id,
             saved_images_url              
         ],
-        outputs=None 
+        outputs=[
+            refresh_information
+        ]
     )
     
     gallery = refresh_gallery.change(
@@ -277,7 +298,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             saved_images_meta,
             img_file_info,
             saved_openfolder,
-            change_preview_image,
+            change_preview_image,            
+            open_image_folder,            
             model_classification,
             vs_folder,
             vs_foldername,            
@@ -314,6 +336,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             img_file_info,
             saved_openfolder,
             change_preview_image,
+            open_image_folder,
             model_classification,
             vs_folder,
             vs_foldername,            
@@ -351,6 +374,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             img_file_info,
             saved_openfolder,
             change_preview_image,
+            open_image_folder,            
             model_classification,
             vs_folder,
             vs_foldername,            
@@ -360,7 +384,8 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             ms_suggestedname,
             personal_note
         ],
-        cancels=gallery
+        cancels=gallery,
+        show_progress=False
     )
     
     # refresh_btn.click(lambda :datetime.datetime.now(),None,refresh_information,cancels=gallery)    
@@ -409,16 +434,37 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     )
     
     close_filename_btn.click(lambda :gr.update(visible=False),None,change_filename,show_progress=False)
-    
+
+    # download_model_test.click(
+    #     fn=on_download_model_test_click,
+    #     inputs=None,
+    #     outputs=[
+    #         dn_msg,
+    #         refresh_information
+    #     ]
+    # )
+        
     return selected_model_id, refresh_information
+
+# def on_download_model_test_click(progress=gr.Progress(track_tqdm=True)):
+#     url = "https://civitai.com/api/download/models/66452"
+#     dfn = "D:\\AI\\stable-diffusion-webui\\models\\Lora\\(G)I-DLE Miyeon\\gidleMiyeonV1.safetensors"
+#     downloader.download_file_gr(url,dfn,progress)
+#     current_time = datetime.datetime.now() 
+#     return gr.update(visible=True) ,current_time
 
 def on_personal_note_save_click(modelid, note):
     ishortcut.update_shortcut_model_note(modelid,note)
     
-def on_send_to_recipe_click(img_file_info, img_index, civitai_images):
-    # return img_file_info
-    try:
-        return civitai_images[int(img_index)]
+def on_send_to_recipe_click(model_id, img_file_info, img_index, civitai_images):
+    try:        
+        # recipe_input의 넘어가는 데이터 형식을 [ shortcut_id:파일네임 ] 으로 하면 
+        # reference shortcut id를 넣어줄수 있다.        
+        recipe_image = setting.set_imagefn_and_shortcutid_for_recipe_image(model_id, civitai_images[int(img_index)])
+        # util.printD(recipe_image)
+        # util.printD(setting.get_image_and_shortcutid_from_recipe_image(recipe_image))        
+        # recipe_image = civitai_images[int(img_index)]
+        return recipe_image
     except:
         return gr.update(visible=False)
 
@@ -504,13 +550,14 @@ def on_download_images_click(model_id:str, images_url):
     if model_id:        
         model_info = ishortcut.get_model_info(model_id)              
         if not model_info:
-            return
+            return gr.update(visible=False)
 
         if "name" not in model_info.keys():
-            return
+            return gr.update(visible=False)
             
         downloader.download_image_file(model_info['name'], images_url)
     current_time = datetime.datetime.now() 
+    return current_time
 
 def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_foldername, cs_foldername=None, ms_foldername=None):
     msg = None
@@ -522,28 +569,46 @@ def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_folde
             msg = downloader.download_file_thread(file_name, version_id, False, False, None , cs_foldername, ms_foldername)
             
         # 다운 받은 모델 정보를 갱신한다.    
-        model.update_downloaded_model()
+        # 모델정보를 불러오기전에 한번 하기 때문에 필요 없을듯         
+        # model.update_downloaded_model()
 
-        downloaded_info = None
-        is_downloaded = False       
-        is_visible_openfolder = False
-        is_visible_changepreview = False
-        downloaded_versions = model.get_model_downloaded_versions(model_id)
-        if downloaded_versions:
-                
-            downloaded_info = "\n".join(downloaded_versions.values())
-
-            if str(version_id) in downloaded_versions:
-                is_visible_openfolder=True
-                is_visible_changepreview = True
-
-        if downloaded_info:
-            is_downloaded = True 
-                                            
         current_time = datetime.datetime.now()
         
-        return gr.update(value=current_time),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview)
-    return gr.update(visible=True),gr.update(visible=False),gr.update(value=None),gr.update(visible=False),gr.update(visible=False)
+        return gr.update(value=current_time),gr.update(value=current_time)
+    return gr.update(visible=True),gr.update(visible=True)
+
+# def on_download_model_click(model_id, version_id, file_name, vs_folder, vs_foldername, cs_foldername=None, ms_foldername=None):
+#     msg = None
+#     if version_id and model_id:    
+#         # 프리뷰이미지와 파일 모두를 다운 받는다.
+#         if cs_foldername == setting.CREATE_MODEL_FOLDER:
+#             msg = downloader.download_file_thread(file_name, version_id, True, vs_folder, vs_foldername, None, ms_foldername)
+#         else:
+#             msg = downloader.download_file_thread(file_name, version_id, False, False, None , cs_foldername, ms_foldername)
+            
+#         # 다운 받은 모델 정보를 갱신한다.    
+#         model.update_downloaded_model()
+
+#         downloaded_info = None
+#         is_downloaded = False       
+#         is_visible_openfolder = False
+#         is_visible_changepreview = False
+#         downloaded_versions = model.get_model_downloaded_versions(model_id)
+#         if downloaded_versions:
+                
+#             downloaded_info = "\n".join(downloaded_versions.values())
+
+#             if str(version_id) in downloaded_versions:
+#                 is_visible_openfolder=True
+#                 is_visible_changepreview = True
+
+#         if downloaded_info:
+#             is_downloaded = True 
+                                            
+#         current_time = datetime.datetime.now()
+        
+#         return gr.update(value=current_time),gr.update(visible = is_downloaded),gr.update(value=downloaded_info),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview)
+#     return gr.update(visible=True),gr.update(visible=False),gr.update(value=None),gr.update(visible=False),gr.update(visible=False)
 
 def on_cs_foldername_select(evt: gr.SelectData, is_vsfolder):
     if evt.value == setting.CREATE_MODEL_FOLDER:
@@ -681,10 +746,19 @@ def load_saved_model(modelid=None, ver_index=None):
             is_downloaded = False       
             is_visible_openfolder = False
             is_visible_changepreview = False
+            is_visible_open_download_imagefolder = False
             flist = list()
             downloadable = list()
             current_time = datetime.datetime.now()
             
+            # 다운 받은 모델 정보를 갱신한다.    
+            model.update_downloaded_model()
+            
+            image_folder = util.get_download_image_folder(model_info['name'])
+            if image_folder:
+                is_visible_open_download_imagefolder = True
+                            
+            # 분류 리스트를 가져온다.
             classification_list = classification.get_classification_names_by_modelid(modelid)
             ms_foldername = model_info['name']
             cs_foldername = setting.CREATE_MODEL_FOLDER
@@ -782,7 +856,7 @@ def load_saved_model(modelid=None, ver_index=None):
                 gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []), downloadable if len(downloadable) > 0 else None,\
                 gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview),\
+                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview),gr.update(visible=is_visible_open_download_imagefolder),\
                 gr.update(choices=classification.get_list(), value=classification_list, interactive=True),\
                 gr.update(value=is_vsfolder, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False), gr.update(value=vs_foldername, visible=is_vsfolder),\
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=cs_foldername),\
@@ -799,7 +873,7 @@ def load_saved_model(modelid=None, ver_index=None):
         gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(value=None),None,\
         gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(visible=False),\
+        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),\
         gr.update(choices=classification.get_list(),value=[], interactive=True),\
         gr.update(value=False, visible=True),gr.update(value="",visible=False),\
         gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER),\

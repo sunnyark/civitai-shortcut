@@ -57,7 +57,7 @@ def civitai_shortcut_ui():
             with gr.Tabs() as civitai_assistance_tabs:
                 with gr.TabItem("Classification"):
                     with gr.Row():
-                        refresh_classification = classification_action.on_ui()
+                        refresh_classification = classification_action.on_ui(shortcut_input)
                 with gr.TabItem("Scan and Update Models"):
                     with gr.Row():
                         scan_action.on_scan_ui()

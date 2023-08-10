@@ -70,6 +70,11 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1,6.3
+* classification 의 인터페이스 변경
+* classification 의 shortcut browser 기능추가, 편의성 개선
+* shortcut information의 이미지에서 recipe로 prompt를 보낼때 해당 shortcut을 기본 레퍼런스 모델로 추가하게 수정.
+
 v 1.6.2
 * shortcut의 등록날짜를 업데이트 
   (기존데이터는 Assistance->Update Shortcuts:Update the model information for the shortcut 수행필요)

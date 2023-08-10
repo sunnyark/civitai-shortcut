@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "v1.6.2"
+Extensions_Version = "v1.6.3"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -109,6 +109,7 @@ shortcut_column = 5
 # shortcut_count_per_page = 20
 shortcut_rows_per_page = 4
 classification_gallery_column = 8
+classification_gallery_rows_per_page = 4
 
 # 유저 갤러리 설정
 usergallery_images_column = 6
@@ -239,6 +240,7 @@ def load_data():
     global shortcut_rows_per_page
     global gallery_column
     global classification_gallery_column
+    global classification_gallery_rows_per_page
     global usergallery_images_column
     global usergallery_images_rows_per_page
     global shortcut_max_download_image_per_version
@@ -308,6 +310,8 @@ def load_data():
                 gallery_column = int(image_style['gallery_column'])
             if "classification_gallery_column" in image_style.keys():
                 classification_gallery_column = int(image_style['classification_gallery_column'])
+            if "classification_gallery_rows_per_page" in image_style.keys():
+                classification_gallery_rows_per_page = int(image_style['classification_gallery_rows_per_page'])                
 
             if "usergallery_images_column" in image_style.keys():
                 usergallery_images_column = int(image_style['usergallery_images_column'])
@@ -370,7 +374,18 @@ def get_ui_typename(model_type):
         if v == model_type:
             return k
     return model_type
-    
+
+def get_imagefn_and_shortcutid_from_recipe_image(recipe_image):
+    if recipe_image:
+        result = recipe_image.split(":", 1)
+        if len(result) > 1:
+            return result[0], result[1]
+        return None, None
+
+def set_imagefn_and_shortcutid_for_recipe_image( shortcutid,image_fn):
+    if image_fn and shortcutid:
+        return f"{shortcutid}:{image_fn}"
+        
 def get_modelid_from_shortcutname(sc_name):
     if sc_name:
         return sc_name[sc_name.rfind(':') + 1:]

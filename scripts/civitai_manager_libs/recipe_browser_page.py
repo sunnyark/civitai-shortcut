@@ -203,6 +203,9 @@ def get_recipe_reference_list(page = 0):
         if shortcut_count_per_page > 0:
             max_page = math.ceil(total / shortcut_count_per_page)
 
+        if page > max_page:
+            page = max_page
+            
         if page > 0 and shortcut_count_per_page > 0:
             item_start = shortcut_count_per_page * (page - 1)
             item_end = (shortcut_count_per_page * page)
@@ -272,6 +275,9 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
         if shortcut_count_per_page > 0:
             max_page = math.ceil(total / shortcut_count_per_page)
 
+        if page > max_page:
+            page = max_page
+            
         if page > 0 and shortcut_count_per_page > 0:
             item_start = shortcut_count_per_page * (page - 1)
             item_end = (shortcut_count_per_page * page)
