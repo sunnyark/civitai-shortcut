@@ -14,7 +14,9 @@ from . import ishortcut_action
 from . import civitai_gallery_action
 
 def on_shortcut_input_change(shortcut_input):
-    return shortcut_input, gr.update(selected="Shortcut")
+    if not shortcut_input:
+        return None, gr.update(visible=False), gr.update(selected="Shortcut")
+    return None, shortcut_input, gr.update(selected="Shortcut")
         
 def on_ui(recipe_input, shortcut_input, civitai_tabs):    
     with gr.Row(visible=False):       
@@ -114,6 +116,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
             shortcut_input
         ],
         outputs=[
+            shortcut_input,
             sc_modelid,
             civitai_tabs,
         ], show_progress=False
