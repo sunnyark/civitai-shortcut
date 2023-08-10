@@ -108,11 +108,13 @@ def on_ui(shortcut_input):
     sc_gallery.select(
         fn=on_sc_gallery_select,
         inputs=[
-            classification_shortcuts
+            classification_shortcuts,
+            classification_gallery_page
         ],
         outputs=[
-            classification_shortcuts,            
-            refresh_gallery,
+            classification_shortcuts,
+            classification_gallery_page,
+            refresh_gallery,            
             sc_gallery,
             refresh_sc_gallery,
             classification_information_tabs
@@ -301,18 +303,10 @@ def on_refresh_classification_change(select_name):
         return gr.update(value=select_name), gr.update(value=info), current_time, gr.update(label=select_name), current_time, gr.update(choices=classification.get_list())
     return gr.update(value=""), gr.update(value=""), current_time, gr.update(label=setting.NEWCLASSIFICATION), gr.update(visible=True), gr.update(choices=classification.get_list())
 
-def on_sc_gallery_select(evt: gr.SelectData, shortcuts):
+def on_sc_gallery_select(evt: gr.SelectData, shortcuts, page):
     sc_reload = setting.classification_preview_mode_disable
-    # clf = None
     current_time = datetime.datetime.now()
     
-    # if not Classification_name:
-    #     return None, None, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False)
-       
-    # clf = classification.get_classification(Classification_name)
-    # if not clf:
-    #     return None, None, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False)
-            
     if evt.value:
                
         shortcut = evt.value 
@@ -323,9 +317,14 @@ def on_sc_gallery_select(evt: gr.SelectData, shortcuts):
             
         if sc_model_id not in shortcuts:
             shortcuts.append(sc_model_id)
+        
+        total = len(shortcuts)
+        shortcut_count_per_page = setting.classification_gallery_column * setting.classification_gallery_rows_per_page
+        if shortcut_count_per_page > 0:
+            page = math.ceil(total / shortcut_count_per_page)
 
-        return shortcuts, current_time, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False),gr.update(selected="Classification_Shortcuts")
-    return shortcuts, None, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False),gr.update(selected="Classification_Shortcuts")
+        return shortcuts, gr.update(value=page, maximum=page), current_time, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False),gr.update(selected="Classification_Shortcuts")
+    return shortcuts, gr.update(value=page), None, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False),gr.update(selected="Classification_Shortcuts")
 
 def on_classification_gallery_loading(shortcuts, page=0):
     totals = 0
@@ -357,7 +356,7 @@ def on_classification_gallery_loading(shortcuts, page=0):
                 result_list.append((setting.no_card_preview_image,setting.set_shortcutname("delete",mid)))                
                 
     current_time = datetime.datetime.now()          
-    return gr.update(value=result_list), gr.update(minimum=1, value=cur_page, maximum=max_page, step=1, label=f"Total {max_page} Pages"),current_time
+    return gr.update(value=result_list), gr.update(minimum=1, value=cur_page, maximum=max_page, step=1, label=f"Total {max_page} Pages"), current_time
 
 # def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
 #     classification_reload = setting.classification_preview_mode_disable
