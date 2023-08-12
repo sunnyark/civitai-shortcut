@@ -28,7 +28,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs() as civitai_shortcut_tabs:
-            with gr.TabItem("Upload"):
+            with gr.TabItem("Register Shortcut"):
                 with gr.Row(visible=False):                                 
                     register_information_only = gr.Checkbox(label="Register only model information", value=False)
                 with gr.Row():
@@ -38,7 +38,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                         update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
                         gr.Markdown(value="If you have made direct modifications(e.g. moving or renaming a folder) to the downloaded model during runtime, please execute the \"Update Downloaded Model Information\" function, which rescans the downloaded model and updates its information accordingly. ", visible=True)
                                                     
-            with gr.TabItem("Browsing"):    
+            with gr.TabItem("Shortcut Browser"):    
                 with gr.Row():
                     with gr.Column():
                         sc_gallery, refresh_sc_browser, refresh_sc_gallery = sc_browser_page.on_ui()
@@ -63,7 +63,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                 with gr.Row():
                     shortcut_modelid, refresh_civitai_information = ishortcut_action.on_ui(refresh_sc_browser, recipe_input)
 
-            with gr.TabItem("User Gallery" , id="gallery_info"):
+            with gr.TabItem("Civitai User Gallery" , id="gallery_info"):
                 with gr.Row():
                     gallery_modelid, refresh_gallery_information = civitai_gallery_action.on_ui(recipe_input)
 
