@@ -4,6 +4,7 @@ import time
 import requests
 import threading
 import shutil
+import json
 
 from . import util
 from . import setting
@@ -110,6 +111,12 @@ def download_file_thread(file_name, version_id, ms_folder, vs_folder, vs_foldern
         if preview_file:
             util.printD(f"Wrote preview image : {path_img}")
 
+        # LoRa_metadata_file 을 생성한다.
+        path_file = os.path.join(model_folder, f"{util.replace_filename(savefile_base)}.json")
+        LoRa_metadata_file = generate_LoRa_metadata(path_file, version_info)
+        if LoRa_metadata_file:
+            util.printD(f"Wrote LoRa metadata : {path_file}")
+            
     # savefile_base 이름이 없다면 모델인포에서 프라이머리 파일을 찾는다.
     # if not savefile_base:
     #     savefile_base = get_save_base_name(version_info)
@@ -150,7 +157,59 @@ def download_preview_image(filepath, version_info):
         except Exception as e:
             pass
                     
-    return True      
+    return True  
+
+def generate_LoRa_metadata(filepath, version_info):
+
+    LoRa_metadata = {
+	    "description": None,
+	    "sd version": None,
+	    "activation text": None,
+	    "preferred weight": 0,
+	    "notes": None
+    }
+    
+    if not version_info:
+        return False
+    
+    if os.path.isfile(filepath):        
+        return False
+        # try:
+        #     with open(filepath, 'r') as f:
+        #         LoRa_metadata = json.load(f)
+        # except:
+        #     pass
+    
+    if "description" in version_info.keys():
+        LoRa_metadata['description'] = version_info["description"]
+
+    if "baseModel" in version_info.keys():
+        baseModel = version_info["baseModel"]
+        if baseModel in setting.model_basemodels.keys():            
+            LoRa_metadata['sd version'] = setting.model_basemodels[baseModel]
+        else:
+            LoRa_metadata['sd version'] = 'Unknown'
+        
+    if "trainedWords" in version_info.keys():    
+        LoRa_metadata['activation text'] = ", ".join(version_info['trainedWords']) 
+    
+    notes = list()
+    if "modelId" in version_info.keys():                
+        notes.append(f"https://civitai.com/models/{version_info['modelId']}")
+    
+    if "downloadUrl" in version_info.keys():
+        notes.append(version_info['downloadUrl'])
+
+    if len(notes) > 0:    
+        LoRa_metadata['notes'] = ", ".join(notes) 
+
+    try:
+        with open(filepath, 'w') as f:
+            json.dump(LoRa_metadata, f, indent=4)
+    except Exception as e:
+        return False
+
+    return True                    
 
 def download_image_file(model_name, image_urls, progress_gr=None):    
     if not model_name:                

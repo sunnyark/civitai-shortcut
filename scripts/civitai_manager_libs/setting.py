@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "v1.6.3"
+Extensions_Version = "v1.6.4"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -24,7 +24,19 @@ CREATE_MODEL_FOLDER = "Create a model folder to download the model"
 
 model_exts = (".bin", ".pt", ".safetensors", ".ckpt")
 
-model_basemodels = ("SD 1.4", "SD 1.5", "SD 2.0", "SD 2.0 768", "SD 2.1", "SD 2.1 768", "SD 2.1 Unclip", "SDXL 0.9", "SDXL 1.0", "Other")
+# sd_version = ['SD1', 'SD2', 'SDXL', 'Unknown']
+model_basemodels = {
+    "SD 1.4":"SD1", 
+    "SD 1.5":"SD1", 
+    "SD 2.0":"SD2", 
+    "SD 2.0 768":"SD2", 
+    "SD 2.1":"SD2", 
+    "SD 2.1 768":"SD2", 
+    "SD 2.1 Unclip":"SD2", 
+    "SDXL 0.9":"SDXL", 
+    "SDXL 1.0":"SDXL", 
+    "Other":"Unknown"
+}
 
 # civitai model type -> folder path
 model_folders = {

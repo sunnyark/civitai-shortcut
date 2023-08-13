@@ -73,6 +73,10 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.6.4
+* sdui의 LoRa metadata editor에 사용가능한 model meta data를 저장.(단, 기존것이 없을경우에만 저장됩니다.)
+* 일부 메뉴의 명칭을 변경 
+
 v 1,6.3
 * classification 의 인터페이스 변경
 * classification 의 shortcut browser 기능추가, 편의성 개선
