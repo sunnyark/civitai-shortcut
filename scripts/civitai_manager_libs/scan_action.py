@@ -47,7 +47,14 @@ def on_scan_ui():
                     with gr.Column():
                         update_all_shortcuts_btn = gr.Button(value="Update the model information for the shortcut",variant="primary")
                         update_progress = gr.Markdown(value="This feature updates registered shortcuts with the latest information and downloads any new images if available.", visible=True)
-    
+        with gr.Row():
+            with gr.Accordion("Update Downloaded Model", open=True):   
+                with gr.Row():
+                    with gr.Column(): 
+                        update_lora_meta_for_downloaded_model_btn = gr.Button(value="Create a Lora metadata file for a downloaded model without Lora metadata file.",variant="primary")                    
+                        update_lora_meta_progress = gr.Markdown(value="This feature generates a Lora metadata file for a downloaded model without Lora metadata file.", visible=True)
+
+
     scan_save_modelfolder.change(
         fn=on_scan_save_modelfolder_change,
         inputs=[
@@ -86,18 +93,12 @@ def on_scan_ui():
     )
                   
     update_all_shortcuts_btn.click(
-        fn=on_update_all_shortcuts_btn,
+        fn=on_update_all_shortcuts_btn_click,
         inputs=None,
         outputs=[
             update_progress,
         ]
     ) 
-    
-    update_progress.change(
-        fn=on_update_progress_change,
-        inputs=None,
-        outputs=[update_progress]
-    )
 
     scan_to_shortcut_btn.click(
         fn=on_scan_to_shortcut_click,
@@ -106,13 +107,13 @@ def on_scan_ui():
             scan_progress,
         ]                
     )
-        
-    scan_progress.change(
-        fn=on_scan_progress_change,
+
+    update_lora_meta_for_downloaded_model_btn.click(
+        fn=on_update_lora_meta_for_downloaded_model_btn_click,
         inputs=None,
-        outputs=[scan_progress]
+        outputs=[update_lora_meta_progress]
     )
-    
+                
 def create_models_information(files, mfolder, vs_folder, register_shortcut, progress=gr.Progress()):
     
     non_list = list()    
@@ -276,14 +277,6 @@ def on_create_models_info_btn_click(files, mfolder, vsfolder, register_shortcut,
         return gr.update(choices=remain_files, value=remain_files, interactive=True, label="These models are not registered with Civitai."),gr.update(visible=True),gr.update(visible=True)    
     return gr.update(choices=[], value=[], interactive=True),gr.update(visible=False),gr.update(visible=False)  
          
-def on_update_progress_change():
-    current_time = datetime.datetime.now()
-    return gr.update(value=current_time)
-
-def on_scan_progress_change():
-    current_time = datetime.datetime.now()
-    return gr.update(value=current_time)
-
 def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
     files = scan_models(fix_information_filename, progress)
     return gr.update(choices=files,value=files,interactive=True,label="Scanned Model List"),gr.update(visible=True),gr.update(visible=True),gr.update(value=False, interactive=True),gr.update(value=False, interactive=False)
@@ -291,14 +284,29 @@ def on_scan_models_btn_click(fix_information_filename, progress=gr.Progress()):
 def on_scan_to_shortcut_click(progress=gr.Progress()):
     model.update_downloaded_model()
     ishortcut_action.scan_downloadedmodel_to_shortcut(progress)
-    return gr.update(value="This feature scans for models that have information files available and registers a shortcut for them, downloading any necessary images in the process. If there is no information available for a particular model, please use the 'Scan Models' feature.")
+    return gr.update(visible=True)
 
-def on_update_all_shortcuts_btn(progress=gr.Progress()):
+def on_update_all_shortcuts_btn_click(progress=gr.Progress()):
     ishortcut.update_all_shortcut_informations(progress)
-    return gr.update(value="This feature updates registered shortcuts with the latest information and downloads any new images if available.")
+    return gr.update(visible=True)
 
 def on_scan_save_modelfolder_change(scan_save_modelfolder):
     if scan_save_modelfolder:
         return gr.update(interactive=True)
     return gr.update(value=False, interactive=False)
-        
+
+def on_update_lora_meta_for_downloaded_model_btn_click(progress=gr.Progress()):
+    model.update_downloaded_model()
+    update_lora_meta(progress)
+    return gr.update(visible=True)
+
+def update_lora_meta(progress=gr.Progress()):    
+
+    for file_path, version_id in progress.tqdm(model.Downloaded_InfoPath.items(), desc=f"Create Lora metadata file for Downloaded Model"): 
+        vfolder , vfile = os.path.split(file_path) 
+        basename , ext = os.path.splitext(vfile)
+        basename , ext = os.path.splitext(basename)
+        metafile = os.path.join(vfolder, f"{basename}.json")
+
+        if not os.path.isfile(metafile):
+            civitai.write_LoRa_metadata_by_version_id(metafile, str(version_id))

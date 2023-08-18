@@ -76,6 +76,7 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 v 1.6.4
 * sdui의 LoRa metadata editor에 사용가능한 model meta data를 저장.(단, 기존것이 없을경우에만 저장됩니다.)
 * 일부 메뉴의 명칭을 변경 
+* Assistance->Scan and Update Models 에 누락된 lora metadata file을 생성할 수 있는 기능 추가(2023-08-19)
 
 v 1,6.3
 * classification 의 인터페이스 변경
