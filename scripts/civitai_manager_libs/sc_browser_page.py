@@ -56,7 +56,8 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels.keys()], interactive=True)
             show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
-
+            reset_filter_btn = gr.Button(value="Reset Filter",variant="primary")
+            
     with gr.Row(visible=False):
         refresh_sc_browser = gr.Textbox()
         refresh_sc_gallery = gr.Textbox()
@@ -202,10 +203,28 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             sc_gallery_result
         ]
     )
-    
+
+    reset_filter_btn.click(
+        fn=on_reset_filter_btn_click,
+        inputs=None,
+        outputs=[
+            shortcut_type,            
+            sc_search,
+            shortcut_basemodel,
+            sc_classification_list,            
+            show_downloaded_sc,
+            sc_gallery_page,
+            
+            refresh_sc_browser
+        ],
+        show_progress=False                
+    )
+        
     return sc_gallery, refresh_sc_browser, refresh_sc_gallery
 
-
+def on_reset_filter_btn_click():
+    current_time = datetime.datetime.now()
+    return gr.update(value=[]), gr.update(value=None), gr.update(value=[]), gr.update(value=[]), gr.update(value=ALL_DOWNLOADED_MODEL),gr.update(value=1), current_time
 
 def get_thumbnail_list(shortcut_types=None, downloaded_sc=False, search=None, shortcut_basemodels=None, sc_classifications=None, page = 0, columns=0, rows=0):
     
