@@ -40,7 +40,8 @@ def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=Non
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels.keys()], interactive=True)
             show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
-        
+            reset_filter_btn = gr.Button(value="Reset Filter",variant="primary")
+            
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
         show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
