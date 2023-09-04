@@ -23,7 +23,11 @@ def on_scan_ui():
                         scan_models_btn = gr.Button(value="Scan Models",variant="primary") 
                         gr.Markdown(value="This feature targets models that do not have information files available in the saved models. It calculates the hash value and searches for the model in Civitai, registering it as a shortcut. Calculating the hash value can take a significant amount of time.", visible=True)
                         with gr.Box(elem_classes="cs_box", visible=False) as scanned_result:  
-                            scan_models_result = gr.CheckboxGroup(visible=True, container=True, label="Scanned Model List")
+                            with gr.Column():
+                                scan_models_result = gr.CheckboxGroup(visible=True, container=True, label="Scanned Model List")
+                                with gr.Row():
+                                    unselect_scan_models_result_btn = gr.Button(value="Unselect All",variant="primary")
+                                    clear_scan_models_result_btn = gr.Button(value="Clear Results",variant="primary")
                 with gr.Row(visible=False) as update_information:
                     with gr.Column():
                         with gr.Row():
@@ -54,7 +58,24 @@ def on_scan_ui():
                         update_lora_meta_for_downloaded_model_btn = gr.Button(value="Create a Lora metadata file for a downloaded model without Lora metadata file.",variant="primary")                    
                         update_lora_meta_progress = gr.Markdown(value="This feature generates a Lora metadata file for a downloaded model without Lora metadata file.", visible=True)
 
-
+    unselect_scan_models_result_btn.click(
+        fn=on_unselect_scan_models_result_btn_click,
+        inputs=None,
+        outputs=[
+            scan_models_result
+        ] 
+    )
+    
+    clear_scan_models_result_btn.click(
+        fn=on_clear_scan_models_result_btn_click,
+        inputs=None,
+        outputs=[
+            scan_models_result,
+            scanned_result,
+            update_information,
+        ]        
+    )
+    
     scan_save_modelfolder.change(
         fn=on_scan_save_modelfolder_change,
         inputs=[
@@ -113,7 +134,13 @@ def on_scan_ui():
         inputs=None,
         outputs=[update_lora_meta_progress]
     )
-                
+
+def on_unselect_scan_models_result_btn_click():
+    return gr.update(value=[], interactive=True)
+
+def on_clear_scan_models_result_btn_click():
+    return gr.update(choices=[], value=[], interactive=True),gr.update(visible=False),gr.update(visible=False)  
+    
 def create_models_information(files, mfolder, vs_folder, register_shortcut, progress=gr.Progress()):
     
     non_list = list()    
