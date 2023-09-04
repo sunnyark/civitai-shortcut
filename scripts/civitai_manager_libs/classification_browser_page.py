@@ -45,13 +45,13 @@ def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=Non
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
         show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
-        sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
+        sc_gallery = gr.Gallery(show_label=False, value=thumb_list, columns=shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, allow_preview=False)
         # show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
     else:        
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
         show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
-        sc_gallery = gr.Gallery(show_label=False, value=thumb_list).style(grid=[shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style)
+        sc_gallery = gr.Gallery(show_label=False, value=thumb_list, columns=shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, allow_preview=False)
         # show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)        
         
         with gr.Accordion("Search", open=search_open):        

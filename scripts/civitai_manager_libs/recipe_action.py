@@ -30,7 +30,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                 recipe_new_btn = gr.Button(value="New Recipe", variant="primary")
                 recipe_gallery, refresh_recipe_browser = recipe_browser_page.on_ui()
             with gr.TabItem("Generate Prompt From Image"):
-                recipe_drop_image = gr.Image(type="pil", label="Drop image").style(height='100%')
+                recipe_drop_image = gr.Image(type="pil", label="Drop image", height='100%')
 
     with gr.Column(scale=(setting.shortcut_browser_screen_split_ratio_max-setting.shortcut_browser_screen_split_ratio)):       
         with gr.Accordion(label=setting.NEWRECIPE, open=True) as recipe_title_name: 
@@ -38,14 +38,14 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                 with gr.Column(scale=4):
                     with gr.Tabs() as recipe_prompt_tabs:
                         with gr.TabItem("Prompt", id="Prompt"):                    
-                            recipe_name = gr.Textbox(label="Name", value="", interactive=True, lines=1, placeholder="Please enter the prompt recipe name.").style(container=True)
-                            recipe_desc = gr.Textbox(label="Description", value="",interactive=True, lines=3, placeholder="Please enter the prompt recipe description.").style(container=True, show_copy_button=True)
-                            recipe_prompt = gr.Textbox(label="Prompt", placeholder="Prompt", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
-                            recipe_negative = gr.Textbox(label="Negative prompt", placeholder="Negative prompt", show_label=False, value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
-                            recipe_option = gr.Textbox(label="Parameter", placeholder="Parameter", value="", lines=3 ,interactive=True).style(container=True, show_copy_button=True)
+                            recipe_name = gr.Textbox(label="Name", value="", interactive=True, lines=1, placeholder="Please enter the prompt recipe name.", container=True)
+                            recipe_desc = gr.Textbox(label="Description", value="",interactive=True, lines=3, placeholder="Please enter the prompt recipe description.", container=True, show_copy_button=True)
+                            recipe_prompt = gr.Textbox(label="Prompt", placeholder="Prompt", value="", lines=3 ,interactive=True, container=True, show_copy_button=True)
+                            recipe_negative = gr.Textbox(label="Negative prompt", placeholder="Negative prompt", show_label=False, value="", lines=3 ,interactive=True ,container=True, show_copy_button=True)
+                            recipe_option = gr.Textbox(label="Parameter", placeholder="Parameter", value="", lines=3 ,interactive=True, container=True, show_copy_button=True)
                             # with gr.Accordion(label="Parameter", open=True):
                             #     prompt_ui.ui(recipe_option)
-                            # recipe_output = gr.Textbox(label="Generate Info", interactive=False, lines=6, placeholder="The prompt and parameters are combined and displayed here.").style(container=True, show_copy_button=True)
+                            # recipe_output = gr.Textbox(label="Generate Info", interactive=False, lines=6, placeholder="The prompt and parameters are combined and displayed here.", container=True, show_copy_button=True)
                             with gr.Row():
                                 try:
                                     send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img","img2img", "inpaint", "extras"])
@@ -64,16 +64,16 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                     gr.Markdown("###")
                     with gr.Tabs() as recipe_reference_tabs:
                         with gr.TabItem("Reference Image", id="reference_image"):
-                            recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image").style(height='100%')
+                            recipe_image = gr.Image(type="pil", interactive=True, label="Prompt recipe image", height='100%')
                             gr.Markdown("This image does not influence the prompt on the left. You can choose any image that matches the created prompt.")
                             # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
                         with gr.TabItem("Reference Models", id="reference_model"):
                             reference_delete = gr.Checkbox(label="Delete from references when selecting a thumbnail.", value=False)
-                            reference_gallery = gr.Gallery(show_label=False).style(grid=[3], height='auto', object_fit=setting.gallery_thumbnail_image_style, preview=False)                            
+                            reference_gallery = gr.Gallery(show_label=False, columns=3, height='auto', object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
                             # with gr.Accordion("Add Reference Shortcut Items", open=False):
                             #     reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui()
                         with gr.TabItem("Generate Information", id="generation_info"):
-                            recipe_output = gr.Textbox(label="Generate Information", interactive=False, lines=20, placeholder="The prompt and parameters are combined and displayed here.").style(container=True, show_copy_button=True)
+                            recipe_output = gr.Textbox(label="Generate Information", interactive=False, lines=20, placeholder="The prompt and parameters are combined and displayed here.", container=True, show_copy_button=True)
                 
     with gr.Row(visible=False):
         selected_recipe_name = gr.Textbox()
@@ -100,7 +100,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         outputs=[
             reference_shortcuts,
             refresh_reference_gallery,
-            reference_gallery,
+            reference_gallery, # 이거는 None으로 할 필요는 gallery를 미선택으로 만드는 방법을 몰라서 일단 이렇게 해보자
             shortcut_input
         ],
         show_progress=False

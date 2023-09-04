@@ -16,16 +16,16 @@ def on_ui():
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(1)
         
     recipe_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True)
-    recipe_gallery = gr.Gallery(value=thumb_list, show_label=False).style(grid=[5], height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+    recipe_gallery = gr.Gallery(value=thumb_list, columns=5, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False, show_label=False)
     
     with gr.Accordion(label="Search Recipe", open=True):
         recipe_search = gr.Textbox(label="Search", value="", placeholder="Search name, #description ....",interactive=True, lines=1)
         recipe_classification_list = gr.Dropdown(label="Filter Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)        
 
-    with gr.Accordion(label="Filter Reference Shortcut Items", open=False):      
-        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models").style(grid=[setting.shortcut_column], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+    with gr.Accordion(label="Filter Reference Shortcut Items", open=False):              
+        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models", columns=setting.shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
         recipe_reference_gallery_page = gr.Slider(minimum=1, maximum=reference_max_page, value=1, step=1, label=f"Total {reference_max_page} Pages", interactive=True, visible=True)      
-        recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False).style(grid=[5], height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False)
+        recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False, columns=5, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
 
     with gr.Row(visible=False):
         # recipe_browser 갱신 트리거
@@ -48,7 +48,7 @@ def on_ui():
         ],
         outputs=[
             recipe_reference_select,
-            recipe_reference_select_gallery,
+            recipe_reference_select_gallery, # 이거는 None으로 할 필요는 gallery를 미선택으로 만드는 방법을 몰라서 일단 이렇게 해보자
             refresh_recipe_reference_select_gallery,            
         ],
         show_progress=False

@@ -104,7 +104,6 @@ preview_image_ext = ".png"
 preview_image_suffix = ".preview"
 
 # 임시설정
-classification_preview_mode_disable = False
 
 # 갤러리 height 설정
 information_gallery_height = "auto" # auto , fit
@@ -264,7 +263,6 @@ def load_data():
     global information_gallery_height
 
     global shortcut_update_when_start
-    global classification_preview_mode_disable
 
     if shared.cmd_opts.embeddings_dir:
         model_folders['TextualInversion'] = shared.cmd_opts.embeddings_dir
@@ -360,9 +358,6 @@ def load_data():
 
         if "temporary" in environment.keys():
             temporary = environment['temporary']
-
-            if "classification_preview_mode_disable" in temporary.keys():
-                classification_preview_mode_disable = bool(temporary['classification_preview_mode_disable']) 
     
 def generate_type_basefolder(content_type):
     

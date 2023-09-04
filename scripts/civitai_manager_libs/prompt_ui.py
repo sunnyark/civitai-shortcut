@@ -114,7 +114,7 @@ def on_enable_hr_change(steps, sampler, faces , cfg_scale, size_width, size_heig
     
 def ui(option):   
     with gr.Row():
-        parameters = gr.Textbox(label="Parameters", lines=3 ,interactive=True).style(container=True)    
+        parameters = gr.Textbox(label="Parameters", lines=3 ,interactive=True, container=True)    
     with gr.Row():
         sampler = gr.Dropdown(label="Sampling method", choices=[x.name for x in samplers], interactive=True)
         steps = gr.Slider(minimum=1, maximum=150, step=1, label="Sampling steps", value=20, interactive=True)
