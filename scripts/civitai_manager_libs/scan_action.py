@@ -23,7 +23,7 @@ def on_scan_ui():
                         scan_models_btn = gr.Button(value="Scan Models",variant="primary") 
                         gr.Markdown(value="This feature targets models that do not have information files available in the saved models. It calculates the hash value and searches for the model in Civitai, registering it as a shortcut. Calculating the hash value can take a significant amount of time.", visible=True)
                         with gr.Box(elem_classes="cs_box", visible=False) as scanned_result:  
-                            scan_models_result = gr.CheckboxGroup(visible=True, label="Scanned Model List").style(item_container=True,container=True)
+                            scan_models_result = gr.CheckboxGroup(visible=True, container=True, label="Scanned Model List")
                 with gr.Row(visible=False) as update_information:
                     with gr.Column():
                         with gr.Row():

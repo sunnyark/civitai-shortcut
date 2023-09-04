@@ -15,8 +15,6 @@ def on_setting_ui():
                 with gr.Row():
                     shortcut_update_when_start = gr.Checkbox(value=setting.shortcut_update_when_start, label="Startup : The program performs 'Update the model information for the shortcut' when it starts.",info="At program startup, the registered shortcuts are updated with the latest data. This process operates in the background. To update manually, you can uncheck that option and use the 'Scans and Model Updates -> Update the model information for the shortcut' feature.", interactive=True)
                     shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
-                with gr.Row():
-                    classification_preview_mode_disable = gr.Checkbox(value=setting.classification_preview_mode_disable, label="Deactivate the preview mode of the classification gallery." , info="Deactivate the preview mode of the classification gallery. It is a temporary feature implemented using a expedient. Please use it only if necessary." , interactive=True)
         with gr.Row():
             with gr.Accordion("Screen Style", open=False):    
                 with gr.Row():
@@ -89,8 +87,7 @@ def on_setting_ui():
             extension_aestheticgradient_folder,
             extension_poses_folder,
             extension_other_folder,
-            download_images_folder,
-            classification_preview_mode_disable             
+            download_images_folder
         ],
         show_progress=False
     )
@@ -132,8 +129,7 @@ def on_setting_ui():
             extension_aestheticgradient_folder,
             extension_poses_folder,
             extension_other_folder,
-            download_images_folder,
-            classification_preview_mode_disable            
+            download_images_folder
         ],
         outputs=None    
     )   
@@ -147,8 +143,7 @@ def on_save_btn_click(shortcut_update_when_start,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
-                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
-                      classification_preview_mode_disable
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder
                       ):    
     
     save_setting(shortcut_update_when_start,
@@ -158,8 +153,7 @@ def on_save_btn_click(shortcut_update_when_start,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
-                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
-                      classification_preview_mode_disable
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder
                       )    
 
 def save_setting(shortcut_update_when_start,
@@ -169,8 +163,7 @@ def save_setting(shortcut_update_when_start,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
-                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder,
-                      classification_preview_mode_disable
+                      locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder
                       ):    
     
     environment = setting.load()
@@ -225,8 +218,7 @@ def save_setting(shortcut_update_when_start,
     environment['download_folders'] = download_folders
     
     temporary = dict()
-    temporary['classification_preview_mode_disable'] = classification_preview_mode_disable  
-    
+        
     environment['temporary'] = temporary
     
     setting.save(environment)
@@ -278,5 +270,4 @@ def on_refresh_setting_change():
             setting.model_folders['AestheticGradient'],\
             setting.model_folders['Poses'],\
             setting.model_folders['Other'],\
-            setting.download_images_folder,\
-            setting.classification_preview_mode_disable 
+            setting.download_images_folder

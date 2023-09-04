@@ -35,7 +35,7 @@ def on_ui(shortcut_input):
                         with gr.TabItem("Classification Shortcuts", id="Classification_Shortcuts"):                            
                             classification_gallery_page = gr.Slider(minimum=1, maximum=1, value=1, step=1, label=f"Total {1} Pages", interactive=True, visible=True if setting.classification_gallery_rows_per_page > 0 else False)
                             classification_shortcut_delete = gr.Checkbox(label="Delete from classification when selecting a thumbnail.", value=False)
-                            classification_gallery = gr.Gallery(elem_id="classification_gallery", show_label=False).style(grid=[setting.classification_gallery_column], height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False)                                                
+                            classification_gallery = gr.Gallery(elem_id="classification_gallery", show_label=False, columns=setting.classification_gallery_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)                                                
                             with gr.Row():
                                 classification_clear_shortcut_btn = gr.Button(value="Clear")
                                 classification_reload_shortcut_btn = gr.Button(value="Reload")
@@ -115,8 +115,8 @@ def on_ui(shortcut_input):
             classification_shortcuts,
             classification_gallery_page,
             refresh_gallery,            
-            sc_gallery,
-            refresh_sc_gallery,
+            # sc_gallery,
+            # refresh_sc_gallery,
             classification_information_tabs
         ],
         show_progress=False        
@@ -131,7 +131,7 @@ def on_ui(shortcut_input):
         outputs=[
             classification_shortcuts,
             refresh_gallery,
-            classification_gallery,
+            classification_gallery, # 이거는 None으로 할 필요는 gallery를 미선택으로 만드는 방법을 몰라서 일단 이렇게 해보자 
             shortcut_input
         ],
         show_progress=False
@@ -304,7 +304,6 @@ def on_refresh_classification_change(select_name):
     return gr.update(value=""), gr.update(value=""), current_time, gr.update(label=setting.NEWCLASSIFICATION), gr.update(visible=True), gr.update(choices=classification.get_list())
 
 def on_sc_gallery_select(evt: gr.SelectData, shortcuts, page):
-    sc_reload = setting.classification_preview_mode_disable
     current_time = datetime.datetime.now()
     
     if evt.value:
@@ -323,8 +322,8 @@ def on_sc_gallery_select(evt: gr.SelectData, shortcuts, page):
         if shortcut_count_per_page > 0:
             page = math.ceil(total / shortcut_count_per_page)
 
-        return shortcuts, gr.update(value=page, maximum=page), current_time, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False),gr.update(selected="Classification_Shortcuts")
-    return shortcuts, gr.update(value=page), None, None if sc_reload else gr.update(show_label=False), current_time if sc_reload else gr.update(visible=False),gr.update(selected="Classification_Shortcuts")
+        return shortcuts, gr.update(value=page, maximum=page), current_time, gr.update(selected="Classification_Shortcuts")
+    return shortcuts, gr.update(value=page), None, gr.update(selected="Classification_Shortcuts")
 
 def on_classification_gallery_loading(shortcuts, page=0):
     totals = 0
@@ -358,23 +357,6 @@ def on_classification_gallery_loading(shortcuts, page=0):
     current_time = datetime.datetime.now()          
     return gr.update(value=result_list), gr.update(minimum=1, value=cur_page, maximum=max_page, step=1, label=f"Total {max_page} Pages"), current_time
 
-# def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
-#     classification_reload = setting.classification_preview_mode_disable
-#     if evt.value:               
-#             shortcut = evt.value 
-#             sc_model_id = setting.get_modelid_from_shortcutname(shortcut)
-#             current_time = datetime.datetime.now()
-            
-#             if not shortcuts:
-#                 shortcuts = list()
-                
-#             if sc_model_id in shortcuts:
-#                 if delete_opt:
-#                     shortcuts.remove(sc_model_id)                
-
-#             return shortcuts, current_time , None if classification_reload else gr.update(show_label=False), gr.update(visible=False) if delete_opt else sc_model_id
-#     return shortcuts, None, None if classification_reload else gr.update(show_label=False), gr.update(visible=False)
-
 def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
     if evt.value:               
         shortcut = evt.value 
@@ -390,6 +372,22 @@ def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=T
 
         return shortcuts, current_time , None , gr.update(visible=False) if delete_opt else sc_model_id
     return shortcuts, None, None, gr.update(visible=False)
+
+# def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
+#     if evt.value:               
+#         shortcut = evt.value 
+#         sc_model_id = setting.get_modelid_from_shortcutname(shortcut)
+#         current_time = datetime.datetime.now()
+        
+#         if not shortcuts:
+#             shortcuts = list()
+            
+#         if sc_model_id in shortcuts:
+#             if delete_opt:
+#                 shortcuts.remove(sc_model_id)                
+
+#         return shortcuts, current_time , gr.update(visible=False) if delete_opt else sc_model_id
+#     return shortcuts, None, gr.update(visible=False)
 
 def on_classification_clear_shortcut_btn_click():
     current_time = datetime.datetime.now()        

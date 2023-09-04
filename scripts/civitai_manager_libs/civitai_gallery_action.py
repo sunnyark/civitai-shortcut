@@ -20,7 +20,7 @@ def on_ui(recipe_input):
     with gr.Column(scale=3):                                                   
         with gr.Accordion("#", open=True) as model_title_name:            
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
-        usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery").style(grid=[setting.usergallery_images_column], height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)
+        usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery", columns=setting.usergallery_images_column, height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)
         with gr.Row():                  
             with gr.Column(scale=1): 
                 with gr.Row():
@@ -40,7 +40,7 @@ def on_ui(recipe_input):
         with gr.Tabs() as info_tabs:
             with gr.TabItem("Image Information" , id="Image_Information"):   
                 with gr.Column():
-                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)                            
+                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6, container=True, show_copy_button=True)                            
                     try:
                         send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                     except:

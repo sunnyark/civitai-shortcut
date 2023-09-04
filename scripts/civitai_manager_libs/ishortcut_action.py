@@ -25,7 +25,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
 
         with gr.Tabs():
             with gr.TabItem("Images" , id="Model_Images"):    
-                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery").style(grid=[setting.gallery_column],height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
+                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery", columns=setting.gallery_column, height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
                     open_image_folder = gr.Button(value="Open Download Image Folder", visible=False) 
@@ -60,13 +60,13 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
                     cs_foldername = gr.Dropdown(label='Can select a classification defined by the user or create a new one as the folder to download the model.', multiselect=False, choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER, interactive=True)
                     with gr.Row():
                         with gr.Column(scale=2):
-                            ms_foldername = gr.Textbox(label="Model folder name for the downloaded model. Please set it to the desired name.", value="", interactive=True, lines=1, visible=True).style(container=True)
+                            ms_foldername = gr.Textbox(label="Model folder name for the downloaded model. Please set it to the desired name.", value="", interactive=True, lines=1, visible=True, container=True)
                             # ms_foldername = gr.Dropdown(label='This is the name for the model folder to be created. You can either choose from the suggested names or enter your own.', multiselect=False, choices=None, value=None, interactive=True, allow_custom_value=True)
                         with gr.Column(scale=1):
                             ms_suggestedname = gr.Dropdown(label='Suggested names', multiselect=False, choices=None, value=None, interactive=True)                            
 
                     vs_folder = gr.Checkbox(label="Create separate independent folders for each version under the generated model folder.", value=False, visible=True , interactive=True)
-                    vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False).style(container=True)
+                    vs_foldername = gr.Textbox(label="Folder name to create", value="", show_label=False, interactive=True, lines=1, visible=False, container=True)
 
                 download_model = gr.Button(value="Download", variant="primary")
                 # download_model_test = gr.Button(value="Download Test", variant="primary")
@@ -77,12 +77,12 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             with gr.TabItem("Information" , id="Model_Information"):                
                 model_type = gr.Textbox(label="Model Type", value="", interactive=False, lines=1)
                 model_basemodel = gr.Textbox(label="BaseModel", value="", interactive=False, lines=1)
-                trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1).style(container=True, show_copy_button=True)
-                civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1).style(container=True, show_copy_button=True)
+                trigger_words = gr.Textbox(label="Trigger Words", value="", interactive=False, lines=1, container=True, show_copy_button=True)
+                civitai_model_url_txt = gr.Textbox(label="Model Url", value="", interactive=False , lines=1, container=True, show_copy_button=True)
                 
             with gr.TabItem("Image Information" , id="Image_Information"):      
                 with gr.Column():            
-                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6).style(container=True, show_copy_button=True)
+                    img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6, container=True, show_copy_button=True)
                     try:
                         send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                     except:
@@ -91,7 +91,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
 
             with gr.TabItem("Personal Note" , id="PersonalNote_Information"):      
                 with gr.Column():            
-                    personal_note = gr.Textbox(label="Personal Note", interactive=True, lines=6).style(container=True, show_copy_button=True)
+                    personal_note = gr.Textbox(label="Personal Note", interactive=True, lines=6, container=True, show_copy_button=True)
                     personal_note_save = gr.Button(value="Save", variant="primary", visible=True)
                     
         with gr.Accordion("Classification", open=True):

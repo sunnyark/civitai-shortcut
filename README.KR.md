@@ -1,3 +1,6 @@
+ 
+# 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다. 올바르게 작동하려면 A1111의 최신 업데이트가 필요합니다.
+
 # Civitai Shortcut
 
 Stable Diffusion Webui Extension for Civitai, to download civitai shortcut and models.
@@ -73,6 +76,10 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.6.5 
+* 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다. 
+* 올바르게 작동하려면 A1111의 최신 업데이트가 필요합니다.
+
 v 1.6.4
 * sdui의 LoRa metadata editor에 사용가능한 model meta data를 저장.(단, 기존것이 없을경우에만 저장됩니다.)
 * 일부 메뉴의 명칭을 변경 
