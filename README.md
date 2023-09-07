@@ -72,6 +72,11 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+v 1.6.6
+* In Prompt Recipe, the option 'Delete from references when selecting a thumbnail' has been deselected, and when clicking on a model within the references, it now displays brief information on the top instead of navigating to the model information.
+* An added feature in Prompt Recipe allows the input of directives in the prompt based on the type of the selected reference model.
+* In classification, the option 'Delete from classification when selecting a thumbnail' has been deselected, and when clicking on a model within the classification, it now displays brief information on the right instead of navigating to the model information.
+
 v 1.6.5
 * This update is compatible with gradio version 3.41.2 or higher. 
 * It requires the latest update of A1111 to function correctly.

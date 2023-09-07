@@ -76,6 +76,11 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+v 1.6.6
+* Prompt Recipe에서 레퍼런스를 관리할때 Delete from references when selecting a thumbnail 을 선택해제하고 리퍼런스 모델을 클릭했을시 모델 인포메이션으로 이동하지 않고 상단에 간략한 정보를 보여주도록 변경됨.
+* Prompt Recipe에서 선택한 reference model 의 type 에 따라 프롬프트에 지시어를 입력할 수 있는 기능추가
+* classification의 Delete from classification when selecting a thumbnail 을 선택해제하고 classification 에 속한 모델을 클릭했을시 모델 인포메이션으로 이동하지 않고 우측애 간략한 정보를 보여주도록 변경됨.
+
 v 1.6.5 
 * 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다. 
 * 올바르게 작동하려면 A1111의 최신 업데이트가 필요합니다.
