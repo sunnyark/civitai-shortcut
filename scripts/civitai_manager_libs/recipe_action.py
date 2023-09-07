@@ -3,6 +3,7 @@ import gradio as gr
 import datetime
 import modules
 import uuid
+import re
 
 from . import util
 from . import setting
@@ -11,7 +12,6 @@ from . import prompt
 # from . import prompt_ui
 from . import sc_browser_page
 from . import ishortcut
-
 from . import recipe_browser_page
 
 from PIL import Image
@@ -69,6 +69,21 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                             # recipe_image_info = gr.Textbox(label="Ganerate Infomation", lines=6, visible=True)
                         with gr.TabItem("Reference Models", id="reference_model"):
                             reference_delete = gr.Checkbox(label="Delete from references when selecting a thumbnail.", value=False)
+
+                            with gr.Accordion("#", open=True, visible=False) as reference_model_information:        
+                                reference_modelid = gr.Textbox(visible=False)
+                                reference_modeltype = gr.Textbox(visible=False)
+                                reference_disp_modeltype = gr.Textbox(label="Model Type", interactive=False, lines=1)
+                                reference_versions = gr.Dropdown(label="Model Version",interactive=True)
+                                reference_filenames = gr.Dropdown(label="Version filename", interactive=True)
+                                reference_weight_slider = gr.Slider(minimum=0, maximum=2, value=0.7, step=0.1, label="Preferred weight", interactive=True, visible=True)
+                                reference_triger = gr.Textbox(label="Triger", interactive=True, lines=1)
+                                insert_prompt_btn = gr.Button(value="Add\\Remove from Prompt", variant="primary")        
+                                with gr.Row():
+                                    goto_model_info_btn = gr.Button(value="Information", variant="primary") 
+                                    delete_reference_model_btn = gr.Button(value="Delete", variant="primary")
+                                close_reference_model_information_btn = gr.Button(value="Close", variant="primary")
+                                
                             reference_gallery = gr.Gallery(show_label=False, columns=3, height='auto', object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
                             # with gr.Accordion("Add Reference Shortcut Items", open=False):
                             #     reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui()
@@ -101,7 +116,8 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
             reference_shortcuts,
             refresh_reference_gallery,
             reference_gallery, # 이거는 None으로 할 필요는 gallery를 미선택으로 만드는 방법을 몰라서 일단 이렇게 해보자
-            shortcut_input
+            reference_modelid
+            # shortcut_input
         ],
         show_progress=False
     )   
@@ -179,6 +195,8 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
             recipe_create_btn,
             recipe_update_btn,
             reference_shortcuts,
+            reference_modelid,
+            reference_gallery,            
             refresh_reference_gallery            
         ],
         cancels=recipe_drop_image_upload
@@ -208,29 +226,6 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         show_progress=False
     )
 
-    # recipe_list.select(    
-    #     fn=on_recipe_list_select,
-    #     inputs=None,
-    #     outputs=[
-    #         selected_recipe_name,
-    #         recipe_name,
-    #         recipe_desc,
-    #         recipe_prompt,
-    #         recipe_negative,
-    #         recipe_option,            
-    #         recipe_output,
-    #         recipe_classification,
-    #         recipe_title_name,
-    #         recipe_image,
-    #         recipe_drop_image,
-    #         recipe_create_btn,
-    #         recipe_update_btn,
-    #         reference_shortcuts,
-    #         refresh_reference_gallery                             
-    #     ],
-    #     cancels=recipe_drop_image_upload
-    # )
-
     recipe_gallery.select(
         fn=on_recipe_gallery_select,
         inputs=None,
@@ -248,7 +243,9 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
             recipe_drop_image,
             recipe_create_btn,
             recipe_update_btn,
-            reference_shortcuts,
+            reference_shortcuts,   
+            reference_modelid,
+            reference_gallery,            
             refresh_reference_gallery                             
         ],
         cancels=recipe_drop_image_upload
@@ -272,6 +269,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
             recipe_create_btn,
             recipe_update_btn,
             reference_shortcuts,
+            reference_modelid,
             refresh_reference_gallery          
         ]
     )
@@ -333,8 +331,237 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
             refresh_recipe_browser            
         ]        
     )
-        
+
+    reference_modelid.change(
+        fn=on_reference_modelid_change,
+        inputs=[
+            reference_modelid,
+        ],
+        outputs=[            
+            reference_modeltype,
+            reference_disp_modeltype,
+            reference_versions,                    
+            reference_filenames,
+            reference_triger,
+            reference_weight_slider,
+            insert_prompt_btn,
+            reference_model_information
+        ],
+        show_progress=False
+    )
+    
+    reference_versions.select(
+        fn=on_reference_versions_select,
+        inputs=[
+            reference_modelid,
+        ],
+        outputs=[
+            reference_modeltype,
+            reference_disp_modeltype,
+            reference_versions,                    
+            reference_filenames,
+            reference_triger,
+            reference_weight_slider,
+            insert_prompt_btn,
+            reference_model_information
+        ],
+        show_progress=False
+    )
+
+    goto_model_info_btn.click(lambda x:x,reference_modelid,shortcut_input)
+    
+    delete_reference_model_btn.click(
+        fn=on_delete_reference_model_btn_click,
+        inputs=[
+            reference_modelid,
+            reference_shortcuts,
+        ],
+        outputs=[
+            reference_shortcuts,
+            refresh_reference_gallery,
+            reference_gallery,
+            reference_modelid
+        ],
+        show_progress=False
+    )  
+
+    insert_prompt_btn.click(
+        fn=on_insert_prompt_btn_click,
+        inputs=[
+            reference_modeltype,
+            recipe_prompt,
+            recipe_negative,
+            recipe_option,
+            reference_filenames,            
+            reference_weight_slider,
+            reference_triger
+        ],
+        outputs=[
+            recipe_prompt,
+            recipe_output
+        ]        
+    )
+    
+    # close_reference_model_information_btn.click(lambda :gr.update(visible=False),None,reference_model_information)
+
+    close_reference_model_information_btn.click(
+        fn=on_close_reference_model_information_btn_click,
+        inputs=[
+            reference_shortcuts,
+        ],
+        outputs=[
+            reference_shortcuts,
+            refresh_reference_gallery,
+            reference_gallery,
+            reference_modelid
+        ],
+        show_progress=False
+    )  
+
     return refresh_recipe
+
+def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
+    # 현재 모델의 정보를 가져온다.
+    model_info = None
+    version_info = None    
+    files = list()
+        
+    if modelid:
+        model_info = ishortcut.get_model_info(modelid)        
+        version_info = dict()
+        if model_info:
+            if not versionid and not ver_index:
+                if "modelVersions" in model_info.keys():
+                    version_info = model_info["modelVersions"][0]
+                    if version_info["id"]:
+                        versionid = version_info["id"]
+            elif versionid:
+                if "modelVersions" in model_info.keys():
+                    for ver in model_info["modelVersions"]:                        
+                        if versionid == ver["id"]:
+                            version_info = ver                
+            else:
+                if "modelVersions" in model_info.keys():
+                    if len(model_info["modelVersions"]) > 0:
+                        version_info = model_info["modelVersions"][ver_index]
+                        if version_info["id"]:
+                            versionid = version_info["id"]
+                            
+    # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
+    if model_info and version_info:        
+        file_name = None
+        output_training = None
+        version_name = version_info["name"]
+        model_type = model_info['type']             
+        model_basemodels = version_info["baseModel"]         
+        versions_list = list()            
+        for ver in model_info['modelVersions']:
+            versions_list.append(ver['name'])
+
+        if 'files' in version_info:                                
+            for file in version_info['files']:
+                files.append(file['name'])
+
+        if len(files) > 0:
+            file_name = files[0]
+
+        if 'trainedWords' in version_info:  
+            output_training = ", ".join(version_info['trainedWords'])
+                            
+        title_name = f"# {model_info['name']} : {version_info['name']}"
+                        
+        return model_info,model_type,versionid,version_name,output_training,model_basemodels,versions_list,files,file_name,title_name
+    return None,None,None,None,None,None,None,None,None,None
+
+def load_model_information(modelid=None, ver_index=None):
+    if modelid:
+        model_info,model_type,versionid,version_name,triger,model_basemodels,versions_list,files,file_name,title_name = get_model_information(modelid,None,ver_index) 
+        if model_info:                        
+            insert_btn_visible=False
+            weight_visible=False
+            triger_visible=False
+            if model_type == 'LORA' or  model_type == 'LoCon' or model_type == 'Hypernetwork':
+                insert_btn_visible=True
+                weight_visible=True
+                triger_visible=True
+            elif model_type == 'TextualInversion':
+                insert_btn_visible=True
+
+            return gr.update(value=model_type),gr.update(value=setting.get_ui_typename(model_type)), gr.update(choices=versions_list,value=version_name), gr.update(choices=files,value=file_name), gr.update(value=triger,visible=triger_visible), \
+                gr.update(visible=weight_visible), gr.update(visible=insert_btn_visible), gr.update(label=title_name,visible=True)
+    return None, None, None, None, gr.update(value=None,visible=True),\
+        gr.update(visible=True), gr.update(visible=True), gr.update(label="#",visible=False)
+        
+def on_reference_modelid_change(modelid=None):    
+    return load_model_information(modelid, None)
+
+def on_reference_versions_select(evt: gr.SelectData, modelid:str):
+    return load_model_information(modelid, evt.index)    
+
+def on_delete_reference_model_btn_click(sc_model_id:str, shortcuts):
+    if sc_model_id:                       
+        current_time = datetime.datetime.now()
+            
+        if not shortcuts:
+            shortcuts = list()
+        
+        if sc_model_id in shortcuts:
+            shortcuts.remove(sc_model_id)                
+            return shortcuts, current_time, None, None
+        
+    return shortcuts, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
+
+def on_close_reference_model_information_btn_click(shortcuts):
+    current_time = datetime.datetime.now()    
+    return shortcuts, current_time, None, None
+
+def add_string(text, mtype, filename, weight, triger=None):
+    pattern = f"<{mtype}:{filename}:{weight}>"
+    if triger:
+        pattern = pattern + ' ' + triger
+        
+    return text.strip() + ' ' + pattern
+
+def remove_strings(text, mtype, filename, triger=None):
+    # Use regular expression to find and remove all <lora:filename:number> strings
+    pattern = f"<{mtype}:{re.escape(filename)}:.*?>"
+    if triger:
+        pattern = pattern + ' ' + triger    
+    text = re.sub(pattern,'', text)
+    return text
+
+def is_string(text,mtype, filename, triger=None):
+    pattern = f"<{mtype}:{re.escape(filename)}:.*?>"
+    if triger:
+        pattern = pattern + ' ' + triger    
+    return re.search(pattern,text)
+
+def on_insert_prompt_btn_click(model_type, recipe_prompt, recipe_negative, recipe_option, filename, weight, triger):
+
+    if model_type == 'LORA' or  model_type == 'LoCon':
+        mtype = 'lora'
+    elif model_type == 'Hypernetwork':
+        mtype = 'hypernet'
+    elif model_type == 'TextualInversion':
+        mtype = 'ti'
+    
+    if filename:
+        filename , ext = os.path.splitext(filename)
+        
+    if mtype == 'lora' or mtype == 'hypernet':                    
+        if is_string(recipe_prompt, mtype, filename, triger):
+            recipe_prompt = remove_strings(recipe_prompt, mtype, filename, triger)
+        else:
+            recipe_prompt = remove_strings(recipe_prompt, mtype, filename)
+            recipe_prompt = add_string(recipe_prompt, mtype, filename, weight, triger)
+    elif mtype == 'ti':
+        if filename in recipe_prompt:
+            recipe_prompt = recipe_prompt.replace(filename,'')
+        else:
+            recipe_prompt = recipe_prompt.replace(filename,'')
+            recipe_prompt = recipe_prompt + ' ' + filename
+
+    return gr.update(value=recipe_prompt), gr.update(value=generate_prompt(recipe_prompt, recipe_negative, recipe_option))
 
 def on_recipe_prompt_tabs_select(evt: gr.SelectData):
     if evt.index == 1:      
@@ -452,14 +679,14 @@ def on_recipe_input_change(recipe_input, shortcuts):
             gr.update(value=""), gr.update(value=""), \
             gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
             gr.update(visible=True), gr.update(visible=False),\
-            shortcuts, current_time            
+            shortcuts, None, None, current_time            
     
     return gr.update(visible=False),gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),\
         gr.update(selected="Recipe"),gr.update(selected="Prompt"),gr.update(selected="reference_image"),\
         gr.update(value=""), gr.update(value=""), \
         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
         gr.update(visible=True), gr.update(visible=False),\
-        shortcuts, gr.update(visible=False)
+        shortcuts,None, None, gr.update(visible=False)
 
 # def on_recipe_input_change(recipe_input, shortcuts):    
 #     current_time = datetime.datetime.now()
@@ -500,22 +727,6 @@ def on_refresh_recipe_change():
     current_time = datetime.datetime.now()
     return current_time, current_time, current_time
 
-# def on_recipe_list_select(evt: gr.SelectData):
-#     current_time = datetime.datetime.now()
-#     select_name = evt.value
-    
-#     description, Prompt, negativePrompt, options, gen_string, classification, imagefile = get_recipe_information(select_name)
-    
-#     if imagefile:
-#         if not os.path.isfile(imagefile):
-#             imagefile = None
-    
-#     shortcuts = recipe.get_recipe_shortcuts(select_name)                 
-    
-#     return gr.update(value=select_name),gr.update(value=select_name),gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(label=select_name),imagefile,None,\
-#         gr.update(visible=False), gr.update(visible=True),\
-#         shortcuts, current_time
-
 def on_recipe_gallery_select(evt: gr.SelectData):
     current_time = datetime.datetime.now()
     select_name = evt.value
@@ -530,13 +741,13 @@ def on_recipe_gallery_select(evt: gr.SelectData):
     
     return gr.update(value=select_name),gr.update(value=select_name),gr.update(value=description), gr.update(value=Prompt), gr.update(value=negativePrompt), gr.update(value=options), gr.update(value=gen_string), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=classification), gr.update(label=select_name),imagefile,None,\
         gr.update(visible=False), gr.update(visible=True),\
-        shortcuts, current_time
+        shortcuts, None, None, current_time
                 
 def on_recipe_new_btn_click():
     current_time = datetime.datetime.now()
     return gr.update(value=""),gr.update(value=""),gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(value=""), gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE), None, None,\
         gr.update(visible=True), gr.update(visible=False),\
-        None, current_time
+        None, None, current_time
         
 def on_recipe_create_btn_click(recipe_name, recipe_desc, recipe_prompt, recipe_negative, recipe_option, recipe_classification, recipe_image=None, recipe_shortcuts=None):  
     current_time = datetime.datetime.now()  
@@ -676,12 +887,12 @@ def on_reference_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
             
         if not shortcuts:
             shortcuts = list()
-                
-        if sc_model_id in shortcuts:
-            if delete_opt:
-                shortcuts.remove(sc_model_id)
-                    
-        return shortcuts, current_time, None, gr.update(visible=False) if delete_opt else sc_model_id
-    return shortcuts, gr.update(visible=False), None, gr.update(visible=False)        
-            
-                
+        
+        if delete_opt and sc_model_id in shortcuts:
+            shortcuts.remove(sc_model_id)                
+            return shortcuts, current_time, None, None
+        
+        return shortcuts, gr.update(visible=False), gr.update(visible=True), sc_model_id
+
+    return shortcuts, gr.update(visible=False), gr.update(visible=True), None
+
