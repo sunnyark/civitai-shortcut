@@ -53,7 +53,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                                     pass                         
                             recipe_classification = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, info="You can choose from a list or enter manually. If you enter a classification that didn't exist before, a new classification will be created." ,interactive=True, allow_custom_value=True)
                         with gr.TabItem("Additional Shortcut Models for Reference"):                    
-                            reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui(False,"DOWN",8,4)
+                            reference_sc_gallery, refresh_reference_sc_browser, refresh_reference_sc_gallery = sc_browser_page.on_ui(False,"DOWN",setting.prompt_reference_shortcut_column,setting.prompt_reference_shortcut_rows_per_page)
                     with gr.Row():
                         recipe_create_btn = gr.Button(value="Create", variant="primary")
                         recipe_update_btn = gr.Button(value="Update", variant="primary", visible=False)
@@ -420,62 +420,9 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
 
     return refresh_recipe
 
-def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
-    # 현재 모델의 정보를 가져온다.
-    model_info = None
-    version_info = None    
-    files = list()
-        
-    if modelid:
-        model_info = ishortcut.get_model_info(modelid)        
-        version_info = dict()
-        if model_info:
-            if not versionid and not ver_index:
-                if "modelVersions" in model_info.keys():
-                    version_info = model_info["modelVersions"][0]
-                    if version_info["id"]:
-                        versionid = version_info["id"]
-            elif versionid:
-                if "modelVersions" in model_info.keys():
-                    for ver in model_info["modelVersions"]:                        
-                        if versionid == ver["id"]:
-                            version_info = ver                
-            else:
-                if "modelVersions" in model_info.keys():
-                    if len(model_info["modelVersions"]) > 0:
-                        version_info = model_info["modelVersions"][ver_index]
-                        if version_info["id"]:
-                            versionid = version_info["id"]
-                            
-    # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
-    if model_info and version_info:        
-        file_name = None
-        output_training = None
-        version_name = version_info["name"]
-        model_type = model_info['type']             
-        model_basemodels = version_info["baseModel"]         
-        versions_list = list()            
-        for ver in model_info['modelVersions']:
-            versions_list.append(ver['name'])
-
-        if 'files' in version_info:                                
-            for file in version_info['files']:
-                files.append(file['name'])
-
-        if len(files) > 0:
-            file_name = files[0]
-
-        if 'trainedWords' in version_info:  
-            output_training = ", ".join(version_info['trainedWords'])
-                            
-        title_name = f"# {model_info['name']} : {version_info['name']}"
-                        
-        return model_info,model_type,versionid,version_name,output_training,model_basemodels,versions_list,files,file_name,title_name
-    return None,None,None,None,None,None,None,None,None,None
-
 def load_model_information(modelid=None, ver_index=None):
     if modelid:
-        model_info,model_type,versionid,version_name,triger,model_basemodels,versions_list,files,file_name,title_name = get_model_information(modelid,None,ver_index) 
+        model_info,version_info,versionid,version_name,model_type,model_basemodels,versions_list, dhtml, triger, files = ishortcut.get_model_information(modelid,None,ver_index)
         if model_info:                        
             insert_btn_visible=False
             weight_visible=False
@@ -486,8 +433,18 @@ def load_model_information(modelid=None, ver_index=None):
                 triger_visible=True
             elif model_type == 'TextualInversion':
                 insert_btn_visible=True
-
-            return gr.update(value=model_type),gr.update(value=setting.get_ui_typename(model_type)), gr.update(choices=versions_list,value=version_name), gr.update(choices=files,value=file_name), gr.update(value=triger,visible=triger_visible), \
+                
+            flist = list()
+            for file in files:            
+                flist.append(file['name'])
+                
+            file_name = ''
+            if len(flist) > 0:
+                file_name = flist[0]
+                            
+            title_name = f"# {model_info['name']} : {version_name}"
+            
+            return gr.update(value=model_type),gr.update(value=setting.get_ui_typename(model_type)), gr.update(choices=versions_list,value=version_name), gr.update(choices=flist,value=file_name), gr.update(value=triger,visible=triger_visible), \
                 gr.update(visible=weight_visible), gr.update(visible=insert_btn_visible), gr.update(label=title_name,visible=True)
     return None, None, None, None, gr.update(value=None,visible=True),\
         gr.update(visible=True), gr.update(visible=True), gr.update(label="#",visible=False)
@@ -687,23 +644,6 @@ def on_recipe_input_change(recipe_input, shortcuts):
         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
         gr.update(visible=True), gr.update(visible=False),\
         shortcuts,None, None, gr.update(visible=False)
-
-# def on_recipe_input_change(recipe_input, shortcuts):    
-#     current_time = datetime.datetime.now()
-#     if recipe_input:        
-#         return gr.update(value=""), recipe_input, recipe_input, current_time, None, \
-#             gr.update(selected="Recipe"),gr.update(selected="Prompt"),gr.update(selected="reference_image"),\
-#             gr.update(value=""), gr.update(value=""), \
-#             gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER) ,gr.update(label=setting.NEWRECIPE),\
-#             gr.update(visible=True), gr.update(visible=False),\
-#             None, current_time            
-    
-#     return gr.update(visible=False),gr.update(visible=True),gr.update(visible=True),gr.update(visible=False),gr.update(visible=False),\
-#         gr.update(selected="Recipe"),gr.update(selected="Prompt"),gr.update(selected="reference_image"),\
-#         gr.update(value=""), gr.update(value=""), \
-#         gr.update(choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER), gr.update(label=setting.NEWRECIPE),\
-#         gr.update(visible=True), gr.update(visible=False),\
-#         shortcuts, gr.update(visible=False)
             
 def on_recipe_drop_image_upload(recipe_img):
     if recipe_img:

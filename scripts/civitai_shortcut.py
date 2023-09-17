@@ -45,7 +45,7 @@ def civitai_shortcut_ui():
             recipe_input = gr.Textbox()
             shortcut_input = gr.Textbox()
             
-        with gr.TabItem("Civitai Shortcut" , id="Shortcut"):
+        with gr.TabItem("Model Browser" , id="Shortcut"):
             with gr.Row():
                 refresh_civitai_sc_browser, refresh_civitai_information = civitai_shortcut_action.on_ui(recipe_input, shortcut_input, civitai_tabs)
 

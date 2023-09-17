@@ -146,7 +146,6 @@ def on_ui(shortcut_input):
             refresh_gallery,
             classification_gallery, # 이거는 None으로 할 필요는 gallery를 미선택으로 만드는 방법을 몰라서 일단 이렇게 해보자 
             shortcut_modelid
-            # shortcut_input
         ],
         show_progress=False
     )
@@ -302,69 +301,24 @@ def on_ui(shortcut_input):
         ],
         show_progress=False
     ) 
-        
-    # close_shortcut_model_information_btn.click(lambda :gr.update(visible=False),None,shortcut_model_information)
-    
+           
     return refresh_classification
 
-def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
-    # 현재 모델의 정보를 가져온다.
-    model_info = None
-    version_info = None    
-    files = list()
-        
-    if modelid:
-        model_info = ishortcut.get_model_info(modelid)        
-        version_info = dict()
-        if model_info:
-            if not versionid and not ver_index:
-                if "modelVersions" in model_info.keys():
-                    version_info = model_info["modelVersions"][0]
-                    if version_info["id"]:
-                        versionid = version_info["id"]
-            elif versionid:
-                if "modelVersions" in model_info.keys():
-                    for ver in model_info["modelVersions"]:                        
-                        if versionid == ver["id"]:
-                            version_info = ver                
-            else:
-                if "modelVersions" in model_info.keys():
-                    if len(model_info["modelVersions"]) > 0:
-                        version_info = model_info["modelVersions"][ver_index]
-                        if version_info["id"]:
-                            versionid = version_info["id"]
-                            
-    # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
-    if model_info and version_info:        
-        file_name = None
-        output_training = None
-        version_name = version_info["name"]
-        model_type = model_info['type']             
-        model_basemodels = version_info["baseModel"]         
-        versions_list = list()            
-        for ver in model_info['modelVersions']:
-            versions_list.append(ver['name'])
-
-        if 'files' in version_info:                                
-            for file in version_info['files']:
-                files.append(file['name'])
-
-        if len(files) > 0:
-            file_name = files[0]
-
-        if 'trainedWords' in version_info:  
-            output_training = ", ".join(version_info['trainedWords'])
-                            
-        title_name = f"# {model_info['name']} : {version_info['name']}"
-                        
-        return model_info,model_type,versionid,version_name,output_training,model_basemodels,versions_list,files,file_name,title_name
-    return None,None,None,None,None,None,None,None,None,None
-
 def load_model_information(modelid=None, ver_index=None):
-    if modelid:
-        model_info,model_type,versionid,version_name,triger,model_basemodels,versions_list,files,file_name,title_name = get_model_information(modelid,None,ver_index) 
-        if model_info:                        
-            return gr.update(value=setting.get_ui_typename(model_type)), gr.update(choices=versions_list,value=version_name), gr.update(choices=files,value=file_name), gr.update(value=triger), gr.update(label=title_name,visible=True)
+    if modelid:        
+        model_info,version_info,versionid,version_name,model_type,model_basemodels,versions_list, dhtml, triger, files = ishortcut.get_model_information(modelid,None,ver_index)
+        if model_info:
+            flist = list()
+            for file in files:            
+                flist.append(file['name'])
+                
+            file_name = ''
+            if len(flist) > 0:
+                file_name = flist[0]
+                            
+            title_name = f"# {model_info['name']} : {version_name}"
+                        
+            return gr.update(value=setting.get_ui_typename(model_type)), gr.update(choices=versions_list,value=version_name), gr.update(choices=flist,value=file_name), gr.update(value=triger), gr.update(label=title_name,visible=True)
     return None, None, None, gr.update(value=None), gr.update(label="#",visible=False)
 
 def on_shortcut_modelid_change(modelid=None):    
@@ -518,23 +472,6 @@ def on_classification_gallery_loading(shortcuts, page=0):
                 
     current_time = datetime.datetime.now()          
     return gr.update(value=result_list), gr.update(minimum=1, value=cur_page, maximum=max_page, step=1, label=f"Total {max_page} Pages"), current_time
-
-# def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
-#     if evt.value:               
-#         shortcut = evt.value 
-#         sc_model_id = setting.get_modelid_from_shortcutname(shortcut)
-#         current_time = datetime.datetime.now()
-        
-#         if not shortcuts:
-#             shortcuts = list()
-                
-#         if delete_opt and sc_model_id in shortcuts:
-#             shortcuts.remove(sc_model_id)                
-#             return shortcuts, current_time, None, gr.update(visible=False)
-        
-#         return shortcuts, gr.update(visible=False), gr.update(visible=True), sc_model_id
-        
-#     return shortcuts, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)   
 
 def on_classification_gallery_select(evt: gr.SelectData, shortcuts, delete_opt=True):
     if evt.value:               

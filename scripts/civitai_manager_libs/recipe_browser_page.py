@@ -16,16 +16,16 @@ def on_ui():
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(1)
         
     recipe_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True)
-    recipe_gallery = gr.Gallery(value=thumb_list, columns=5, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False, show_label=False)
+    recipe_gallery = gr.Gallery(value=thumb_list, columns=setting.prompt_shortcut_column, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False, show_label=False)
     
     with gr.Accordion(label="Search Recipe", open=True):
         recipe_search = gr.Textbox(label="Search", value="", placeholder="Search name, #description ....",interactive=True, lines=1)
         recipe_classification_list = gr.Dropdown(label="Filter Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)        
 
     with gr.Accordion(label="Filter Reference Shortcut Items", open=False):              
-        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models", columns=setting.shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
+        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models", columns=setting.prompt_shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
         recipe_reference_gallery_page = gr.Slider(minimum=1, maximum=reference_max_page, value=1, step=1, label=f"Total {reference_max_page} Pages", interactive=True, visible=True)      
-        recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False, columns=5, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
+        recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False, columns=setting.prompt_shortcut_column, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
 
     with gr.Row(visible=False):
         # recipe_browser 갱신 트리거
@@ -198,7 +198,7 @@ def get_recipe_reference_list(page = 0):
     if total > 0:
         # page 즉 페이징이 아닌 전체가 필요할때도 총페이지 수를 구할때도 있으므로..
         # page == 0 은 전체 리스트를 반환한다
-        shortcut_count_per_page = setting.shortcut_column * setting.shortcut_rows_per_page
+        shortcut_count_per_page = setting.prompt_shortcut_column * setting.prompt_shortcut_rows_per_page
         
         if shortcut_count_per_page > 0:
             max_page = math.ceil(total / shortcut_count_per_page)
@@ -270,7 +270,7 @@ def get_recipe_list(search=None, classification=None, shortcut=None, page = 0):
     if total > 0:
         # page 즉 페이징이 아닌 전체가 필요할때도 총페이지 수를 구할때도 있으므로..
         # page == 0 은 전체 리스트를 반환한다
-        shortcut_count_per_page = setting.shortcut_column * setting.shortcut_rows_per_page
+        shortcut_count_per_page = setting.prompt_shortcut_column * setting.prompt_shortcut_rows_per_page
         
         if shortcut_count_per_page > 0:
             max_page = math.ceil(total / shortcut_count_per_page)
