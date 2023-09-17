@@ -15,6 +15,162 @@ from . import classification
 from PIL import Image
 
 thumbnail_max_size = (400, 400)
+
+def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=None):
+    # 현재 모델의 정보를 가져온다.
+    model_info = None
+    version_info = None
+    
+    if modelid:
+        model_info = get_model_info(modelid)        
+        version_info = dict()
+        if model_info:
+            if not versionid and not ver_index:
+                if "modelVersions" in model_info.keys():
+                    version_info = model_info["modelVersions"][0]
+                    if version_info["id"]:
+                        versionid = version_info["id"]
+            elif versionid:
+                if "modelVersions" in model_info.keys():
+                    for ver in model_info["modelVersions"]:                        
+                        if versionid == ver["id"]:
+                            version_info = ver                
+            else:
+                if "modelVersions" in model_info.keys():
+                    if len(model_info["modelVersions"]) > 0:
+                        version_info = model_info["modelVersions"][ver_index]
+                        if version_info["id"]:
+                            versionid = version_info["id"]
+                            
+    # 존재 하는지 판별하고 있다면 내용을 얻어낸다.
+    if model_info and version_info:        
+        version_name = version_info["name"]
+        model_type = model_info['type']             
+        model_basemodels = version_info["baseModel"]         
+        versions_list = list()            
+        for ver in model_info['modelVersions']:
+            versions_list.append(ver['name'])
+            # model_basemodels.append(ver['baseModel'])
+        
+        dhtml, triger, files = get_version_description(version_info, model_info)
+        
+        return model_info,version_info,versionid,version_name,model_type,model_basemodels,versions_list,dhtml,triger,files
+    return None,None,None,None,None,None,None,None,None,None
+    
+def get_version_description_gallery(version_info):
+    modelid = None
+    versionid = None
+    ver_images = dict()
+    
+            
+    if not version_info:
+        return None, None
+
+    if "modelId" in version_info.keys():
+        modelid = str(version_info['modelId'])   
+            
+    if "id" in version_info.keys():
+        versionid = str(version_info['id'])
+
+    if "images" in version_info.keys():
+        ver_images = version_info['images']
+
+    images_url = list()
+    images_meta = list()
+    
+    try:        
+        for ver in ver_images:
+            description_img = setting.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
+            meta_string = ""
+            
+            # NSFW filtering ....
+            if setting.NSFW_filtering_enable:
+                # if not setting.NSFW_level[ver["nsfw"]]:
+                if setting.NSFW_levels.index(ver["nsfw"]) > setting.NSFW_levels.index(setting.NSFW_level_user):                
+                    description_img = setting.nsfw_disable_image
+                    meta_string = ""
+                    
+            if os.path.isfile(description_img):               
+                meta_string = util.convert_civitai_meta_to_stable_meta(ver['meta'])
+                images_url.append(description_img)
+                images_meta.append(meta_string)
+    except:
+        return None, None
+                
+    return images_url, images_meta                  
+    
+def get_version_description(version_info:dict,model_info:dict=None):
+    output_html = ""
+    output_training = ""
+
+    files = []
+    
+    html_typepart = ""
+    html_creatorpart = ""
+    html_trainingpart = ""
+    html_modelpart = ""
+    html_versionpart = ""
+    html_descpart = ""
+    html_dnurlpart = ""
+    html_imgpart = ""
+    html_modelurlpart = ""
+    html_model_tags = ""
+        
+    model_id = None
+    
+    if version_info:        
+        if 'modelId' in version_info:            
+            model_id = version_info['modelId']  
+            if not model_info:            
+                model_info = get_model_info(model_id)
+
+    if version_info and model_info:
+        
+        html_typepart = f"<br><b>Type: {model_info['type']}</b>"    
+        model_url = civitai.Url_Page()+str(model_id)
+
+        html_modelpart = f'<br><b>Model: <a href="{model_url}" target="_blank">{model_info["name"]}</a></b>'
+        html_modelurlpart = f'<br><b><a href="{model_url}" target="_blank">Civitai Hompage << Here</a></b><br>'
+
+        model_version_name = version_info['name']
+
+        if 'trainedWords' in version_info:  
+            output_training = ", ".join(version_info['trainedWords'])
+            html_trainingpart = f'<br><b>Training Tags:</b> {output_training}'
+
+        model_uploader = model_info['creator']['username']
+        html_creatorpart = f"<br><b>Uploaded by:</b> {model_uploader}"
+
+        
+        html_descpart = f"<br><b>Version : {version_info['name']}</b><br> BaseModel : {version_info['baseModel']}<br>"
+        
+        if 'description' in version_info:  
+            if version_info['description']:
+                html_descpart = html_descpart + f"<b>Description</b><br>{version_info['description']}<br>"
+
+        if 'tags' in model_info:  
+            model_tags = model_info["tags"]
+            if len(model_tags) > 0:
+                html_model_tags = "<br><b>Model Tags:</b>"
+                for tag in model_tags:
+                    html_model_tags = html_model_tags + f"<b> [{tag}]</b>"
+                                                                
+        if 'description' in model_info:  
+            if model_info['description']:
+                html_descpart = html_descpart + f"<br><b>Description</b><br>{model_info['description']}<br>"
+                    
+        html_versionpart = f"<br><b>Version:</b> {model_version_name}"        
+
+        if 'files' in version_info:                                
+            for file in version_info['files']:
+                files.append(file)
+                html_dnurlpart = html_dnurlpart + f"<br><a href={file['downloadUrl']}><b>Download << Here</b></a>"     
+                            
+        output_html = html_typepart + html_modelpart + html_versionpart + html_creatorpart + html_trainingpart + "<br>" +  html_model_tags + "<br>" +  html_modelurlpart + html_dnurlpart + "<br>" + html_descpart + "<br>" + html_imgpart
+        
+        return output_html, output_training, files            
+    
+    return "", None, None    
    
 def sort_shortcut_by_value(ISC, key, reverse=False):
     sorted_data = sorted(ISC.items(), key=lambda x: x[1][key], reverse=reverse)

@@ -18,35 +18,50 @@ def on_setting_ui():
         with gr.Row():
             with gr.Accordion("Screen Style", open=False):    
                 with gr.Row():
-                    scbrowser_screen_split_ratio = gr.Slider(minimum=0, maximum=setting.shortcut_browser_screen_split_ratio_max, value=setting.shortcut_browser_screen_split_ratio, step=1, info="You can specify the size ratio between the shortcut browser and the information screen.", label='Shortcut Browser screen ratio', interactive=True)              
+                    scbrowser_screen_split_ratio = gr.Slider(minimum=0, maximum=setting.shortcut_browser_screen_split_ratio_max, value=setting.shortcut_browser_screen_split_ratio, step=1, info="You can specify the size ratio between the shortcut browser and the information screen.", label='Model Browser screen ratio', interactive=True)              
                 with gr.Row():                                                
                     info_gallery_height = gr.Dropdown(choices=["auto"], value=setting.information_gallery_height, allow_custom_value=True, interactive=True, info="You can also specify a specific size other than 'auto'" , label="Information Gallery Height")                    
                     gallery_thumbnail_image_style = gr.Dropdown(choices=["scale-down","cover","contain","fill","none"], value=setting.gallery_thumbnail_image_style, interactive=True, info="This specifies the shape of the displayed thumbnail." , label="Gallery Thumbnail Image Style")
                     shortcut_browser_search_up = gr.Dropdown(choices=["Up","Down"], value="Up" if setting.shortcut_browser_search_up else "Down", interactive=True, label="Set the position of the search bar in the shortcut browser.", info="If you select 'Up', the search bar will be placed above the thumbnail pane.")
                     
         with gr.Row():
-            with gr.Accordion("Shortcut Browser and Information Images", open=False):    
-                with gr.Row():                    
-                    gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.gallery_column, step=1, label='Model Information Image Counts per Row', interactive=True)                
-                with gr.Row():
-                    shortcut_column = gr.Slider(minimum=1, maximum=14, value=setting.shortcut_column, step=1, label='Shortcut Browser Thumbnail Counts per Row', interactive=True)
-                    shortcut_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.shortcut_rows_per_page, step=1, label='Shortcut Browser Thumbnails Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
-                with gr.Row():                                        
-                    classification_gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.classification_gallery_column, step=1, label='Classification Model Counts per Row', interactive=True)
-                    classification_gallery_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.classification_gallery_rows_per_page, step=1, label='Classification Model Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
-                # with gr.Row():                        
-                #     shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
-                #     gr.Markdown(value="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", visible=True)    
-                                                                
+            with gr.Tabs():
+                with gr.TabItem("Model Browser and Model Information"):
+                    with gr.Row():
+                        shortcut_column = gr.Slider(minimum=1, maximum=14, value=setting.shortcut_column, step=1, label='Model Browser Thumbnail Counts per Row', interactive=True)
+                        shortcut_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.shortcut_rows_per_page, step=1, label='Model Browser Thumbnails Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)                    
+                    with gr.Row():                    
+                        gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.gallery_column, step=1, label='Model Information Image Counts per Row', interactive=True)
+                with gr.TabItem("Civitai User Gallery"):                        
+                    with gr.Row():
+                        usergallery_images_column = gr.Slider(minimum=1, maximum=14, value=setting.usergallery_images_column, step=1, label='Civitai User Gallery Image Counts per Row', interactive=True)
+                        usergallery_images_rows_per_page = gr.Slider(minimum=1, maximum=14, value=setting.usergallery_images_rows_per_page, step=1, label='Civitai User Gallery Image Rows Per Page', interactive=True)
+                    with gr.Row():                    
+                        usergallery_openfolder_btn = gr.Button(value="Open Civitai User Gallery Cache Folder", variant="primary")
+                        with gr.Accordion("Clean User Gallery Cache", open=False):
+                            usergallery_cleangallery_btn = gr.Button(value="Clean Civitai User Gallery Cache", variant="primary")
+
         with gr.Row():
-            with gr.Accordion("User Gallery Images", open=False):    
-                with gr.Row():
-                    usergallery_images_column = gr.Slider(minimum=1, maximum=14, value=setting.usergallery_images_column, step=1, label='User Gallery Image Counts per Row', interactive=True)
-                    usergallery_images_rows_per_page = gr.Slider(minimum=1, maximum=14, value=setting.usergallery_images_rows_per_page, step=1, label='User Gallery Image Rows Per Page', interactive=True)
-                with gr.Row():                    
-                    usergallery_openfolder_btn = gr.Button(value="Open User Gallery Cache Folder", variant="primary")
-                    with gr.Accordion("Clean User Gallery Cache", open=False):
-                        usergallery_cleangallery_btn = gr.Button(value="Clean User Gallery Cache", variant="primary")
+            with gr.Tabs():
+                with gr.TabItem("Prompt Recipe"):
+                    with gr.Row():
+                        prompt_shortcut_column = gr.Slider(minimum=1, maximum=14, value=setting.prompt_shortcut_column, step=1, label='Prompt Recipe Browser Thumbnail Counts per Row', interactive=True)
+                        prompt_shortcut_rows_per_page = gr.Slider(minimum=1, maximum=14, value=setting.prompt_shortcut_rows_per_page, step=1, label='Prompt Recipe Browser Thumbnails Rows per Page', interactive=True)                    
+                # with gr.TabItem("Shortcut Models for Reference"):                        
+                    with gr.Row():
+                        prompt_reference_shortcut_column = gr.Slider(minimum=1, maximum=14, value=setting.prompt_reference_shortcut_column, step=1, label='Reference\'s Models Browser Thumbnail Counts per Row', interactive=True)
+                        prompt_reference_shortcut_rows_per_page = gr.Slider(minimum=1, maximum=14, value=setting.prompt_reference_shortcut_rows_per_page, step=1, label=' Reference\'s Models Browser Thumbnails Rows per Page', interactive=True)                    
+                            
+        with gr.Row():
+            with gr.Tabs():
+                with gr.TabItem("Classification"):            
+                    with gr.Row():
+                        classification_shortcut_column = gr.Slider(minimum=1, maximum=14, value=setting.classification_shortcut_column, step=1, label='Classification\'s Model Browser Thumbnail Counts per Row', interactive=True)
+                        classification_shortcut_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.classification_shortcut_rows_per_page, step=1, label='Classification\'s Model Browser Thumbnails Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
+                    with gr.Row():                                        
+                        classification_gallery_column = gr.Slider(minimum=1, maximum=14, value=setting.classification_gallery_column, step=1, label='Classification Model Counts per Row', interactive=True)
+                        classification_gallery_rows_per_page = gr.Slider(minimum=0, maximum=14, value=setting.classification_gallery_rows_per_page, step=1, label='Classification Model Rows per Page : setting it to 0 means displaying the entire list without a page.', interactive=True)
+                                                                
 
         with gr.Row():
             with gr.Accordion("Download Folder for Extensions", open=False):
@@ -74,10 +89,18 @@ def on_setting_ui():
             shortcut_column,
             shortcut_rows_per_page,
             gallery_column,
+            classification_shortcut_column,
+            classification_shortcut_rows_per_page,            
             classification_gallery_column,
             classification_gallery_rows_per_page,
             usergallery_images_column,
-            usergallery_images_rows_per_page,            
+            usergallery_images_rows_per_page,
+            
+            prompt_shortcut_column,
+            prompt_shortcut_rows_per_page,
+            prompt_reference_shortcut_column,
+            prompt_reference_shortcut_rows_per_page,
+                                    
             shortcut_max_download_image_per_version,
             gallery_thumbnail_image_style,
             shortcut_browser_search_up,
@@ -116,10 +139,18 @@ def on_setting_ui():
             shortcut_column,
             shortcut_rows_per_page,
             gallery_column,
+            classification_shortcut_column,
+            classification_shortcut_rows_per_page,                 
             classification_gallery_column,
             classification_gallery_rows_per_page,
             usergallery_images_column,
             usergallery_images_rows_per_page,            
+
+            prompt_shortcut_column,
+            prompt_shortcut_rows_per_page,
+            prompt_reference_shortcut_column,
+            prompt_reference_shortcut_rows_per_page,
+                        
             shortcut_max_download_image_per_version,
             gallery_thumbnail_image_style,
             shortcut_browser_search_up,
@@ -138,8 +169,10 @@ def on_setting_ui():
 
 def on_save_btn_click(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
-                      shortcut_column, shortcut_rows_per_page,
-                      gallery_column, classification_gallery_column, classification_gallery_rows_per_page, usergallery_images_column, usergallery_images_rows_per_page,
+                      shortcut_column, shortcut_rows_per_page, gallery_column, 
+                      classification_shortcut_column, classification_shortcut_rows_per_page, classification_gallery_column, classification_gallery_rows_per_page, 
+                      usergallery_images_column, usergallery_images_rows_per_page,
+                      prompt_shortcut_column, prompt_shortcut_rows_per_page, prompt_reference_shortcut_column, prompt_reference_shortcut_rows_per_page,                                  
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
@@ -148,8 +181,10 @@ def on_save_btn_click(shortcut_update_when_start,
     
     save_setting(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
-                      shortcut_column, shortcut_rows_per_page,
-                      gallery_column, classification_gallery_column, classification_gallery_rows_per_page, usergallery_images_column, usergallery_images_rows_per_page,
+                      shortcut_column, shortcut_rows_per_page, gallery_column, 
+                      classification_shortcut_column, classification_shortcut_rows_per_page, classification_gallery_column, classification_gallery_rows_per_page, 
+                      usergallery_images_column, usergallery_images_rows_per_page,
+                      prompt_shortcut_column, prompt_shortcut_rows_per_page, prompt_reference_shortcut_column, prompt_reference_shortcut_rows_per_page,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
@@ -158,8 +193,10 @@ def on_save_btn_click(shortcut_update_when_start,
 
 def save_setting(shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height, 
-                      shortcut_column, shortcut_rows_per_page,
-                      gallery_column, classification_gallery_column, classification_gallery_rows_per_page, usergallery_images_column, usergallery_images_rows_per_page,
+                      shortcut_column, shortcut_rows_per_page, gallery_column, 
+                      classification_shortcut_column, classification_shortcut_rows_per_page, classification_gallery_column, classification_gallery_rows_per_page, 
+                      usergallery_images_column, usergallery_images_rows_per_page,
+                      prompt_shortcut_column, prompt_shortcut_rows_per_page, prompt_reference_shortcut_column, prompt_reference_shortcut_rows_per_page,
                       shortcut_max_download_image_per_version,
                       gallery_thumbnail_image_style,
                       shortcut_browser_search_up,
@@ -187,12 +224,20 @@ def save_setting(shortcut_update_when_start,
     image_style['shortcut_rows_per_page'] = shortcut_rows_per_page
 
     image_style['gallery_column'] = gallery_column
-    
+
+    image_style['classification_shortcut_column'] = classification_shortcut_column
+    image_style['classification_shortcut_rows_per_page'] = classification_shortcut_rows_per_page    
     image_style['classification_gallery_column'] = classification_gallery_column
     image_style['classification_gallery_rows_per_page'] = classification_gallery_rows_per_page
         
     image_style['usergallery_images_column'] = usergallery_images_column
-    image_style['usergallery_images_rows_per_page'] = usergallery_images_rows_per_page           
+    image_style['usergallery_images_rows_per_page'] = usergallery_images_rows_per_page
+
+    image_style['prompt_shortcut_column'] = prompt_shortcut_column
+    image_style['prompt_shortcut_rows_per_page'] = prompt_shortcut_rows_per_page
+    image_style['prompt_reference_shortcut_column'] = prompt_reference_shortcut_column
+    image_style['prompt_reference_shortcut_rows_per_page'] = prompt_reference_shortcut_rows_per_page
+    
     environment['image_style'] = image_style
     
     model_folders = dict()
@@ -257,10 +302,16 @@ def on_refresh_setting_change():
             setting.shortcut_column,\
             setting.shortcut_rows_per_page,\
             setting.gallery_column,\
+            setting.classification_shortcut_column,\
+            setting.classification_shortcut_rows_per_page,\
             setting.classification_gallery_column,\
             setting.classification_gallery_rows_per_page,\
             setting.usergallery_images_column,\
             setting.usergallery_images_rows_per_page,\
+            setting.prompt_shortcut_column,\
+            setting.prompt_shortcut_rows_per_page,\
+            setting.prompt_reference_shortcut_column,\
+            setting.prompt_reference_shortcut_rows_per_page,\
             setting.shortcut_max_download_image_per_version,\
             setting.gallery_thumbnail_image_style,\
             "Up" if setting.shortcut_browser_search_up else "Down",\

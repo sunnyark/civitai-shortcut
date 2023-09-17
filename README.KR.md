@@ -1,4 +1,3 @@
- 
 # 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다. 올바르게 작동하려면 A1111의 최신 업데이트가 필요합니다.
 
 # Civitai Shortcut
@@ -14,45 +13,48 @@ Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으�
 
 # Usage instructions
 
-![screenshot 2023-08-10 105556](https://github.com/sunnyark/civitai-shortcut/assets/40237431/77e103b6-6767-456b-8073-a4dbe7d0c042)
+![screenshot 2023-09-15 203613](https://github.com/sunnyark/civitai-shortcut/assets/40237431/fdac59c0-0ced-41fb-8faa-83029b3ffc3f)
 
-* Upload : 이 기능은 Civitai 사이트의 모델 URL을 이용하여 확장 프로그램에서 사용할 수 있는 바로 가기를 생성합니다. 주소 창에서 URL을 클릭하고 드래그하거나 저장된 인터넷 바로 가기를 드래그앤드롭할 수 있습니다. 또한 여러 개의 인터넷 바로 가기를 선택하고 한 번에 드롭할 수도 있습니다.
-* Browsing : 이 기능은 등록된 바로 가기를 섬네일 형식으로 표시하며, 선택 시 창의 오른쪽에 해당 바로 가기의 세부 정보를 표시합니다.
+* Register Model : 이 기능은 Civitai 사이트의 모델 URL을 이용하여 모델의 정보를 Civitai에서 가져와 드록합니다.
+ 주소 창에서 URL을 클릭하고 드래그하거나 저장된 인터넷 바로 가기를 드래그앤드롭할 수 있습니다. 또한 여러 개의 인터넷 바로 가기를 선택하고 한 번에 드롭할 수도 있습니다.
+* Model Browser : 이 기능은 등록된 모델을 섬네일 형식으로 표시하며, 선택 시 창의 오른쪽에 해당 모델의 세부 정보를 표시합니다.
 * Scan New Version : 이 기능은 Civitai 사이트에서 다운로드한 모델의 최신 버전을 검색하는 기능입니다. 사이트에서 정보를 가져오며, 사이트가 정상 작동할 때에만 정상적으로 작동합니다.
 * Model Information 의 정보를 최신 상태로 유지하기 위해서는 주기적인 데이터 업데이트가 필요합니다.
   방법에는 model information 하면에서 Update Shortcut 기능을 이용해서 개별적으로 업데이트 하거나, manage->setting->option 의 자동 업데이트를 활성화 , Manage->Scan and Update Models->Update the model information for the shortcut 기능을 이용하는 방법이 있습니다.
 
-![drag_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4f0bd60-0c81-45fe-aa60-652027579247)
+![register_model_direct](https://github.com/sunnyark/civitai-shortcut/assets/40237431/c6db4ced-9cec-4488-ac3f-9a17fadb42b8)
 
-![file_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/efdee43a-795e-4cb9-8c5e-322b5824bb8f)
-
-![file_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dbcbc789-89a9-45fd-b8a9-388ba33c916f)
-
-* Classification : Shortcut에서 사용하는 분류항목을 관리하는 기능입니다.
-
-![screenshot 2023-08-10 101404](https://github.com/sunnyark/civitai-shortcut/assets/40237431/bd8ed2b4-5551-4d4a-bd64-91a99a0e5187)
-
-![screenshot 2023-08-10 101352](https://github.com/sunnyark/civitai-shortcut/assets/40237431/66b4bace-7b89-4938-aef2-c957dd3a5a06)
-
+![register_model_shortcut](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a18cc188-0d7a-4860-91fa-b9b2b27f4bdc)
 
 * Prompt Recipe : Prompt recipe는 자주 사용하는 Prompt를 등록하고 관리 할수 있는 기능입니다.
 
-![screenshot 2023-08-10 110136](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4ef04b3-b82d-420b-a73b-87ceeada3c1d)
+![screenshot 2023-09-15 201815](https://github.com/sunnyark/civitai-shortcut/assets/40237431/d3d61c0a-c749-40ee-bc8c-69c35e9c6ba7)
 
-![screenshot 2023-08-10 110147](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7034ac04-b4e0-415b-af38-58b4e5789dac)
+![screenshot 2023-09-15 201833](https://github.com/sunnyark/civitai-shortcut/assets/40237431/773dc92f-3fd5-4509-94bb-99a9e50bec34)
 
-![screenshot 2023-08-10 110158](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dd737ca1-34c6-48c2-b694-98f42972988b)
+![screenshot 2023-09-15 201853](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ecf6e1a7-59f8-4eb5-a58f-5a7ff7824437)
 
-* Scan and Update Models
+* Assistance :
+
+1. Classification : Shortcut에서 사용하는 분류항목을 관리하는 기능입니다.
+
+![screenshot 2023-09-15 201933](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7881d3d8-d2a3-4502-b39c-fb40a17cf21c)
+
+![screenshot 2023-09-15 201956](https://github.com/sunnyark/civitai-shortcut/assets/40237431/94b2b2a1-f148-42dc-b6a8-21c1381dc55f)
+
+![screenshot 2023-09-15 202004](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9003d94d-5a13-4613-9fa6-722b1e892874)
+
+2. Scan and Update Models
   Scan Models : 현재 보유 중인 모델 정보가 없는 모델에 대해 스캔하여 바로 가기를 등록하는 기능입니다.
   Update the model information for the shortcut : 등록된 바로 가기의 정보를 최신 정보로 업데이트합니다.
   Scan downloaded models for shortcut registration : 삭제되거나 모델 정보가 누락된 다운로드된 모델에 대해 새로운 바로 가기를 등록합니다.
+  Update Downloaded Model : 이 기능은 Lora 메타데이터 파일이 없는 다운로드된 모델을 위한 Lora 메타데이터 파일을 생성합니다.
 
-![screenshot 2023-08-10 110607](https://github.com/sunnyark/civitai-shortcut/assets/40237431/927fc11b-6e08-4360-a968-0f63130cb3c5)
+![screenshot 2023-09-15 202018](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f200d24-a4ca-4e23-834a-71470590ee49)
 
 * Setting : 확장프로그램의 다양한 설정값을 관리합니다.
 
-![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
+![screenshot 2023-09-15 202037](https://github.com/sunnyark/civitai-shortcut/assets/40237431/67e2e7c5-0cd6-4917-a4c8-b9ffb45832f9)
 
 # Features
 
@@ -76,51 +78,66 @@ Civitai 사이트의 모델 URL을 저장하여 나중에 참조하고 보관할
 * CivitaiShortCutBackupUrl.json : Shortcut 등록시의 URL을 백업하는 파일
 
 # Change Log
+
+v 1.6.7
+
+* 기능에 맞도록 각 매뉴의 명칭을 변경했습니다.
+
 v 1.6.6
+
 * Prompt Recipe에서 레퍼런스를 관리할때 Delete from references when selecting a thumbnail 을 선택해제하고 리퍼런스 모델을 클릭했을시 모델 인포메이션으로 이동하지 않고 상단에 간략한 정보를 보여주도록 변경됨.
 * Prompt Recipe에서 선택한 reference model 의 type 에 따라 프롬프트에 지시어를 입력할 수 있는 기능추가
 * classification의 Delete from classification when selecting a thumbnail 을 선택해제하고 classification 에 속한 모델을 클릭했을시 모델 인포메이션으로 이동하지 않고 우측애 간략한 정보를 보여주도록 변경됨.
 
-v 1.6.5 
-* 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다. 
+v 1.6.5
+
+* 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다.
 * 올바르게 작동하려면 A1111의 최신 업데이트가 필요합니다.
 
 v 1.6.4
+
 * sdui의 LoRa metadata editor에 사용가능한 model meta data를 저장.(단, 기존것이 없을경우에만 저장됩니다.)
-* 일부 메뉴의 명칭을 변경 
+* 일부 메뉴의 명칭을 변경
 * Assistance->Scan and Update Models 에 누락된 lora metadata file을 생성할 수 있는 기능 추가(2023-08-19)
 
 v 1,6.3
+
 * classification 의 인터페이스 변경
 * classification 의 shortcut browser 기능추가, 편의성 개선
 * shortcut information의 이미지에서 recipe로 prompt를 보낼때 해당 shortcut을 기본 레퍼런스 모델로 추가하게 수정.
 
 v 1.6.2
-* shortcut의 등록날짜를 업데이트 
+
+* shortcut의 등록날짜를 업데이트
   (기존데이터는 Assistance->Update Shortcuts:Update the model information for the shortcut 수행필요)
 * gallery의 설정을 직관적으로 변경
 
 v 1.6.1
+
 * recipe의 reference shortcut model의 인터페이스 변경
 * 섬네일이 자동으로 생성될때 nsfw level이 가장 낮은 (건전한) 모델이 선정되게 변경.
 * 전체 모든 범위에서 nsfw filter 가 작동하게 변경
 * classification 에서 표시되는 shortcut model중 삭제된 모델이 표시되도록 변경
 
 v 1.6.0
+
 * NSFW Filter 기능 추가
 * prompt recipe 리뉴얼
 * prompt recipe에 reference model을 등록 할수 있는 tab추가
 * prompt recipe 검색기능 보강
 * shortcut broswer의 검색창의 위치를 섬네일 목록의 상/하중 원하는 위치로 변경할 수 있도록 setting 에 추가.
- 
+
 v 1.5.8
+
 * 모델 인포메이션에 personal note 항목을 추가, 검색에서 "@" 를 이용해서 검색가능
 
 v 1.5.7
+
 * Civitai에서 제공하는 기본 모델을 사용하여 필터링하는 기능이 추가되었습니다.
 * 분류 항목을 검색 섹션에서 검색하는 대신 드롭다운 목록에서 선택할 수 있도록 변경합니다. 선택된 분류 항목은 'AND' 연산으로 작동하여 교집합처럼 동작합니다. 이렇게 하면 다중 카테고리에 속하는 바로 가기들을 더 자세하게 관리할 수 있습니다.
 
 v 1.5.6
+
 * Civitai에서 권장하는 대로 "user gallery paging" 방법을 cursor paging 으로 변경합니다.
 
 v 1.5.5
@@ -325,30 +342,19 @@ v 1.1
   *전체 모델 정보를 업데이트하는 "Update Shortcut's Model Information" 버튼 외에 개별적으로 모델 정보를 업데이트할 수 있는 "Update Model Information" 버튼이 "Saved Model Information" 탭에 추가됩니다.
 
 # Screenshot
-![screenshot 2023-08-10 105556](https://github.com/sunnyark/civitai-shortcut/assets/40237431/77e103b6-6767-456b-8073-a4dbe7d0c042)
 
-![screenshot 2023-08-10 101352](https://github.com/sunnyark/civitai-shortcut/assets/40237431/66b4bace-7b89-4938-aef2-c957dd3a5a06)
-
-![screenshot 2023-08-10 101404](https://github.com/sunnyark/civitai-shortcut/assets/40237431/bd8ed2b4-5551-4d4a-bd64-91a99a0e5187)
-
-![screenshot 2023-08-10 110136](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4ef04b3-b82d-420b-a73b-87ceeada3c1d)
-![screenshot 2023-08-10 110147](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7034ac04-b4e0-415b-af38-58b4e5789dac)
-![screenshot 2023-08-10 110158](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dd737ca1-34c6-48c2-b694-98f42972988b)
-
-![screenshot 2023-08-10 110607](https://github.com/sunnyark/civitai-shortcut/assets/40237431/927fc11b-6e08-4360-a968-0f63130cb3c5)
-
-![screenshot 2023-05-24 134749](https://github.com/sunnyark/civitai-shortcut/assets/40237431/3758bee5-71ea-4fb1-a411-e55213f701d4)
-
-![drag_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/e4f0bd60-0c81-45fe-aa60-652027579247)
-
-![file_drop_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/efdee43a-795e-4cb9-8c5e-322b5824bb8f)
-
-![file_upload](https://github.com/sunnyark/civitai-shortcut/assets/40237431/dbcbc789-89a9-45fd-b8a9-388ba33c916f)
-
-![classification_action](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ec0ddb51-6b8b-485a-a560-9c174a962001)
-
-![prompt_recipe_create01](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f8db7b5-f3d0-45bc-a8b9-181f3befe4ef)
-
-![prompt_recipe_create02](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9218f2bd-9bf9-47ee-b61f-80cc1816da1e)
-
-![prompt_recipe_send_txt2image](https://github.com/sunnyark/civitai-shortcut/assets/40237431/abeb0af6-fe97-4cef-b4b5-92110237c6b2)
+![screenshot 2023-09-15 203613](https://github.com/sunnyark/civitai-shortcut/assets/40237431/fdac59c0-0ced-41fb-8faa-83029b3ffc3f)
+![screenshot 2023-09-15 202037](https://github.com/sunnyark/civitai-shortcut/assets/40237431/67e2e7c5-0cd6-4917-a4c8-b9ffb45832f9)
+![screenshot 2023-09-15 202018](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f200d24-a4ca-4e23-834a-71470590ee49)
+![screenshot 2023-09-15 202004](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9003d94d-5a13-4613-9fa6-722b1e892874)
+![screenshot 2023-09-15 201956](https://github.com/sunnyark/civitai-shortcut/assets/40237431/94b2b2a1-f148-42dc-b6a8-21c1381dc55f)
+![screenshot 2023-09-15 201933](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7881d3d8-d2a3-4502-b39c-fb40a17cf21c)
+![screenshot 2023-09-15 201909](https://github.com/sunnyark/civitai-shortcut/assets/40237431/d3a300da-bccf-4452-ad59-11904c44f585)
+![screenshot 2023-09-15 201853](https://github.com/sunnyark/civitai-shortcut/assets/40237431/ecf6e1a7-59f8-4eb5-a58f-5a7ff7824437)
+![screenshot 2023-09-15 201845](https://github.com/sunnyark/civitai-shortcut/assets/40237431/c1726ab5-15b7-499f-9067-9755fba332c0)
+![screenshot 2023-09-15 201833](https://github.com/sunnyark/civitai-shortcut/assets/40237431/773dc92f-3fd5-4509-94bb-99a9e50bec34)
+![screenshot 2023-09-15 201815](https://github.com/sunnyark/civitai-shortcut/assets/40237431/d3d61c0a-c749-40ee-bc8c-69c35e9c6ba7)
+![screenshot 2023-09-15 201738](https://github.com/sunnyark/civitai-shortcut/assets/40237431/b8673673-ea42-43ad-942f-15437fce6b26)
+![screenshot 2023-09-15 201708](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9f8f7ab3-245c-4878-b722-5cb7de2f1c9d)
+![register_model_shortcut](https://github.com/sunnyark/civitai-shortcut/assets/40237431/a18cc188-0d7a-4860-91fa-b9b2b27f4bdc)
+![register_model_direct](https://github.com/sunnyark/civitai-shortcut/assets/40237431/c6db4ced-9cec-4488-ac3f-9a17fadb42b8)

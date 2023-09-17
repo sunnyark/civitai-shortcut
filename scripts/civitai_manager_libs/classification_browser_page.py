@@ -15,8 +15,8 @@ ALL_DOWNLOADED_MODEL = "All"
 
 def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=None,user_shortcut_column=None, user_shortcut_rows_per_page=None):
     shortcut_browser_search_up = setting.shortcut_browser_search_up
-    shortcut_column = setting.shortcut_column
-    shortcut_rows_per_page = setting.shortcut_rows_per_page
+    shortcut_column = setting.classification_shortcut_column
+    shortcut_rows_per_page = setting.classification_shortcut_rows_per_page
     
     if user_shortcut_browser_search_up:
         if user_shortcut_browser_search_up == "UP":
@@ -31,15 +31,16 @@ def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=Non
         shortcut_rows_per_page = user_shortcut_rows_per_page
 
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(None,False,None,None,None,1,shortcut_column,shortcut_rows_per_page)
+
+    show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
             
-    if shortcut_browser_search_up:
-        
+    if shortcut_browser_search_up:        
         with gr.Accordion("Search", open=search_open):        
             shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
             sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @personal note ....",interactive=True, lines=1)
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels.keys()], interactive=True)
-            show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
+            # show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
             reset_filter_btn = gr.Button(value="Reset Filter",variant="primary")
             
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
@@ -59,7 +60,7 @@ def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=Non
             sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @personal note ....",interactive=True, lines=1)
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels.keys()], interactive=True)            
-            show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
+            # show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
             reset_filter_btn = gr.Button(value="Reset Filter",variant="primary")
             
     with gr.Row(visible=False):

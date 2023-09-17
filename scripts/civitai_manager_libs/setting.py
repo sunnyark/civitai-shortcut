@@ -12,7 +12,7 @@ extension_base = scripts.basedir()
 headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
 
 Extensions_Name = "Civitai Shortcut"
-Extensions_Version = "v1.6.6"
+Extensions_Version = "v1.6.7"
 
 PLACEHOLDER = "[No Select]"
 NORESULT = "[No Result]"  
@@ -115,17 +115,28 @@ shortcut_browser_screen_split_ratio_max  = 10
 shortcut_browser_search_up = False
 
 # 갤러리 ui설정
-gallery_column = 7
+# model browser 설정
 shortcut_column = 5  
-# shortcut_count_per_page = 20
 shortcut_rows_per_page = 4
-classification_gallery_column = 8
-classification_gallery_rows_per_page = 4
+gallery_column = 7
 
 # 유저 갤러리 설정
 usergallery_images_column = 6
-# usergallery_images_page_limit = 12
 usergallery_images_rows_per_page = 2
+
+# prompt recipe 설정
+prompt_shortcut_column = 5  
+prompt_shortcut_rows_per_page = 4
+prompt_reference_shortcut_column = 8
+prompt_reference_shortcut_rows_per_page = 4
+
+# classification 설정
+classification_shortcut_column = 5  
+classification_shortcut_rows_per_page = 4
+
+classification_gallery_column = 8
+classification_gallery_rows_per_page = 4
+
 shortcut_max_download_image_per_version = 0 # 버전당 최대 다운로드 이미지 수 , 0이면 전체다운 받는다
 gallery_thumbnail_image_style = "scale-down"
 
@@ -167,40 +178,6 @@ def set_NSFW(enable, level="None"):
     
     NSFW_filtering_enable = enable
     NSFW_level_user = level
-    
-    # if level == "Soft":
-    #     NSFW_level["None"] = True
-    #     NSFW_level["Soft"] = True
-    #     NSFW_level["Mature"] = False
-    #     NSFW_level["X"] = False  
-    # elif level == "Mature":
-    #     NSFW_level["None"] = True
-    #     NSFW_level["Soft"] = True
-    #     NSFW_level["Mature"] = True
-    #     NSFW_level["X"] = False  
-    # elif level == "X":
-    #     NSFW_level["None"] = True
-    #     NSFW_level["Soft"] = True
-    #     NSFW_level["Mature"] = True
-    #     NSFW_level["X"] = True        
-    # else:
-    #     # level == 1
-    #     NSFW_level["None"] = True
-    #     NSFW_level["Soft"] = False
-    #     NSFW_level["Mature"] = False
-    #     NSFW_level["X"] = False
-
-# def get_NSFW_Level():
-#     return NSFW_level_user
-
-#     prev = "None"
-#     for level, v in NSFW_level.items():
-#         if not v:
-#             return prev
-#         else:
-#             prev = level
-    
-#     return prev
 
 def save_NSFW():
     global NSFW_filtering_enable
@@ -250,10 +227,18 @@ def load_data():
     global shortcut_column
     global shortcut_rows_per_page
     global gallery_column
+    global classification_shortcut_column
+    global classification_shortcut_rows_per_page    
     global classification_gallery_column
     global classification_gallery_rows_per_page
     global usergallery_images_column
     global usergallery_images_rows_per_page
+    
+    global prompt_shortcut_column
+    global prompt_shortcut_rows_per_page
+    global prompt_reference_shortcut_column
+    global prompt_reference_shortcut_rows_per_page
+            
     global shortcut_max_download_image_per_version
     global gallery_thumbnail_image_style
     global shortcut_browser_search_up
@@ -318,6 +303,11 @@ def load_data():
 
             if "gallery_column" in image_style.keys():            
                 gallery_column = int(image_style['gallery_column'])
+
+            if "classification_shortcut_column" in image_style.keys():
+                classification_shortcut_column = int(image_style['classification_shortcut_column'])
+            if "classification_shortcut_rows_per_page" in image_style.keys():
+                classification_shortcut_rows_per_page = int(image_style['classification_shortcut_rows_per_page'])                
             if "classification_gallery_column" in image_style.keys():
                 classification_gallery_column = int(image_style['classification_gallery_column'])
             if "classification_gallery_rows_per_page" in image_style.keys():
@@ -327,7 +317,16 @@ def load_data():
                 usergallery_images_column = int(image_style['usergallery_images_column'])
             if "usergallery_images_rows_per_page" in image_style.keys():
                 usergallery_images_rows_per_page = int(image_style['usergallery_images_rows_per_page'])
-            
+
+            if "prompt_shortcut_column" in image_style.keys():
+                prompt_shortcut_column = int(image_style['prompt_shortcut_column'])
+            if "prompt_shortcut_rows_per_page" in image_style.keys():
+                prompt_shortcut_rows_per_page = int(image_style['prompt_shortcut_rows_per_page'])
+            if "prompt_reference_shortcut_column" in image_style.keys():
+                prompt_reference_shortcut_column = int(image_style['prompt_reference_shortcut_column'])
+            if "prompt_reference_shortcut_rows_per_page" in image_style.keys():
+                prompt_reference_shortcut_rows_per_page = int(image_style['prompt_reference_shortcut_rows_per_page'])
+                                            
         if "model_folders" in environment.keys():
                 
             user_folders = environment['model_folders']

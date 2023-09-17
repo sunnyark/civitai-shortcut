@@ -12,48 +12,6 @@ from modules import scripts, script_callbacks, shared
 from . import setting
 from tqdm import tqdm
 
-# from modules import images
-# def run_pnginfo(image, image_path, image_file_name):
-#     if image is None:
-#         return '', '', '', '', ''
-#     try:
-#         geninfo, items = images.read_info_from_image(image)
-#         items = {**{'parameters': geninfo}, **items}
-
-#         info = ''
-#         for key, text in items.items():
-#             info += f"""
-#                 <div>
-#                 <p><b>{plaintext_to_html(str(key))}</b></p>
-#                 <p>{plaintext_to_html(str(text))}</p>
-#                 </div>
-#                 """.strip()+"\n"
-#     except UnidentifiedImageError as e:
-#         geninfo = None
-#         info = ""
-    
-#     if geninfo is None:
-#         try:
-#             filename = os.path.splitext(image_file_name)[0] + ".txt"
-#             geninfo = ""
-#             with open(filename) as f:
-#                 for line in f:
-#                     geninfo += line
-#         except Exception:
-#             logger.warning(f"run_pnginfo: No EXIF in image or txt file")
-
-#     if openoutpaint:
-#         prompt, neg_prompt = wib_db.select_prompts(image_file_name)
-#         if prompt == "0":
-#             prompt = ""
-#         if neg_prompt == "0":
-#             neg_prompt = ""
-#     else:
-#         prompt = ""
-#         neg_prompt = ""
-
-#     return '', geninfo, info, prompt, neg_prompt
-
 def printD(msg):    
     print(f"{setting.Extensions_Name}: {msg}") 
 
@@ -188,66 +146,6 @@ def get_search_keyword(search:str):
                 keys.append(word)
                     
     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, notes if len(notes) > 0 else None
-    
-# def get_search_keyword(search:str):
-#     tags = []
-#     keys = []
-#     clfs = []
-        
-#     if not search:
-#         return None , None, None
-    
-#     for word in search.split(","):
-#         word = word.strip()
-#         if word.startswith("#"):
-#             if len(word) > 1:
-#                 tag = word[1:].lower()
-#                 if tag not in tags:
-#                     tags.append(tag)
-#         elif word.startswith("@"):
-#             if len(word) > 1:
-#                 clf = word[1:]
-#                 if clf not in clfs:
-#                     clfs.append(clf)
-#         else:
-#             word = word.lower()
-#             if word not in keys:                
-#                 keys.append(word)
-                    
-#     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None    
-
-# def get_search_keyword(search:str):
-#     tags = []
-#     keys = []
-#     clfs = []
-#     filenames = []
-    
-#     if not search:
-#         return None , None, None
-    
-#     for word in search.split(","):
-#         word = word.strip()
-#         if word.startswith("#"):
-#             if len(word) > 1:
-#                 tag = word[1:].lower()
-#                 if tag not in tags:
-#                     tags.append(tag)
-#         elif word.startswith("@"):
-#             if len(word) > 1:
-#                 clf = word[1:]
-#                 if clf not in clfs:
-#                     clfs.append(clf)
-#         elif word.startswith("!"):
-#             if len(word) > 1:
-#                 filename = word[1:].lower()
-#                 if filename not in filenames:
-#                     filenames.append(filename)                    
-#         else:
-#             word = word.lower()
-#             if word not in keys:                
-#                 keys.append(word)
-                    
-#     return keys if len(keys) > 0 else None, tags if len(tags) > 0 else None, clfs if len(clfs) > 0 else None, filenames if len(filenames) > 0 else None    
 
 def read_json(path)->dict:
     contents = None
@@ -281,40 +179,6 @@ def scan_folder_for_info(folder):
         return None
     
     return info_list
-            
-# def make_version_folder(version_info, vs_folder=True, vs_foldername=None, ms_foldername=None):
-    
-#     if not version_info:
-#         return
-                
-#     if "model" not in version_info.keys():
-#         return
-                       
-#     content_type = version_info['model']['type']
-    
-#     if not ms_foldername:
-#         ms_foldername = version_info['model']['name']
-#     elif len(ms_foldername.strip()) <= 0:
-#         ms_foldername = version_info['model']['name']
-#     ms_foldername = ms_foldername.strip()
-        
-#     model_folder = setting.generate_model_foldername(content_type, ms_foldername)                     
-    
-#     if not model_folder:
-#         return
-    
-#     if vs_folder:        
-#         if not vs_foldername:
-#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
-#         elif len(vs_foldername.strip()) <= 0:
-#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
-
-#         model_folder = os.path.join(model_folder, replace_dirname(vs_foldername.strip()))
-                
-#     if not os.path.exists(model_folder):
-#         os.makedirs(model_folder)
-                
-#     return model_folder  
 
 def get_download_image_folder(ms_foldername):
 
@@ -347,44 +211,6 @@ def make_download_image_folder(ms_foldername):
     return model_folder  
 
 # 다정하면 임의의 분류뒤에 모델폴더를 생성하고 그뒤에 버전까지 생성가능
-# def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None):
-    
-#     if not version_info:
-#         return
-                
-#     if "model" not in version_info.keys():
-#         return
-                       
-#     content_type = version_info['model']['type']
-#     ms_foldername = version_info['model']['name']
-               
-#     model_folder = setting.generate_type_basefolder(content_type)
-    
-#     if not model_folder:
-#         return
-    
-#     if not cs_foldername and not ms_folder:
-#         return
-    
-#     if cs_foldername:
-#         model_folder = os.path.join(model_folder, replace_dirname(cs_foldername.strip()))
-                
-#     if ms_folder:
-#         model_folder = os.path.join(model_folder, replace_dirname(ms_foldername.strip()))
-        
-#     if vs_folder:        
-#         if not vs_foldername:
-#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
-#         elif len(vs_foldername.strip()) <= 0:
-#             vs_foldername = setting.generate_version_foldername(ms_foldername,version_info['name'],version_info['id'])
-
-#         model_folder = os.path.join(model_folder, replace_dirname(vs_foldername.strip()))
-                
-#     if not os.path.exists(model_folder):
-#         os.makedirs(model_folder)
-                
-#     return model_folder  
-
 def make_download_model_folder(version_info, ms_folder=True, vs_folder=True, vs_foldername=None, cs_foldername=None, ms_foldername=None):
     
     if not version_info:
@@ -440,21 +266,6 @@ def write_InternetShortcut(path, url):
         return False    
     return True
     
-# def load_InternetShortcut(path)->str:
-#     urls = ""
-#     try:    
-#         with open(path, 'r') as f:
-#         #with open(path, 'r', encoding='utf8') as f:            
-#             content = f.readlines()
-#             for line in content:
-#                 if line.startswith('URL='):
-#                     urls = line[4:]
-#     except Exception as e:
-#         printD(e)
-#         return
-
-#     return urls.strip()
-
 def load_InternetShortcut(path)->str:
     urls = list()
     try:    
@@ -476,31 +287,6 @@ def get_full_size_image_url(image_url, width):
 
 def change_width_from_image_url(image_url, width):
     return re.sub('/width=\d+/', '/width=' + str(width) + '/', image_url)
-
-# get id from url
-# def get_model_id_from_url(url):
-#     id = ""
-
-#     if not url:
-#         return ""
-
-#     if url.isnumeric():
-#         # is already an id
-#         id = str(url)
-#         return id
-    
-#     s = url.split("/")
-#     if len(s) < 2:
-#         return ""
-    
-#     if s[-2].isnumeric():
-#         id  = s[-2]
-#     elif s[-1].isnumeric():
-#         id  = s[-1]
-#     else:
-#         return ""
-    
-#     return id
 
 def get_model_id_from_url(url):
     if not url:

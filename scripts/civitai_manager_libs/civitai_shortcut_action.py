@@ -28,17 +28,18 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         
     with gr.Column(scale=setting.shortcut_browser_screen_split_ratio):
         with gr.Tabs() as civitai_shortcut_tabs:
-            with gr.TabItem("Register Shortcut"):
+            with gr.TabItem("Register Model"):
                 with gr.Row(visible=False):                                 
                     register_information_only = gr.Checkbox(label="Register only model information", value=False)
                 with gr.Row():
                     with gr.Column():
+                        gr.Markdown(value="Using the model URL from the Civitai site, you register the information of the model. You can click and drag the Civitai Model's URL or drag and drop a saved internet shortcut. Additionally, you can select multiple internet shortcuts and drop them all at once.", visible=True)
                         civitai_internet_url_txt = gr.Textbox(placeholder="Copy & Paste or Drag & Drop Civitai Model Url", show_label=False, interactive=True)
                         civitai_internet_url = gr.File(label="Civitai Internet Shortcut", file_count="multiple", file_types=[".url"])
-                        update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
-                        gr.Markdown(value="If you have made direct modifications(e.g. moving or renaming a folder) to the downloaded model during runtime, please execute the \"Update Downloaded Model Information\" function, which rescans the downloaded model and updates its information accordingly. ", visible=True)
+                        # update_modelfolder_btn = gr.Button(value="Update Downloaded Model Information", variant="primary")
+                        # gr.Markdown(value="If you have made direct modifications(e.g. moving or renaming a folder) to the downloaded model during runtime, please execute the \"Update Downloaded Model Information\" function, which rescans the downloaded model and updates its information accordingly. ", visible=True)
                                                     
-            with gr.TabItem("Shortcut Browser"):    
+            with gr.TabItem("Model Browser"):    
                 with gr.Row():
                     with gr.Column():
                         sc_gallery, refresh_sc_browser, refresh_sc_gallery = sc_browser_page.on_ui()
@@ -125,7 +126,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
     scan_new_version_btn.click(on_scan_new_version_btn,shortcut_new_version_type,sc_new_version_gallery)                
     sc_gallery.select(on_sc_gallery_select, None, [sc_modelid], show_progress=False)    
     sc_new_version_gallery.select(on_sc_gallery_select, None, [sc_modelid], show_progress=False)
-    update_modelfolder_btn.click(on_update_modelfolder_btn_click,None,refresh_sc_browser)
+    # update_modelfolder_btn.click(on_update_modelfolder_btn_click,None,refresh_sc_browser)
     civitai_shortcut_tabs.select(on_civitai_shortcut_tabs_select,None,[refresh_sc_browser,refresh_NSFW],show_progress=False)
 
     update_informations.change(
