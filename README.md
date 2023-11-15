@@ -1,3 +1,5 @@
+# Personal reasons make it difficult for further updates. Feel free to use the source without any restrictions. I sincerely apologize.
+
 # This update is compatible with gradio version 3.41.2 or higher. It requires the latest update of A1111 to function correctly.
 
 # Civitai Shortcut
@@ -41,10 +43,10 @@ Stable Diffusion Webui's Extension tab, go to Install from url sub-tab. Copy thi
 ![screenshot 2023-09-15 202004](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9003d94d-5a13-4613-9fa6-722b1e892874)
 
 2. Scan and Update Models
-  Scan Models - Scan and register shortcut for models without model information that are currently held.
-  Update Shortcut - Move the shortcut update function from the Upload tab.
-  Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
-  Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
+   Scan Models - Scan and register shortcut for models without model information that are currently held.
+   Update Shortcut - Move the shortcut update function from the Upload tab.
+   Update the model information for the shortcut - Update the information of registered shortcuts with the latest information.
+   Scan downloaded models for shortcut registration - Register new shortcuts for downloaded models that have been deleted or have missing model information.
 
 ![screenshot 2023-09-15 202018](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f200d24-a4ca-4e23-834a-71470590ee49)
 
@@ -73,40 +75,49 @@ Four folders and five JSON files will be created, each serving the following rol
 * CivitaiShortCutBackupUrl.json : JSON file for backing up the URL during shortcut registration.
 
 # Change Log
+
 v 1.6.7
+
 * Changed the names of each menu to correspond to their functions.
 
 v 1.6.6
+
 * In Prompt Recipe, the option 'Delete from references when selecting a thumbnail' has been deselected, and when clicking on a model within the references, it now displays brief information on the top instead of navigating to the model information.
 * An added feature in Prompt Recipe allows the input of directives in the prompt based on the type of the selected reference model.
 * In classification, the option 'Delete from classification when selecting a thumbnail' has been deselected, and when clicking on a model within the classification, it now displays brief information on the right instead of navigating to the model information.
 
 v 1.6.5
-* This update is compatible with gradio version 3.41.2 or higher. 
+
+* This update is compatible with gradio version 3.41.2 or higher.
 * It requires the latest update of A1111 to function correctly.
 
 v 1.6.4
+
 * Save the available model data in sdui's LoRa metadata editor. (Note that it will only be saved if there is no existing data.)
 * Change the names of some menus.
 * Added a feature to Assistance->Scan and Update Models for generating missing LoRa metadata files (2023-08-19).
 
 v 1,6.3
+
 * The interface of the classification has been modified.
 * Added shortcut browser feature to the classification, improving convenience.
 * Modified shortcut information to include the respective shortcut as the default reference model when sending a prompt from the image to the recipe.
 
 v 1.6.2
+
 * Update the registration date of the shortcut
-(Perform Assistance->Update Shortcuts: Update the model information for the shortcut for existing data)
+  (Perform Assistance->Update Shortcuts: Update the model information for the shortcut for existing data)
 * Intuitively modify the settings of the gallery
 
 v 1.6.1
+
 * The interface of the reference shortcut model in the recipe has been modified.
 * When generating thumbnails automatically, the model with the lowest NSFW level (most safe for work) will be selected.
 * The NSFW filter will now operate across all ranges.
 * In the classification, display the removed models among the shortcut models.
 
 v 1.6.0
+
 * Adding NSFW Filter function
 * Revamping prompt recipe
 * Adding a tab to register reference models in the prompt recipe
@@ -114,19 +125,21 @@ v 1.6.0
 * Added a setting in the shortcut browser to allow users to change the position of the search bar to their desired location, either above or below the thumbnail list.
 
 v 1.5.8
+
 * Add a 'Personal Note' section to the model information, and make it searchable using '@' in the search.
 
 v 1.5.7
+
 * The functionality to filter using the base model provided by Civitai has been added.
 * I changed the classification categories to be selected from a dropdown list instead of searching in the search section. The selected classification categories will work as an 'AND' operation, meaning they will function as an intersection. This way, we can manage shortcuts that are classified under multiple categories in a more detailed manner
 
 v 1.5.6
+
 * Change the "user gallery paging" method to cursor-based paging as recommended by Civitai.
 
 v 1.5.5
 
-* When downloading a file, if there is no primary file in the download list, it will be modified to not generate version info and preview images. Only the corresponding file will be downloaded. 
-
+* When downloading a file, if there is no primary file in the download list, it will be modified to not generate version info and preview images. Only the corresponding file will be downloaded.
 * The download file list will indicate whether it is a primary file.
 * The sorting has been modified so that the shortcuts are sorted based on the 'name' field.
 
@@ -294,6 +307,7 @@ v 1.1
 * "Update Model Information" button is added to "Saved Model Information" Tab for individual updating of model information, in addition to "Update Shortcut's Model Information" that updates all model information.
 
 # Screenshot
+
 ![screenshot 2023-09-15 203613](https://github.com/sunnyark/civitai-shortcut/assets/40237431/fdac59c0-0ced-41fb-8faa-83029b3ffc3f)
 ![screenshot 2023-09-15 202037](https://github.com/sunnyark/civitai-shortcut/assets/40237431/67e2e7c5-0cd6-4917-a4c8-b9ffb45832f9)
 ![screenshot 2023-09-15 202018](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f200d24-a4ca-4e23-834a-71470590ee49)

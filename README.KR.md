@@ -1,3 +1,5 @@
+# 개인적인 사정으로 인해 추가 업데이트가 어렵습니다. 출처에 제한 없이 자유롭게 사용하시기 바랍니다. 진심으로 사과드립니다.
+
 # 이 업데이트는 Gradio 버전 3.41.2 이상과 호환됩니다. 올바르게 작동하려면 A1111의 최신 업데이트가 필요합니다.
 
 # Civitai Shortcut
@@ -16,7 +18,7 @@ Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으�
 ![screenshot 2023-09-15 203613](https://github.com/sunnyark/civitai-shortcut/assets/40237431/fdac59c0-0ced-41fb-8faa-83029b3ffc3f)
 
 * Register Model : 이 기능은 Civitai 사이트의 모델 URL을 이용하여 모델의 정보를 Civitai에서 가져와 드록합니다.
- 주소 창에서 URL을 클릭하고 드래그하거나 저장된 인터넷 바로 가기를 드래그앤드롭할 수 있습니다. 또한 여러 개의 인터넷 바로 가기를 선택하고 한 번에 드롭할 수도 있습니다.
+  주소 창에서 URL을 클릭하고 드래그하거나 저장된 인터넷 바로 가기를 드래그앤드롭할 수 있습니다. 또한 여러 개의 인터넷 바로 가기를 선택하고 한 번에 드롭할 수도 있습니다.
 * Model Browser : 이 기능은 등록된 모델을 섬네일 형식으로 표시하며, 선택 시 창의 오른쪽에 해당 모델의 세부 정보를 표시합니다.
 * Scan New Version : 이 기능은 Civitai 사이트에서 다운로드한 모델의 최신 버전을 검색하는 기능입니다. 사이트에서 정보를 가져오며, 사이트가 정상 작동할 때에만 정상적으로 작동합니다.
 * Model Information 의 정보를 최신 상태로 유지하기 위해서는 주기적인 데이터 업데이트가 필요합니다.
@@ -45,10 +47,10 @@ Stable Diffusion Webui의 Extension 탭에서 'URL에서 설치' 서브 탭으�
 ![screenshot 2023-09-15 202004](https://github.com/sunnyark/civitai-shortcut/assets/40237431/9003d94d-5a13-4613-9fa6-722b1e892874)
 
 2. Scan and Update Models
-  Scan Models : 현재 보유 중인 모델 정보가 없는 모델에 대해 스캔하여 바로 가기를 등록하는 기능입니다.
-  Update the model information for the shortcut : 등록된 바로 가기의 정보를 최신 정보로 업데이트합니다.
-  Scan downloaded models for shortcut registration : 삭제되거나 모델 정보가 누락된 다운로드된 모델에 대해 새로운 바로 가기를 등록합니다.
-  Update Downloaded Model : 이 기능은 Lora 메타데이터 파일이 없는 다운로드된 모델을 위한 Lora 메타데이터 파일을 생성합니다.
+   Scan Models : 현재 보유 중인 모델 정보가 없는 모델에 대해 스캔하여 바로 가기를 등록하는 기능입니다.
+   Update the model information for the shortcut : 등록된 바로 가기의 정보를 최신 정보로 업데이트합니다.
+   Scan downloaded models for shortcut registration : 삭제되거나 모델 정보가 누락된 다운로드된 모델에 대해 새로운 바로 가기를 등록합니다.
+   Update Downloaded Model : 이 기능은 Lora 메타데이터 파일이 없는 다운로드된 모델을 위한 Lora 메타데이터 파일을 생성합니다.
 
 ![screenshot 2023-09-15 202018](https://github.com/sunnyark/civitai-shortcut/assets/40237431/7f200d24-a4ca-4e23-834a-71470590ee49)
 
