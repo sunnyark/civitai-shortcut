@@ -9,8 +9,10 @@ root_path = os.getcwd()
 extension_base = scripts.basedir()
 # extension_base = os.path.join("extensions","civitai-shortcut")
 
-headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68'}
+headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68',
+         "Authorization": ""}
 
+civitai_api_key = ""
 Extensions_Name = "Civitai Shortcut"
 Extensions_Version = "v1.6.7"
 
