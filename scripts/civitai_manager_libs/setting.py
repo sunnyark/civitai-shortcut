@@ -262,6 +262,7 @@ def load_data():
     global information_gallery_height
 
     global shortcut_update_when_start
+    global civitai_api_key
 
     if shared.cmd_opts.embeddings_dir:
         model_folders['TextualInversion'] = shared.cmd_opts.embeddings_dir
@@ -289,6 +290,8 @@ def load_data():
         if "application_allow" in environment.keys():
             application_allow = environment['application_allow']
 
+            if "civitai_api_key" in application_allow.keys():
+                civitai_api_key = application_allow['civitai_api_key']
             if "shortcut_update_when_start" in application_allow.keys():
                 shortcut_update_when_start = bool(application_allow['shortcut_update_when_start'])
             if "shortcut_max_download_image_per_version" in application_allow.keys():

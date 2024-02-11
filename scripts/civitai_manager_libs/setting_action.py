@@ -13,6 +13,8 @@ def on_setting_ui():
         with gr.Row():
             with gr.Accordion("Option", open=False):
                 with gr.Row():
+                    civitai_api_key = gr.Textbox(value=setting.civitai_api_key, label="Civitai Api Key", info="To access the models that require you to be logged in. Please obtain the key from: https://civitai.com/user/account.", interactive=True)
+                with gr.Row():
                     shortcut_update_when_start = gr.Checkbox(value=setting.shortcut_update_when_start, label="Startup : The program performs 'Update the model information for the shortcut' when it starts.",info="At program startup, the registered shortcuts are updated with the latest data. This process operates in the background. To update manually, you can uncheck that option and use the 'Scans and Model Updates -> Update the model information for the shortcut' feature.", interactive=True)
                     shortcut_max_download_image_per_version = gr.Slider(minimum=0, maximum=30, value=setting.shortcut_max_download_image_per_version, step=1,info="When registering a shortcut of a model, you can specify the maximum number of images to download. \n This is the maximum per version, and setting it to 0 means unlimited downloads.", label='Maximum number of download images per version', interactive=True)
         with gr.Row():
@@ -83,6 +85,7 @@ def on_setting_ui():
         fn=on_refresh_setting_change,
         inputs=None,
         outputs=[
+            civitai_api_key,
             shortcut_update_when_start,
             scbrowser_screen_split_ratio,
             info_gallery_height,
@@ -133,6 +136,7 @@ def on_setting_ui():
     save_btn.click(
         fn=on_save_btn_click,
         inputs=[
+            civitai_api_key,
             shortcut_update_when_start,
             scbrowser_screen_split_ratio,
             info_gallery_height,
@@ -167,7 +171,7 @@ def on_setting_ui():
 
     return refresh_setting
 
-def on_save_btn_click(shortcut_update_when_start,
+def on_save_btn_click(civitai_api_key, shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height,
                       shortcut_column, shortcut_rows_per_page, gallery_column,
                       classification_shortcut_column, classification_shortcut_rows_per_page, classification_gallery_column, classification_gallery_rows_per_page,
@@ -179,7 +183,7 @@ def on_save_btn_click(shortcut_update_when_start,
                       locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder
                       ):
 
-    save_setting(shortcut_update_when_start,
+    save_setting(civitai_api_key, shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height,
                       shortcut_column, shortcut_rows_per_page, gallery_column,
                       classification_shortcut_column, classification_shortcut_rows_per_page, classification_gallery_column, classification_gallery_rows_per_page,
@@ -191,7 +195,7 @@ def on_save_btn_click(shortcut_update_when_start,
                       locon,wildcards,controlnet,aestheticgradient,poses,other,download_images_folder
                       )
 
-def save_setting(shortcut_update_when_start,
+def save_setting(civitai_api_key, shortcut_update_when_start,
                       scbrowser_screen_split_ratio, info_gallery_height,
                       shortcut_column, shortcut_rows_per_page, gallery_column,
                       classification_shortcut_column, classification_shortcut_rows_per_page, classification_gallery_column, classification_gallery_rows_per_page,
@@ -208,6 +212,7 @@ def save_setting(shortcut_update_when_start,
          environment = dict()
 
     application_allow = dict()
+    application_allow['civitai_api_key'] = civitai_api_key
     application_allow['shortcut_update_when_start'] = shortcut_update_when_start
     application_allow['shortcut_max_download_image_per_version'] = shortcut_max_download_image_per_version
     environment['application_allow'] = application_allow
@@ -296,7 +301,8 @@ def request_restart():
 #     print(output.decode('utf-8'))
 
 def on_refresh_setting_change():
-    return setting.shortcut_update_when_start,\
+    return setting.civitai_api_key,\
+            setting.shortcut_update_when_start,\
             setting.shortcut_browser_screen_split_ratio,\
             setting.information_gallery_height,\
             setting.shortcut_column,\
