@@ -22,7 +22,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
 
         with gr.Tabs():
             with gr.TabItem("Images" , id="Model_Images"):    
-                saved_gallery = gr.Gallery(show_label=False, elem_id="saved_gallery", columns=setting.gallery_column, height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
+                saved_gallery = gr.Gallery(show_label=False, columns=setting.gallery_column, height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)    
                 with gr.Row():
                     download_images = gr.Button(value="Download Images")
                     open_image_folder = gr.Button(value="Open Download Image Folder", visible=False) 
@@ -113,7 +113,6 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
         img_index = gr.Number(show_label=False)
         saved_images = gr.State() # 로드된것
         saved_images_url = gr.State() #로드 해야 하는것
-        saved_images_meta = gr.State() # 생성 정보 로드
         
         # 트리거를 위한것
         hidden = gr.Image(type="pil")
@@ -290,7 +289,6 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             model_title_name,                        
             refresh_gallery,
             saved_images_url,
-            saved_images_meta,
             img_file_info,
             saved_openfolder,
             change_preview_image,            
@@ -327,7 +325,6 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             model_title_name,                        
             refresh_gallery,
             saved_images_url,
-            saved_images_meta,
             img_file_info,
             saved_openfolder,
             change_preview_image,
@@ -365,7 +362,6 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             model_title_name,                        
             refresh_gallery,
             saved_images_url,
-            saved_images_meta,
             img_file_info,
             saved_openfolder,
             change_preview_image,
@@ -385,7 +381,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
     
     # refresh_btn.click(lambda :datetime.datetime.now(),None,refresh_information,cancels=gallery)    
     saved_gallery.select(on_gallery_select, saved_images, [img_index, hidden, info_tabs])
-    hidden.change(on_civitai_hidden_change,[hidden,img_index,saved_images_meta],[img_file_info])
+    hidden.change(on_civitai_hidden_change,[hidden,img_index],[img_file_info])
     saved_openfolder.click(on_open_folder_click,[selected_model_id,selected_version_id],None)  
     vs_folder.change(lambda x:gr.update(visible=x),vs_folder,vs_foldername)
     change_preview_image.click(on_change_preview_image_click,[selected_model_id,selected_version_id,img_index,saved_images],None)
@@ -700,10 +696,8 @@ def on_change_preview_image_click(mid,vid,img_idx:int,civitai_images):
 def on_gallery_select(evt: gr.SelectData, civitai_images):
     return evt.index, civitai_images[evt.index], gr.update(selected="Image_Information")
 
-def on_civitai_hidden_change(hidden, index, civitai_images_meta):
+def on_civitai_hidden_change(hidden, index):
     info1,info2,info3 = modules.extras.run_pnginfo(hidden)
-    if not info2:
-        info2 = civitai_images_meta[int(index)]        
     return info2
 
 def on_shortcut_del_btn_click(model_id):
@@ -848,7 +842,7 @@ def load_saved_model(modelid=None, ver_index=None):
             vs_foldername = setting.generate_version_foldername(model_info['name'],version_name,versionid)
             model_url = civitai.Url_Page() + str(modelid)
             
-            images_url, images_meta = ishortcut.get_version_description_gallery(version_info)
+            images_url = ishortcut.get_version_description_gallery(modelid, version_info)
             
             return gr.update(value=versionid),gr.update(value=model_url),\
                 gr.update(visible = is_downloaded),gr.update(value=downloaded_info),\
@@ -856,7 +850,7 @@ def load_saved_model(modelid=None, ver_index=None):
                 gr.update(choices=versions_list,value=version_name),gr.update(value=dhtml),\
                 gr.update(value=triger),gr.update(choices=flist if flist else [], value=flist if flist else []), downloadable if len(downloadable) > 0 else None,\
                 gr.update(label=title_name),\
-                current_time,images_url,images_meta,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview),gr.update(visible=is_visible_open_download_imagefolder),\
+                current_time,images_url,gr.update(value=None),gr.update(visible=is_visible_openfolder),gr.update(visible=is_visible_changepreview),gr.update(visible=is_visible_open_download_imagefolder),\
                 gr.update(choices=classification.get_list(), value=classification_list, interactive=True),\
                 gr.update(value=is_vsfolder, visible=True if cs_foldername == setting.CREATE_MODEL_FOLDER else False), gr.update(value=vs_foldername, visible=is_vsfolder),\
                 gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=cs_foldername),\
@@ -873,7 +867,7 @@ def load_saved_model(modelid=None, ver_index=None):
         gr.update(choices=[setting.NORESULT], value=setting.NORESULT),gr.update(value=None),\
         gr.update(value=None),gr.update(value=None),None,\
         gr.update(label="#"),\
-        None,None,None,gr.update(value=None),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),\
+        None,None,gr.update(value=None),gr.update(visible=False),gr.update(visible=False),gr.update(visible=False),\
         gr.update(choices=classification.get_list(),value=[], interactive=True),\
         gr.update(value=False, visible=True),gr.update(value="",visible=False),\
         gr.update(choices=[setting.CREATE_MODEL_FOLDER] + classification.get_list(), value=setting.CREATE_MODEL_FOLDER),\

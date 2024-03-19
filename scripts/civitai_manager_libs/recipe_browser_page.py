@@ -23,7 +23,7 @@ def on_ui():
         recipe_classification_list = gr.Dropdown(label="Filter Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, interactive=True, multiselect=False)        
 
     with gr.Accordion(label="Filter Reference Shortcut Items", open=False):              
-        recipe_reference_select_gallery = gr.Gallery(elem_id="recipe_select_reference_gallery", label="Filter Reference Models", columns=setting.prompt_shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
+        recipe_reference_select_gallery = gr.Gallery(label="Filter Reference Models", columns=setting.prompt_shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
         recipe_reference_gallery_page = gr.Slider(minimum=1, maximum=reference_max_page, value=1, step=1, label=f"Total {reference_max_page} Pages", interactive=True, visible=True)      
         recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False, columns=setting.prompt_shortcut_column, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
 

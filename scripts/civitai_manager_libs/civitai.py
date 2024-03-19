@@ -60,17 +60,17 @@ def get_model_info(id:str) -> dict:
 
     return content
 
-def get_model_info_by_version_id(version_id:str) -> dict:        
-    if not version_id:
-        return
+# def get_model_info_by_version_id(version_id:str) -> dict:        
+#     if not version_id:
+#         return
     
-    version_info = get_version_info_by_version_id(version_id) 
-    return get_model_info_by_version_info(version_info)
+#     version_info = get_version_info_by_version_id(version_id) 
+#     return get_model_info_by_version_info(version_info)
 
-def get_model_info_by_version_info(version_info) -> dict:    
-    if not version_info:
-        return 
-    return get_model_info(version_info['modelId'])
+# def get_model_info_by_version_info(version_info) -> dict:    
+#     if not version_info:
+#         return 
+#     return get_model_info(version_info['modelId'])
   
 def get_version_info_by_hash(hash) -> dict:        
     if not hash:                

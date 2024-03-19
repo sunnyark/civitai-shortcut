@@ -222,6 +222,7 @@ def on_civitai_information_tabs_select(evt: gr.SelectData):
 
 ##### sc_gallery 함수 정의 #####
 def on_sc_gallery_select(evt : gr.SelectData):
+
     if evt.value:
         shortcut = evt.value 
         sc_model_id = setting.get_modelid_from_shortcutname(shortcut) #shortcut[0:shortcut.find(':')]      
