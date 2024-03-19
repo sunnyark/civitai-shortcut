@@ -57,18 +57,20 @@ def get_model_information(modelid:str=None, versionid:str=None, ver_index:int=No
         return model_info,version_info,versionid,version_name,model_type,model_basemodels,versions_list,dhtml,triger,files
     return None,None,None,None,None,None,None,None,None,None
     
-def get_version_description_gallery(version_info):
-    modelid = None
+def get_version_description_gallery(modelid, version_info):
+#    modelid = None
     versionid = None
     ver_images = dict()
     
+    if not modelid:
+        return None
             
     if not version_info:
-        return None, None
+        return None
 
-    if "modelId" in version_info.keys():
-        modelid = str(version_info['modelId'])   
-            
+    # if "modelId" in version_info.keys():
+    #     modelid = str(version_info['modelId'])   
+               
     if "id" in version_info.keys():
         versionid = str(version_info['id'])
 
@@ -76,28 +78,26 @@ def get_version_description_gallery(version_info):
         ver_images = version_info['images']
 
     images_url = list()
-    images_meta = list()
-    
+   
     try:        
         for ver in ver_images:
             description_img = setting.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
-            meta_string = ""
+            # util.printD(modelid)
+            # util.printD(description_img)
             
             # NSFW filtering ....
             if setting.NSFW_filtering_enable:
                 # if not setting.NSFW_level[ver["nsfw"]]:
                 if setting.NSFW_levels.index(ver["nsfw"]) > setting.NSFW_levels.index(setting.NSFW_level_user):                
                     description_img = setting.nsfw_disable_image
-                    meta_string = ""
                     
             if os.path.isfile(description_img):               
-                meta_string = util.convert_civitai_meta_to_stable_meta(ver['meta'])
                 images_url.append(description_img)
-                images_meta.append(meta_string)
-    except:
-        return None, None
-                
-    return images_url, images_meta                  
+    except Exception as e:
+        # util.printD("error :" + e)
+        return None
+
+    return images_url
     
 def get_version_description(version_info:dict,model_info:dict=None):
     output_html = ""
@@ -295,20 +295,6 @@ def get_version_image_id(filename):
     if len(ids) > 1 :
         return ids
         
-    return None
-
-def get_images_meta(images:dict, imageid):
-    
-    if not images:
-        return None
-    
-    if not imageid:
-        return None
-    
-    for img in images:
-        if imageid in img['url']:
-            return img['meta']
-    
     return None
 
 # 모델에 해당하는 shortcut에서 note를 변경한다.

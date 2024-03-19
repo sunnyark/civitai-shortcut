@@ -35,6 +35,18 @@ model_basemodels = {
     "SD 2.1 Unclip":"SD2", 
     "SDXL 0.9":"SDXL", 
     "SDXL 1.0":"SDXL", 
+    
+    "SDXL 1.0 LCM":"SDXL", 
+    "SDXL Distilled":"SDXL", 
+    "SDXL Turbo":"SDXL", 
+    "SDXL Lightning":"SDXL", 
+    "Pony":"Pony", 
+    "SVD":"SVD", 
+    "SVD XT":"SVD", 
+    "Stable Cascade":"SC", 
+    "Playground V2":"PGV2", 
+    "PixArt A":"PixArtA",     
+    
     "Other":"Unknown"
 }
 

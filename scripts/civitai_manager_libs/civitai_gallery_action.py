@@ -20,7 +20,7 @@ def on_ui(recipe_input):
     with gr.Column(scale=3):                                                   
         with gr.Accordion("#", open=True) as model_title_name:            
             versions_list = gr.Dropdown(label="Model Version", choices=[setting.PLACEHOLDER], interactive=True, value=setting.PLACEHOLDER)
-        usergal_gallery = gr.Gallery(show_label=False, elem_id="user_gallery", columns=setting.usergallery_images_column, height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)
+        usergal_gallery = gr.Gallery(show_label=False, columns=setting.usergallery_images_column, height=setting.information_gallery_height, object_fit=setting.gallery_thumbnail_image_style)
         with gr.Row():                  
             with gr.Column(scale=1): 
                 with gr.Row():
@@ -59,8 +59,6 @@ def on_ui(recipe_input):
         # 로드 해야 할것
         usergal_images_url = gr.State()
         
-        usergal_images_meta = gr.State()
-        
         # 트리거를 위한것
         hidden = gr.Image(type="pil")
         
@@ -82,7 +80,7 @@ def on_ui(recipe_input):
         pass            
             
     usergal_gallery.select(on_gallery_select, usergal_images, [img_index, hidden, info_tabs])
-    hidden.change(on_civitai_hidden_change,[hidden,img_index,usergal_images_meta],[img_file_info])
+    hidden.change(on_civitai_hidden_change,[hidden,img_index],[img_file_info])
     open_image_folder.click(on_open_image_folder_click,[selected_model_id],None)
         
     send_to_recipe.click(
@@ -126,7 +124,6 @@ def on_ui(recipe_input):
         outputs=[               
             refresh_gallery,
             usergal_images_url,
-            usergal_images_meta,
             page_slider,
             img_file_info,            
         ],
@@ -142,7 +139,6 @@ def on_ui(recipe_input):
         outputs=[               
             refresh_gallery,
             usergal_images_url,
-            usergal_images_meta,
             page_slider,
             img_file_info,            
         ],
@@ -339,11 +335,8 @@ def on_prev_btn_click(usergal_page_url, paging_information):
 
     return page_url
 
-def on_civitai_hidden_change(hidden, index, civitai_images_meta):
+def on_civitai_hidden_change(hidden, index):
     info1,info2,info3 = modules.extras.run_pnginfo(hidden)
-    # 이미지에 메타 데이터가 없으면 info 것을 사용한다.
-    if not info2:
-        info2 = civitai_images_meta[int(index)]
     return info2
 
 def on_gallery_select(evt: gr.SelectData, civitai_images):
@@ -505,7 +498,7 @@ def download_images(dn_image_list:list):
                                     
 def load_gallery_page(usergal_page_url, paging_information):           
     if usergal_page_url:
-        image_url, images_meta = get_gallery_information(usergal_page_url, False)
+        image_url = get_gallery_information(usergal_page_url, False)
             
         current_Page = get_current_page(paging_information, usergal_page_url) 
         
@@ -513,11 +506,10 @@ def load_gallery_page(usergal_page_url, paging_information):
         
         return current_time,\
             image_url,\
-            images_meta,\
             gr.update(value=current_Page),\
             gr.update(value=None)
     
-    return None,None,None,gr.update(minimum=1, maximum=1, value=1),None                                                    
+    return None,None,gr.update(minimum=1, maximum=1, value=1),None                                                    
 
 def get_gallery_information(page_url=None, show_nsfw=False):
     modelid = None       
@@ -526,12 +518,11 @@ def get_gallery_information(page_url=None, show_nsfw=False):
         
     if modelid:
         images_url = None        
-        images_meta = None
         
-        images_url, images_meta , images_list = get_user_gallery(modelid, page_url, show_nsfw)
+        images_url, images_list = get_user_gallery(modelid, page_url, show_nsfw)
 
-        return images_url, images_meta
-    return None,None
+        return images_url
+    return None
 
 def get_user_gallery(modelid, page_url, show_nsfw):    
     if not modelid:
@@ -541,12 +532,9 @@ def get_user_gallery(modelid, page_url, show_nsfw):
 
     images_list = {}
     images_url = []
-    images_meta = []
+
     if image_data:
         for image_info in image_data:       
-            meta_string = ""  
-            if "meta" in image_info:     
-                meta_string = util.convert_civitai_meta_to_stable_meta(image_info['meta'])
                 
             if "url" in image_info:                
                 img_url = image_info['url']
@@ -564,11 +552,10 @@ def get_user_gallery(modelid, page_url, show_nsfw):
                     img_url = gallery_img_file
                                      
                 images_url.append(img_url)
-                images_meta.append(meta_string)
                 
         images_list = {image_info['id']:image_info for image_info in image_data}
         
-    return images_url, images_meta , images_list
+    return images_url, images_list
            
 def get_image_page(modelid, page_url, show_nsfw=False):
     json_data = {}
