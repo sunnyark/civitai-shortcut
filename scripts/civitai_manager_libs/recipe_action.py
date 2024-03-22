@@ -1,9 +1,11 @@
 import os
 import gradio as gr
 import datetime
-import modules
 import uuid
 import re
+
+import modules
+import modules.infotext_utils as parameters_copypaste
 
 from . import util
 from . import setting
@@ -48,7 +50,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
                             # recipe_output = gr.Textbox(label="Generate Info", interactive=False, lines=6, placeholder="The prompt and parameters are combined and displayed here.", container=True, show_copy_button=True)
                             with gr.Row():
                                 try:
-                                    send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img","img2img", "inpaint", "extras"])
+                                    send_to_buttons = parameters_copypaste.create_buttons(["txt2img","img2img", "inpaint", "extras"])
                                 except:
                                     pass                         
                             recipe_classification = gr.Dropdown(label="Prompt Recipe Classification", choices=[setting.PLACEHOLDER] + recipe.get_classifications(), value=setting.PLACEHOLDER, info="You can choose from a list or enter manually. If you enter a classification that didn't exist before, a new classification will be created." ,interactive=True, allow_custom_value=True)
@@ -99,7 +101,7 @@ def on_ui(recipe_input, shortcut_input, civitai_tabs):
         reference_shortcuts = gr.State()
         refresh_reference_gallery = gr.Textbox()
     try:
-        modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, recipe_image, recipe_output)
+        parameters_copypaste.bind_buttons(send_to_buttons, recipe_image, recipe_output)
     except:
         pass
 

@@ -3,10 +3,12 @@ import shutil
 import requests
 import gradio as gr
 import datetime
-import modules
 import re
 import threading
 import math
+
+import modules
+import modules.infotext_utils as parameters_copypaste
 
 from tqdm import tqdm
 
@@ -42,7 +44,7 @@ def on_ui(recipe_input):
                 with gr.Column():
                     img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6, container=True, show_copy_button=True)                            
                     try:
-                        send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                        send_to_buttons = parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
                     except:
                         pass
                     send_to_recipe = gr.Button(value="Send To Recipe", variant="primary", visible=True)
@@ -75,7 +77,7 @@ def on_ui(recipe_input):
         pre_loading = gr.Textbox()
                 
     try:
-        modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden,img_file_info)
+        parameters_copypaste.bind_buttons(send_to_buttons, hidden,img_file_info)
     except:
         pass            
             
