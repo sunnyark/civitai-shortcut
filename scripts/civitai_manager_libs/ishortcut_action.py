@@ -2,8 +2,9 @@ import os
 import json
 import gradio as gr
 import datetime
-import modules
 import shutil
+import modules
+import modules.infotext_utils as parameters_copypaste
 
 from . import util
 from . import model
@@ -78,9 +79,11 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
             with gr.TabItem("Image Information" , id="Image_Information"):      
                 with gr.Column():            
                     img_file_info = gr.Textbox(label="Generate Info", interactive=True, lines=6, container=True, show_copy_button=True)
+
                     try:
-                        send_to_buttons = modules.generation_parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
-                    except:
+                        send_to_buttons = parameters_copypaste.create_buttons(["txt2img", "img2img", "inpaint", "extras"])
+                    except Exception as e:
+                        util.printD(e)
                         pass 
                     send_to_recipe = gr.Button(value="Send To Recipe", variant="primary", visible=True)
 
@@ -123,7 +126,7 @@ def on_ui(refresh_sc_browser:gr.Textbox(), recipe_input):
         loaded_modelid = gr.Textbox()
         
     try:
-        modules.generation_parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
+        parameters_copypaste.bind_buttons(send_to_buttons, hidden, img_file_info)
     except:
         pass
        
