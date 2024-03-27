@@ -180,7 +180,7 @@ nsfw_disable_image = os.path.join(extension_base,"img","nsfw-no-preview.png")
 
 NSFW_filtering_enable = True
 # NSFW_level = { "None":True, "Soft":False, "Mature":False, "X":False } # None, Soft, Mature, X
-NSFW_levels = ("None","Soft","Mature","X") # None, Soft, Mature, X
+NSFW_levels = ("None","Soft","Mature","X","XX") # None, Soft, Mature, X
 NSFW_level_user = "None"
 
 shortcut_env = dict()
