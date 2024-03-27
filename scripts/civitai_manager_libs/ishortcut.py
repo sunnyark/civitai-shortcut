@@ -80,15 +80,26 @@ def get_version_description_gallery(modelid, version_info):
     images_url = list()
    
     try:        
-        for ver in ver_images:
-            description_img = setting.get_image_url_to_shortcut_file(modelid,versionid,ver['url'])
+        for img_dict in ver_images:
+            description_img = setting.get_image_url_to_shortcut_file(modelid,versionid,img_dict['url'])
             # util.printD(modelid)
             # util.printD(description_img)
             
             # NSFW filtering ....
             if setting.NSFW_filtering_enable:
                 # if not setting.NSFW_level[ver["nsfw"]]:
-                if setting.NSFW_levels.index(ver["nsfw"]) > setting.NSFW_levels.index(setting.NSFW_level_user):                
+                
+                img_nsfw_level = 1
+                
+                if "nsfw" in img_dict.keys():
+                    img_nsfw_level = setting.NSFW_levels.index(img_dict["nsfw"])
+                
+                if "nsfwLevel" in img_dict.keys():
+                    img_nsfw_level = img_dict["nsfwLevel"] - 1
+                    if img_nsfw_level < 0:
+                        img_nsfw_level = 0
+                                            
+                if img_nsfw_level > setting.NSFW_levels.index(setting.NSFW_level_user):
                     description_img = setting.nsfw_disable_image
                     
             if os.path.isfile(description_img):               
@@ -575,8 +586,19 @@ def update_thumbnail_images(progress):
                 cur_nsfw_level = len(setting.NSFW_levels)
                 def_image = None
                 for img_dict in version_info["images"]:
-                    if setting.NSFW_levels.index(img_dict["nsfw"]) < cur_nsfw_level:
-                        cur_nsfw_level = setting.NSFW_levels.index(img_dict["nsfw"])
+                    
+                    img_nsfw_level = 1
+                    
+                    if "nsfw" in img_dict.keys():
+                        img_nsfw_level = setting.NSFW_levels.index(img_dict["nsfw"])
+                    
+                    if "nsfwLevel" in img_dict.keys():
+                        img_nsfw_level = img_dict["nsfwLevel"] - 1
+                        if img_nsfw_level < 0:
+                            img_nsfw_level = 0
+                                            
+                    if img_nsfw_level < cur_nsfw_level:
+                        cur_nsfw_level = img_nsfw_level
                         def_image = img_dict["url"]
                         
                 if not def_image:
@@ -845,8 +867,19 @@ def add(ISC:dict, model_id, register_information_only=False, progress=None)->dic
                     cur_nsfw_level = len(setting.NSFW_levels)
                     def_image = None
                     for img_dict in def_version["images"]:
-                        if setting.NSFW_levels.index(img_dict["nsfw"]) < cur_nsfw_level:
-                            cur_nsfw_level = setting.NSFW_levels.index(img_dict["nsfw"])
+                        
+                        img_nsfw_level = 1
+                        
+                        if "nsfw" in img_dict.keys():
+                            img_nsfw_level = setting.NSFW_levels.index(img_dict["nsfw"])
+                        
+                        if "nsfwLevel" in img_dict.keys():
+                            img_nsfw_level = img_dict["nsfwLevel"] - 1
+                            if img_nsfw_level < 0:
+                                img_nsfw_level = 0
+                                                
+                        if img_nsfw_level < cur_nsfw_level:
+                            cur_nsfw_level = img_nsfw_level
                             def_image = img_dict["url"]
                             
                     if not def_image:

@@ -545,6 +545,7 @@ def get_user_gallery(modelid, page_url, show_nsfw):
                 
                 # NSFW filtering ....
                 if setting.NSFW_filtering_enable:
+                    
                     # if not setting.NSFW_level[image_info["nsfwLevel"]]:
                     if setting.NSFW_levels.index(image_info["nsfwLevel"]) > setting.NSFW_levels.index(setting.NSFW_level_user):                    
                         gallery_img_file = setting.nsfw_disable_image
