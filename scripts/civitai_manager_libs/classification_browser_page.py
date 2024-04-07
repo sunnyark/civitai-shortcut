@@ -44,8 +44,8 @@ def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=Non
             
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
         with gr.Row():
-            sc_prevPage_btn = gr.Button(value="Prev",scale=1)            
-            sc_nextPage_btn = gr.Button(value="Next",scale=1)
+            sc_prevPage_btn = gr.Button(value="Prev",scale=1, visible=True if shortcut_rows_per_page > 0 else False)            
+            sc_nextPage_btn = gr.Button(value="Next",scale=1, visible=True if shortcut_rows_per_page > 0 else False)
                     
         show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
@@ -53,8 +53,8 @@ def on_ui(ex_shortcuts=None,search_open=True,user_shortcut_browser_search_up=Non
     else:        
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)
         with gr.Row():
-            sc_prevPage_btn = gr.Button(value="Prev",scale=1)            
-            sc_nextPage_btn = gr.Button(value="Next",scale=1)
+            sc_prevPage_btn = gr.Button(value="Prev",scale=1, visible=True if shortcut_rows_per_page > 0 else False)            
+            sc_nextPage_btn = gr.Button(value="Next",scale=1, visible=True if shortcut_rows_per_page > 0 else False)
                     
         show_ex_shortcuts = gr.Checkbox(label="Shortcuts registered in the current classification will not be displayed.", value=True)
         # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
