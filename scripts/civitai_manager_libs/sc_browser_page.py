@@ -48,15 +48,15 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
             
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)                
         with gr.Row():
-            sc_prevPage_btn = gr.Button(value="Prev",scale=1)            
-            sc_nextPage_btn = gr.Button(value="Next",scale=1)
+            sc_prevPage_btn = gr.Button(value="Prev",scale=1, visible=True if shortcut_rows_per_page > 0 else False)            
+            sc_nextPage_btn = gr.Button(value="Next",scale=1, visible=True if shortcut_rows_per_page > 0 else False)
         
         sc_gallery = gr.Gallery(show_label=False, columns=shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, allow_preview=False, value=thumb_list)
     else:
         sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)                
         with gr.Row():
-            sc_prevPage_btn = gr.Button(value="Prev",scale=1)            
-            sc_nextPage_btn = gr.Button(value="Next",scale=1)
+            sc_prevPage_btn = gr.Button(value="Prev",scale=1, visible=True if shortcut_rows_per_page > 0 else False)            
+            sc_nextPage_btn = gr.Button(value="Next",scale=1, visible=True if shortcut_rows_per_page > 0 else False)
         
         sc_gallery = gr.Gallery(show_label=False, columns=shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, allow_preview=False, value=thumb_list)
         
