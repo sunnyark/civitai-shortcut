@@ -16,6 +16,10 @@ def on_ui():
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(1)
         
     recipe_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True)
+    with gr.Row():
+        recipe_prevPage_btn = gr.Button(value="Prev",scale=1)            
+        recipe_nextPage_btn = gr.Button(value="Next",scale=1)
+                
     recipe_gallery = gr.Gallery(value=thumb_list, columns=setting.prompt_shortcut_column, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False, show_label=False)
     
     with gr.Accordion(label="Search Recipe", open=True):
@@ -25,6 +29,10 @@ def on_ui():
     with gr.Accordion(label="Filter Reference Shortcut Items", open=False):              
         recipe_reference_select_gallery = gr.Gallery(label="Filter Reference Models", columns=setting.prompt_shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
         recipe_reference_gallery_page = gr.Slider(minimum=1, maximum=reference_max_page, value=1, step=1, label=f"Total {reference_max_page} Pages", interactive=True, visible=True)      
+        with gr.Row():
+            recipe_reference_prevPage_btn = gr.Button(value="Prev",scale=1)            
+            recipe_reference_nextPage_btn = gr.Button(value="Next",scale=1)
+                
         recipe_reference_gallery = gr.Gallery(value=reference_list, show_label=False, columns=setting.prompt_shortcut_column, height="100%", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)
 
     with gr.Row(visible=False):
@@ -161,15 +169,98 @@ def on_ui():
         ]
     )
 
+    recipe_prevPage_btn.click(
+        fn = on_recipe_prevPage_btn_click,
+        inputs = [          
+            recipe_search,
+            recipe_classification_list,
+            recipe_reference_select,                    
+            recipe_gallery_page
+        ],
+        outputs=[
+            recipe_gallery,
+            recipe_gallery_page
+        ],
+        show_progress=False                    
+    )
+
+    recipe_nextPage_btn.click(
+        fn = on_recipe_nextPage_btn_click,
+        inputs = [          
+            recipe_search,
+            recipe_classification_list,
+            recipe_reference_select,                    
+            recipe_gallery_page
+        ],
+        outputs=[
+            recipe_gallery,
+            recipe_gallery_page
+        ],
+        show_progress=False
+    )
+    
+    recipe_reference_prevPage_btn.click(
+        fn = on_recipe_reference_prevPage_btn_click,
+        inputs = [            
+            recipe_reference_gallery_page
+        ],
+        outputs=[
+            recipe_reference_gallery,
+            recipe_reference_gallery_page
+        ],
+        show_progress=False                    
+    )
+    
+    recipe_reference_nextPage_btn.click(
+        fn = on_recipe_reference_nextPage_btn_click,
+        inputs = [            
+            recipe_reference_gallery_page
+        ],
+        outputs=[
+            recipe_reference_gallery,
+            recipe_reference_gallery_page
+        ],
+        show_progress=False
+    )
+            
     return recipe_gallery, refresh_recipe_browser
 
 def on_recipe_reference_gallery_page(page):    
     reference_list, reference_totals, reference_max_page = get_recipe_reference_list(page)
     return gr.update(value=reference_list)
 
+def on_recipe_reference_nextPage_btn_click(page):
+    page = page + 1    
+    reference_list, reference_totals, reference_max_page = get_recipe_reference_list(page)
+    if page > reference_max_page:
+        page = reference_max_page    
+    return gr.update(value=reference_list),page
+
+def on_recipe_reference_prevPage_btn_click(page):    
+    page = page - 1
+    if page < 1:
+        page = 1      
+    reference_list, reference_totals, reference_max_page = get_recipe_reference_list(page)
+    return gr.update(value=reference_list),page
+
 def on_recipe_gallery_page(search, classification, shortcut, page = 0):        
     thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut, page)        
     return gr.update(value=thumb_list)
+
+def on_recipe_nextPage_btn_click(search, classification, shortcut, page = 0): 
+    page = page + 1
+    thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut, page)        
+    if page > thumb_max_page:
+        page = thumb_max_page
+
+    return gr.update(value=thumb_list), page
+
+def on_recipe_prevPage_btn_click(search, classification, shortcut, page = 0): 
+    page = page - 1
+    if page < 1:
+        page = 1    
+    thumb_list , thumb_totals, thumb_max_page  = get_recipe_list(search, classification, shortcut, page)        
+    return gr.update(value=thumb_list), page
 
 def get_shortcut_by_modelid(ISC, modelid):
     if ISC and modelid:

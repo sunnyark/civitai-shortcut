@@ -36,6 +36,10 @@ def on_ui(shortcut_input):
                             with gr.Row():
                                 with gr.Column(scale=4):
                                     classification_gallery_page = gr.Slider(minimum=1, maximum=1, value=1, step=1, label=f"Total {1} Pages", interactive=True, visible=True if setting.classification_gallery_rows_per_page > 0 else False)
+                                    with gr.Row():
+                                        classification_prevPage_btn = gr.Button(value="Prev",scale=1)            
+                                        classification_nextPage_btn = gr.Button(value="Next",scale=1)
+                                                
                                     classification_shortcut_delete = gr.Checkbox(label="Delete from classification when selecting a thumbnail.", value=False)
                                     classification_gallery = gr.Gallery(elem_id="classification_gallery", show_label=False, columns=setting.classification_gallery_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, preview=False, allow_preview=False)                                                
                                 with gr.Accordion("#", open=True, visible=False) as shortcut_model_information:        
@@ -301,8 +305,44 @@ def on_ui(shortcut_input):
         ],
         show_progress=False
     ) 
-           
+
+    classification_prevPage_btn.click(
+        fn = on_classification_prevPage_btn_click,
+        inputs = [          
+            classification_gallery_page
+        ],
+        outputs=[
+            refresh_gallery,
+            classification_gallery_page
+        ],
+        show_progress=False                    
+    )
+
+    classification_nextPage_btn.click(
+        fn = on_classification_nextPage_btn_click,
+        inputs = [          
+            classification_gallery_page
+        ],
+        outputs=[
+            refresh_gallery,
+            classification_gallery_page
+        ],
+        show_progress=False
+    )
+               
     return refresh_classification
+
+def on_classification_nextPage_btn_click(page):
+    page = page + 1    
+    current_time = datetime.datetime.now()
+    return current_time, page
+
+def on_classification_prevPage_btn_click(page):    
+    page = page - 1
+    if page < 1:
+        page = 1      
+    current_time = datetime.datetime.now()
+    return current_time, page
 
 def load_model_information(modelid=None, ver_index=None):
     if modelid:        

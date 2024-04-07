@@ -32,33 +32,39 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
 
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(None,False,None,None,None,1,shortcut_column,shortcut_rows_per_page)
     
-    show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)
-                
+    show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)               
+    
+    # sc_list = list()
+    # for i in range(0, shortcut_column):
+    #     sc_list.append(gr.Button(value="tttt",scale=1))
+        
     if shortcut_browser_search_up:
         with gr.Accordion("Search", open=search_open):        
             shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
             sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @personal note ....",interactive=True, lines=1)
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels.keys()], interactive=True)
-            # show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
             reset_filter_btn = gr.Button(value="Reset Filter",variant="primary")
             
-        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)        
-        # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
+        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)                
+        with gr.Row():
+            sc_prevPage_btn = gr.Button(value="Prev",scale=1)            
+            sc_nextPage_btn = gr.Button(value="Next",scale=1)
+        
         sc_gallery = gr.Gallery(show_label=False, columns=shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, allow_preview=False, value=thumb_list)
-        # show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
     else:
-        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)        
-        # elem_id 를 안써줘야 옆의 인포와 연동이 안된다. 인포쪽에는 써줘야 할것....
+        sc_gallery_page = gr.Slider(minimum=1, maximum=thumb_max_page, value=1, step=1, label=f"Total {thumb_max_page} Pages", interactive=True, visible=True if shortcut_rows_per_page > 0 else False)                
+        with gr.Row():
+            sc_prevPage_btn = gr.Button(value="Prev",scale=1)            
+            sc_nextPage_btn = gr.Button(value="Next",scale=1)
+        
         sc_gallery = gr.Gallery(show_label=False, columns=shortcut_column, height="auto", object_fit=setting.gallery_thumbnail_image_style, allow_preview=False, value=thumb_list)
-        # show_downloaded_sc = gr.Checkbox(label="Show downloaded model's shortcut only", value=False)
         
         with gr.Accordion("Search", open=search_open):        
             shortcut_type = gr.Dropdown(label='Filter Model Type', multiselect=True, choices=[k for k in setting.ui_typenames], interactive=True)
             sc_search = gr.Textbox(label="Search", value="", placeholder="Search name, #tags, @personal note ....",interactive=True, lines=1)
             sc_classification_list = gr.Dropdown(label='Classification',info="The selection options of classification are subject to the AND operation.", multiselect=True, choices=classification.get_list(), interactive=True)
             shortcut_basemodel = gr.Dropdown(label='Filter Model BaseModel', multiselect=True, choices=[k for k in setting.model_basemodels.keys()], interactive=True)
-            # show_downloaded_sc = gr.Dropdown(label='Filter Downloaded', multiselect=False, choices=[ALL_DOWNLOADED_MODEL,DOWNLOADED_MODEL,NOT_DOWNLOADED_MODEL], value=ALL_DOWNLOADED_MODEL, interactive=True)    
             reset_filter_btn = gr.Button(value="Reset Filter",variant="primary")
             
     with gr.Row(visible=False):
@@ -222,7 +228,49 @@ def on_ui(search_open=True,user_shortcut_browser_search_up=None,user_shortcut_co
         ],
         show_progress=False                
     )
-        
+
+    sc_prevPage_btn.click(
+        fn = on_sc_prevPage_btn_click,
+        inputs = [            
+            shortcut_type,
+            sc_search,
+            shortcut_basemodel,
+            sc_classification_list,            
+            show_downloaded_sc,
+            sc_gallery_page,
+            
+            sc_shortcut_column,
+            sc_shortcut_rows_per_page
+        ],
+        outputs=[
+            sc_gallery,
+            sc_gallery_page,
+            sc_gallery_result
+        ],
+        show_progress=False                    
+    )
+
+    sc_nextPage_btn.click(
+        fn = on_sc_nextPage_btn_click,
+        inputs = [            
+            shortcut_type,
+            sc_search,
+            shortcut_basemodel,
+            sc_classification_list,            
+            show_downloaded_sc,
+            sc_gallery_page,
+            
+            sc_shortcut_column,
+            sc_shortcut_rows_per_page
+        ],
+        outputs=[
+            sc_gallery,
+            sc_gallery_page,
+            sc_gallery_result
+        ],
+        show_progress=False                    
+    )            
+
     return sc_gallery, refresh_sc_browser, refresh_sc_gallery
 
 def on_reset_filter_btn_click():
@@ -335,3 +383,19 @@ def on_shortcut_gallery_refresh(sc_types, sc_search, sc_basemodels, sc_classific
 def on_sc_gallery_page(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, sc_page, columns, rows):
     thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows)
     return gr.update(value=thumb_list),thumb_list
+
+def on_sc_nextPage_btn_click(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, sc_page, columns, rows):
+    sc_page = sc_page + 1
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows)
+    
+    if sc_page > thumb_max_page:
+        sc_page = thumb_max_page
+        
+    return gr.update(value=thumb_list),sc_page,thumb_list
+
+def on_sc_prevPage_btn_click(sc_types, sc_search, sc_basemodels, sc_classifications, show_downloaded_sc, sc_page, columns, rows):
+    sc_page = sc_page - 1
+    if sc_page < 1:
+        sc_page = 1    
+    thumb_list , thumb_totals, thumb_max_page  = get_thumbnail_list(sc_types,show_downloaded_sc,sc_search,sc_basemodels,sc_classifications,sc_page, columns, rows)
+    return gr.update(value=thumb_list),sc_page,thumb_list

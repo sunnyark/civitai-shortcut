@@ -537,11 +537,9 @@ def get_user_gallery(modelid, page_url, show_nsfw):
 
     if image_data:
         for image_info in image_data:       
-                
-            if "url" in image_info:                
-                img_url = image_info['url']
-                
-                gallery_img_file = setting.get_image_url_to_gallery_file(image_info['url'])
+            if "url" in image_info:                        
+                img_url = image_info['url']                
+                gallery_img_file = setting.get_image_url_to_gallery_file(img_url)
                 
                 # NSFW filtering ....
                 if setting.NSFW_filtering_enable:
