@@ -536,7 +536,9 @@ def get_user_gallery(modelid, page_url, show_nsfw):
     images_url = []
 
     if image_data:
-        for image_info in image_data:       
+        # util.printD("Gal:")
+        # util.printD(len(image_data))   
+        for image_info in image_data:                
             if "url" in image_info:                        
                 img_url = image_info['url']                
                 gallery_img_file = setting.get_image_url_to_gallery_file(img_url)
@@ -782,16 +784,24 @@ def get_default_page_url(modelId, modelVersionId = None, show_nsfw=False, limit=
     if modelVersionId:
         page_url = f"{page_url}&modelVersionId={modelVersionId}"
         
-    if not show_nsfw:    
-        page_url = f"{page_url}&nsfw=false"
-
+    # 사실상 사용되지 않기에 주석처리
+    # if not show_nsfw:    
+    #     page_url = f"{page_url}&nsfw=false"
+    
+    # Image api 에서 nsfw 필터링이 제대로 이뤄지지않고 있다. 테스트용 그래서 기본은 최고수준으로 허용해준다
+    page_url = f"{page_url}&nsfw=X"
+    
     page_url = f"{page_url}&sort=Newest"
     
+    # util.printD(page_url)
     return page_url
 
 # cursor + 1 로 만들어 준다
 # civitai 에서 cursor 를 수정 한다면 필요 없다.
-def fix_page_url_cursor(page_url):
+def fix_page_url_cursor(page_url, use=True):
+    if not use:
+        return page_url
+
     cursor = int(extract_url_cursor(page_url))
     if cursor > 0:
         page_url = util.update_url(page_url,"cursor", cursor + 1)        
